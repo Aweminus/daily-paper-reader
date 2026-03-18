@@ -1,0 +1,276 @@
+Title: On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks
+
+URL Source: https://arxiv.org/pdf/2602.15460v1
+
+Published Time: Wed, 18 Feb 2026 01:34:56 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks 
+
+Yannic Neuhaus 1 Nicolas Flammarion 2 Matthias Hein 1 Francesco Croce 3
+
+# Abstract 
+
+Integrating reasoning in large language models and large vision-language models has recently led to significant improvement of their capabil-ities. However, the generalization of reasoning models is still vaguely defined and poorly un-derstood. In this work, we present an evalua-tion framework to rigorously examine how well chain-of-thought (CoT) approaches generalize on a simple planning task. Specifically, we con-sider a grid-based navigation task in which a model is provided with a map and must output a sequence of moves that guides a player from a start position to a goal while avoiding obsta-cles. The versatility of the task and its data allows us to fine-tune model variants using different in-put representations (visual and textual) and CoT reasoning strategies, and systematically evaluate them under both in-distribution (ID) and out-of-distribution (OOD) test conditions. Our experi-ments show that, while CoT reasoning improves in-distribution generalization across all represen-tations, out-of-distribution generalization (e.g., to larger maps) remains very limited in most cases when controlling for trivial matches with the ID data. Surprisingly, we find that reasoning traces which combine multiple text formats yield the best (and non-trivial) OOD generalization. Fi-nally, purely text-based models consistently out-perform those utilizing image-based inputs, in-cluding a recently proposed approach relying on latent space reasoning. 
+
+# 1. Introduction 
+
+Chain-of-thought (CoT) reasoning has been shown to be a powerful tool to improve the ability of large language models (LLMs) to solve complex tasks (Wei et al., 2022). 
+
+> 1
+
+Tübingen AI Center – University of Tübingen 2EPFL 3ELLIS Institute Finland – Aalto University. Correspondence to: Yannic Neuhaus <yannic.neuhaus@uni-tuebingen.de>. 
+
+Preprint. February 18, 2026. 3x3 4x4 5x5 6x6 7x7 8x8 9x9 10x10  
+
+> Map Size
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Accuracy
+> In-Distribution Out-Of-Distribution
+> zero-shot
+> SFT (no CoT)
+> SFT w/ description CoT
+> SFT w/ grid CoT
+> SFT w/ grid + descr. CoT
+
+Figure 1. Chain-of-thought (CoT) format impacts out-of-distribution (OOD) generalization. We fine-tune Qwen2.5-VL-7B-Instruct on the F ROZEN LAKE datasets with maps of size up to 6×6, in grid format. The models trained without CoT or with CoT in description format lead to no OOD (larger maps) generalization, while combining grid and description reasoning steps yield non-trivial results until 10×10 maps. This shows that generalization of reasoning is influenced by the format of the CoT traces. 
+
+In practice, both test-time prompting ( “Let’s think step-by-step” ) (Kojima et al., 2022) or specifically designed fine-tuning schemes (Ho et al., 2023) can make the LLMs generate intermediate reasoning steps which aid arriving to the correct solution, rather than directly providing the an-swer. This approach may also benefit interpretability, as the user can inspect the reasoning process behind the response and potential failure points. Recently, the chain-of-thought paradigm has been extended to multimodal models to en-hance their capabilities to reason about visual inputs (Huang et al., 2025; Yang et al., 2025). Despite its widespread success and adoption, there is a fundamental lack of un-derstanding of what makes chain-of-thought effective and what reasoning LLMs learn. For example, recent works suggest that current reasoning abilities may primarily reflect statistical properties of the data rather than genuine algo-rithmic learning, as evidenced by decreasing performance when inputs diverge from the training distribution (Stechly et al., 2024; Zhao et al., 2025). In this work, we want to systematically study both in-1       
+
+> arXiv:2602.15460v1 [cs.LG] 17 Feb 2026 On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks
+> Figure 2. Maze representations. In Wu et al. (2024), the planning task is introduced with several representations of the maze: as an
+> image , a text description and a table . We also introduce an ASCII-based grid representation requiring less tokens to encode the map.
+
+distribution (ID) and, especially, out-of-distribution (OOD) generalization behavior of LLMs in a controlled setup, on a simple but challenging task which allows us to disentangle the effect of factors such as input representations, reason-ing and CoT format. Such a comprehensive evaluation is however not straightforward with common benchmarks (Lu et al., 2022; Yue et al., 2024), as there is no clear distinction between ID and OOD tasks, or an evident ground-truth al-gorithm to be learned. Therefore, we first build a controlled evaluation environment upon the F ROZEN LAKE dataset (Wu et al., 2024). This requires visual planning to find the cor-rect path to reach a treasure without falling into lakes (see illustration in Fig. 2): even small maps are challenging for state-of-the-art LLMs (Wu et al., 2024), making it a relevant testbed. Moreover, while the maps are typically images, they can be represented in text-only formats (Fig. 2), as well as the reasoning steps (identified by each move along a path towards the goal). Crucially, the complexity of the tasks can be easily controlled in terms of map size, start-target dis-tance, number of lakes, etc., which allows us to distinguish in- and out-of-distribution data. Then, we train a variety of standard (no CoT) and reasoning models which share the training maps but encode them in different formats. We use four inputs formats, image , de-scription , table and grid (the latter three text-based), while the reasoning traces can feature either one of the text-based formats or a combination of them (Fig. 3). In general, per-formance sharply drops on OOD data, i.e. larger map sizes, in particular when the start and goal positions are farther away than in the training data. While CoT reasoning boosts performance across the board, it does not solve the limita-tions in OOD generalization. Notably, we find that the only models which show non-trivial performance up to 10×10 maps use our combined grid/table + description CoTs (see Fig. 1), uncovering an interesting connection between for-mat and generalization. Even on the ID test maps, these models achieve the best results and outperform complex re-cent methods relying on continuous space reasoning (Yang et al., 2025) and specialized vision-only models (Xu et al., 2025). We further analyze generalization w.r.t. start-goal distance at fixed map size and optimal solution length, con-firming the difficulty of distribution shifts and the benefit of proper CoT format. Overall, our study shows that OOD generalization of reason-ing still suffers from severe limitations, and appears to be relying more on pattern matching than algorithmic learning. However, our results also suggest that specific (multimodal) data formats might enable stronger performance, opening new directions to future research. The benchmark we in-troduce will be a crucial tool to measure and improve the generalization capabilities of future LLMs, and the flexibil-ity of its data enables adding even more complex layers as more powerful models appear. 
+
+# 2. Related Work 
+
+Reasoning LLMs achieve notable results on a variety of tasks (Chen et al., 2025), and understanding their func-tioning and limitations is an active area of research (Sho-jaee et al., 2025; Mirzadeh et al., 2025; Wang et al., 2025). In particular, Stechly et al. (2024) study the performance of state-of-the-art LLMs in text-based planning domain and simple synthetic tasks. In their case, CoT demonstra-tions are added in context rather than used for fine-tuning. Across tasks, they observe limited improvements due to CoT prompts, restricted to when these are very similar to the target test examples. Therefore, Stechly et al. (2024) argue that the model does not learn general algorithmic procedures via such demonstrations. Zhao et al. (2025) in-troduce D ATA ALCHEMY , a controllable environment which abstracts language tasks with simple symbolic inputs and transformations. In this way, they can control the OOD generalization along different distribution shifts, of both transformers trained from scratch and fine-tuned LLMs. While CoT reasoning is effective on in-distribution data, it quickly degrades under moderate shifts, again suggesting that the models learn to recognize patters from the training set rather than logical structures. In our work, we expand this line of research of studying OOD generalization of CoT reasoning: our tasks are trivial for humans but challenging for SOTA LLMs, suitable for both training from scratch and fine-tuning, and can be extended to arbitrarily difficult levels. Unlike previous benchmarks such as D ATA ALCHEMY , our dataset allows us to study the interplay between input and CoT format, spanning both text and image representations, which has recently drawn attention in the context of multi-modal reasoning models (Zhou et al., 2025). This reveals that there are setups where significant OOD generalization can be achieved. 2On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks         
+
+> Figure 3. Reasoning traces in different formats. We illustrate an example reasoning trace, from first step to the solution, in the various formats. While Xu et al. (2025) use the sequence of maze representations as images , we generate the corresponding steps as text-only
+> descriptions ,tables and grids . In the description format at each step we formulate a discussion of which the next step should be, while for the other formats we have the visual representation of the map after the next move.
+
+# 3. A Controlled Environment to Benchmark Generalization in Reasoning Models 
+
+3.1. Task 
+
+We consider the spatial planning task introduced in Wu et al. (2024), named F ROZEN LAKE . In this task, the model has to navigate a player through a fully observable maze. The input consists of a textual description of the rules and goal of the game, and a grid-based map of the maze, where one cell hosts the player, another the treasure, and the remain-ing cells are either empty or contain holes. The model’s output is a sequence of moves (“UP”, “DOWN”, “LEFT”, “RIGHT”) that should guide the player to the treasure with-out falling into a hole. This setting offers several advantages for our analysis: the input map can be easily represented as either an image or text, and the solutions to this simple planning problem have a clear visual and descriptive struc-ture. Moreover, the difficulty of the task can be adjusted by (i) the size of the map and (ii) the distance between the start and the treasure: these controllable difficulty factors enable us to systematically examine the out-of-distribution generalization of different fine-tuning approaches. Finally, despite its simplicity for human players, even state-of-the-art LLMs struggle to solve the task without fine-tuning (Wu et al., 2024), e.g. 46% accuracy for GPT-4o (Hurst et al., 2024) or 29% for Gemini (Gemini Team, 2023) (on average on small 3×3, 4×4, 5×5, and 6×6 maps), see Table 9. 
+
+3.2. Maze representations 
+
+In Wu et al. (2024), the planning task is introduced with several representations of the maze: as an image , an unstruc-tured text description and as an ASCII table in Markdown-like format. We additionally introduce an ASCII-based 
+
+grid representation, which also has a table-like structure but requires less tokens to encode the map. These four represen-tations for the maze, illustrated in Fig. 2, allow us to use the same data both with text-only and multimodal LLMs. 
+
+3.3. Reasoning traces representations 
+
+The simplicity of the task makes the reasoning process to-ward a correct solution sequence straightforward, since each step corresponds to a step along the correct path towards the treasure (more details on the construction of reasoning traces in App. A). This, together with the versatility of the data, enables generating multiple variants of chain-of-thought 3On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks 
+
+reasoning traces with different formats (see Fig. 3): • Image : Xu et al. (2025) use vision-only models, and their reasoning traces consist of images that show the current maze state after each move. While we do not directly employ this format in our experiments, as standard (mul-timodal) LLMs do not handle images in the reasoning process, it may be useful for future work on integrating visual elements in chain-of-thought. • Description : This is a narration of the reasoning behind each step, discussing which moves would bring the player closer to the treasure, whether the path toward it is blocked by a lake, which are the feasible steps, and finally deciding which the next move should be. • Table and grid : We represent the current map, after the next move, with our two text-based representations dis-cussed above, for each step of a path to the treasure. • Table + description , grid + description : We combine either table or grid traces with description . Thus, the chain-of-thought contains first a narrated description of the reasoning process about what the next step should be, and then the table or grid representation of the map after applying the selected move. These formats contain more information at the cost of being longer (and thus more expensive to generate at inference time, see Table 5). 
+
+3.4. Measuring OOD generalization 
+
+We measure the out-of-distribution (OOD) generalization capabilities of the models along multiple axes, which control the difficulty of the task in different ways. • Map size: First, by training on a range of different map sizes and testing on sizes not seen during training, we can evaluate whether the model generalizes to larger maps. Note that a larger map can contain the same maze as a smaller one, simply padded with empty cells or holes. • Start-goal distance: Next, we consider the L∞ distance between the start and the goal, i.e. for player coordinates 
+
+(s1, s 2) and treasure coordinates (g1, g 2)
+
+d∞ = max {| s1 − g1|, |s2 − g2|} .
+
+For instance, in the 3×3 example in Fig. 2, this distance equals 2. In general, a map of size n × n has d∞ ≤ n − 1.Therefore, we can test OOD generalization to maps with start-goal distance larger than what seen at training time. • Optimal solution length: Finally, we can compute the length of the optimal path via the A * algorithm, and ana-lyze how well models perform on maps where the optimal solution path is longer than those of the training set. These factors, while connected (e.g., larger maps tend to induce larger start-goal distances and longer solutions), cap-ture different types of distribution shifts, thus allowing us to study different aspects of the LLMs. 
+
+# 4. Experiments 
+
+4.1. Setup Data. For training, we use the dataset introduced by Yang et al. (2025), which consists of 1,000 data points (100 3×3, 200 4×4, 300 5×5, and 400 6×6 maps). Thus, the training set only contains distances d∞ ≤ 5. For each training example we generate the input and reasoning traces in all formats described in Sec. 3. The in-distribution test sets (3×3, 4×4, 5×5, and 6×6 maps) are also identical to those in Yang et al. (2025), while the out-of-distribution test sets were generated by us using the Gym library (Brockman et al., 2016) as described in App. A.We generate 200 maps for each map size (or distance in the embedded maps case) in the corresponding OOD test sets. During evaluation, we extract the move sequence from the model output and simulate it in the environment. The sequence is correct if (i) 
+
+the player does not enter a cell with a hole and (ii) the end position is on the treasure. Code and data are available at 
+
+http://github.com/YanNeu/frozen_ood .
+
+Models. As our base model, we use Qwen2.5-VL-7B-Instruct (Bai et al., 2025), following the setup of Yang et al. (2025), including their prompt and rule specification. All models are adapted via supervised fine-tuning for 10 epochs, see App. A for details. For each input format, we test the zero-shot performance of Qwen2.5-VL-7B-Instruct, as well as its versions fine-tuned without reasoning traces (no CoT). Then, we train models which combine either same or dif-ferent formats for input and CoT (the complete list of the resulting models can bee seen in Table 1). 
+
+4.2. In-distribution performance 
+
+First, to test the in-distribution generalization of the various models, we measure their performance on maps of the same size as in the training set (from 3×3 to 6×6), and report the re-sults in Table 1. We see that zero-shot performance remains low across input formats, confirming that even small maps represent a challenging task for general-purpose LLMs, and the F ROZEN LAKE dataset was not part of the training set of the base model, which makes it well-suited for testing OOD behavior. Across input formats, any type of CoT reasoning yields better accuracy than fine-tuning on the answers only (no CoT models). Image inputs (with and without CoT) perform consistently worse than text-only ones, highlight-ing the limitations of current multimodal LLMs in fully leveraging visual inputs. Among the other formats, all com-binations of input and CoT representations can effectively improve performance, with the best average accuracy (91%) achieved by table/grid inputs and table/grid + description 
+
+CoT. Such combined reasoning traces become particularly 4On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks                                                                                                                                                                                                                                                                                                                                        
+
+> Table 1. Influence of data format on ID and OOD generalization. We report accuracy on both ID and OOD map sizes of zero-shot and fine-tuned LLMs using different combination of input and CoT traces (if any) formats. For OOD maps, we distinguish test sets where the distance between start and goal position is d∞≥6, i.e. not seen during training. CoTs with mixed format ( grid/table + description ) lead to the best in- and out-of-distribution performance, with non-trivial accuracy until 10×10 maps while being trained on up to 6×6 maps. Input format CoT format
+> ID test maps ( d∞≤5)OOD maps (random d∞)OOD maps ( d∞≥6)
+> 3x3 4x4 5x5 6x6 Avg 7x7 8x8 9x9 10x10 Avg 7x7 8x8 9x9 10x10 Avg zero-shot 0.14 0.05 0.03 0.02 0.06 0.02 0.02 0.01 0.01 0.01 0.01 0.00 0.00 0.00 0.00 Image no CoT 0.89 0.84 0.72 0.52 0.74 0.51 0.37 0.23 0.12 0.31 0.02 0.00 0.00 0.00 0.01 Descr. 0.95 0.87 0.76 0.62 0.80 0.47 0.35 0.21 0.14 0.29 0.07 0.03 0.00 0.01 0.03 Descr. zero-shot 0.41 0.25 0.23 0.13 0.26 0.12 0.14 0.10 0.10 0.12 0.01 0.06 0.04 0.03 0.03 no CoT 0.92 0.91 0.86 0.64 0.83 0.65 0.55 0.49 0.41 0.52 0.19 0.08 0.04 0.02 0.08 Descr. 0.94 0.92 0.90 0.67 0.86 0.67 0.63 0.55 0.46 0.58 0.07 0.02 0.01 0.01 0.02 Grid 0.96 0.89 0.90 0.70 0.86 0.59 0.47 0.28 0.12 0.36 0.35 0.17 0.06 0.01 0.15 Table 0.99 0.90 0.93 0.69 0.88 0.64 0.45 0.33 0.16 0.40 0.28 0.16 0.07 0.02 0.13 Grid + Descr. 0.98 0.93 0.93 0.69 0.88 0.70 0.51 0.41 0.26 0.47 0.44 0.28 0.11 0.07 0.23 Table + Descr. 0.93 0.93 0.93 0.71 0.88 0.66 0.52 0.40 0.32 0.47 0.31 0.21 0.12 0.09 0.18 Table zero-shot 0.43 0.24 0.20 0.08 0.24 0.09 0.08 0.04 0.04 0.06 0.04 0.03 0.01 0.01 0.02 no CoT 0.94 0.89 0.83 0.59 0.81 0.56 0.41 0.35 0.27 0.40 0.02 0.01 0.00 0.00 0.01 Descr. 0.96 0.94 0.83 0.69 0.85 0.57 0.39 0.34 0.23 0.39 0.04 0.03 0.00 0.00 0.02 Table 0.99 0.90 0.93 0.72 0.89 0.73 0.51 0.35 0.19 0.45 0.38 0.24 0.07 0.03 0.18 Table + Descr. 0.97 0.93 0.95 0.78 0.91 0.81 0.57 0.41 0.27 0.51 0.48 0.32 0.12 0.06 0.25 Grid zero-shot 0.14 0.13 0.06 0.03 0.09 0.02 0.01 0.00 0.02 0.01 0.00 0.01 0.01 0.01 0.01 no CoT 0.95 0.89 0.83 0.62 0.82 0.55 0.39 0.34 0.26 0.38 0.04 0.02 0.00 0.00 0.01 Descr. 0.94 0.91 0.86 0.62 0.83 0.53 0.41 0.35 0.25 0.39 0.10 0.07 0.01 0.01 0.05 Grid 0.98 0.92 0.97 0.71 0.90 0.74 0.51 0.39 0.24 0.47 0.43 0.22 0.07 0.04 0.19 Grid + Descr. 0.99 0.93 0.92 0.79 0.91 0.83 0.68 0.49 0.35 0.59 0.65 0.55 0.23 0.20 0.41
+
+relevant for OOD generalization, as we discuss next. 
+
+4.3. OOD generalization Map size. Our first out-of-distribution test set includes larger map sizes not seen during training, namely 7×7, 8×8, 9×9, and 10×10. Similarly to the in-distribution data, these maps are generated with random sampling of the initial position of player and treasure, without controlling for the start-goal distance (random d∞ results in Table 1). This means that start, goal and solution could fit into a map of size smaller than or equal to 6×6, which is than embedded in a larger map. This examples are OOD in terms of map size but not start-goal distance, as can be seen in Table 2. Similar to the ID case, models with text-based input significantly outperform the image-based ones. Using the same format for input and CoT representations leads to improvements compared to no CoT, especially for the description format achieving 58% average accuracy. Again, this is slightly outperformed by grid input with the multimodal grid + description CoT (59%). Fig. 5 shows an example of the CoT produced by this model: even on an OOD map of size 8×8 it first reasons in natural language on the next move, then produces the map correctly updated after such move. 
+
+Start-goal distance. As mentioned, in the previous test set we do not constrain d∞, thus samples with a larger map size in the OOD set might still have small values of d∞ which were seen during training. Then, we generate new test sets for the OOD map sizes where we enforce d∞ ≥ 6, i.e. the distance between player and treasure is too large to fit in one of the training maps (right column in Table 1). In this more challenging distribution shift, the accuracy of most models drops below 10% already on 7×7 maps, and quickly goes near 0% for larger ones. In particular, the accuracy of the model using description format for both input and CoT, which attained the second-best result on the OOD maps with random d∞, sharply drops to 7% on 7×7 maps. This demonstrates the importance of our evaluation setup con-trolling d∞ together with map size, which can reveal severe limitations in generalization. Surprisingly, combining table 
+
+or grid with description CoT provides the best results for all text-based inputs. In particular, the model using grid 
+
+input and grid + description CoT retains a 20% accuracy on the 10×10 maps and 41% on average over the OOD test set with d∞ ≥ 6. These results show that OOD generalization typically remains challenging for all models, but improve-ments can be achieved with well-chosen data formats. We conjecture that generating a “visual” representation of the current map (as table or grid ) at each step helps tracking the progress of the map navigation, while the reasoning in the natural language (the description CoT component) is better suited for the model to elaborate on the next move). The 
+
+grid format is also the more compact one, without the extra 5On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks                                                                                                                                                                                                      
+
+> Table 2. Average start-goal distance. We report the average distance d∞between the start and goal positions for each map size. For the OOD maps with d∞≥6we enforce that both map size and start-goal distance are out-of-distribution compared to the training data.
+> ID test maps ( d∞≤5)OOD maps (random d∞)OOD maps ( d∞≥6)
+> 3x3 4x4 5x5 6x6 7x7 8x8 9x9 10x10 7x7 8x8 9x9 10x10 Mean d∞1.50 1.79 2.16 2.75 3.27 3.66 4.01 4.47 6.00 6.35 6.72 7.00
+> Table 3. Generalization w.r.t. start-end distance ( d∞) with fixed 10×10 map size. We compare different input and CoT format when the training maps have fixed size 10x10 and d∞<6, test maps size 10×10 and d∞∈ { 2, . . . , 5}(ID) or d∞∈ { 6, . . . , 9}(OOD). Using
+> grid input with grid or grid + description CoT format yields the best results, while the accuracy of models with no CoT or CoTs in other formats drop close to 0% already at d∞= 6 .Input format CoT format
+> ID test maps ( d∞≤5)OOD maps ( d∞≥6)
+> 2345Avg 6789Avg Image no CoT 0.70 0.46 0.21 0.03 0.35 0.03 0.01 0.00 0.00 0.01 Descr. 0.69 0.41 0.16 0.06 0.33 0.01 0.00 0.00 0.00 0.00 Descr. no CoT 0.82 0.75 0.57 0.34 0.62 0.01 0.01 0.00 0.00 0.01 Descr. 0.89 0.80 0.68 0.41 0.69 0.00 0.00 0.00 0.00 0.00 Grid 0.82 0.76 0.67 0.49 0.69 0.34 0.20 0.10 0.04 0.17 Grid + Descr. 0.82 0.73 0.61 0.47 0.66 0.36 0.25 0.17 0.14 0.23 Table no CoT 0.88 0.77 0.54 0.16 0.59 0.01 0.00 0.00 0.00 0.00 Descr. 0.89 0.76 0.47 0.09 0.55 0.00 0.01 0.01 0.00 0.00 Grid no CoT 0.86 0.81 0.55 0.12 0.58 0.00 0.01 0.00 0.00 0.00 Descr. 0.84 0.78 0.45 0.10 0.54 0.00 0.01 0.00 0.00 0.00 Grid 0.89 0.84 0.77 0.62 0.78 0.46 0.34 0.17 0.08 0.26 Grid + Descr. 0.86 0.84 0.74 0.61 0.76 0.50 0.33 0.21 0.10 0.29
+
+structure of table (see Fig. 2 and Table 5), and may enable the model to better generalize to larger maps. 
+
+Start-goal distance with fixed map size. To fully disentan-gle the effects of map size and d∞, we embedded all train-ing images (of size up to 6×6) randomly into 10×10 maps, which does not change the correct path but fixes the map size. Moreover, we generate a new test set of 10×10 maps with 200 samples for each value of d∞ ∈ { 2, . . . , 9}. This setup allows us to analyze generalization w.r.t. start-goal distance in isolation, without requiring the model to learn or generalize to maps of different size. Table 3 shows the in-distribution ( d∞ ≤ 5) and out-of-distribution ( d∞ ≥ 6)accuracy for different data format (we omit table -based CoT since it becomes extremely expensive with larger maps). Similarly to the previous setups, image inputs yield worse results than text-based ones. Moreover, for both no CoT and 
+
+description CoT the accuracy drops to near 0% already at 
+
+d∞ = 6 , i.e. the smallest distribution shift, indicating that the models do not typically learn an algorithmic solution to the task. Using grid input with grid or grid + description 
+
+CoT format yields the best ID (76-78%) and OOD (26-29%) accuracy, significantly outpeforming the baselines. The 
+
+grid -based CoT formats even boost the performance with 
+
+description inputs to good OOD accuracy. This, consistently with the previous experiments, shows that the grid format is very well-suited and can provide non-trivial performance even in front of large distribution shifts at test time. 
+
+Optimal solution length. The next axis along which we study the OOD generalization performance of the various LLMs is the length of optimal solution l. In Fig. 4 (top plot) we show the distribution of the length of the shortest path solving each map for both training and test set, aggregating the statistics over map sizes. As expected, including the larger OOD maps in the test set introduces a distribution shift towards longer solutions. In particular, for the training set l ≤ 14 , while in the test set it goes up to 18 . In the bottom plot of Fig. 4, we show the accuracy of the models using grid input representations vs the solution length of the test maps. The accuracy of the LLMs with no CoT or description CoT drops near zero for l ≥ 9, where very few training examples are available. Conversely, with grid + description CoT the accuracy remains non-trivial until 
+
+l = 13 , yet failing afterwards. As a further ablation, we re-train this model removing the examples with l > 10 from the training set (10 maps in total): this model (the dashed curve in the Fig. 4) performs similarly to the original one. Overall, this shows that generalization to maps with longer solutions is also very challenging, but even in this case our CoT representations can help achieving better accuracy. The results for all input formats can be found in Fig. 7. 
+
+4.4. Additional analyses Comparison to Mirage. Mirage (Yang et al., 2025) inte-grates images into CoT by using latent reasoning, where the 6On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks              
+
+> Figure 4. OOD generalization w.r.t. optimal solution length. Top: we show the distribution of the length of the optimal (shortest) solution paths for both training and test maps (aggregated across map sizes). Bottom: we show success rate of models using grid
+> as input representation and various CoT formats. Even when using only training maps with optimal solution length ≤10 (dashed line), the grid + description CoT yields non-trivial success rate on maps with solutions of length 11 and 12 .
+
+LLM can generate tokens in continuous space, i.e. it is not restricted to tokens in the vocabulary. In particular, helper images depicting the correct path to the goal are produced, and Mirage learns to generate the encoded version of the helper image before giving the text-based solution. Yang et al. (2025) report that Mirage Direct, which relies on such continuous reasoning and supervised fine-tuning (SFT), out-performs SFT on the solution only (Direct SFT) and with text-based CoT (CoT SFT), all using F ROZEN LAKE maps as images. In Table 4 we report the results from Yang et al. (2025) and compare it to our models trained on image input format and no or description CoTs. Surprisingly, our model without CoT already outperforms Mirage Direct and Direct SFT, which use the same data: we hypothesize this is due to our better choice for training hyperparameters. Moreover, the model with our description CoT attains the best results (80% average accuracy), while Yang et al. (2025) report that this version, with their reasoning traces, largely fails (47%): we conjecture our CoT formulation, more concise than that of Yang et al. (2025), yields this improvement. Finally, we retrain Mirage Direct, either in the original setup and shuffling at random the helper images in the training set:                                             
+
+> Table 4. Comparison to Mirage. We compare the ID performance of models from Yang et al. (2025) to ours (20 epochs training, * trained for 10 epochs only). The continuous reasoning of Mirage does not provide benefit over our model trained without CoT data. Model ID test maps ( d∞≤5)
+> 3x3 4x4 5x5 6x6 Avg Direct SFT (Yang et al., 2025) 0.88 0.81 0.73 0.47 0.72 CoT SFT (Yang et al., 2025) 0.68 0.53 0.35 0.31 0.47 Mirage Direct (Yang et al., 2025) 0.93 0.83 0.76 0.51 0.76 Mirage Direct (retrained) 0.91 0.82 0.79 0.51 0.76 Mirage Direct shuffled 0.92 0.85 0.82 0.5 0.77 Image, no CoT (ours) 0.91 0.85 0.76 0.59 0.78 Image, Descr. CoT (ours)* 0.95 0.87 0.76 0.62 0.80
+
+both models achieve similar performance to what reported in Yang et al. (2025) for Mirage Direct, suggesting that their continuous reasoning approach does not provide benefits on this task. In Table 6 in appendix we also show that the Mirage framework does not benefit OOD performance. 
+
+Comparison to other baselines. Table 9 in App. B reports the result of additional baselines on ID maps. Li et al. (2025) fine-tune Anole (Chern et al., 2024) on a larger training set than ours for 40 epochs. Their approach, MVoT, which also includes images of the map in the reasoning traces, results in 86% accuracy, lower than several of our models in Table 1. Moreover, VPFT (Xu et al., 2025) achieves 75.4% accuracy (exact match metric) with a specialized model, LVM-7B (Bai et al., 2024), which only handles images as both input and output. VPRL (Xu et al., 2025) improves this to 91.6% by further fine-tuning with reinforcement learning (RL). This matches what we achieve via supervised fine-tuning alone of the general-purpose Qwen2.5-VL-7B-Instruct with 
+
+grid/table + description CoT (91%). Since the models from Xu et al. (2025) are not available, we could not test their OOD generalization. This confirms the validity of our models in contrast to recent methods in ID performance, and not only for OOD generalization. 
+
+Length of reasoning. Table 5 reports the average length, in tokens, of the responses with correct solutions of the reasoning models from Table 1. As expected, CoTs com-bining multiple formats yield the longest output, but reason-ing length does not necessarily correlate with better perfor-mance. The best results are achieved by grid input with grid + description CoT with relatively short outputs, confirming the effectiveness of the compact grid representation. 
+
+Effect of number of training epochs. To test the effect of longer training, we fine-tune LLMs with various data formats and with or without CoT for 20 and 30 epochs (as default we use 10 epochs). The detailed results are shown in Fig. 6 (in appendix). While there are minimal improvements after 20 epochs on the ID test set and after 30 epochs on the OOD test set, the overall performance and model rankings 7On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks                                                                                                                                                                                                                                                                                            
+
+> The direct path to the goal is moving UP or RIGHT. Thus, Iwill move UP. Grid: .....X...X....X...............X.......G..X.....X.....P....X.....The direct path to the goal is moving UP or RIGHT. Thus, Iwill move UP. Grid: .....X...X....X...............X.......G..X...P.X..........X.....The direct path to the goal is moving UP or RIGHT. Thus, Iwill move UP. Grid: .....X...X....X...............X......PG..X.....X..........X.....The direct path to the goal is moving RIGHT. Thus, Iwill move RIGHT. Grid: .....X...X....X...............X.......P..X.....X..........X.....Final answer: \\boxed{UP, UP, UP, RIGHT}
+
+Figure 5. Example of the CoT reasoning of our models on OOD maps. We show an example of the reasoning trace produced by the model train on grid input and grid + description CoT. Even on an OOD map, the model first reasons in natural language on the next move, then produces the map after such move. 
+
+remain largely unchanged. 
+
+# 5. Discussion and Conclusion 
+
+Discussion. Our results confirm the observation of prior works (Stechly et al., 2024; Zhao et al., 2025) that chain-of-thought reasoning, while helping LLMs to generalize to in-distribution test samples, often fails under, even small, distribution shifts. This in turn indicates the models do not learn the algorithmic solution to the tasks but rather some form of pattern recognition and memorization. How-ever, unlike existing works, we demonstrate that significant improvements in out-of-distribution performance can be achieved by carefully chosen format for input and reason-
+
+Table 5. Output length. We report the average length (in tokens) of the correct solutions, including reasoning, across models. Input format CoT format ID maps OOD maps 
+
+(random d∞)
+
+OOD maps 
+
+(d∞ ≥ 6)Image zero-shot 328 562 564 no CoT 10 11 19 Descr. 65 69 192 Descr. zero-shot 383 732 870 no CoT 10 13 20 Descr. 69 89 141 Grid 160 586 1317 Table 437 1311 2990 Grid + Descr. 213 771 1615 Table + Descr. 471 1657 3123 Table zero-shot 463 893 937 no CoT 10 11 19 Descr. 69 75 180 Table 428 1517 2925 Table + Descr. 490 1909 3904 Grid zero-shot 785 1387 1338 no CoT 10 11 19 Descr. 67 77 157 Grid 158 619 1194 Grid + Descr. 220 831 1459 
+
+ing. Interestingly, our extensive experiments show that rich reasoning steps, combining a natural language discussion and a structure representation of the current map, improve accuracy of various test-time shifts (larger maps, farther start and goal positions, longer solutions), where standard approaches fail. 
+
+Outlook. We consider our evaluation as the starting point for comparing and developing methods for reasoning mod-els which truly learn the task and have strong OOD gen-eralization. The flexibility of the environment we have introduced, in terms of data formats and distribution shifts, offers the possibility to study a variety of approaches on a task which humans can easily solve. For example, ex-ploring the interaction of reinforcement learning with dif-ferent data formats may yield further interesting findings. While image inputs yield worse results than text-based ones, multimodal modals are rapidly improving and may be a promising direction, potentially integrating visual inputs in the CoT. Moreover, testing continuous space reasoning (Hao et al., 2024) is a natural next step, as it has been shown to encode parallel search (Zhu et al., 2025), though it faces training challenges. Finally, the simplicity of the task may allow us to study from a more theoretical point of view how transformer-based models can solve (some version of) it. 
+
+Limitations. Following Yang et al. (2025) we focus on Qwen2.5-VL-7B-Instruct as our base model, since it is well-suited for extensive experiments on an academic budget, 8On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks 
+
+and allows us to study OOD performance in isolation. Other models may interact slightly differently with the various data formats, an interesting object for future work. 
+
+# Impact Statement 
+
+This paper presents work whose goal is to advance the field of Machine Learning. There are many potential societal consequences of our work, none which we feel must be specifically highlighted here. 
+
+# References 
+
+Anthropic. Introducing the next generation of claude, 2024. URL https://www.anthropic.com/news/c laude-3-family .Bai, S., Chen, K., Liu, X., Wang, J., Ge, W., Song, S., Dang, K., Wang, P., Wang, S., Tang, J., et al. Qwen2. 5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. Bai, Y., Geng, X., Mangalam, K., Bar, A., Yuille, A. L., Darrell, T., Malik, J., and Efros, A. A. Sequential model-ing enables scalable learning for large vision models. In 
+
+CVPR , 2024. Brockman, G., Cheung, V., Pettersson, L., Schneider, J., Schulman, J., Tang, J., and Zaremba, W. Openai gym, 2016. URL https://arxiv.org/abs/1606.0 1540 .Chen, Q., Qin, L., Liu, J., Peng, D., Guan, J., Wang, P., Hu, M., Zhou, Y., Gao, T., and Che, W. Towards reasoning era: A survey of long chain-of-thought for reasoning large language models. arXiv preprint arXiv:2503.09567 ,2025. Chern, E., Su, J., Ma, Y., and Liu, P. Anole: An open, autore-gressive, native large multimodal models for interleaved image-text generation. arXiv preprint arXiv:2407.06135 ,2024. Gemini Team. Gemini: a family of highly capable multi-modal models. arXiv preprint arXiv:2312.11805 , 2023. Hao, S., Sukhbaatar, S., Su, D., Li, X., Hu, Z., Weston, J., and Tian, Y. Training large language models to reason in a continuous latent space. arXiv preprint arXiv:2412.06769 , 2024. Ho, N., Schmid, L., and Yun, S.-Y. Large language models are reasoning teachers. In ACL , 2023. Huang, W., Jia, B., Zhai, Z., Cao, S., Ye, Z., Zhao, F., Xu, Z., Hu, Y., and Lin, S. Vision-r1: Incentivizing reasoning capability in multimodal large language models. arXiv preprint arXiv:2503.06749 , 2025. Hurst, A., Lerer, A., Goucher, A. P., Perelman, A., Ramesh, A., Clark, A., Ostrow, A., Welihinda, A., Hayes, A., Radford, A., et al. Gpt-4o system card. arXiv preprint arXiv:2410.21276 , 2024. Kojima, T., Gu, S. S., Reid, M., Matsuo, Y., and Iwasawa, Y. Large language models are zero-shot reasoners. In 
+
+NeurIPS , 2022. Li, C., Wu, W., Zhang, H., Xia, Y., Mao, S., Dong, L., Vuli´ c, I., and Wei, F. Imagine while reasoning in space: Multimodal visualization-of-thought. arXiv preprint arXiv:2501.07542 , 2025. Lu, P., Mishra, S., Xia, T., Qiu, L., Chang, K.-W., Zhu, S.-C., Tafjord, O., Clark, P., and Kalyan, A. Learn to explain: Multimodal reasoning via thought chains for science question answering. In NeurIPS , 2022. Mirzadeh, S. I., Alizadeh, K., Shahrokhi, H., Tuzel, O., Bengio, S., and Farajtabar, M. GSM-symbolic: Under-standing the limitations of mathematical reasoning in large language models. In ICLR , 2025. Shojaee, P., Mirzadeh, I., Alizadeh, K., Horton, M., Bengio, S., and Farajtabar, M. The illusion of thinking: Under-standing the strengths and limitations of reasoning models via the lens of problem complexity. In NeurIPS , 2025. Stechly, K., Valmeekam, K., and Kambhampati, S. Chain of thoughtlessness? an analysis of cot in planning. In 
+
+NeurIPS , 2024. von Werra, L., Belkada, Y., Tunstall, L., Beeching, E., Thrush, T., Lambert, N., Huang, S., Rasul, K., and Gal-louédec, Q. TRL: Transformers Reinforcement Learning, 2020. URL https://github.com/huggingfa ce/trl .Wang, Y., Chang, F.-C., and Wu, P.-Y. A theoretical frame-work for ood robustness in transformers using gevrey classes. arXiv preprint arXiv:2504.12991 , 2025. Wei, J., Wang, X., Schuurmans, D., Bosma, M., Xia, F., Chi, E., Le, Q. V., Zhou, D., et al. Chain-of-thought prompting elicits reasoning in large language models. 
+
+NeurIPS , 2022. Wu, Q., Zhao, H., Saxon, M., Bui, T., Wang, W. Y., Zhang, Y., and Chang, S. Vsp: Assessing the dual challenges of perception and reasoning in spatial planning tasks for vlms. arXiv preprint arXiv:2407.01863 , 2024. Xu, Y., Li, C., Zhou, H., Wan, X., Zhang, C., Korhonen, A., and Vuli´ c, I. Visual planning: Let’s think only with images. arXiv preprint arXiv:2505.11409 , 2025. 9On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks 
+
+Yang, Z., Yu, X., Chen, D., Shen, M., and Gan, C. Machine mental imagery: Empower multimodal reasoning with latent visual tokens. arXiv preprint arXiv:2506.17218 ,2025. Yue, X., Ni, Y., Zhang, K., Zheng, T., Liu, R., Zhang, G., Stevens, S., Jiang, D., Ren, W., Sun, Y., et al. Mmmu: A massive multi-discipline multimodal understanding and reasoning benchmark for expert agi. In CVPR , 2024. Zhao, C., Tan, Z., Ma, P., Li, D., Jiang, B., Wang, Y., Yang, Y., and Liu, H. Is chain-of-thought reasoning of llms a mirage? a data distribution lens. arXiv preprint arXiv:2508.01191 , 2025. Zhou, Y., Tu, H., Wang, Z., Wang, Z., Muennighoff, N., Nie, F., Choi, Y., Zou, J., Deng, C., Yan, S., et al. When visualizing is the first step to reasoning: Mira, a benchmark for visual chain-of-thought. arXiv preprint arXiv:2511.02779 , 2025. Zhu, H., Hao, S., Hu, Z., Jiao, J., Russell, S., and Tian, Y. Reasoning by superposition: A theoretical perspective on chain of continuous thought. In NeurIPS , 2025. 
+
+# A. Data and Experimental Details 
+
+Data generation. For the OOD maps, we generate the maps randomly using a hole probability of 0.1. We generated 200 maps per map size. Player and goal are placed at random, using rejection sampling in cases where we have a constraint on the distance between start and goal. Similarly, to embed the small maps into 10×10 size, we generate a random 10×10 map, remove player and treasure, and then place the small map randomly within the large one. 
+
+Construction of reasoning traces. To generate descriptive reasoning traces for each step of the solution sequence, we first identify the general direction from the player toward the treasure, which can include one or two of the four possible directions. In the 3×3 example, this direction is “UP.” Next, we check whether this direction is blocked by a hole. If it is not, this move is selected; otherwise, we iterate over the remaining directions: first the other direction pointing to-ward the treasure (if it exists), and then the one not pointing towards the treasure. We enforce that the chosen direction in the reasoning trace always corresponds to the next move in the target action sequence of the training point to ensure consistency between reasoning and solution. 
+
+Training setup. The statistics of the training data are re-ported in Table 7. For fine-tuning the models, we use the SFTTrainer from the trl (von Werra et al., 2020) package with the hyperparameters stated in Table 8. All models were trained on two A100 GPUs. 
+
+# B. Additional experiments 
+
+Extended comparison to Mirage on OOD maps. To com-plement the results in Sec. 4.2, Table 6 further reports the performance on OOD of the Mirage models (Yang et al., 2025) we retrained (the original ones are not available). Sim-ilar to ID performance, the continuous reasoning approach of Mirage does not provide benefit compared to our simple supervised fine-tuning with image inputs, with or without 
+
+description CoT. 
+
+Detailed response length results. Table 10 reports the breakdown of average response length (reasoning and solu-tion) of the different LLMs over map size. 
+
+Results of other methods. Table 9 reports the result of additional baselines models. We see that frontier LLMs such as Gemini-1.0-Pro-Vision (Gemini Team, 2023), Claude-3 (Anthropic, 2024) and GPT-4o (Hurst et al., 2024), have low zero-shot accuracy (the best is GPT-4o with 46%) on the ID test maps (results are taken from (Wu et al., 2024)). Further, we report the three fine-tuning variants from Li et al. (2025): Direct , CoT , and MVoT . They use Anole-7B (Chern et al., 2024) as base model which can generate interleaved text and images autoregressively. Direct corresponds to 10 On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks 
+
+Table 6. Comparison to Mirage. We additionally report the OOD performance of the models of Table 4. The latent reasoning approach of Mirage does not provide better OOD generalization than simple supervised fine-tuning without CoT. Model ID test maps ( d∞ ≤ 5) OOD maps (random d∞) OOD maps ( d∞ ≥ 6)
+
+3x3 4x4 5x5 6x6 Avg 7x7 8x8 9x9 10x10 Avg 7x7 8x8 9x9 10x10 Avg Direct SFT (Yang et al., 2025) 0.88 0.81 0.73 0.47 0.72 - - - - - - - - - -CoT SFT (Yang et al., 2025) 0.68 0.53 0.35 0.31 0.47 - - - - - - - - - -Mirage Direct (Yang et al., 2025) 0.93 0.83 0.76 0.51 0.76 - - - - - - - - - -Mirage Direct (retrained) 0.91 0.82 0.79 0.51 0.76 0.45 0.35 0.22 0.15 0.29 0.01 0.01 0.01 0.00 0.00 Mirage Direct shuffled 0.92 0.85 0.82 0.5 0.77 0.46 0.41 0.26 0.14 0.31 0.05 0.06 0.02 0.00 0.03 Image, no CoT (ours) 0.91 0.85 0.76 0.59 0.78 0.46 0.41 0.23 0.16 0.31 0.04 0.01 0.00 0.00 0.01 Image, Descr. CoT (ours) 0.95 0.87 0.76 0.62 0.80 0.47 0.35 0.21 0.14 0.29 0.07 0.03 0.00 0.01 0.03 
+
+Table 7. Statistics of training data. We report the mean d∞ as well as the mean length of the ground truth solution sequence on the training set. 3x3 4x4 5x5 6x6 Total Number of samples 100 200 300 400 1000 Mean d∞ 1.40 1.80 2.23 2.72 2.26 Mean solution length 2.03 2.65 3.58 4.18 3.48 
+
+Table 8. SFT hyperparameters. These values were used for all text-based models. The image models use the same hyperparame-ters as Yang et al. (2025) 
+
+Hyperparameter Value 
+
+epochs 10 
+
+per_device_train_batch_size 1
+
+gradient_accumulation_steps 1
+
+warmup_steps 10 
+
+learning rate 1e-5 
+
+weight_decay 0.01 
+
+optim AdamW 
+
+bf16 True 
+
+SFT without reasoning traces and achieves an accuracy of 78%. For CoT , the model is fine-tuned on reasoning traces incorporating coordinates and environment layout described in the text. In contrast to our experiments, they are not able to improve using such traces (accuracy 64%). MVoT 
+
+also includes images of the grid in the reasoning traces and results in 86%. Note that these methods were fine-tuned on a larger training set for 40 epochs each. Finally, VPFT (Xu et al., 2025) achieves 75.4% accuracy (exact match metric) with a specialized model, LVM-7B (Bai et al., 2024), which only handles images as both input and output. VPRL (Xu et al., 2025) improves this to 91.6% by further fine-tuning with reinforcement learning (RL). This is similar to what we achieve via supervised fine-tuning alone of the general-purpose Qwen2.5-VL-7B-Instruct with grid/table + description CoT (91%), see Table 1. Since the models from Xu et al. (2025) are not available, we could not test their OOD generalization. 
+
+Table 9. Other baselines. We report the performance of other baselines models and visual reasoning methods on the ID tasks. The results are taken from the previous works reporting them. Model ID test maps ( d∞ ≤ 5)
+
+3x3 4x4 5x5 6x6 Avg Gemini-1.0 (Xu et al., 2025) 0.31 0.26 0.15 0.06 0.20 Claude-3 (Xu et al., 2025) 0.52 0.33 0.16 0.15 0.29 GPT-4o (Xu et al., 2025) 0.68 0.58 0.35 0.24 0.46 Anole Direct (Li et al., 2025) 0.83 0.80 0.75 0.75 0.78 Anole CoT (Li et al., 2025) 0.94 0.72 0.50 0.39 0.64 MVoT (Li et al., 2025) 0.86 0.84 0.84 0.89 0.86 VPFT (Xu et al., 2025) 0.92 0.83 0.67 0.58 0.75 VPRL (Xu et al., 2025) 0.98 0.96 0.91 0.82 0.92 
+
+11 On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks 
+
+Figure 6. Number of epochs. We extended the fine-tuning to 20 and 30 epochs for some of the models and evaluated them on the ID and the OOD (random d∞) test maps. However, the overall performance and model ranking remain largely unchanged. 
+
+Table 10. Output length. We report the average length (in tokens) of the correct solutions, including reasoning, our the various fine-tuned models for each map size. Input format CoT format 
+
+ID test maps ( d∞ ≤ 5) OOD maps (random d∞) OOD maps ( d∞ ≥ 6)
+
+3x3 4x4 5x5 6x6 Avg 7x7 8x8 9x9 10x10 Avg 7x7 8x8 9x9 10x10 Avg zero-shot 210 429 309 363 328 450 590 662 547 562 524 457 774 502 564 Image no CoT 9 10 10 11 10 12 11 10 9 11 19 - - - 19 Descr. 52 59 64 86 65 81 74 65 54 69 196 217 - 162 192 Descr. zero-shot 222 264 505 541 383 588 836 832 675 732 848 791 1010 833 870 no CoT 9 10 11 12 10 13 13 13 13 13 21 19 18 22 20 Descr. 52 62 73 87 69 86 90 91 90 89 156 127 122 157 141 Grid 54 98 176 310 160 472 554 666 652 586 850 1023 1281 2116 1317 Table 155 272 497 824 437 1136 1307 1534 1268 1311 2071 2534 2967 4387 2990 Grid + Descr. 97 148 236 369 213 623 621 772 1069 771 1000 1371 1676 2413 1615 Table + Descr. 188 320 527 848 471 1213 1451 1760 2205 1657 2238 2613 3289 4353 3123 Table zero-shot 227 384 701 540 463 910 684 951 1027 893 848 918 886 1097 937 no CoT 9 10 11 12 10 12 12 11 11 11 20 19 - - 19 Descr. 52 64 68 91 69 82 80 76 64 75 171 189 - - 180 Table 152 266 482 810 428 1242 1436 1687 1701 1517 2166 2652 3383 3498 2925 Table + Descr. 192 324 544 899 490 1265 1633 1982 2755 1909 2333 2979 3813 6489 3904 Grid zero-shot 355 668 1030 1086 785 1209 1314 1459 1567 1387 1067 1421 1523 1340 1338 no CoT 9 10 11 12 10 12 11 11 11 11 19 18 - - 19 Descr. 52 61 72 83 67 81 80 79 71 77 161 145 171 150 157 Grid 53 98 179 300 158 457 614 659 744 619 871 1081 1251 1572 1194 Grid + Descr. 98 151 239 393 220 582 751 882 1109 831 1025 1298 1632 1880 1459 
+
+12 On the Out-of-Distribution Generalization of Reasoning in Multimodal LLMs for Simple Visual Planning Tasks 
+
+Figure 7. OOD generalization w.r.t. optimal solution length. We show success rate of models using different input and CoT representation over solution length, complementing the results of Fig. 4 for the grid format. 
+
+13

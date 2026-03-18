@@ -1,0 +1,1105 @@
+Title: More than the Sum: Panorama-Language Models for Adverse Omni-Scenes
+
+URL Source: https://arxiv.org/pdf/2603.09573v1
+
+Published Time: Wed, 11 Mar 2026 01:01:27 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# More than the Sum: Panorama-Language Models for Adverse Omni-Scenes 
+
+## Weijia Fan 1,3,† Ruiping Liu 1 Jiale Wei 1 Yufan Chen 1 Junwei Zheng 1,∗ Zichao Zeng 1,4
+
+## Jiaming Zhang 2,∗ Qiufu Li 3 Linlin Shen 3 Rainer Stiefelhagen 1
+
+> 1
+
+Karlsruhe Institute of Technology 2Hunan University 3Shenzhen University 4UCL Panoramic Annotations based Json Format                  
+
+> VQA Generation
+> Structed
+> Information
+> Object:
+> tupling tuple. System Prompt
+> Instruction | Rules
+> LLM
+> Real Scene
+> Understanding
+> Real Occlusion
+> Scenario
+> Simu. Accident
+> Scenario
+> BlendPASS
+> [,,,]
+> DeepAccident
+> [,,,]
+> NuScenes
+> [,,,]
+> Category
+> Direction
+> Distance
+> Visibility
+> Speed
+> Filtering &
+> Human Check
+> Category Direction Distance Visibility Speed
+> Category
+> Direction
+> Distance
+> Visibility
+> Speed
+> 653 K QA
+
+(a) Our PanoVQA generating pipeline. (b) Comparison between VLM and PLM. avg(N) avg(O) avg(D) avg 
+
+10 
+
+20 
+
+30 
+
+40 
+
+50 
+
+60  
+
+> Performance (%)
+> PLM
+> Qwen2.5-VL-32B-Ins.
+> InternVL3-8B-Ins
+> Gemini-2.5-Flash-Lite
+> InternVL2-8B
+> Qwen2.5-VL-7B-Ins.
+> GLM-4-9B
+> LLaVA-OneVision-7B
+> DeepSeek-VL2-Small
+> LLaVA-NEXT-7B
+> Grok-3-Mini
+> Chameleon-7B
+
+(c) Performance of VLMs and PLM on benchmark. 
+
+Figure 1. Overview of Panorama-Language Modeling (PLM) . (a) To enable PLM, we create the first PanoVQA dataset with 653K QA pairs, including normal (N), occluded (O), accidental (D) driving scenarios. (b) Compared to narrow-FoV multi-view VLMs, PLM with 360 ◦ spatial semantic consistency can identify the potential risks ( e.g ., a van in the front-left ). (c) Evaluating across PanoVQA, our proposed PLM significantly outperforms all other models across all categories, yielding superior omni-scene understanding. 
+
+## Abstract 
+
+Existing vision-language models (VLMs) are tailored for pinhole imagery, stitching multiple narrow field-of-view inputs to piece together a complete omni-scene under-standing. Yet, such multi-view perception overlooks the holistic spatial and contextual relationships that a single panorama inherently preserves. In this work, we intro-duce the Panorama-Language Modeling (PLM) paradigm, a unified 360 ◦ vision-language reasoning that is more than the sum of its pinhole counterparts. Besides, we present 
+
+PanoVQA , a large-scale panoramic VQA dataset that in-volves adverse omni-scenes, enabling comprehensive rea-soning under object occlusions and driving accidents. To establish a foundation for PLM, we develop a plug-and-play panoramic sparse attention module that allows existing pinhole-based VLMs to process equirectangular panoramas without retraining. Extensive experiments demonstrate that our PLM achieves superior robustness and holistic reason-ing under challenging omni-scenes, yielding understanding greater than the sum of its narrow parts. Project page: 
+
+https://github.com/InSAI-Lab/PanoVQA .
+
+> †
+
+This work was done while Weijia Fan was a visiting student at KIT. 
+
+> *
+
+Correspondence: junwei.zheng@kit.edu, jiamingzhang@hnu.edu.cn. 
+
+## 1. Introduction 
+
+Vision-Language Models (VLMs) [2, 6, 20, 26] have re-cently demonstrated remarkable capabilities in bridging the gap between visual perception and natural language under-standing [24, 27]. Foundation models such as LLaVA [27] and BLIP-2 [24] have excelled at a wide range of tasks, in-cluding visual question answering (VQA) [1], image cap-tioning [45], and complex visual reasoning [16], paving the way for more general-purpose AI systems. Despite their success, most existing VLMs are tailored for standard “pinhole” imagery, which captures a narrow field-of-view (FoV). This limitation becomes critical when applied to omnidirectional ( 360 ◦) scenes, which are in-creasingly prevalent in applications like autonomous driv-ing [5, 48], robotics [49], and immersive augmented/virtual reality (AR/VR) [15]. To comprehend a panoramic scene, current methods typically resort to a “stitching” approach: sampling multiple narrow-view crops, processing them in-dividually, and attempting to piece together a complete un-derstanding [42]. This multi-view perception, however, fun-damentally overlooks the holistic spatial and contextual re-lationships that a single, unified panorama inherently pre-serves. It breaks the seamless 360 ◦ continuity and fails to model the crucial “wrap-around” nature of panoramas, 
+
+> arXiv:2603.09573v1 [cs.CV] 10 Mar 2026
+
+where the left and right edges of the image are connected. This research gap is exacerbated by two primary chal-lenges. (1) A lack of dedicated, large-scale benchmarks for training and validation. Existing datasets are limited to either multi-view pinhole VQA [32, 39] or panoramic data without corresponding VQA pairs [5, 48]. Crucially, they lack the diverse, adverse situations needed to test ro-bust real-world reasoning. (2) The inherent incompatibility of model architecture. Equirectangular projections (ERP), the standard 360 ◦ format, introduce severe geometric distor-tions and have much higher resolutions than typical pinhole images. Applying narrow-FoV Transformer-based VLMs naively is not only computationally prohibitive, due to the 
+
+O(n2) complexity of dense attention, but also fails to model the unique projection topology. To address the issues above, this work validates the hypothesis that panorama-language understanding is more than the sum of its pinhole counterparts, as shown in Fig. 2. We introduce the Panorama-Language Model (PLM) , a well-designed VLM for panoramas, where we propose a panoramic sparse attention (PSA). This design ensures that our module remains compatible with existing pre-trained VLMs, enabling them to efficiently process 360 ◦ inputs. To train and evaluate our PLM and existing VLMs, we present 
+
+PanoVQA , a new, large-scale panoramic visual question answering dataset. As illustrated in Fig. 1a, PanoVQA is distinct in its integration of a vast collection of diverse and adverse omni-scenes. It features complex scenarios involv-ing occlusions, vehicular accidents, and other challenging environmental conditions. This design forces models to move beyond simple object recognition and engage in com-prehensive reasoning about the entire complex situation. To summarize, our contributions are as follows. • We introduce PanoVQA, a large-scale dataset curated with diverse “omni-scenes”, including normal driving, occlusion, and accident scenarios, to facilitate compre-hensive 360 ◦ reasoning. • We propose a panoramic sparse attention mecha-nism, a novel module specifically designed to address equirectangular distortion and efficiently capture long-range spatial dependencies in panoramic images. • Extensive experiments demonstrate the limitations of existing VLMs on panoramic tasks and validate the ef-fectiveness and superior reasoning capabilities of our proposed PLM framework. 
+
+## 2. Related Work 
+
+2.1. Panoramic Scene Benchmark 
+
+Recent VQA benchmarks target scene understanding, par-ticularly in autonomous driving shown in Table 1. Ini-tial works like NuScenes-QA [32] provide template-based, single-word-answer questions, while NuScenes-VLM  &
+
+> Multi -view
+
+1-Pano  Outperforms 6 -Cam after  SFT 
+
+Performance : 41.42  vs.  40.22 
+
+What  is  the  visibility  and  direction  of  the  closest  adult 
+
+to  the  ego  car?                            
+
+> Compute TTC for the car in the back right at about 4meters
+> moving about 19 km/h relative to astationary ego .Provide
+> result in seconds rounded to one decimal .
+
+What  is  the  visibility  and  approximate 
+
+distance  of  the  nearest  fully  visible  child ?
+
+An  adult  in  the  front  at  about  9 meters 
+
+fully  visible .             
+
+> Apedestrian in the front left with
+> approximately 10 meters and about 6km/h .
+> The TTC for the car at about 4 meters moving about 19 km/h
+> relative to a stationary ego is approximately 0.7 seconds.
+> The TTC for the car in the back right at about 4 meters
+> moving about 19 km/h relative to a stationary ego is
+> approximately 0.8 seconds. Ground Truth
+
+GT: A fully visible adult in the front at around 8 meters .
+
+Analysis : The  seamless  360 ° context  allows  the  model  to 
+
+correctly  understand  the  spatial  query  and  locate  the  object . 
+
+> VLM &
+> Panorama
+
+Figure 2. 1-Pano (41.42 %) outperforms 6-Cam (40.22 %) on PanoVQA-mini. The panorama’s seamless 360 ◦ context is key for spatial awareness. As shown, the 6-cam model fails the query, e.g., misidentifying the direction. In contrast, the 1-Pano model lever-ages the full context to, e.g., correctly locate the object, matching the GT. More examples can be found in the supplementary. 
+
+SpatialQA [39] focuses on evaluating spatial reasoning. Some benchmarks address more complex cognitive tasks. DriveLM [35] introduced Graph VQA to model driver rea-soning. Works focusing on planning, like OmniDrive [40], use counterfactual trajectory reasoning, while NuPlanQA-1M [30] scales this to one million diverse VQAs generated by GPT-4o. A parallel line focuses on pedestrian-centric assistance. mmWalk [49] is designed for pedestrians with blindness or low vision (BLV), capturing data from walker-egocentric, guide-dog, and aerial views. VizWiz-VQA [10] uses images and spoken questions from blind users. However, these benchmarks mainly use forward-facing, multi-camera, or egocentric perspectives. They do not eval-uate a model’s ability to reason over a complete 360 ◦ scene from a single panoramic input. Our PanoVQA benchmark is designed to fill this gap, providing a dedicated resource for evaluating holistic outdoor scene understanding. 
+
+2.2. Panoramic Scene Understanding 
+
+Holistic panoramic scene understanding involves tasks such as 3D layout estimation [36], pose estimation [56], object detection, and depth estimation [23]. Foundational works like PanoContext [53] and DeepPanoContext [50] estab-lished the importance of 3D scene context, which is partic-ularly strong in 360 ◦ images. In the context of panoramic scenes, a primary challenge is the severe geometric distor-tion in ERP. Models like SphereNet [8], UniFuse [17], and PanoFormer [34] address this by operating on the sphere, fusing different projections, or using distortion-invariant Table 1. Existing multi-view VQA or panoramic datasets . We compare key attributes: data volume (frames, QAs), input modality (pinhole vs. panorama), and scenario diversity. While previous dataset is limited to either pinhole VQA or panoramic data without VQA, our PanoVQA is the first to provide 360 ◦ images and VQA (653K pairs), spanning normal , occlusion , and accidental scenarios. 
+
+Dataset Year #Frames #QAs Input Real/Syn Scenario Occlusion Accident 
+
+NuScenes-QA [32] AAAI’24 34K 460K Pinhole Real Driving × ×
+
+DriveLM [35] ECCV’24 5K 443K Pinhole Real & Syn Driving × ×
+
+OmniDrive [40] CVPR’25 34K 136K Pinhole Real & Syn Driving × ×
+
+NuPlanQA-1M [30] ICCV’25 90K 1M Pinhole Real Driving × ×
+
+NuScenes-SpatialQA [39] arXiv’25 34K 460K Pinhole Real Driving × ×
+
+DeepAccident [41] AAAI’24 57K × Pinhole Syn Driving × ✓
+
+VRU-Accident [19] ICCVW’25 - 6K Pinhole Real Driving × ✓
+
+ChatBEV [46] arXiv’25 25K 137K BEV Real Driving × ×
+
+mmWalk [49] NeurIPS’25 7.5K 69K Panorama Syn Walking × ×
+
+WildPASS [48] CVPR’21 80 × Panorama Real Mixed × ×
+
+BlendPASS [5] ECCV’24 2K × Panorama Real Driving ✓ ×
+
+PanoVQA (Ours) - 44.6K 653K Panorama Real & Syn Driving ✓ ✓
+
+patches. Other works [14, 51, 52, 55] incorporate de-formable design to address image distortions and object de-formation in panoramas. A parallel track, dominant in au-tonomous driving, projects sensor data into a Bird’s-Eye-View (BEV). LSS [31] introduced the “lift-splat” method for this projection. BEVFormer [25, 47] advanced this with spatiotemporal transformers, while OneBEV [43] adapted the paradigm for single panoramas using a Mamba-based state space model. These Transformer-based models are of-ten computationally expensive. In contrast, our work pro-poses a dynamic sparse attention mechanism where queries learn which tokens to attend to, improving performance for panoramic inputs while maintaining low overhead. 
+
+2.3. Vision-Language Models 
+
+Recent large Vision-Language Models (VLMs) like LLaVA [26], Qwen-VL [2], InternVL [6], and GLM-V [12] have excelled at tasks like Visual Question Answering (VQA) [1], captioning [45], and retrieval [44] by bridging vision and language. Their application is expanding into specialized domains like autonomous driving and robotics. However, existing VLMs are designed for standard pinhole images, which offer a fragmented view with discontinuous information. This creates a gap, as they cannot process the rich, seamless context of a 360 ◦ scene. Our work, PLM, fills this gap by introducing a PSA that operates directly on panoramic inputs, enabling a more complete and grounded understanding of the full 360 ◦ environment. 
+
+## 3. Methodology 
+
+3.1. PanoVQA Benchmark 
+
+To address the limitations of existing datasets in evaluat-ing complex, 360 ◦ driving-scene understanding, we intro-duce the PanoVQA benchmark. As detailed in our com-parison in Table 1, PanoVQA is the first large-scale VQA dataset specifically designed for panoramic inputs that cov-ers a comprehensive range of driving situations. It pro-vides a robust framework for evaluating driving-focused LLMs and Agents by incorporating diverse scenarios, in-cluding normal driving, complex occlusions, and high-risk accidents, which are critically underrepresented in previous benchmarks. The overall pipeline for the generation of our PanoVQA dataset is illustrated in Fig. 1a. 
+
+Categories. To create PanoVQA for comprehensive eval-uation, we designed a total of 12 visual question cate-gories, as detailed in Table 2. These categories are de-rived from three distinct datasets to cover a wide range of panoramic visual understanding tasks in autonomous driv-ing. The PanoVQA-N addresses general driving scenar-ios, tasking models with (N1) Scene Captioning (includ-ing object existence, counting, and localization), (N2) Ob-ject Identification (focusing on position, distance, and direc-tion), and understanding both (N3) Object-to-Object (O2O) and (N4) Ego-to-Object (E2O) Spatial Relationships. The PanoVQA-O specifically targets complex occlusion scenar-ios, with questions designed to test reasoning about unseen elements, such as (O1) Occlusion Relationships, (O2) In-ferring Actions of Occluded Objects, and (O3) Identifying Actions to Prevent Accidents. Finally, the PanoVQA-D is collision-focused and built for risk analysis, acknowledging that environment, weather, and intersections impact judg-ment; its tasks include (D1) Environment/Weather assess-ment, (D2) Collision Risk Assessment, (D3) Severity As-sessment, (D4) Action Avoidance planning, and (D5) Time to Collision Estimation. 
+
+Dataset Generation. We construct our dataset by format-ting and cleaning three existing datasets: NuScenes [4], BlendPASS [5], and DeepAccident [41]. A critical first step involves generating panoramic images. For NuScenes * 
+
+> 4/25 34
+> 334
+> 2,534
+> 634
+> ,,
+> X-axis
+> Y-axis(forward)
+> Z-axis
+
+Figure 3. Panorama generation overview. Following [43], we cen-ter a viewing sphere at O. For each camera, an image plane Ii is tangent to a concentric sphere at Mi on its optical axis. For each panorama pixel P360 jk , we cast a ray ljk from O, intersect it with the tangent planes, and sample the color at the projected image co-ordinate Njk . Overlaps are resolved by a fixed camera order (“first hit wins”), ensuring consistency without feature matching. Table 2. Distribution of 12 QA types on PanoVQA. Tasks are grouped by their three source datasets: NuScenes (normal scenar-ios), BlendPASS (occlusion reasoning), and DeepAccident (colli-sion accident), along with their respective sample counts. 
+
+Data. ID QA Task Description #Samples 
+
+> Normal Scenes
+
+N1 Scene Captioning 118,101 N2 Object Identification 144,927 N3 O2O Spatial Relationships 117,174 N4 E2O Spatial Relationships 128,793 
+
+> Occluded Scenes
+
+O1 Occlusion Relationships 698 O2 Actions of Occluded Objects 252 O3 Actions to Prevent Accidents 342 Accident Scenes  D1 Environment, Weather 38,619 D2 Collision Risk Assessment 28,774 D3 Severity Assessment 21,270 D4 Action Avoidance 29,405 D5 Time2Collision Estimation 25,559 
+
+and DeepAccident, we follow OneBEV [43] and use a pure-geometry pipeline (Fig. 3). The BlendPASS dataset already provides panoramic images, requiring no stitching. Following image preparation, we process the raw anno-tations from each dataset to create a structured, json-based annotation of each frame. This format allows us to pre-calculate and explicitly store all the object properties re-quired for our targeted VQA tasks. To formally denote each object and its state, we use a colloquial quadruple repre-sentation that is both machine-readable and intuitive. An example of this representation is shown in Fig. 1b. The spe-cific preprocessing for each data subset is as follows: • PanoVQA-N (NuScenes) establishes a baseline for panoramic scene understanding under normal driving conditions. The goal is to train and evaluate a VLM’s 
+
+Table 3. Comparison of dataset statistics. PanoVQA introduces over 650K total samples, offering a larger scale and comprehen-sive question-answer lengths compared to existing benchmarks.                       
+
+> Dataset Samples Average Word Length Train Val Question Answer
+> NuScenes [32] 419,336 89,659 15.6 34.8 BlendPASS [5] –1,292 17.1 51.0 DeepAccident [41] 119,299 24,328 24.5 41.4
+> PanoVQA (Ours) 538,635 115,279 19.07 42.4
+
+ability to identify objects and understand their spa-tial relationships to the ego-vehicle. We parse the annotations to calculate each object’s position, which we then represent with the quadruple: (category, direction, distance, visibility) . The format was chosen because it provides the fundamen-tal information required for navigation: what an object is, where it is, and how well it can be seen. • PanoVQA-O (BlendPASS): We first employ the DA2 [23] for pixel-level depth estimation. An ob-ject’s distance is then determined by averaging the depth values within its polygonal region. The ob-ject’s position and angle are used to calculate its direc-tion. To determine occlusion relationships, we identify overlapping objects via a polygonal region and com-pare their lowest y-axis pixel coordinates; the object with the smaller y-coordinate is designated the “oc-cluding object”, and the other is the “occluded ob-ject”. This analysis allows us to calculate a “visibility” score based on the Intersection over Union (IoU) re-gion. The quadruple is (category, direction, distance, visibility) .• PanoVQA-D (DeepAccident): We include environ-mental conditions, such as weather and road type, which are critical for braking and visibility. As this dataset focuses on collisions and accident scenarios, we calculate objects’ relative angle, speed, and dis-tance. Because our input is a static image, it is diffi-cult to infer speed. Therefore, the objects’ speed and distance are provided in the question to facilitate un-derstanding. The resulting quadruple is (category, direction, distance, speed) .With these pre-calculated and structured scene annotations, we utilize GPT-5-mini with reasoning effort =
+
+{minimal, low } as a generator to create the question-answer (QA) pairs. The generated dataset then undergoes a final stage of automated machine cleaning and rigorous hu-man evaluation to ensure quality. Further technical details, including the specific formulas used for calculating relative positions and occlusion, as well as the generation prompts, are available in the supplement. 
+
+Filtration and Statistics. To ensure the quality of the data, we first applied an automatic filtering process using man-Table 4. Data quality verified by the human-GPT evaluation scores. The higher the better, up to 5.                  
+
+> Dataset Question Answer Quality Correctness Actionability Fluency
+> PanoVQA-N 4.73 4.50 4.31 4.84 PanoVQA-O 4.21 4.04 3.52 4.66 PanoVQA-D 4.80 4.72 4.64 4.91
+
+ually defined keywords to remove undesirable QA pairs. Following this refinement, our complete PanoVQA dataset comprises 653K QA pairs, split into 538K for training and 
+
+115K for validation based on the original dataset’s setting. Furthermore, for efficient evaluation, we curated a smaller version, PanoVQA-mini, containing 25K QA pairs, specif-ically 17 ,378 for training and 8,184 for validation. 
+
+Human Evaluation. To ensure the correctness of the an-notation, we conduct mix human and GPT evaluation on a mini version. The result shows our annotations achieve high quality. As shown in Table 4, overall scores affirm the dataset’s reliability 
+
+3.2. Preliminary of narrow-FoV VLMs 
+
+The original Vision Transformer (ViT) processes an im-age by first dividing it into a sequence of non-overlapping, fixed-size patches. These patches are flattened and then lin-early projected into vector embeddings. A learnable cls 
+
+token embedding is prepended to this sequence, and po-sitional embeddings are added to all tokens to retain spa-tial information. This results in the final input sequence 
+
+h(0) ∈ RL×d, where L is the number of patch tokens (in-clude cls token) and d is the hidden dimension. Each Transformer block contains a Multi-Head Self-Attention (MSA) and a Feed-Forward Network (FFN). The computation for the l-th block, including residual connec-tions and Layer Normalization (LN), which is expressed as 
+
+˜h(l) = LN 
+
+
+
+MSA (l)(h(l−1) ) + h(l−1) 
+
+, (1) 
+
+h(l) = LN 
+
+
+
+FFN (l)(˜h(l)) + ˜h(l)
+
+. (2) The MSA in Eq. 1 is a variant of self-attention that runs multiple independent attention heads in parallel. It com-putes attention through a weighted sum of Value ( V) vec-tors based on attention scores derived from Query ( Q) and Key ( K) vectors. For the l-th layer, the projected matri-ces of the input hidden state h(l−1) are defined as Q(l) =
+
+h(l−1) W(l) 
+
+> Q
+
+, K(l) = h(l−1) W(l) 
+
+> K
+
+, and V(l) = h(l−1) W(l) 
+
+> V
+
+.The computation for a self-attention head is calculated as: 
+
+Attention (Q,K,V) = softmax 
+
+
+
+QK T /√d
+
+
+
+V. (3) The MSA (l) is formed by concatenating the results from multiple heads and applying an output projection W(l) 
+
+> O
+
+.In the standard dense self-attention, the query of every token is compared against the key of all other tokens. This mechanism, while effective, introduces a significant bottle-neck, i.e ., its computational and memory complexity scales quadratically O(L2) with the number of tokens L, making it prohibitively expensive for panoramic inputs. While Sim-plified Sparse Attention (SSA) has proposed to reduce cost, it risks losing important information by pre-determining an inflexible attention structure. Thus, we propose a hybrid attention mechanism that combines local and global sparse attention. This approach is designed to efficiently capture both fine-grained local patterns and critical long-range spa-tial dependencies within the panoramic image, balancing computational efficiency with model performance. 
+
+3.3. Panorama-Language Model 
+
+The overview of our panorama-language model (PLM) is presented in Fig. 4. Similar to modern VLMs [2, 20, 26], our PLM is composed of three components: (1) a panorama-enhanced ViT, (2) an MLP-based merger, and (3) a large language model (LLM). To capture the fine-grained local patterns and long-range spatial relationships in a panoramic image, we modify the standard ViT by adding local and global attention mechanisms in a parallel manner, which preserves the existing structure of VLMs. 
+
+Sliding Window Attention. The local head is imple-mented using Sliding Window Attention (SWA) [7], where we set the sliding stride equal to the window size, re-sulting in W non-overlapping windows. The input se-quence h(l−1) is partitioned into W non-overlapping win-dows, {h1, . . . , hW }, where each window hw ∈ RLw ×d
+
+and Lw is the window size ( Lw ≪ L). Self-attention is then computed independently within each window w ∈{1, . . . , W }. The Query, Key, and Value matrices are projected from the windowed input hw, e.g ., Q(l) 
+
+> w
+
+=
+
+hwW(l)
+
+> Q, local
+
+, K(l) 
+
+> w
+
+= hwW(l)
+
+> K, local
+
+, V(l) 
+
+> w
+
+= hwW(l)
+
+> V, local
+
+,
+
+where Q(l) 
+
+> w
+
+, K(l) 
+
+> w
+
+, V(l) 
+
+> w
+
+∈ RLw ×d are the query, key, and value matrices for window w, and Lw is the window size (Lw ≪ L). A window attention is calculated by 
+
+o(l) 
+
+> w
+
+= Attention 
+
+
+
+Q(l) 
+
+> w
+
+, K(l) 
+
+> w
+
+,V(l)
+
+> w
+
+
+
+. (4) The output for the SWA is obtained by reassembling the outputs from all windows and applying a projection 
+
+W(l)
+
+> O, local
+
+:
+
+Attn (l) 
+
+> local
+
+= Reassemble (o(l)1 , . . . , o(l) 
+
+> W
+
+), (5) SWA (h(l−1) ) = Attn (l) 
+
+> local
+
+· W(l)
+
+> O, local
+
+. (6) This local attention mechanism reduces the complexity from O(L2) to O(W · L2
+
+> w
+
+) = O(L · Lw), but it prevents tokens from different windows from interacting. SWA  SSA  PSA (a) Our panorama sparse attention block. SWA  SSA  PHA (SSA+ PSA ) (b) Attention mask visualization. 
+
+Figure 4. Left : Structure of our proposed attention block with SWA and PSA. Right : The visualization of attention masks for Sliding Window Attention (SWA), Simplified Sparse Attention (SSA), and Panoramic Sparse Attention (PSA), respectively. 
+
+Panoramic Sparse Attention. The global head is imple-mented by Panoramic Sparse Attention (PSA), which dy-namically selects the Top-K most relevant key tokens for each query token. First, a dynamic selector module com-putes a non-causal score matrix I ∈ RL×L. The score It,s ,representing the relevance between a query token t and a key token s, is calculated as: 
+
+It,s =
+
+> HI
+
+X
+
+> j=1
+
+
+
+gate( qG, (t,j ), kG, (s,j ), t, s )
+
+· ReLU( q⊤
+
+> I, (t,j )
+
+kI, (s,j ))
+
+
+
+, (7) 
+
+gate( q, k, t, s ) = sigmoid  MLP  q⊤k + PE t,s 
+
+ , (8) where HI is the number of selector heads. For each head j,the vectors qG, (t,j ), kG, (s,j ) ∈ RdG and qI, (t,j ), kI, (s,j ) ∈
+
+RdI are derived from the input tokens h(l−1)  
+
+> t
+
+and h(l−1) 
+
+> s
+
+through separate linear projections ( dG ≪ d, d I ≪ d). The gate (·) network in Eq. (8) is an MLP that incorporates a learnable position embedding (PE t,s ) to make the selection process position-aware. Consequently, we compute the main sparse atten-tion projections from the input h(l−1) , e.g ., Q(l) 
+
+> S
+
+=
+
+h(l−1) W(l)
+
+> Q, sparse
+
+, K(l) 
+
+> S
+
+= h(l−1) W(l)
+
+> K, sparse
+
+, V(l) 
+
+> S
+
+=
+
+h(l−1) W(l)
+
+> V, sparse
+
+. For each query token t (row q(l) 
+
+> t
+
+from 
+
+Q(l) 
+
+> S
+
+), we identify the set of Top-K key indices St = {s |
+
+It,s ∈ Top-K (It, :)}. The sparse attention output is com-puted only over these selected key-value pairs: 
+
+o(l) 
+
+> t
+
+= Attention 
+
+
+
+q(l) 
+
+> t
+
+, K(l) 
+
+> St
+
+, V(l)
+
+> St
+
+
+
+, (9) where K(l) 
+
+> St
+
+and V(l) 
+
+> St
+
+are matrices formed by stacking the key and value vectors from K(l) 
+
+> S
+
+and V(l) 
+
+> S
+
+corresponding to the indices in St. The final output for the PSA module is obtained by stacking all token outputs o(l) 
+
+> t
+
+and applying an output projection W(l)
+
+> O, sparse
+
+:
+
+Attn (l) 
+
+> sparse
+
+= Stack (o(l)1 , . . . , o(l) 
+
+> L
+
+), (10) PSA (h(l−1) ) = Attn (l)
+
+> sparse
+
+W(l)
+
+> O, sparse
+
+. (11) We define Panoramic Hybrid Attention (PHA) as the par-allel combination of SWA and PSA. The l-th block calcula-tion is reformulated as: 
+
+˜h(l) = LN 
+
+
+
+SWA (h(l−1) ) + PSA (h(l−1) ) + h(l−1) 
+
+, (12) 
+
+h(l) = LN 
+
+
+
+FFN (l)(˜h(l)) + ˜h(l)
+
+. (13) 
+
+Fig. 4b visualizes three attention masks. Sliding Win-dow Attention (SWA) (left) captures fine-grained local pat-terns (blue diagonal band) but fails to model the global con-text. Simplified Sparse Attention (SSA) (middle) models long-range dependencies, but its fixed pattern is not opti-mized for the unique structure of panoramas. Our proposed Panoramic Hybrid Attention (PHA) (right) is specifically designed to overcome these limitations. PHA retains SWA’s local window to capture fine-grained details while dynami-cally incorporating long-range dependencies (visualized as yellow-to-orange points) to connect distant token, such as front-back sides, or the left-right sides. Additionally, PSA utilizes patch-wise deformable attention and gating mech-anisms to effectively handle the object distortion and filter out uninformative areas inherent in panoramic images. Fur-ther discussion is provided in the supplement. 
+
+## 4. Experiments 
+
+4.1. Implementation Details 
+
+Model. Our experiments utilize the Qwen2.5-VL series as the base architecture. Since Qwen2.5-VL already in-corporates SWA, our primary modification is the integra-tion of our proposed PSA module. We initialize all model weights from the publicly available checkpoints and con-duct full-parameter supervised fine-tuning (SFT), unfreez-ing and training all parameters on our dataset. Table 5. Results for all models on the PanoVQA benchmark. ‘-’ means not available. The metric is the normalized GPT-score. All experiments are conducted on the PanoVQA.                                                                                                                                                                                         
+
+> Model PanoVQA-N PanoVQA-O PanoVQA-D Avg. N1 N2 N3 N4 O1 O2 O3 D1 D2 D3 D4 D5
+> Zero-shot
+> Chameleon-7B [54] 9.87 18.04 12.60 10.62 6.98 33.04 38.96 8.71 23.65 35.01 30.76 11.69 19.99 LLaVA-NEXT-7B [28] 11.19 17.15 15.06 12.13 10.54 40.47 46.91 8.93 20.66 36.73 23.33 18.57 21.81 LLaVA-OneVision-7B [20] 12.54 19.61 19.83 14.49 11.97 40.66 43.25 12.05 25.88 47.09 34.75 43.00 27.09 Qwen2.5-VL-7B-Ins. [3] 13.65 18.53 22.08 14.72 15.13 35.89 44.68 12.86 30.97 48.86 36.93 62.90 29.77 InternVL2-8B [38] 12.79 22.55 24.17 15.59 9.17 43.35 50.80 15.11 33.88 49.73 46.71 40.51 30.36 InternVL3-8B-Ins. [57] 15.06 22.79 23.99 16.14 9.32 45.91 53.38 15.06 36.06 57.87 52.98 65.17 34.48 GLM-4-9B [9] 11.73 15.6 19.36 13.34 11.93 44.74 53.44 10.93 31.42 46.64 43.29 52.36 29.57 DeepSeek-VL2-Small [29] 12.50 19.45 15.66 13.71 12.46 38.69 40.64 13.77 33.48 52.01 45.83 10.04 25.69 Qwen2.5-VL-32B-Ins. [3] 16.51 20.88 26.34 17.51 9.85 46.23 54.61 15.45 35.56 54.11 55.14 74.55 35.56
+> Proprietary
+> Grok-3-Mini 3.38 6.88 11.61 8.42 5.37 34.23 34.58 7.91 19.30 35.00 26.15 68.05 21.74 Gemini-2.5-Flash-Lite 18.83 23.61 25.21 19.07 11.21 36.81 45.25 14.08 31.72 32.62 41.79 68.64 30.74
+> Panoramic fine-tuned
+> Qwen2.5-VL-7B 33.52 34.22 27.57 27.66 22.66 50.00 58.26 23.21 42.08 74.07 74.90 74.34 45.21 PanoLM-7B (Ours) 34.79 33.54 28.18 28.54 18.62 50.21 60.09 23.65 42.92 75.72 76.74 72.75 45.48
+
+Training & Evaluation Strategy. We employ a tiered data strategy contingent on model scale. For large-scale models (7B and larger), we create a balanced SFT training mix-ture by sampling 90% of the DeepAccident data and 60% of the NuScenes data; these models are then evaluated on the complete PanoVQA test set. To mitigate computational costs during the analysis and iterative development of our proposed model, we conduct both training and evaluation on the PanoVQA-mini subset. This methodology is sup-ported by established research on scaling laws [11, 18], which demonstrates that model performance scales pre-dictably with dataset size. Our specific scaling law analyses are presented in Sec. 4.3. 
+
+Metrics. The curated dataset involves normal, occlusion, and accident scenarios. In our experiments, following LLM as-a-judge paradigm [21, 22], we employ gpt-4o-mini 
+
+to evaluate the similarity and correctness of the generated answers and the ground truth answers. Following a unified scoring prompt in previous work [49] for the evaluation of all models. For each inference result, the metric is a scaled score si (1-5, with 5 being the highest score). To visualize the differences in model performance, we normalized all scores to 1 ∼100 by S GPT = 1 /N ×PNi=1 (si −1) /4∗100% ,where N denotes the number of all samples. 
+
+Comparison of VLMs. To establish a comprehensive baseline, we evaluate a wide range of recent Vision-Language Models (VLMs) on our PanoVQA bench-mark. This includes leading open-source models such as Chameleon [54], LLaVA [20, 26], Qwen-VL [2], In-ternVL [6], GLM [12], and DeepSeek-VL [29], as well as high-performing proprietary commercial models, including Grok and the Gemini[37]. The results are shown in Table 5. 
+
+4.2. Results of PanoVQA 
+
+The comprehensive benchmark results on the PanoVQA test set are presented in Table 5. Our evaluation provides a broad comparison between existing models in a zero-shot setting and our models fine-tuned on panoramic data. 
+
+Zero-Shot Baseline Performance. Among open-source VLMs, performance generally scales with model size and architectural refinement. The strongest model is Qwen2.5-VL-32B-Ins., which achieves the highest average score of 
+
+35 .56% . In the 7B-9B parameter class, which serves as a direct comparison for our model, InternVL3-8B-Ins sets the top mark at 34 .48% . This significantly outperforms other models in its class, such as InternVL2-8B ( 30 .36% ) and the original Qwen2.5-VL-7B-Ins. ( 29 .77% ). 
+
+Proprietary Model Performance. The proprietary models show highly varied results. Gemini-2.5-Flash-Lite delivers a competitive score of 30.74%. Conversely, Grok-3-Mini struggles with the panoramic task, registering a low score of 21.74%, which falls behind most 7B-scale open-source competitors. Additional proprietary model evaluations on PanoVQA-mini are provided in the supplementary. Ulti-mately, the general sub-optimal performance across both open-source and proprietary models highlights a shared struggle with panoramic tasks, underscoring the necessity of our PLM. 
+
+Panoramic Fine-Tuned Models. We compare our PanoLM-7B (PLM) and base model, Qwen2.5-VL-7B, af-Table 6. Ablation study of components in PanoLM. SSA denotes Simplified Sparse Attention, where we use an MLP to replace our gate network. Experiments are conducted in PanoVQA-mini.                                           
+
+> Model Training #Param Avg ViT MLP Module LLM
+> 3B-Lora ✓✓-×259.21M 28.55
+> Ablation experiments
+> + SSA ×✓✓×85.09M 29.80 + PSA ×✓✓×95.56M 32.14 + PSA ×✓✓✓3196.25M 41.49
+> SFT
+> 3B ✓✓-×668.68M 29.34 3B ✓✓-✓3754.62M 41.42
+
+ter panoramic SFT. Qwen2.5-VL-7B achieves an average score of 45 .21% , while our PLM achieves a comparable 
+
+45 .91% , surpassing all other methods. 
+
+4.3. Analysis of PLM 
+
+Ablation study. In Table 6, we conduct an ablation study on the PanoVQA-mini dataset using the Qwen-2.5-3B model to verify the effectiveness of our proposed PSA. For these experiments, we first freeze the LLM and train only the vi-sion components. Our baseline (line 1) using LoRA [13] achieves 28 .55% on average with 259.21M trainable param-eters. As shown in line 3, the model with SSA achieves an average score of 29 .80% , surpassing the baseline while using significantly fewer parameters (85.09M). This re-sult confirms the effectiveness of using sparse attention for panorama inputs. Next, we evaluate our proposed PSA, which enhances SSA by using a dynamic gate network. With the LLM frozen (line 4), the model with our PSA achieves 32 .14% , which significantly outperforms both the LoRA baseline ( 28 .55% ) and a standard SFT approach with a frozen LLM ( 29 .34% , line 7), despite using far fewer trainable parameters (95.56M vs. 668.68M). Finally, when we unfreeze the LLM (line 5), our PSA-enabled model’s performance jumps to 41 .49 . This result is comparable to, and even slightly surpasses, the performance of a fully fine-tuned 3B model ( 41 .42 , line 8). These results demonstrate the effectiveness and parameter efficiency of our proposed PSA method. The SSA can be found in the supplement. 
+
+Parameters study. We analyzed the impact of the bot-tleneck dimension and Top-K value, plotting performance (blue line) against the number of trainable parameters (or-ange line). As shown in the left figure, while model pa-rameters (orange) increase with the bottleneck dimension, performance (blue) peaks at 32.10% with a dimension of 196 before declining. The right figure shows that the Top-K value does not affect parameter count (flat orange line), and performance reaches its peak when K=512. Therefore, we      
+
+> Figure 5. Analysis of the performance-parameter trade-off. Left :Impact of varying bottle dimensions. Right : Impact of varying the selected Top-K. Avg(N) Avg(O) Avg(D) Avg
+> 20
+> 25
+> 30
+> 35
+> 40
+> 45
+> 50
+> Performance (  )
+> Sampling Rate
+> 5%
+> 10%
+> 20%
+> 40%
+> 60%
+> 80%
+> 100%
+> Figure 6. Scaling law study on PanoVQA-mini.
+
+adopt a bottleneck dimension of 196 and a Top-K of 512 for all subsequent experiments. All experiments are conducted using PanoLM-3B on PanoVQA-mini. 
+
+Scaling law study. We confirm the scaling law through ex-periments on PanoVQA-mini. The results in Fig. 6 show that performance scales smoothly with data volume, and the relative gains diminish as data size increases ( e.g ., from an average score of 40 .68% at 60% data to 41 .42% at 100%). This validates that a smaller, representative subset like PanoVQA-mini is sufficient for reliable model compar-ison and rapid experimental iteration. 
+
+## 5. Conclusion 
+
+In this work, we introduce Panorama-Language Model-ing (PLM) for holistic panoramic understanding. We pro-pose Panorama Sparse Attention (PSA) to efficiently pro-cess 360 ◦ imagery while maintaining compatibility with pre-trained VLMs. To support this research, we create PanoVQA, a large-scale benchmark for panoramic visual question answering featuring diverse real-world scenarios, including normal, occluded and accidental cases. Exten-sive experiments demonstrate that our PLM approach effec-tively addresses the limitations of narrow-FoV multi-view stitching methods and establishes new state-of-the-art per-formance in panoramic visual reasoning. Acknowledgements 
+
+This work was supported by the Shenzhen University Over-seas Exchange Scholarship, which supported Weijia Fan’s living in Karlsruhe, Germany. This work was supported in part by National Natural Science Foundation of China under Grant No. 62503166, 62576217 and 62576216; Guangdong Provincial Key Laboratory under Grant 2023B1212060076, and also supported by the Intelligent Computing Center of Shenzhen University; and in part by Helmholtz As-sociation of German Research Centers, in part by the Ministry of Science, Research and the Arts of Baden-W¨ urttemberg (MWK) through the Cooperative Graduate School Accessibility through AI-based Assistive Technol-ogy (KATE) under Grant BW6-03, and in part by the Helmholtz Association Initiative and Networking Fund on the HAICORE@KIT and HOREKA@KIT partition. 
+
+## References 
+
+[1] Stanislaw Antol, Aishwarya Agrawal, Jiasen Lu, Margaret Mitchell, Dhruv Batra, C Lawrence Zitnick, and Devi Parikh. Vqa: Visual question answering. In Proceedings of the IEEE international conference on computer vision , pages 2425– 2433, 2015. 1, 3 [2] Jinze Bai, Shuai Bai, Shusheng Yang, Shijie Wang, Sinan Tan, Peng Wang, Junyang Lin, Chang Zhou, and Jingren Zhou. Qwen-vl: A frontier large vision-language model with versatile abilities. arXiv preprint arXiv:2308.12966 , 2023. 1, 3, 5, 7 [3] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, Humen Zhong, Yuanzhi Zhu, Mingkun Yang, Zhao-hai Li, Jianqiang Wan, Pengfei Wang, Wei Ding, Zheren Fu, Yiheng Xu, Jiabo Ye, Xi Zhang, Tianbao Xie, Zesen Cheng, Hang Zhang, Zhibo Yang, Haiyang Xu, and Jun-yang Lin. Qwen2.5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. 7 [4] Holger Caesar, Varun Bankiti, Alex H Lang, Sourabh Vora, Venice Erin Liong, Qiang Xu, Anush Krishnan, Yu Pan, Gi-ancarlo Baldan, and Oscar Beijbom. nuscenes: A multi-modal dataset for autonomous driving. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 11621–11631, 2020. 3, 1 [5] Yihong Cao, Jiaming Zhang, Hao Shi, Kunyu Peng, Yuhongxuan Zhang, Hui Zhang, Rainer Stiefelhagen, and Kailun Yang. Occlusion-aware seamless segmentation. In 
+
+European Conference on Computer Vision (ECCV) , 2024. 1, 2, 3, 4 [6] Zhe Chen, Jiannan Wu, Wenhai Wang, Weijie Su, Guo Chen, Sen Xing, Muyan Zhong, Qinglong Zhang, Xizhou Zhu, Lewei Lu, et al. Internvl: Scaling up vision foundation mod-els and aligning for generic visual-linguistic tasks. In Pro-ceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 24185–24198, 2024. 1, 3, 7 [7] Rewon Child, Scott Gray, Alec Radford, and Ilya Sutskever. Generating long sequences with sparse transformers. arXiv preprint arXiv:1904.10509 , 2019. 5 [8] Benjamin Coors, Alexandru Paul Condurache, and Andreas Geiger. Spherenet: Learning spherical representations for detection and classification in omnidirectional images. In 
+
+Proceedings of the European conference on computer vision (ECCV) , pages 518–533, 2018. 2 [9] Team GLM, Aohan Zeng, Bin Xu, Bowen Wang, Chenhui Zhang, Da Yin, Diego Rojas, Guanyu Feng, Hanlin Zhao, Hanyu Lai, Hao Yu, Hongning Wang, Jiadai Sun, Jiajie Zhang, Jiale Cheng, Jiayi Gui, Jie Tang, Jing Zhang, Juanzi Li, Lei Zhao, Lindong Wu, Lucen Zhong, Mingdao Liu, Minlie Huang, Peng Zhang, Qinkai Zheng, Rui Lu, Shuaiqi Duan, Shudan Zhang, Shulin Cao, Shuxun Yang, Weng Lam Tam, Wenyi Zhao, Xiao Liu, Xiao Xia, Xiaohan Zhang, Xi-aotao Gu, Xin Lv, Xinghan Liu, Xinyi Liu, Xinyue Yang, Xixuan Song, Xunkai Zhang, Yifan An, Yifan Xu, Yilin Niu, Yuantao Yang, Yueyan Li, Yushi Bai, Yuxiao Dong, Zehan Qi, Zhaoyu Wang, Zhen Yang, Zhengxiao Du, Zhenyu Hou, and Zihan Wang. Chatglm: A family of large language mod-els from glm-130b to glm-4 all tools, 2024. 7 [10] Danna Gurari, Qing Li, Abigale J Stangl, Anhong Guo, Chi Lin, Kristen Grauman, Jiebo Luo, and Jeffrey P Bigham. Vizwiz grand challenge: Answering visual questions from blind people. In Proceedings of the IEEE conference on computer vision and pattern recognition , pages 3608–3617, 2018. 2 [11] Jordan Hoffmann, Sebastian Borgeaud, Arthur Mensch, Elena Buchatskaya, Trevor Cai, Eliza Rutherford, Diego de Las Casas, Lisa Anne Hendricks, Johannes Welbl, Aidan Clark, et al. Training compute-optimal large language mod-els. arXiv preprint arXiv:2203.15556 , 2022. 7 [12] Wenyi Hong, Wenmeng Yu, Xiaotao Gu, Guo Wang, Guob-ing Gan, Haomiao Tang, Jiale Cheng, Ji Qi, Junhui Ji, Li-hang Pan, et al. Glm-4.1 v-thinking: Towards versatile multi-modal reasoning with scalable reinforcement learning. arXiv e-prints , pages arXiv–2507, 2025. 3, 7 [13] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, Weizhu Chen, et al. Lora: Low-rank adaptation of large language models. ICLR ,1(2):3, 2022. 8 [14] Jie Hu, Junwei Zheng, Jiale Wei, Jiaming Zhang, and Rainer Stiefelhagen. Deformable mamba for wide field of view seg-mentation. arXiv preprint arXiv:2411.16481 , 2024. 3 [15] Jingwei Huang, Zhili Chen, Duygu Ceylan, and Hailin Jin. 6-dof vr videos with a single 360-camera. In 2017 IEEE Virtual Reality (VR) , pages 37–44. IEEE, 2017. 1 [16] Drew A Hudson and Christopher D Manning. Gqa: A new dataset for real-world visual reasoning and compositional question answering. In Proceedings of the IEEE/CVF con-ference on computer vision and pattern recognition , pages 6700–6709, 2019. 1 [17] Hualie Jiang, Zhe Sheng, Siyu Zhu, Zilong Dong, and Rui Huang. Unifuse: Unidirectional fusion for 360 panorama depth estimation. IEEE Robotics and Automation Letters , 6 (2):1519–1526, 2021. 2 [18] Jared Kaplan, Sam McCandlish, Tom Henighan, Tom B Brown, Benjamin Chess, Rewon Child, Scott Gray, Alec Radford, Jeffrey Wu, and Dario Amodei. Scaling laws for neural language models. arXiv preprint arXiv:2001.08361 ,2020. 7 [19] Younggun Kim, Ahmed S Abdelrahman, and Mohamed Abdel-Aty. Vru-accident: A vision-language benchmark for video question answering and dense captioning for accident scene understanding. In Proceedings of the IEEE/CVF In-ternational Conference on Computer Vision , pages 761–771, 2025. 3 [20] Bo Li, Yuanhan Zhang, Dong Guo, Renrui Zhang, Feng Li, Hao Zhang, Kaichen Zhang, Peiyuan Zhang, Yanwei Li, Zi-wei Liu, et al. Llava-onevision: Easy visual task transfer. 
+
+arXiv preprint arXiv:2408.03326 , 2024. 1, 5, 7 [21] Dawei Li, Renliang Sun, Yue Huang, Ming Zhong, Bohan Jiang, Jiawei Han, Xiangliang Zhang, Wei Wang, and Huan Liu. Preference leakage: A contamination problem in llm-as-a-judge. arXiv preprint arXiv:2502.01534 , 2025. 7 [22] Haitao Li, Qian Dong, Junjie Chen, Huixue Su, Yujia Zhou, Qingyao Ai, Ziyi Ye, and Yiqun Liu. Llms-as-judges: a com-prehensive survey on llm-based evaluation methods. arXiv preprint arXiv:2412.05579 , 2024. 7 [23] Haodong Li, Wangguangdong Zheng, Jing He, Yuhao Liu, Xin Lin, Xin Yang, Ying-Cong Chen, and Chunchao Guo. DA 2: Depth anything in any direction. arXiv preprint arXiv:2509.26618 , 2025. 2, 4 [24] Junnan Li, Dongxu Li, Silvio Savarese, and Steven Hoi. Blip-2: Bootstrapping language-image pre-training with frozen image encoders and large language models. In In-ternational conference on machine learning , pages 19730– 19742. PMLR, 2023. 1 [25] Zhiqi Li, Wenhai Wang, Hongyang Li, Enze Xie, Chong-hao Sima, Tong Lu, Yu Qiao, and Jifeng Dai. Bevformer: Learning bird’s-eye-view representation from multi-camera images via spatiotemporal transformers. arXiv preprint arXiv:2203.17270 , 2022. 3 [26] Haotian Liu, Chunyuan Li, Yuheng Li, and Yong Jae Lee. Improved baselines with visual instruction tuning. arXiv preprint arXiv:2310.03744 , 2023. 1, 3, 5, 7 [27] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. Visual instruction tuning. Advances in neural information processing systems , 36:34892–34916, 2023. 1 [28] Haotian Liu, Chunyuan Li, Yuheng Li, Bo Li, Yuanhan Zhang, Sheng Shen, and Yong Jae Lee. Llavanext: Improved reasoning, ocr, and world knowledge, 2024. 7 [29] Haoyu Lu, Wen Liu, Bo Zhang, Bingxuan Wang, Kai Dong, Bo Liu, Jingxiang Sun, Tongzheng Ren, Zhuoshu Li, Hao Yang, et al. Deepseek-vl: towards real-world vision-language understanding. arXiv preprint arXiv:2403.05525 ,2024. 7 [30] Sung-Yeon Park, Can Cui, Yunsheng Ma, Ahmadreza Moradipari, Rohit Gupta, Kyungtae Han, and Ziran Wang. NuPlanQA: A large-scale dataset and benchmark for multi-view driving scene understanding in multi-modal large lan-guage models. In ICCV , 2025. 2, 3 [31] Jonah Philion and Sanja Fidler. Lift, splat, shoot: Encoding images from arbitrary camera rigs by implicitly unproject-ing to 3d. In Proceedings of the European Conference on Computer Vision , 2020. 3 [32] Tianwen Qian, Jingjing Chen, Linhai Zhuo, Yang Jiao, and Yu-Gang Jiang. NuScenes-QA: A multi-modal visual ques-tion answering benchmark for autonomous driving scenario. In Proceedings of the AAAI Conference on Artificial Intelli-gence , pages 4542–4550, 2024. 2, 3, 4 [33] Zihan Qiu, Zekun Wang, Bo Zheng, Zeyu Huang, Kaiyue Wen, Songlin Yang, Rui Men, Le Yu, Fei Huang, Suozhi Huang, Dayiheng Liu, Jingren Zhou, and Junyang Lin. Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free. In Advances in Neural In-formation Processing Systems , 2025. 1 [34] Zhijie Shen, Chunyu Lin, Kang Liao, Lang Nie, Zishuo Zheng, and Yao Zhao. Panoformer: panorama transformer for indoor 360 o depth estimation. In European Conference on Computer Vision , pages 195–211. Springer, 2022. 2 [35] Chonghao Sima, Katrin Renz, Kashyap Chitta, Li Chen, Hanxue Zhang, Chengen Xie, Jens Beißwenger, Ping Luo, Andreas Geiger, and Hongyang Li. Drivelm: Driving with graph visual question answering. In European conference on computer vision , pages 256–274. Springer, 2024. 2, 3 [36] Cheng Sun, Chi-Wei Hsiao, Min Sun, and Hwann-Tzong Chen. Horizonnet: Learning room layout with 1d represen-tation and pano stretch data augmentation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 1047–1056, 2019. 2 [37] Gemini Team, Rohan Anil, Sebastian Borgeaud, Yonghui Wu, Jean-Baptiste Alayrac, Jiahui Yu, Radu Soricut, Johan Schalkwyk, Andrew M Dai, Anja Hauth, et al. Gemini: a family of highly capable multimodal models. arXiv preprint arXiv:2312.11805 , 2023. 7 [38] OpenGVLab Team. Internvl2: Better than the best—expanding performance boundaries of open-source multimodal models with the progressive scaling strategy, 2024. 7 [39] Kexin Tian, Jingrui Mao, Yunlong Zhang, Jiwan Jiang, Yang Zhou, and Zhengzhong Tu. NuScenes-spatialQA: A spatial understanding and reasoning benchmark for vision-language models in autonomous driving. arXiv preprint arXiv:2504.03164 , 2025. 2, 3 [40] Shihao Wang, Zhiding Yu, Xiaohui Jiang, Shiyi Lan, Min Shi, Nadine Chang, Jan Kautz, Ying Li, and Jose M. Al-varez. OmniDrive: A holistic vision-language dataset for au-tonomous driving with counterfactual reasoning. In CVPR ,2025. 2, 3 [41] Tianqi Wang, Sukmin Kim, Ji Wenxuan, Enze Xie, Chongjian Ge, Junsong Chen, Zhenguo Li, and Ping Luo. Deepaccident: A motion and accident prediction bench-mark for v2x autonomous driving. In Proceedings of the AAAI Conference on Artificial Intelligence , pages 5599– 5606, 2024. 3, 4, 1 [42] Weiyu Wang, Chunmei Qing, Junpeng Tan, and XiangMin Xu. Multi-view panoramic image style transfer with multi-scale attention and global sharing. ACM Transactions on Multimedia Computing, Communications and Applications ,2025. 1 [43] Jiale Wei, Junwei Zheng, Ruiping Liu, Jie Hu, Jiaming Zhang, and Rainer Stiefelhagen. Onebev: Using one panoramic image for bird, aos-eye-view semantic mapping. In Proceedings of the Asian Conference on Computer Vision ,pages 583–596, 2024. 3, 4, 2 [44] Hui Wu, Yupeng Gao, Xiaoxiao Guo, Ziad Al-Halah, Steven Rennie, Kristen Grauman, and Rogerio Feris. Fashion iq: A new dataset towards retrieving images by natural language feedback. In Proceedings of the IEEE/CVF Conference on computer vision and pattern recognition , pages 11307– 11317, 2021. 3 [45] Kelvin Xu, Jimmy Ba, Ryan Kiros, Kyunghyun Cho, Aaron Courville, Ruslan Salakhudinov, Rich Zemel, and Yoshua Bengio. Show, attend and tell: Neural image caption gen-eration with visual attention. In International conference on machine learning , pages 2048–2057. PMLR, 2015. 1, 3 [46] Qingyao Xu, Siheng Chen, Guang Chen, Yanfeng Wang, and Ya Zhang. Chatbev: A visual language model that under-stands bev maps. arXiv preprint arXiv:2503.13938 , 2025. 3[47] Chenyu Yang, Yuntao Chen, Hao Tian, Chenxin Tao, Xizhou Zhu, Zhaoxiang Zhang, Gao Huang, Hongyang Li, Yu Qiao, Lewei Lu, et al. Bevformer v2: Adapting modern im-age backbones to bird’s-eye-view recognition via perspective supervision. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 17830– 17839, 2023. 3 [48] Kailun Yang, Jiaming Zhang, Simon Reiß, Xinxin Hu, and Rainer Stiefelhagen. Capturing omni-range context for om-nidirectional segmentation. In 2021 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2021. 1, 2, 3 [49] Kedi Ying, Ruiping Liu, Chongyan Chen, Mingzhe Tao, Hao Shi, Kailun Yang, Jiaming Zhang, and Rainer Stiefelhagen. mmwalk: Towards multi-modal multi-view walking assis-tance. arXiv preprint arXiv:2510.11520 , 2025. 1, 2, 3, 7 [50] Cheng Zhang, Zhaopeng Cui, Cai Chen, Shuaicheng Liu, Bing Zeng, Hujun Bao, and Yinda Zhang. Deeppanocontext: Panoramic 3d scene understanding with holistic scene con-text graph and relation-based optimization. In Proceedings of the IEEE/CVF International Conference on Computer Vi-sion , pages 12632–12641, 2021. 2 [51] Jiaming Zhang, Kailun Yang, Chaoxiang Ma, Simon Reiß, Kunyu Peng, and Rainer Stiefelhagen. Bending reality: Distortion-aware transformers for adapting to panoramic se-mantic segmentation. In Proceedings of the IEEE/CVF con-ference on computer vision and pattern recognition , pages 16917–16927, 2022. 3 [52] Jiaming Zhang, Kailun Yang, Hao Shi, Simon Reiß, Kunyu Peng, Chaoxiang Ma, Haodong Fu, Philip H. S. Torr, Kai-wei Wang, and Rainer Stiefelhagen. Behind every domain there is a shift: Adapting distortion-aware vision transform-ers for panoramic semantic segmentation. IEEE Transac-tions on Pattern Analysis and Machine Intelligence , 46(12): 8549–8567, 2024. 3 [53] Yinda Zhang, Shuran Song, Ping Tan, and Jianxiong Xiao. Panocontext: A whole-room 3d context model for panoramic scene understanding. In European conference on computer vision , pages 668–686. Springer, 2014. 2 [54] Zongzheng Zhang, Xinrun Li, Sizhe Zou, Guoxuan Chi, Siqi Li, Xuchong Qiu, Guoliang Wang, Guantian Zheng, Leichen Wang, Hang Zhao, et al. Chameleon: Fast-slow neuro-symbolic lane topology extraction. arXiv preprint arXiv:2503.07485 , 2025. 7 [55] Junwei Zheng, Ruiping Liu, Yufan Chen, Kunyu Peng, Chengzhi Wu, Kailun Yang, Jiaming Zhang, and Rainer Stiefelhagen. Open panoramic segmentation. In European Conference on Computer Vision , pages 164–182. Springer, 2024. 3 [56] Junwei Zheng, Ruiping Liu, Yufan Chen, Zhenfang Chen, Kailun Yang, Jiaming Zhang, and Rainer Stiefelhagen. Scene-agnostic pose regression for visual localization. In 
+
+Proceedings of the IEEE/CVF Conference on Computer Vi-sion and Pattern Recognition , pages 27092–27102, 2025. 2 [57] Jinguo Zhu, Weiyun Wang, Zhe Chen, Zhaoyang Liu, Shen-glong Ye, Lixin Gu, Hao Tian, Yuchen Duan, Weijie Su, Jie Shao, et al. Internvl3: Exploring advanced training and test-time recipes for open-source multimodal models. arXiv preprint arXiv:2504.10479 , 2025. 7 More than the Sum: Panorama-Language Models for Adverse Omni-Scenes 
+
+# Supplementary Material 
+
+## A. Sparse Attention 
+
+A.1. Preliminary of Simplified Sparse Attention 
+
+To verify the effectiveness of sparse attention with an effi-cient indexing mechanism in panoramic tasks, we imple-ment a simple yet effective sparse attention, called Sim-plified Sparse Attention (SSA). Similar to PSA, SSA em-ploys a lightweight indexer to select the Top-K key tokens. However, SSA simplifies the similarity scoring by removing the position-aware gating network. Specifically, the indexer computes a score matrix I ∈ RL×L. The score It,s between a query token t and a key token s is calculated by 
+
+It,s =
+
+> HI
+
+X
+
+> j=1
+
+wt,j · ReLU( q⊤
+
+> I, (t,j )
+
+kI, (s,j )), (14) where HI is the number of selector heads. For each head 
+
+j, the query vector qI, (t,j ) ∈ RdI and key vector kI, (s,j ) ∈
+
+RdI are obtained via linear projections of the input states 
+
+h(l−1)  
+
+> t
+
+and h(l−1)  
+
+> s
+
+. Differ from the gate mechanism in PSA, the weighting term wt,j is derived solely from the query token, i.e., 
+
+w(l) 
+
+> t
+
+= h(l−1)  
+
+> t
+
+W(l) 
+
+> w
+
+, (15) where W(l) 
+
+> w
+
+∈ Rd×HI
+
+, and wt,j is the j-th scalar compo-nent of w(l) 
+
+> t
+
+, representing the importance of head j for the current query t. The ReLU activation ensures sparsity in the dot-product similarity. Based on the score matrix I, we select the indices of the Top-K relevant keys for each query 
+
+t, denoted as St = {s | It,s ∈ Top-K (It, :)}. The sub-sequent attention computation remains consistent with the sparse paradigm: 
+
+o(l) 
+
+> t
+
+= Attention 
+
+
+
+q(l) 
+
+> t
+
+, K(l) 
+
+> St
+
+, V(l)
+
+> St
+
+
+
+. (16) Finally, the output of the SSA is produced by aggregating the token outputs and applying a linear projection: 
+
+SSA (h(l−1) ) = Stack (o(l)1 , . . . , o(l) 
+
+> L
+
+)W(l)
+
+> O, sparse
+
+. (17) 
+
+A.2. Discussion on Proposed PSA 
+
+We highlight three key points of our PSA: (1) Unlike pixel-level Deformable CNNs, PSA utilizes patch-wise attention. This is specifically designed for high-resolution panoramas to capture long-range semantic dependencies ( e.g ., wrap-around continuity) that pixel-based methods miss. (2) We introduce a gating mechanism (Eq. 8) as a semantic noise 
+
+> Table 7. compatibility of PSA on LLaVA-Next-7B
+
+Model Avg(N) Avg(O) Avg(D) Avg 
+
+LLaVA-Next-7B 15.36 34.14 26.25 24.59 LLaVA-Next-7B + PSA 16.05 33.57 28.53 25.63 
+
+filter to prune vast redundant regions ( e.g ., sky). This inte-gration of gating and sparsity is supported by recent find-ings in efficient LLMs [33] for handling massive token se-quences. (3) As shown in Fig. 7, the effectiveness of PSA is clear: while the baseline scatters attention noisily, PSA concentrates activation strictly along the semantic horizon (buildings, roads marked in red box), suppressing uninfor-mative backgrounds. Furthermore, to test the compatibility of our proposed PSA, we integrated it with the LLaVA-Next-7B and con-ducted experiments on the PanoVQA-mini dataset. The re-sults are shown in Table 7, the addition of PSA enhances performance across all subsets, confirming PSA’s robust plug-and-play capability. 
+
+## B. PanoVQA Benchmark 
+
+B.1. Data Collection 
+
+PanoVQA-N (NuScenes) As a cornerstone for real-world autonomous driving perception, the NuScenes dataset [4] comprises 1,000 scenes collected in Boston and Singapore. It provides high-quality data from a sensor suite including 6 cameras, LiDAR, and Radar, offering a complete 360 ◦
+
+field of view. We utilize the multi-view camera images to construct panoramic inputs, serving as the primary source for training the model’s fundamental perception capabili-ties, such as object detection, and spatial relationships. 
+
+PanoVQA-O (BlendPASS). To evaluate the performance of existing VLMs, particularly in occlusion scenarios, we incorporate the BlendPASS dataset. Utilizing a native 360 ◦
+
+camera, this dataset captures a seamless, full-surround Field of View (FoV). BlendPASS is characterized by its high-fidelity rendering and diverse visual scenarios, which are often underrepresented in standard real-world collections. By including this data, we significantly improve the model’s robustness against varying lighting conditions and environ-mental contexts, ensuring consistent performance across different visual domains. 
+
+PanoVQA-D (DeepAccident). Standard datasets like NuScenes rarely contain collision data, limiting a model’s ability to reason about safety-critical situations. DeepAc-cident [41] is a large-scale synthetic dataset explicitly de-GT 
+
+# w/o PSA 
+
+# w PSA Figure 7. Attention visualization of our proposed PSA. PSA filters uninformative regions like “sky” and distant backgrounds, while concentrating on the critical navigation areas (e.g., the road and surrounding vehicles) across the 360-degree panoramic view. 
+
+signed for accident prediction and causal reasoning. It cov-ers diverse accident types and complex interaction scenar-ios. We leverage this dataset to construct accident-related QA pairs, requiring the model not only to perceive the envi-ronment but also to predict potential hazards and explain the underlying causes of accidents, which is crucial for safety-aware autonomous driving. 
+
+B.2. Generating Details 
+
+Our dataset generation pipeline integrates three distinct autonomous driving sources, including NuScenes, Blend-PASS, and DeepAccident, to construct a large-scale panoramic VQA benchmark. The process comprises three sequential stages: (1) geometry-based panoramic synthesis, (2) structured annotation preprocessing, and (3) automated QA generation with quality assurance. 
+
+B.2.1 Panoramic Image Synthesis 
+
+For the NuScenes and DeepAccident datasets, we synthe-size panoramic images using a geometry-based stitching approach following by OneBEV [43]. We model the en-vironment using a viewing sphere centered at the optical origin O. Each of the six camera views, denoted as Ii for 
+
+i ∈ { 1, . . . , 6}, is treated as a 2D image plane tangent to this sphere at a specific point Mi, aligned with the camera’s extrinsic optical axis. The pixel mapping is computed via ray casting. For each target pixel Pj,k in the panoramic coordinate system, we cast a 3D ray ⃗ lj,k outward from the origin O. The source pixel correspondence is established by calculating where this ray intersects the camera planes: 
+
+N(i) 
+
+> j,k
+
+= Intersect( ⃗ lj,k , Ii), (18) 
+
+P(Pj,k ) = Ii∗ (Proj (N(i∗) 
+
+> j,k
+
+)) , (19) where P(Pj,k ) denotes the assigned pixel value (e.g., RGB color) in the final panorama P at spatial coordinate (j,k ).
+
+N(i) 
+
+> j,k
+
+represents the 3D intersection point of the ray with the 
+
+i-th camera plane, and Proj (·) projects this 3D point back into the 2D pixel coordinates of that specific camera to fetch the source value. Since the cameras’ fields of view naturally overlap, a single ray might hit multiple valid camera planes. To pre-vent blurry ghosting artifacts caused by pixel blending, we resolve these overlaps using a strict deterministic priority rule: i∗ = min {i | N(i) 
+
+> j,k
+
+∈ Valid (Ii)}. This guarantees spatial consistency by exclusively selecting the valid cam-era with the highest priority (the lowest index i∗). Note that the BlendPASS dataset provides native panoramic imagery, thereby bypassing this entire stitching phase. 
+
+B.2.2 Structured Annotation Processing 
+
+To standardize object properties across heterogeneous sources, we use a quadruple to denote each object in the scene. Each object of interest is encoded as a tuple Q =(c, θ, d, v/s ), representing category, direction, distance, and visibility/speed, respectively. 
+
+PanoVQA-N (NuScenes Baseline). We derive spatial at-tributes from 3D bounding boxes. The direction θ is the angular displacement relative to the ego-vehicle’s heading vector ⃗v ego , and visibility v is original meta informations. 
+
+PanoVQA-O (BlendPASS Occlusion). Focusing on oc-clusion handling, we employ the DA2 [23] for pixel-level depth estimation. For an object represented by a polygonal region R, the distance is computed as the regional average: 
+
+¯D = 1
+
+|R| 
+
+X
+
+> (u,v )∈R
+
+D(u,v ), (20) where D(u,v ) is the estimated depth at pixel (u,v ). Occlu-sion relationships are determined by comparing the geomet-ric intersection and y-axis ordering of object polygons. 
+
+PanoVQA-D (DeepAccident). To incorporate temporal dynamics from static imagery, we extend the quadruple format to include speed s. The tuple becomes QD =(c, θ, d, s ), where ground-truth speed data is used to com-pensate for the ambiguity of motion inference in single-frame inputs. N1 N2 N3 N4       
+
+> QA Type
+> 0
+> 20000
+> 40000
+> 60000
+> 80000
+> 100000
+> 120000
+> 140000
+> Number of Samples  118101
+> 144927
+> 117174
+> 128793
+> PanoVQA-N QA
+> O1 O2 O3
+> QA Type
+> 0
+> 100
+> 200
+> 300
+> 400
+> 500
+> 600
+> 700
+> Number of Samples
+> 698
+> 252
+> 342
+> PanoVQA-O QA
+> D1 D2 D3 D4 D5
+> QA Type
+> 0
+> 5000
+> 10000
+> 15000
+> 20000
+> 25000
+> 30000
+> 35000
+> 40000
+> Number of Samples
+> 38619
+> 28774
+> 21270
+> 29405
+> 25559
+> PanoVQA-D QA
+
+Figure 8. Distribution of QA samples in PanoVQA. The dataset features disparate scales to mimic real-world distributions: PanoVQA-N (left) offers a large-scale foundation ( ∼510k), PanoVQA-O (middle) introduces a challenging long-tailed setting ( ∼1.3k), and PanoVQA-D (right) covers safety-critical events ( ∼143k).                               
+
+> qwenvl/train/train_qwen.py --model_name_or_path "Qwen2.5-VL-7B-Instruct" --run_name "qwen2.5-vl-finetune" --deepspeed "scripts/zero3.json" --dataset_use "NuScenes_train%60,DeepAccident_train %90" --data_flatten True --tune_mm_vision True --tune_mm_mlp True --tune_mm_llm True --tune_mm_adaptorformer False --bf16 True --output_dir "./output/train_whole/7B(vit,mlp,llm) _baseline" --num_train_epochs 1.0 --per_device_train_batch_size 8--per_device_eval_batch_size 16 --gradient_accumulation_steps 1--max_pixels 50176 --min_pixels 784 --save_strategy "steps" --save_steps 100 --save_total_limit 1--learning_rate 5e-6 --weight_decay 0--warmup_ratio 0.03 --max_grad_norm 1--lr_scheduler_type "cosine" --logging_steps 1--model_max_length 8192 --gradient_checkpointing True --dataloader_num_workers 8--report_to "wandb"
+
+Figure 9. Hyperparameters for Qwen2.5-VL Baseline. 
+
+B.2.3 Automated QA Generation and Statistics 
+
+We employ GPT-5-mini to generate QA pairs, incorpo-rating structured quadruples Q into the template shown in Fig. 10. To optimize the trade-off between reasoning depth and efficiency, we apply adaptive reasoning effort settings: 
+
+minimal for standard driving scenes (PanoVQA-N) and 
+
+low for the more challenging scenarios in PanoVQA-O and PanoVQA-D. 
+
+Quality Assurance. The pipeline includes a two-stage validation: (1) Automated Filtering to verify semantic align-ment between the generated QA and source annotations; (2) 
+
+Human Evaluation to assess correctness and fluency. 
+
+Statistics. The final PanoVQA benchmark comprises a total of 538,635 training samples and 115,279 validation samples. The dataset features an average question length of 19.07 words and an answer length of 42.4 words, ensuring sufficient complexity for comprehensive evaluation across normal, occluded, and accident-prone scenarios. 
+
+Panoramic QA. To ensure the model processes the full 360 ◦ context (i.e., panoramic scene), we emphasize panoramic scene in three ways. (1) The system prompt ex-plicitly include ”panoramic scene” (see Figure 10) to force generate panorama-related qa pairs during generation. (2) The questions utilize keywords like “ panoramic scene ” and “whole scene ” to trigger global reasoning. Our quadruple tuple includes a direction field that compels the model to explicitly model spatial relationships. 
+
+B.3. Data Statistics 
+
+As illustrated in Figure 8, PanoVQA spans diverse scales while maintaining internal balance. PanoVQA-N provides a massive foundation ( >500k) with samples evenly dis-tributed across four QA types. Similarly, PanoVQA-D 
+
+(∼143k) maintains a relatively uniform distribution across its five accident categories. In the PanoVQA-O subset (∼1.3k), the data remains distributed across its types with-out extreme skew. This internal balance prevents the model from overfitting to specific question patterns, while the global scale disparity effectively tests robust generalization. 
+
+B.4. Human Evaluation 
+
+To assess annotation fidelity, we implemented a dual-verification protocol on the PanoVQA-mini subset involving five human experts. We partitioned the evaluation samples Table 8. Comparison of multi-view (6 cameras) and panoramic (1 camera) modeling across Normal (N), Occluded (O), and Acci-dental (D) scenes.                                  
+
+> Model Input Strategy Metrics (↑)Avg(N) Avg(O) Avg(D) Avg
+> Qwen2.5-VL-3B Multi-view (6 cam) 16.82 32.40 34.92 28.26
+> Uni-view ( 2×3grid) 15.69 31.27 30.39 25.71 Panoramic (1 pano) 16.86 30.44 31.25 26.25 Qwen2.5-VL-3B-SFT Multi-view (6 cam) 26.33 39.88 54.45 40.22 Uni-view ( 2×3grid) 26.04 40.52 50.95 40.04 Panoramic (1 pano) 29.68 40.98 51.08 41.42
+
+equally between human reviewers and GPT-4o; the consis-tent scoring distributions observed across both groups at-test to the dataset’s reliability. Quantitatively, as detailed in Table 4, 96% of the samples were classified as “Valid” or “High Quality.” Furthermore, the high degree of align-ment—with a deviation of less than 0.5% between GPT-4o and human evaluations—confirms that our automated pipeline serves as a robust proxy for human judgment. 
+
+## C. Implementation Details 
+
+C.1. Training Script 
+
+To ensure the reproducibility of our experiments, we present the detailed training command and hyperparameter configu-ration in Fig. 9. We utilize Qwen2.5-VL-7B-Instruct 
+
+as our base foundation model. We use supervised fine-tuning and unfreezing all components, including the visual encoder, MLP-based merger, and LLM. 
+
+C.2. Evaluation Prompt 
+
+Fig. 11 illustrates the prompt utilized to score the model inference on a scale of 1∼5. After obtaining the raw re-sponses from the evaluator, our post-processing script auto-matically parses the numerical ratings and aggregates them to assess model performance from multiple perspectives. Specifically, it computes normalized scores for each item based on our pre-defined categories, respectively. Finally, the system derives a comprehensive overall score, reported with a precision of two decimal places, to facilitate accurate quantitative comparisons. 
+
+## D. More Experiment Analysis 
+
+D.1. Qualitative Results 
+
+To systematically evaluate the effectiveness of our panoramic approach, we compare three distinct visual in-put modalities for the VLM. As summarized in Table 8, the experimental settings are defined as follows: • Multi-view (6-cam): The 6 surrounding camera images are input as independent sequences of vi-sual token. We utilize text prompts to identify 
+
+Table 9. Proprietary results on PanoVQA-mini. 
+
+Model Avg(N) Avg(O) Avg(D) Avg 
+
+Gemini-3-Pro 18.04 20.86 37.32 26.78 GPT-5 22.02 40.55 51.64 38.99 Claude-Sonnet-4.5 19.29 41.73 52.76 38.84 
+
+each view (e.g., “Front: <image1 >, Front-Left: 
+
+<image2 >. . . ”), relying on the LLM to mentally re-construct the spatial topology. • Uni-view ( 2×3 grid): The 6 images are spatially con-catenated into a single 2×3 grid image before feeding into the vision encoder. This preserves the original res-olution without an extremely unbalanced aspect ratio. • Panoramic (1-pano): Our proposed method, where images are cylindrically projected and stitched. Note that this process involves vertical cropping to remove distortion and blank areas, resulting in a reduction of total pixels compared to the raw 6-camera input. 
+
+Analysis. The quantitative results in Table 8 reveal a com-pelling finding. While the Multi-view approach preserves the highest image fidelity and vertical Field of View (FoV), it forces the model to process fragmented visual informa-tion. In contrast, despite the inevitable resolution loss and vertical cropping inherent in the stitching process, the 
+
+Panoramic input achieves superior performance after Su-pervised Fine-Tuning (SFT), reaching an overall score of 
+
+41.42 compared to 40.22 for the Multi-view baseline. This performance gain is particularly evident in 
+
+PanoVQA-N (29.68 vs. 26.33) and PanoVQA-O (40.98 vs. 39.88) scenarios. We attribute this to the seamless spatial context provided by the panorama. The continuous 360 ◦
+
+view eliminates the cognitive burden of stitching disjointed images, allowing the model to better understand spatial re-lationships and object continuity across camera boundaries. This demonstrates that for holistic scene understanding in autonomous driving, spatial continuity is often more criti-cal than maximizing pixel count. 
+
+D.2. More Results on PanoVQA-mini 
+
+We additionally evaluate several advanced proprietary mod-els on PanoVQA-mini, including Gemini-3-Pro, GPT-5, and Claude-Sonnet-4.5. As shown in 9, their performance indicates that panoramic understanding remains a chal-lenge for generalist models, likely due to the scarcity of panoramic data in their pre-training corpora. 
+
+D.3. More Examples 
+
+Reasoning in Normal Scenarios. Fig. 12 illustrates a per-ception task from PanoVQA-N, where the model is asked to identify the visibility and location of the closest adult. The 1-Pano model accurately locates the adult in the “front” SYSTEM MESSAGE = ‘‘Generate 15 QA pairs from one panoramic scene JSON file from perspectives from users. Each scene includes object annotations (category, attributes, and relative direction). Generate Question Answer pairs for each panoramic scene, which should cover all 4 QA Types. (At least 1 pair for each type) The Question Answer pairs must follow the instructions and rules below, taking the given sample as an example.’’ PROMPT = ‘‘ Rules: 1. Analyze the panoramic scene annotations, focusing on: − Use a quadruple tuple (category, direction, distance, visibility) to describe an object (e.g., ‘a fully visible pedestrian in the back right around 9 meters’). Use vague numbers to express distances, without decimal points. − Object attributes and spatial relationships (visibility, distance, and direction relative to the ego car). 2. Only describe clear information in the images, do not fabricate or invent in the answers. 3. Base all answers only on what is actually visible in the provided json data. Do not make assumptions or invent details. 4. All positions and absolute coordinates must be described in a directional manner. (Describe exact direction such as ‘ front left’, ‘back right’, ‘front’, etc.) 5. Visibility Encoding: 1: Low visibility (0−40%) 2: Medium visibility (40−60%) 3: High visibility (60−80%) 4: Fully visible (80−100%) 6. The question can be slightly modified to produce different answers. For multi−item answers, maintain the order relevant to the question (e.g., nearest to farthest). One question should correspond to one answer. 7. All responses should be written expressions in natural language, avoid using symbols or brackets. Instructions: Fully consider following levels to generate questions and multiple answers: 1. Short Level QA: QA pairs that query the basic information in the json file or single panoramic image, the answer can be completely verified by the ground truth. 2. Long Level QA: QA pairs that contain multiple objects, with attributions and their relationships in concern, the answer stems mainly from the combined ground truth feature information. The questions should be short and rough, while the answers should be detailed and comprehensive. The answer can be partially verified. QA Types: −Type N1− Global scene understanding (overall scene description, including objects, visibility) −Type N2− Object and attribute identification (attributes of objects present) −Type N3− Relationship identification (object−object spatial relationships) −Type N4− Location description (where objects are located in relation to ego car, ego−object spatial relationships) JSON file: 
+
+{json data }
+
+’’ 
+
+> Figure 10. Prompt used in PanoVQA generation. Using PanoVQA-N as an example.
+
+at approximately 9 meters and correctly identifies them as “fully visible.” In contrast, the 6-Cam model hallucinates the direction as “front left” and provides extraneous speed information not present in the visual cues. This discrepancy highlights that the seamless 360 ◦ context of the panoramic input aids the model in establishing a more precise ego-centric coordinate system, whereas the fragmented multi-view input may introduce spatial ambiguities across camera overlaps. 
+
+Reasoning under Occlusion. In the complex scenario messages = [ 
+
+{
+
+‘‘role’’: ‘‘system’’, ‘‘content’’: ‘‘You are an intelligent evaluator designed to evaluate the correctness and similarity of generative outputs for question−answer pairs. ’’ ‘‘Your task is to compare the model prediction answer with the correct answer and determine if they match in meaning. Here’s the scoring criteria: \n\n’’ ”### Scoring Criteria: \n’’ ‘‘5 = Perfect match or Correct in meaning \n’’ ‘‘4 = Key information correct, minor flaws \n’’ ‘‘3 = Partially correct \n’’ ‘‘2 = Mostly wrong answer for key query, but some relevance \n’’ ‘‘1 = Completely wrong or nonsense sentences \n\n’’ ‘‘Your response must ONLY be the integer score (e.g., 4). DO NOT include any text or explanation.’’ 
+
+},
+
+{
+
+‘‘role’’: ‘‘user’’, ‘‘content’’: f‘‘Question: {question }\ n’’ f‘‘Correct Answer: {gt answer }\ n’’ f‘‘Predicted Answer: {pred answer }\ n\n’’ ‘‘Please provide a score from 1 to 5 based on how well the predicted answer matches the correct answer.’’ 
+
+}
+
+]                                                            
+
+> Figure 11. Prompt used in evaluation. VLM &
+> Multi -view
+> 1-Pano Outperforms 6 -Cam on PanoVQA -N
+> What is the visibility and direction of the closest adult
+> to the ego car?
+> An adult in the front at about 9meters
+> fully visible .
+> Apedestrian in the front left with
+> approximately 10 meters and about 6km/h .
+> d Truth
+> GT: A fully visible adult in the front at around 8 meters .
+> Analysis :The seamless 360 °context allows the model to
+> correctly understand the spatial query and locate the object .
+> VLM &
+> Panorama
+> Figure 12. Qualitative comparison on PanoVQA-N .The panoramic model (1-Pano) correctly identifies the spatial location (“front”) and visibility of the pedestrian, whereas the multi-view model (6-Cam) hallucinates a “front left” direction due to frag-mented spatial context.
+
+shown in Fig. 13 (PanoVQA-O), the vehicle encounters a cluster of bicycles. The prompt requires a defensive driving maneuver. The 6-Cam model’s reasoning appears fragmented, potentially due to the bicycle cluster spanning across camera boundaries. Conversely, the 1-Pano model leverages the unified view to holistically assess the density of the cluster, recommending a contextually safer maneuver. This suggests that spatial continuity is critical for planning tasks where objects of interest (e.g., crowds, large vehicles) span multiple viewing angles. 
+
+Reasoning in Safety-Critical scenarios. Fig. 14 presents a rear-end collision scenario from PanoVQA-D. Interest-ingly, both the 6-Cam and 1-Pano models successfully iden-tify the collision mechanics (“rear-side impact”) and accu-rately estimate the severity as “moderate to severe.” This result is significant as it validates that our panoramic stitch-ing and cropping process—despite the theoretical loss of vertical field-of-view—preserves the essential fine-grained visual details required for high-level accident analysis. 
+
+Conclusion. The qualitative results corroborate our quanti-tative findings: while multi-view inputs preserve raw pixel fidelity, the 1-Pano representation offers superior spatial VLM  &
+
+Panorama 
+
+VLM  &
+
+Multi -view 
+
+6-cam vs. 1 -pano on  PanoVQA -O
+
+Performance:  40.22 vs.  41.42 after SFT Given  many  fully  visible  bicycles  clustered  in  front  within  five  to  six 
+
+meters,  what  defensive  driving  maneuver  is  recommended? 
+
+Recommended  maneuver : reduce  speed  and 
+
+prepare  to  stop ; avoid  sudden  lateral  moves  into 
+
+the  bicycle  cluster,  yield  at  the  front  junction,  and 
+
+be  ready  to  brake  smoothly  if  any  bicycle  or 
+
+pedestrian  enters  the  path .
+
+Avoid  sudden  braking ; if  possible,  gently  accelerate 
+
+forward  or  signal  and  move  laterally  only  when  safe 
+
+to  increase  gap  from  the  cluster  of  stationary  or 
+
+slow -moving  cyclists .
+
+GT : With  multiple  bicycles  in  the  front  at  approximately  four  to  six 
+
+meters  and  fully  visible,  the  recommended  maneuver  is  to  reduce 
+
+speed,  increase  following  distance,  and  avoid  sudden  lane 
+
+changes ; be  prepared  to  stop  if  a cyclist  deviates  into  the  lane .
+
+Analysis : The  fragmented  context  from  6-cam  input  leads 
+
+to  misinterpretation  of  the  situation,  while  the  unified 
+
+panoramic  view  enables  the  model  to  recommend  a safer, 
+
+more  appropriate  defensive  driving  maneuver  given  the 
+
+complex  scene .Figure 13. Qualitative comparison on PanoVQA-O . Facing a cluster of bicycles, the 1-Pano model benefits from the unified view to propose a coherent defensive maneuver, demonstrating the importance of seamless context for planning. VLM  & 
+
+> Panorama
+> VLM &
+> Multi -view
+
+6-cam vs. 1 -pano on  Pano VQA -D                                                                                                                                                          
+
+> Focusing on the two colliding cars from metadata (car in the back at
+> 12 meters, 28 km/h and car in the back at 16 meters, 32 km/h), if a
+> rear -side collision occurs between them at the reported relative same -
+> direction rear -side contact, what is the likely severity?
+> Likely moderate to severe .Arear -side impact between two
+> vehicles moving in the same direction at roughly 28 km/h and
+> 32 km/h would produce significant relative speed and could
+> cause substantial vehicle damage and potential occupant
+> injury depending on exact impact angle and restraint use .
+> Likely moderate to severe for both vehicles. Both cars have
+> nonzero speeds around 28 to 32 km/h; a rear -side impact at
+> these speeds can cause significant vehicle deformation and
+> risk of occupant injury , especially if one vehicle is moving
+> faster than the other.
+> ound Truth
+> Likely moderate to severe .Both cars are moving at relatively high speeds
+> of about 28 km/h and 32 km/h and are within short distances of about 12 to
+> 16 meters ;arear -side impact at these speeds can cause significant
+> vehicle deformation and risk of occupant injury, especially at ajunction .
+> Analysis :Both models accurately identify collision severity and mechanics,
+> confirming that the panoramic representation effectively preserves the critical
+> details required for complex accident reasoning .
+
+Figure 14. Qualitative comparison on PanoVQA-D . Both models accurately predict the severity and type of collision. This confirms that the panoramic representation retains critical visual details nec-essary for complex accident reasoning. 
+
+coherence . This coherence proves advantageous in tasks requiring precise localization and holistic scene understand-ing, without compromising performance on semantic rea-soning tasks like accident analysis. 
+
+## E. Limitation and Future Work 
+
+Despite the robust spatial reasoning demonstrated by our panoramic framework, the current geometric stitching pro-cess introduces inevitable limitations. To achieve a seam-less projection, the method necessitates vertical cropping and induces boundary distortions, resulting in pixel-level in-formation loss. This reduction in fidelity explains instances where raw multi-view inputs outperform the panoramic rep-resentation, especially in zero-shot settings or scenarios de-manding high-resolution visual detail. Future research will focus on enhancing visual fidelity and expanding into the temporal domain. We plan to ex-plore more advanced image stitching techniques to reduce information loss and preserve better visual details compared to current fixed projection methods. Furthermore, acknowl-edging the dynamic nature of autonomous driving, we aim to extend our framework to process video inputs, enabling the model to understand movement and unfolding events rather than just static scenes.
