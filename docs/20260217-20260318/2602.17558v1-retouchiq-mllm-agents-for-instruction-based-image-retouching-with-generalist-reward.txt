@@ -1,0 +1,414 @@
+Title: RetouchIQ: MLLM Agents for Instruction-Based Image Retouching with Generalist Reward
+
+URL Source: https://arxiv.org/pdf/2602.17558v1
+
+Published Time: Fri, 20 Feb 2026 02:02:23 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# RETOUCH IQ: MLLM Agents for Instruction-Based Image Retouching with Generalist Reward 
+
+## Qiucheng Wu 1,2*, Jing Shi 1, Simon Jenni 1, Kushal Kafle 1, Tianyu Wang 1, Shiyu Chang 2, Handong Zhao 1†
+
+1Adobe Research, 2UC, Santa Barbara Convey the vast, serene grandeur of the night sky —a quiet sense of        
+
+> infinity beneath the luminous Milky Way.
+> Create an epic, moody seascape with a cool teal -blue tone. Bring
+> richness to the sky and waves, give a dramatic, cinematic intensity.
+> Let’s give this image a warmer feel and shift the tones to enhance
+> the ambient glow and overall richness.
+> I want the Chicago Theater to stand out with a bold
+> cinematic glow, radiant and glorious against the night.
+> Make the image feel more vivid and alive, softening heavy shadows and
+> bringing warmth and depth to the scene.
+> Make the flowers look more vibrant and lively, with richer tones and a
+> crisp, refreshing feel that brings out their natural beauty.
+> Give this photo a warm vintage feel, adding depth and a
+> timeless sense of nostalgia for this character .
+> Make the scene feel warmer and more inviting, with gentle golden
+> light that adds comfort and a calm, cozy atmosphere.
+
+Figure 1. We present R ETOUCH IQ, an MLLM agent that performs customized image retouching. Given an user instruction and an image input, R ETOUCH IQ produces high-quality results across various quality enhancement and style transformation scenarios. 
+
+## Abstract 
+
+Recent advances in multimodal large language models (MLLMs) have shown great potential for extending vision-language reasoning to professional tool-based image edit-ing, enabling intuitive and creative editing. A promising direction is to use reinforcement learning (RL) to enable MLLMs to reason about and execute optimal tool-use plans within professional image-editing software. However, train-ing remains challenging due to the lack of reliable, verifi-able reward signals that can reflect the inherently subjec-tive nature of creative editing. In this work, we introduce 
+
+RETOUCH IQ , a framework that performs instruction-based executable image editing through MLLM agents guided by a generalist reward model. RETOUCH IQ interprets user-specified editing intentions and generates corresponding, executable image adjustments, bridging high-level aesthetic 
+
+> *
+
+This work was completed during Qiucheng’s internship at Adobe. 
+
+> †
+
+Project Lead. 
+
+goals with precise parameter control. To move beyond conventional, rule-based rewards that compute similarity against a fixed reference image using handcrafted metrics, we propose a generalist reward model—an RL fine-tuned MLLM that evaluates edited results through a set of gen-erated metrics on a case-by-case basis. Then, the reward model provides scalar feedback through multimodal rea-soning, enabling reinforcement learning with high-quality, instruction-consistent gradients. We curate an extended dataset with 190k instruction-reasoning pairs and estab-lish a new benchmark for instruction-based image edit-ing. Experiments show that RETOUCH IQ substantially improves both semantic consistency and perceptual qual-ity over previous MLLM-based and diffusion-based editing systems. Our findings demonstrate the potential of gener-alist reward-driven MLLM agents as flexible, explainable, and executable assistants for professional image editing. 
+
+> arXiv:2602.17558v1 [cs.CV] 19 Feb 2026
+
+## 1. Introduction 
+
+The recent progress of multimodal large language models (MLLMs) has unlocked a vast landscape of applications that bridge visual understanding and linguistic reasoning. Beyond perception and captioning, MLLMs are now capa-ble of acting as general-purpose agents that can invoke ex-ternal tools, combining the broad reasoning capabilities of language models with the precision and domain expertise of specialized systems. Such MLLM agents have demon-strated their potential in a wide range of domains, from re-trieval [29, 37] and image generation [18, 38, 40] to au-tonomous workflows [8, 25, 26, 28], showcasing an emerg-ing paradigm of reasoning-driven tool use. Among these applications, one particularly creative and artistically meaningful direction is to empower MLLM agents to interact with professional image editing soft-ware, such as Adobe Lightroom, PicsArt, and Claid AI stu-dio [1, 5, 31]. However, mastering such software demands deep technical and creative expertise, posing a barrier for both casual users and professional photographers who may excel at capturing images but lack the specialized knowl-edge for effective retouching. Existing solutions [4, 10, 22] adopt various post-training strategies to equip MLLMs with tool-use capabilities, including reinforcement learning (RL) aimed at reproducing human-edited results. However, due to the inherently subjective nature of creative photo re-touching, multiple edits can be equally good, and different users may produce distinct yet valid outcomes for the same request. Consequently, existing rule-based pixel-level re-wards (See Figure 3) become unreliable when model train-ing is anchored to a single reference edit. To address this challenge, we introduce R ETOUCH IQ, an MLLM-based agent that performs instruction-based ex-ecutable image editing, converting user requests into in-terpretable reasoning and actionable steps. RETOUCH IQ leverages editing tools from professional image process-ing software to execute fine-grained parameter adjustments that align with natural language instructions (e.g., “create an epic, moody seascape, give a dramatic, cinematic in-tensity” as shown in Figure 1). Crucially, we introduce a generalist reward model (GRM), which is an RL fine-tuned MLLM that evaluates edited results with a series of gener-ated metrics on a case-by-case basis. To construct pairwise (strong/weak) data for RL training of the GRM, a natural approach is to generate weak edits via inverse-edit pertur-bations—using predefined tools and parameter offsets [7]. However, we find that this seemingly reasonable strategy yields sub-optimal performance due to a distribution shift between these synthetic weak edits and the real weak edits produced by the policy editing model. We further intro-duce a new training scheme (Policy-Guided Reward Train-ing, PGRT) designed to align the data distributions of the policy editing model and the reward critic model, thereby yielding stronger and more stable performance. Experiments show that R ETOUCH IQ exhibits strong ca-pabilities in producing aesthetically consistent, instruction-aligned, and publication-quality image edits. Compared with existing agent and diffusion-based editing systems, our framework offers better semantic consistency and percep-tual quality, while providing explainable reasoning through-out the editing process. Our contributions are threefold: • We introduce R ETOUCH IQ, the first framework to ad-dress the inherently subjective nature of image retouching by introducing a generalist reward model that provides flexible, context-aware supervision beyond conventional verifiable rewards. • We propose PGRT, a RL paradigm that leverages signals from the policy editing model itself to refine reward esti-mation and better capture nuanced perceptual differences between before- and after-edit images. • R ETOUCH IQ demonstrates strong performance in both semantic alignment and perceptual quality, surpassing state-of-the-art general purpose MLLMs, MLLM agents and diffusion-based systems, and producing edits that closely approach professional-level retouching. 
+
+## 2. Related Work 
+
+2.1. Image Retouching 
+
+Image retouching aims to enhance visual appeal by ad-justing tone, color, and illumination while preserving re-alism and semantic consistency. Early works focused on learning to predict image editing operations to achieve aes-thetically pleasing results [17, 19, 20, 30, 34]. While these methods provide step-wise and explainable editing procedures, these models typically have little or no capa-bility to capture nuanced, user-specific goals, which pre-vents them from handling diverse textual instructions. More recently, diffusion-based models [15, 35] have been ex-plored for image enhancement and editing according to user prompts [9, 14, 23, 39]. Although these models can inter-pret natural-language instructions, they often unintention-ally alter the original image content and environment due to the stochastic nature of the diffusion process. To ad-dress these limitations, recent research has begun explor-ing multimodal LLM agents that interact with external edit-ing tools to achieve desired retouching effects [4, 10, 22]. These studies demonstrate that MLLMs possess potential to understand user intentions and reason about proper editing steps, even in a zero-shot setting [13, 41]. 
+
+2.2. Generalist Reward in Reinforcement Learning 
+
+Precise reward signals are central to fine-tuning LLMs for reasoning capabilities. Previous approaches mainly rely on verifiable rewards [12, 16, 36], which provide rule-based scores determined by the correctness of the final answers. Before  After              
+
+> Editing
+> Configs
+> Annotator
+> Instruction:
+> Make the cherry
+> blossoms to pop more ...
+> Reasoning:
+> First, Iwill increase the
+> overall exposure to better
+> illustrate the cherry
+> blossom in the scene …
+
+Data Preparation  Supervised Finetuning 
+
+> filter
+
+Reinforcement Learning                     
+
+> Policy Editing Model
+> Reasoning:
+> First, Iwill increase
+> the overall exposure
+> to better illustrate
+> the cherry blossom
+> in the scene.
+> Additionally, high
+> temperature …
+> Editing Configs :{
+> Exposure2012 :0.87,
+> Temperature :5695,
+> Saturation: 30,
+> Sharpening: 20,
+> Vibrance: 15,
+> ….
+> }
+> Before
+> Policy  Editing  Model
+> Before
+
+System 
+
+Prompt        
+
+> Instruction
+> Reasoning:
+> •Iwill increase …
+> Editing Configs:
+> •ToneCurvePV2012 …
+> After
+> Reward  Critic  Model
+
+Metrics:        
+
+> •Brightness (25%): …
+> •Aesthetic Balance (20%): …
+
+Reward:          
+
+> 6x25% +8x20% …=7.3
+> filter
+> Instruction:
+> Make the cherry
+> blossoms to pop
+> more ...
+> Parameters:
+> Exposure
+> Contrast
+> White
+> Temperature
+> ...
+> Editing
+> Tools
+
+Figure 2. Overview of R ETOUCH IQ. Left: We annotate the user instruction and reasoning for training data. Generated data are filtered to ensure quality. Middle: The supervised fine-tuning stage. Based on the user instruction ( e.g., pop more), the policy model needs to reason the correct parameters ( e.g., exposure ) and change them accordingly. Right: The reinforcement learning stage. We leverage a generalist reward model to propose metrics and provide scalar reward guidance for policy model. Details of the reward model is introduced in Sec 4. 
+
+While such methods have proven effective in objective do-mains such as mathematics and programming [11, 32, 33], recent studies show that they struggle in more complex and subjective tasks [24], such as the agentic scenario. One way to overcome this is through a generalist reward model [24, 42], where an LLM reward model is trained to score the answers. In this work, we extend this concept by training an MLLM-based reward model that assesses output images through a series of dynamically generated evalua-tion metrics. 
+
+## 3. R ETOUCH IQ 
+
+In this section, we introduce R ETOUCH IQ, an MLLM agent that performs instruction-based image retouching leverag-ing professional editing tools. We first introduce the overall setup in Sec. 3.1. Then, we introduce the training pipeline, including data preprocessing (Sec. 3.2), supervised fine-tuning (Sec. 3.3), and reinforcement learning (Sec. 3.4). 
+
+3.1. Overview 
+
+The R ETOUCH IQ pipeline is illustrated in Figure 2. RE-
+
+> TOUCH
+
+IQ includes a policy model that translates a user’s natural-language instruction into two outputs: • A reasoning trace , describing the semantic interpretation and aesthetic intent of the request, and • A sequence of parameterized editing tool-use opera-tions that can be executed (e.g., {exposure=+0.9 ;
+
+contrast=-30 }). To achieve this, we adopt a two-stage training strategy. In the first stage, supervised fine-tuning (SFT), the model learns to simulate gold reasoning processes and correspond-ing editing operations from real user edits. In the second stage, reinforcement learning (RL), the model self-explores diverse reasoning paths and editing plans, gradually discov-ering better editing strategies under different input condi-tions. However, collecting a suitable training dataset that includes images, user editing intentions, and detailed edit-ing steps required for SFT and RL remains challenging. To address this, we design a data collection pipeline to curate and preprocess high-quality data for subsequent training. 
+
+3.2. Data Preparation 
+
+In R ETOUCH IQ, an ideal training datum should contain the following elements: a before-and-after image pair (I0, I ),a user editing goal g expressed in natural language, a rea-soning process q describing how to plan the optimal editing strategy, and an editing step sequence e consisting of pa-rameter configurations. We present the data preparation pipeline in the left panel of Figure 2. We start by collecting initial data from user editing trajectories, where the before-and-after image pairs 
+
+(I0, I ) along with the corresponding editing sequences e are recorded. Note that, unlike existing work [22] that synthe-sizes post-edit images by applying predefined editing pre-sets, our before–after image pairs are collected from real human users (all of whom provided the required permis-sions for data use), making them naturally closer to real-world editing scenarios. However, two essential elements are missing from the source data: ❶ the specific editing goal g that the user had when modifying the image, and 
+
+❷ the reasoning process q that guided the user’s use of cor-responding image editing tools. As such, we seek to annotate g and q by leveraging an MLLM-based annotator. Specifically, the annotator takes as input the triplet (I0, I, e ) and first infers the user’s edit-ing intention g based on the differences between the images and the applied editing steps. It is then prompted to gener-ate a reasoning process q, simulating how an MLLM agent would reason and produce the final editing sequence e ac-cordingly. To ensure the quality of the generated instruc-tions and reasoning processes, we apply a systematic filter-ing procedure to remove image pairs with unclear editing intentions or inconsistencies between the generated inten-tions and reasoning. The MLLM annotator remains fixed throughout the entire process. 
+
+3.3. Supervised Fine-Tuning Stage 
+
+With the prepared training data, we now perform supervised fine-tuning of the MLLM policy model in R ETOUCH IQ. We initialize the policy model from a pretrained MLLM back-bone and fine-tune it using the instruction–reasoning–edit corpus. Given an input image I0 and user instruction g, the model is trained to generate both a textual reasoning trace 
+
+q and structured editing steps e. The supervised fine-tuning objective is an autoregressive loss that minimizes the nega-tive log-likelihood over the target token sequence: 
+
+LSFT = − X
+
+> t
+
+log pθ (yt | y<t , I 0, g ), (1) where θ denotes the model parameters, yt is the t-th output token, and y<t represents all previously generated tokens. The output sequence contains both the natural-language rea-soning q and the editing operations e in a structured for-mat. This stage enables the model to learn semantically grounded mappings between linguistic aesthetic intent and executable editing parameters, providing a strong initializa-tion for downstream reinforcement learning. 
+
+3.4. Reinforcement Learning Stage 
+
+While supervised fine-tuning aligns the policy editing model with demonstration data, it cannot guarantee optimal aesthetic alignment with user intent across diverse images and instructions. To further improve the model’s ability to generalize and adapt, we refine the policy through RL, allowing it to explore various reasoning paths and editing strategies beyond the demonstration data. A conventional practice in RL is to develop a verifiable reward, which gives score based on pre-defined rules such as similarities to a ground truth reference image [22]. How-ever, this strategy faces a fundamental challenge in image editing, where the inherently subjective nature of aesthet-ics makes it impossible to define a single verifiable ground truth . As illustrated in Fig. 3, a given instruction (e.g., “make it feel like a fall scene with autumn vibes”) can cor-respond to multiple acceptable results, each expressing the intent differently through tone, warmth, or color balance. In Before                       
+
+> Iwant it feels like a fall scene with autumn vibes , a natural atmosphere.
+> Good  Edits Problematic  Edits
+> User Edit
+> Reward :4
+> Pixel: 31.8
+> Reward :7
+> Pixel: 19.6
+> Reward: 5
+> Pixel: 30.2
+> Reward: 3
+> Pixel: 57.0
+> Policy  Model  Edits Perturbed  Edits
+> Exposure Temp
+> Combined
+> Figure 3. Problematic rewards in image retouching tasks. Given a before–after image pair ( left ), ❶verifiable rewards (middle )rely on metrics between the edited image and ground truth, such as pixel differences. However, since multiple valid edits can sat-isfy user intent, these rewards become imprecise. ❷The reward model ’s precision strongly depends on its training data distri-bution (right ). When trained to distinguish good user edits from randomly perturbed images, it may later struggle to assess results from the policy model that produces combined, complex edits.
+
+this setting, conventional reward definitions based on pixel-wise or reference-based comparisons fail to capture seman-tic quality or artistic preference. Such metrics are suitable for deterministic reconstruction tasks but are inadequate for open-ended, instruction-driven retouching, where subjec-tive aesthetic judgments play a central role. We therefore further refine the policy via RL using the 
+
+reward model rϕ, which evaluates how well an edited result satisfies the given instruction. For a policy πθ (q, s | I0, g )
+
+that predicts editing actions given the image and instruction, the objective is to maximize the expected reward: 
+
+J (θ) = Eq,s ∼πθ [rϕ(g, I 0, Execute (I0, e )) + rformat (q, s )] ,
+
+(2) where Execute (·) denotes applying the predicted edits to obtain the resulting image, and rformat is a format re-ward [12]. During training, the policy samples candidate edits, receives feedback, and updates its parameters via gra-dient ascent on J (θ), progressively improving instruction alignment and aesthetic quality. As such, the success of this RL stage heavily depends on the quality of the reward model. Ideally, the reward model should provide a scalar signal that accurately reflects the quality of the generated edit. However, the criteria for a successful edit vary across different input images and user instructions. To flexibly adapt to diverse scenarios and de-liver precise reward guidance, we propose a generalist re-ward model that first generates a set of metrics describing the key aspects of a successful edit and then scores the out-put image accordingly. The following section provides de-tails of the generalist reward model. Before  After -u
+
+> Editing
+> Configs
+
+Image Perturber            
+
+> To make the edit
+> suboptimal ,Iwill
+> decrease the
+> contrast to make
+> the image less
+> appealing …
+
+Data Preparation  Reinforcement Learning 
+
+After -w
+
+filter 
+
+> Instruction
+
+Supervised Finetuning 
+
+Reward Model 
+
+Before  After -u After -w
+
+Reward Model   
+
+> Training Goal:
+> R(after -u) >
+> R(after -w)
+
+Before  Image Perturber 
+
+Policy Model    
+
+> Switch to policy distribution
+
+filter                                           
+
+> Instruction
+> Metrics:
+> •The image should exhibit sharp
+> edges of creatures (25%)
+> •The image should not have color
+> shifts or over -saturation (20%) …
+> Rewards:
+> •[After -u]: sharp edge (9/10), no
+> color shift (7/10) …Overall: 8.4
+> •[After -w]: sharp edge (3/10), over
+> saturate (4/10) …Overall: 3.3
+> Instruction
+> Metrics:
+> •The image should exhibit an
+> autumn color vibe (yellow and
+> orange tones). (25%)
+> •The image should have good
+> white balance for visually
+> appealing quality .(20%) …
+
+After -u
+
+> After -w
+> After -w
+
+After -u
+
+After -w                       
+
+> Rewards:
+> •[After -u]: Autumn vibe (9/10),
+> white balance (7/10) …Overall: 8.2
+> •[After -w]: Autumn vibe (8/10),
+> white balance (3/10) …Overall: 5.4
+> Instruction: Iwant it
+> feels like a fall scene with
+> autumn vibes , a natural
+> atmosphere.
+
+Before Figure 4. Overview of generalist reward model. Left : Given a before-edited image and a user-edited after image After-u (“u” for “user”), we perturb the editing process to obtain a suboptimal image, After-w (“w” for “weak”). Middle : In the SFT stage,the reward model first learns to generate metrics and then produces scalar rewards for the two input images. Right : In the RL stage, we introduce policy-guided reward training (PGRT), where the suboptimal image After-w is provided by the policy model rather than generated through perturbation. The goal of the RL stage is to assign a higher scalar reward to the user-edited (strong) image After-u .
+
+## 4. Generalist Reward Model 
+
+In this section, we present the Generalist Reward Model (GRM) used in R ETOUCH IQ, describing the preparation of its training data and the procedures for model optimization. 
+
+4.1. Overview 
+
+The overall GRM preparation pipeline is shown in Figuer 4. The proposed MLLM-based reward model evaluates im-age retouching quality by taking a before–after image pair 
+
+(I0, Execute (I0, e )) and the corresponding editing instruc-tion g, the reward model produces two outputs sequentially: • A self-generated set of metrics that describe the key char-acteristics a successful edit should exhibit, and • A scalar reward value reflecting the overall quality of the retouching according to these metrics. Similar to the policy model, we first prepare dedicated train-ing data for the GRM. We then adopt SFT and RL to ensure that the GRM provides accurate and consistent guidance across diverse retouching scenarios. 
+
+4.2. Data Preparation 
+
+When preparing the training data, the key challenge lies in constructing accurate and reliable gold signals. Our primary objective is to ensure the correct ordering in supervision: a better retouching result should receive a higher reward than a suboptimal one under the same instruction. To achieve this, we construct a paired comparison dataset by augmenting the training corpus with strong and weak ed-its for each original image, as shown in the left panel of Fig-ure 4. Starting from the initial data pool containing before-after pairs (I0, I ), we treat the reference after image I as a strong edit corresponding to the annotated instruction g.To obtain a weak edit, we intentionally perturb the editing configuration s to produce an alternative version that omits or misadjusts several key parameters during the editing pro-cess, resulting in a suboptimal outcome Iw. This pertur-bation is guided by a frozen MLLM to maintain edits that remain plausible yet perceptually inferior. We further apply filtering mechanisms to ensure that each generated Iw is in-deed weaker than I, providing reliable ranking consistency for reward learning. Finally, we annotate each (I, I w) pair using an MLLM. Since the ground-truth ordering between the strong and weak edits is known, we retain only annotations that cor-rectly assign a higher score to I, obtaining annotated met-rics m and scores for the strong and weak response (s, s w)
+
+correspondingly. 
+
+4.3. Training 
+
+Supervised Fine-Tuning Stage. We first perform super-vised fine-tuning so the GRM learns to produce metrics and corresponding scores consistent with annotations. The training examples contain input image I0, editing instruc-tion g, two after edit image I and Iw, and annotated metric 
+
+m and scores (m, s, s w). The training objective is an au-toregressive loss that fits the annotation: 
+
+Lreward SFT = − X
+
+> t
+
+log pϕ(yt | y<t , I 0, I, I w, g ). (3) This stage trains the model to explain aesthetic metrics in natural language and to produce scalar scores accordingly. Policy-Guided Reward Training (PGRT) in RL. The previous SFT stage relies on perturbed sub-optimal im-ages, which introduces intrinsic bias toward a limited set of edit categories. As illustrated in Figure 3, we ob-serve that many perturbations involve single adjustments to 
+
+exposure and temperature , while the results gener-ated by policy model often involve combined and complex edits. This reveals a training distribution shift, which may cause inferior performance of the reward model when pre-dicting real outputs from policy models. Our goal is to align the reward model with the policy distribution during training. To this end, we propose policy-guided reward training (PGRT), which trains the reward model on data consistent with the policy’s editing distribu-tion. As shown in Figure 4 (right), the RL stage replaces perturbed images with policy-generated results, shifting 
+
+Iw from the perturbed to the policy-generated distribution. Given paired examples (I0, I, I w), the reward function is defined as 
+
+J (ϕ) = Em,r,r w ∼πϕ [I[r > r w] + rformat (m, r, r w)] , (4) where I[·] is a 0-1 indicator, and rformat is a format reward ensuring that both metrics and scores are properly gener-ated. Essentially, this reward function penalizes the model when it incorrectly assigns a higher score to a weaker edit. PGRT relies on the outputs of the policy model. There-fore, when training R ETOUCH IQ, we adopt an alternating training strategy in which the policy model and the reward model are optimized in turn to progressively enhance each other’s performance. It is worth noting that when training the reward model for the first time, the RL stage uses only perturbed edits, since the policy model is not yet trained. 
+
+## 5. Experiments 
+
+In this section, we evaluate R ETOUCH IQ under various re-touching settings and compare it with state-of-the-art meth-ods. We focus on the following questions: • Can R ETOUCH IQ consistently provides high-quality im-age retouching results? • How does the generalist reward model overcome the chal-lenges in conventional verifiable reward? • How does the policy-guided reward training improves the reward model and policy model in R ETOUCH IQ? 
+
+5.1. Experiment Settings 
+
+Datasets. We curate large-scale, high-quality datasets for training both the policy model and the reward model. For the policy model, the final training set contains 190K im-age–instruction pairs covering a wide range of global and 
+
+local retouching tasks. Each input image is associated with three instruction variants that differ in length and com-plexity, providing diversity during training. For the re-ward model, we construct a dataset of 10K perturbed sam-ples, where each datum consists of an original image, its ground-truth editing, and a corresponding sub-optimal ver-sion. During alternating training, an additional 5K samples are generated to further fine-tune the reward model under the RL objective. 
+
+Implementation. Both the policy and reward models are built upon Qwen2.5-VL-7B [2]. For the MLLM anno-tator and perturber, we employ GLM-4.5V [16]. During training, we first fine-tune the reward model using the per-turbed dataset. We then perform alternating fine-tuning of the policy and reward models, as described in Sec. 3 and 4. For the editing platform, following prior work [22], we leverage Adobe Lightroom [1] for its professional-grade image retouching capabilities. 
+
+Benchmarks. To the best of our knowledge, there is no existing public benchmark for evaluating image retouching quality using professional editing tools. Therefore, we in-troduce R ETOUCH EVAL , a dedicated benchmark designed to assess retouching quality. RETOUCH EVAL consists of 300 instruction–image pairs curated from real user editing histories. The dataset is divided into three splits: quality enhancement , which focuses on enhancing the overall vi-sual quality of the input image; style transformation , which aims to alter the artistic or tonal style of the image; and lo-cal retouching , which targets localized adjustments rather than global edits. In addition, we also evaluate on MIT-Adobe5K [3], a public benchmark for general image en-hancement. It is worth noting that, unlike our setting, MIT-Adobe5K does not include explicit user intentions; as its primary objective is to improve perceptual quality rather than to achieve a customized editing style. Following pre-vious work [10], we conduct evaluations on 400 randomly selected test images. 
+
+Baselines. We compare R ETOUCH IQ with three categories of state-of-the-art baselines: ❶ General-purpose MLLMs :We carefully design editing instructions and prompt lead-ing MLLMs, including Gemini-2.5 [6] and GPT-5 [27], to evaluate their zero-shot ability to interpret user instruc-tions and generate valid editing plans. ❷ MLLM Agents :
+
+JarvisArt [22] serves as a representative state-of-the-art agent that leverages tools for image editing. We also include 
+
+MonetGPT [10], a strong baseline focusing on image qual-ity enhancement using tools. ❸ Diffusion-based Models :We further evaluate how advanced diffusion-based models, 
+
+flux-pro-1.1 [21], respond to editing instructions and perform corresponding modifications. Note that Google’s NanaBanana and Adobe Firefly are popular image editing solutions but are closed-source. Since their underlying ar-chitectures (e.g., pure diffusion or hybrid systems) remain undisclosed, we instead compare against the leading open-source diffusion model, flux-pro-1.1 .
+
+Metrics. Following prior work [22], we adopt the following Quality Improving Style Changing Local Retouching                                                                                                                                                        
+
+> L1 ↓L2 ↓SC ↑PQ ↑O↑L1 ↓L2 ↓SC ↑PQ ↑O↑L1 ↓L2 ↓SC ↑PQ ↑O↑
+> FLUX -P RO [21] 64.97 98.14 6.12 6.09 6.10 68.20 70.01 6.48 6.36 6.42 67.93 82.86 6.19 6.26 6.22 GPT-5 [27] 36.21 47.53 6.74 6.51 6.62 39.17 50.36 6.89 6.76 6.82 37.20 47.56 6.07 6.89 6.47 GEMINI -2.5 [6] 39.58 51.60 6.56 6.72 6.64 41.54 53.01 5.82 6.28 6.05 36.11 46.72 6.01 6.63 6.31 MONET GPT [10] 32.05 44.98 6.52 7.05 6.78 41.03 52.75 5.87 6.03 5.95 30.08 44.98 6.27 6.70 6.48 JARVIS ART [22] 32.17 46.23 7.22 6.59 6.90 33.90 48.23 7.39 6.88 7.13 38.19 49.75 6.45 6.39 6.42 RETOUCH IQ-SFT 35.03 46.63 6.71 6.67 6.69 38.80 51.55 7.04 6.96 7.00 26.41 42.10 5.98 6.84 6.40 RETOUCH IQ-Rule 32.65 46.47 7.14 6.61 6.87 35.74 49.01 7.17 6.91 7.04 28.22 43.89 6.20 6.83 6.51 RETOUCH IQ-GRM 31.41 44.99 7.57 7.48 7.51 34.08 47.71 7.29 7.34 7.31 27.03 42.73 6.39 6.92 6.65
+
+Table 1. Quantitative comparisons on the R ETOUCH EVAL benchmark. We consider three categories of baselines: general-purpose MLLMs (GPT-5, Gemini-2.5); MLLM agents (MonetGPT, JarvisArt); and diffusion-based methods (Flux-Pro). Meanwhile, we report the perfor-mance of R ETOUCH IQ under both the SFT (RetouchIQ-SFT) and RL (RetouchIQ-RL) stages. We also include results from a variant trained with rule-based reward (RetouchIQ-Rule). The best results are shown in bold , and the second-best results are underlined. 
+
+SSIM LPIPS PSNR GPT-5 [27] 0.72 0.26 20.82 MONET GPT [10] 0.82 0.17 23.10 JARVIS ART [22] 0.76 0.23 21.03 RETOUCH IQ-SFT 0.84 0.20 22.37 RETOUCH IQ-GRM 0.86 0.16 23.14 
+
+Table 2. Quantitative results on the MIT-Adobe5K benchmark. 
+
+metrics: ❶ L1 and L2 differences between the output and the ground-truth images; ❷ Perceptual quality and semantic consistency scores evaluated by GLM-4.5V [16]. For the MIT-Adobe5K dataset, we report PSNR, LPIPS, and SSIM, following the original benchmark setting. 
+
+5.2. Qualitative Comparisons 
+
+Figure 6 presents side-by-side comparisons between R E-
+
+> TOUCH
+
+IQ and representative baselines across three scenar-ios: quality improving, style changing, and local retouch-ing. We observe that each baseline exhibits distinct defi-ciencies. First, general-purpose MLLMs such as GPT-5 
+
+tend to over-edit images, as shown in the 3rd and 5th rows. This is likely because these models struggle to infer coher-ent and natural parameter configurations in a zero-shot man-ner. Second, the diffusion-based method Flux Pro fails to preserve the original image structure, leading to notice-able identity and environmental distortions in all examples. Among MLLM agents, MonetGPT struggles with style changing tasks, while JarvisArt fails on customized re-quests such as incorrectly adjusts temperatures in 1st row and miss black-and-white conversions in 4th row. In con-trast, R ETOUCH IQ consistently produces results that are more semantically aligned and professionally styled, partic-ularly in challenging scenarios such as nighttime balancing and tone harmonization. Off-the-Shelf Perturbed Data Combined Data 
+
+> 6.89
+> 7.36
+> 7.51
+> 0.65
+> 0.70
+> 0.75
+> 0.80
+> 0.85
+> Perturbed Data Accuracy
+> 0.60
+> 0.62
+> 0.64
+> 0.66
+> 0.68
+> 0.70
+> Actual Data Accuracy
+> Perturbed Data Accuracy
+> Actual Data Accuracy
+
+Figure 5. Comparison of reward model and policy model per-formance under different reward model configurations. The lines show the accuracies of the reward model, while the bars indicate the scores of the corresponding policy model. 
+
+5.3. Quantitative Evaluation 
+
+Next, we quantitatively evaluate performance on Re-touchEval and MIT-Adobe5K. The result is in Table 1 and 2. We observe that RetouchIQ achieves superior results across various scenarios, outperforming diffusion-based and MLLM-agent baselines by large margins. Similar gains are observed on MIT-Adobe5K, demonstrating that Re-touchIQ generalizes beyond the curated instruction dataset and transfers well to standard aesthetic editing benchmarks. Notably, the inclusion of RL fine-tuning with the generalist reward contributes a consistent improvement across all met-rics, confirming the value of multimodal reward alignment. 
+
+5.4. The Role of Reward Model and PGRT 
+
+In this section, we analyze the role of the reward model in RETOUCH IQ. Specifically, we examine how policy-guided reward training (PGRT) improves the reward model itself, and how this improvement, in turn, benefits the policy model training. We consider two variants of the generalist reward model: ❶ an untrained version, i.e. , an off-the-shelf MLLM; and ❷ a version trained only on perturbed data gen-erated by the image perturber introduced in Sec. 4. The results are in Figure 5. We first report the accuracy RetouchIQ JarvisArt  FLUX Pro  MonetGPT GPT -5Input  User Edit                 
+
+> Make the photo to feel brighter , with softer lighting, richer colors. The bride stands out with enhanced details .
+> Quality Enhancement Style Transformation
+> I want it more dreamy with a vintage touch, capturing a warm, romantic style that highlights the couple’s joy.
+> Local Retouching
+> Let’s make it a nostalgic, grainy black -and -white look that highlights texture and mood.
+> In <coordinate>, can you give the child a soft, golden glow, like sunlight gently enveloping the child?
+> I want the Chicago Theater to stand out with a bold cinematic glow, radiant and glorious against the night.
+
+Gemini -2.5 Figure 6. Qualitative results across diverse image retouching scenarios, including quality enhancement (top), style transformation (middle), and local retouching (bottom). For each example, the input image and the corresponding user-edited result are shown on the left. 
+
+of the reward model (line plot). Here, accuracy measures whether the reward model correctly assigns lower rewards to sub-optimal images either from perturbed synthesis data (blue line) or from actual policy-generated data (red line). As shown in the figure, PGRT shifts the reward model’s dis-tribution toward actual policy-generated data, achieving the highest accuracy on that set. Next, we use these reward models to train policy models and report their performance on the R ETOUCH EVAL benchmark, illustrated by the bar plot. We observe that PGRT yields the best overall per-formance, indicating that policy-guided reward training ef-fectively produces a reward model that better supports the policy model’s learning process. 
+
+## 6. Conclusion 
+
+We introduced R ETOUCH IQ, an instruction-based MLLM agent that performs executable image editing via profes-sional software interfaces. By translating natural-language instructions into parameterized edits, it enables control-lable, transparent manipulation beyond black-box diffusion methods. A generalist reward model assesses editing qual-ity, providing human-like feedback for reinforcement learn-ing. This enhances instruction consistency and demon-strates the potential of reasoning-based policies with mul-timodal rewards for intelligent visual editing. References 
+
+[1] Adobe. Adobe lightroom. https://lightroom.adobe.com. 2, 6 [2] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, et al. Qwen2. 5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. 6 [3] Vladimir Bychkovsky, Sylvain Paris, Eric Chan, and Fr´ edo Durand. Learning photographic global tonal adjustment with a database of input / output image pairs. In The Twenty-Fourth IEEE Conference on Computer Vision and Pattern Recognition , 2011. 6 [4] Haoyu Chen, Wenbo Li, Jinjin Gu, Jingjing Ren, Sixi-ang Chen, Tian Ye, Renjing Pei, Kaiwen Zhou, Fenglong Song, and Lei Zhu. Restoreagent: Autonomous image restoration agent via multimodal large language models. 
+
+Advances in Neural Information Processing Systems , 37: 110643–110666, 2024. 2 [5] Claid AI. Claid AI Photo Studio. https://claid.ai/. 2 [6] Gheorghe Comanici, Eric Bieber, Mike Schaekermann, Ice Pasupat, Noveen Sachdeva, Inderjit Dhillon, Marcel Blis-tein, Ori Ram, Dan Zhang, Evan Rosen, et al. Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long context, and next generation agentic capabilities. arXiv preprint arXiv:2507.06261 , 2025. 6, 7 [7] Marcos V Conde, Zihao Lu, and Radu Timofte. Pixtalk: Controlling photorealistic image processing and editing with language. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 19269–19279, 2025. 2[8] Google Deepmind. Introducing gemini 2.0: our new ai model for the agentic era. https://blog.google/technology/google-deepmind/google-gemini-ai-update-december-2024/. 2 [9] Zheng-Peng Duan, Jiawei Zhang, Zheng Lin, Xin Jin, Xun-Dong Wang, Dongqing Zou, Chun-Le Guo, and Chongyi Li. Diffretouch: Using diffusion to retouch on the shoulder of experts. In Proceedings of the AAAI Conference on Artificial Intelligence , pages 2825–2833, 2025. 2 [10] Niladri Shekhar Dutt, Duygu Ceylan, and Niloy J Mitra. Monetgpt: Solving puzzles enhances mllms’ image retouch-ing skills. ACM Transactions on Graphics (TOG) , 44(4): 1–12, 2025. 2, 6, 7 [11] Kaixuan Fan, Kaituo Feng, Haoming Lyu, Dongzhan Zhou, and Xiangyu Yue. Sophiavl-r1: Reinforcing mllms reason-ing with thinking reward. arXiv preprint arXiv:2505.17018 ,2025. 3 [12] Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi Wang, Xiao Bi, et al. Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning. arXiv preprint arXiv:2501.12948 , 2025. 2, 4 [13] Xuanhua He, Lang Li, Yingying Wang, Hui Zheng, Ke Cao, Keyu Yan, Rui Li, Chengjun Xie, Jie Zhang, and Man Zhou. Training-free large model priors for multiple-in-one image restoration. arXiv preprint arXiv:2407.13181 , 2024. 2 [14] Amir Hertz, Ron Mokady, Jay Tenenbaum, Kfir Aberman, Yael Pritch, and Daniel Cohen-Or. Prompt-to-prompt im-age editing with cross attention control. arXiv preprint arXiv:2208.01626 , 2022. 2 [15] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising dif-fusion probabilistic models. Advances in neural information processing systems , 33:6840–6851, 2020. 2 [16] Wenyi Hong, Wenmeng Yu, Xiaotao Gu, Guo Wang, Guob-ing Gan, Haomiao Tang, Jiale Cheng, Ji Qi, Junhui Ji, Li-hang Pan, et al. Glm-4.5v and glm-4.1v-thinking: Towards versatile multimodal reasoning with scalable reinforcement learning. arXiv e-prints , pages arXiv–2507, 2025. 2, 6, 7 [17] Yuanming Hu, Hao He, Chenxi Xu, Baoyuan Wang, and Stephen Lin. Exposure: A white-box photo post-processing framework. ACM Transactions on Graphics (TOG) , 37(2): 1–17, 2018. 2 [18] Kaiyi Huang, Yukun Huang, Xuefei Ning, Zinan Lin, Yu Wang, and Xihui Liu. Genmac: compositional text-to-video generation with multi-agent collaboration. arXiv preprint arXiv:2412.04440 , 2024. 2 [19] Zhanghan Ke, Chunyi Sun, Lei Zhu, Ke Xu, and Rynson WH Lau. Harmonizer: Learning to perform white-box image and video harmonization. In European conference on computer vision , pages 690–706. Springer, 2022. 2 [20] Satoshi Kosugi and Toshihiko Yamasaki. Unpaired image enhancement featuring reinforcement-learning-controlled image editing software. In Proceedings of the AAAI con-ference on artificial intelligence , pages 11296–11303, 2020. 2[21] Black Forest Labs. Flux 1.1 pro. https://bfl.ai/models/flux-pro. 6, 7 [22] Yunlong Lin, Zixu Lin, Kunjie Lin, Jinbin Bai, Panwang Pan, Chenxin Li, Haoyu Chen, Zhongdao Wang, Xinghao Ding, Wenbo Li, et al. Jarvisart: Liberating human artistic creativ-ity via an intelligent photo retouching agent. arXiv preprint arXiv:2506.17612 , 2025. 2, 3, 4, 6, 7 [23] Jiaxin Liu, Qichao Ying, Zhenxing Qian, Sheng Li, Runqi Zhang, Jian Liu, and Xinpeng Zhang. Mofrr: Mixture of dif-fusion models for face retouching restoration. In Proceed-ings of the IEEE/CVF International Conference on Com-puter Vision , pages 12842–12851, 2025. 2 [24] Zijun Liu, Peiyi Wang, Runxin Xu, Shirong Ma, Chong Ruan, Peng Li, Yang Liu, and Yu Wu. Inference-time scaling for generalist reward modeling. arXiv preprint arXiv:2504.02495 , 2025. 3 [25] Zhengxi Lu, Yuxiang Chai, Yaxuan Guo, Xi Yin, Liang Liu, Hao Wang, Han Xiao, Shuai Ren, Guanjing Xiong, and Hongsheng Li. Ui-r1: Enhancing efficient action predic-tion of gui agents by reinforcement learning. arXiv preprint arXiv:2503.21620 , 2025. 2 [26] Run Luo, Lu Wang, Wanwei He, Longze Chen, Jiaming Li, and Xiaobo Xia. Gui-r1: A generalist r1-style vision-language action model for gui agents. arXiv preprint arXiv:2504.10458 , 2025. 2 [27] OpenAI. Introducing gpt-5. https://openai.com/index/introducing-gpt-5/, . 6, 7 [28] OpenAI. Introducing chatgpt agent: bridging research and action. https://openai.com/index/introducing-chatgpt-agent/, . 2 [29] OpenAI. Introducing deep research. https://openai.com/index/introducing-deep-research/, .2[30] Wenqi Ouyang, Yi Dong, Xiaoyang Kang, Peiran Ren, Xin Xu, and Xuansong Xie. Rsfnet: A white-box image retouch-ing approach using region-specific color filters. In Proceed-ings of the IEEE/CVF International Conference on Com-puter Vision , pages 12160–12169, 2023. 2 [31] Picsart. Picsart. https://picsart.com. 2 [32] Runqi Qiao, Qiuna Tan, Peiqing Yang, Yanzi Wang, Xi-aowan Wang, Enhui Wan, Sitong Zhou, Guanting Dong, Yuchen Zeng, Yida Xu, et al. We-math 2.0: A versatile mathbook system for incentivizing visual mathematical rea-soning. arXiv preprint arXiv:2508.10433 , 2025. 3 [33] Wei Shen, Jiangbo Pei, Yi Peng, Xuchen Song, Yang Liu, Jian Peng, Haofeng Sun, Yunzhuo Hao, Peiyu Wang, Jianhao Zhang, et al. Skywork-r1v3 technical report. arXiv preprint arXiv:2507.06167 , 2025. 3 [34] Jing Shi, Ning Xu, Yihang Xu, Trung Bui, Franck Der-noncourt, and Chenliang Xu. Learning by planning: Language-guided global image editing. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 13590–13599, 2021. 2 [35] Yang Song, Jascha Sohl-Dickstein, Diederik P Kingma, Ab-hishek Kumar, Stefano Ermon, and Ben Poole. Score-based generative modeling through stochastic differential equa-tions. arXiv preprint arXiv:2011.13456 , 2020. 2 [36] Haozhe Wang, Chao Qu, Zuming Huang, Wei Chu, Fangzhen Lin, and Wenhu Chen. Vl-rethinker: Incentivizing self-reflection of vision-language models with reinforcement learning. arXiv preprint arXiv:2504.08837 , 2025. 2 [37] Qiuchen Wang, Ruixue Ding, Yu Zeng, Zehui Chen, Lin Chen, Shihang Wang, Pengjun Xie, Fei Huang, and Feng Zhao. Vrag-rl: Empower vision-perception-based rag for visually rich information understanding via itera-tive reasoning with reinforcement learning. arXiv preprint arXiv:2505.22019 , 2025. 2 [38] Zhenyu Wang, Aoxue Li, Zhenguo Li, and Xihui Liu. Genartist: Multimodal llm as an agent for unified image gen-eration and editing. Advances in Neural Information Pro-cessing Systems , 37:128374–128395, 2024. 2 [39] Qiucheng Wu, Yujian Liu, Handong Zhao, Ajinkya Kale, Trung Bui, Tong Yu, Zhe Lin, Yang Zhang, and Shiyu Chang. Uncovering the disentanglement capability in text-to-image diffusion models. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition ,pages 1900–1910, 2023. 2 [40] Ling Yang, Zhaochen Yu, Chenlin Meng, Minkai Xu, Ste-fano Ermon, and Bin Cui. Mastering text-to-image diffu-sion: Recaptioning, planning, and generating with multi-modal llms. In Forty-first International Conference on Ma-chine Learning , 2024. 2 [41] Moon Ye-Bin, Roy Miles, Tae-Hyun Oh, Ismail Elezi, and Jiankang Deng. Retouchllm: Training-free code-based im-age retouching with vision language models. arXiv e-prints ,pages arXiv–2510, 2025. 2 [42] Jiayi Zhou, Jiaming Ji, Boyuan Chen, Jiapeng Sun, Wenqi Chen, Donghai Hong, Sirui Han, Yike Guo, and Yaodong Yang. Generative rlhf-v: Learning principles from multi-modal human preference. arXiv preprint arXiv:2505.18531 ,2025. 3

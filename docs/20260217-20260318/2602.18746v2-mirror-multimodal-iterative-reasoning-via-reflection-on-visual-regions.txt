@@ -1,0 +1,1375 @@
+Title: MIRROR: Multimodal Iterative Reasoning via Reflection on Visual Regions
+
+URL Source: https://arxiv.org/pdf/2602.18746v2
+
+Published Time: Wed, 25 Feb 2026 01:48:30 GMT
+
+Number of Pages: 42
+
+Markdown Content:
+# MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+Haoyu Zhang 1 2 Yuwei Wu 1 2 Pengxiang Li 1 Xintong Zhang 1 Zhi Gao 1 2 Rui Gao 1 2 Mingyang Gao 1
+
+Che Sun 2 Yunde Jia 2
+
+Project Page: https://floy4.github.io/MIRROR/ 
+
+## Abstract 
+
+In the era of Vision-Language Models (VLMs), enhancing multimodal reasoning capabilities re-mains a critical challenge, particularly in handling ambiguous or complex visual inputs, where initial inferences often lead to hallucinations or logic er-rors. Existing VLMs often produce plausible yet ungrounded answers, and even when prompted to “reflect”, their corrections may remain detached from the image evidence. To address this, we pro-pose the MIRROR framework for m ultimodal iterative r easoning via reflection on visual regions. By embedding visual reflection as a core mech-anism, MIRROR is formulated as a closed-loop process comprising draft, critique, region-based verification, and revision, which are repeated un-til the output is visually grounded. To facilitate training of this model, we construct ReflectV ,a visual reflective dataset for multi-turn supervi-sion that explicitly contains reflection triggers, region-based verification actions, and answer re-vision grounded in visual evidence. Experiments on both general vision-language benchmarks and representative vision-language reasoning bench-marks show that MIRROR improves correctness and reduces visual hallucinations, demonstrating the value of training reflection as an evidence-seeking, region-aware verification process rather than a purely textual revision step. 
+
+## 1. Introduction 
+
+Recent years have witnessed the rapid evolution of Vision-Language Models (VLMs), which integrate powerful visual 
+
+> 1
+
+Beijing Key Laboratory of Intelligent Information Technology, School of Computer Science & Technology, Beijing Institute of Technology 2Guangdong Laboratory of Machine Perception and Intelligent Computing, Shenzhen MSU-BIT University. Corre-spondence to: Zhi Gao <gaozhi@bit.edu.cn >.
+
+Preprint. February 25, 2026. 
+
+encoders with Large Language Models (LLMs) to achieve remarkable performance in general multimodal tasks (Peng et al., 2023; Zhu et al., 2025; Bai et al., 2025). Despite these advancements, enhancing multimodal reasoning ca-pabilities remains a critical challenge, particularly when handling ambiguous or complex visual inputs. To address this, paradigms such as Chain-of-Thought (Wei et al., 2022) and “Thinking with Images” (Su et al., 2025b) have been introduced to align logical generation with visual contexts. However, in complex scenarios, the reasoning process still leads to plausible yet ungrounded answers, a phenomenon widely known as hallucination (Guan et al., 2024). Reflection serves as a critical mechanism in robust multi-modal reasoning, refining initial inferences to ensure logical accuracy. Current approaches have attempted to model this process by incorporating the CoT mechanisms (Wei et al., 2022; Xu et al., 2025) and self-correction strategies (Wang et al., 2025d; Wan et al., 2025). While these methods im-prove robustness to some extent, they fundamentally suffer from a “modality disconnect”: they largely rely on textual revision. Even when prompted to “reflect”, the model’s corrections often remain detached from the actual image evidence. Without an explicit mechanism to revisit visual details, models tend to hallucinate “corrections” based on linguistic priors rather than visual facts. In this paper, we argue that overcoming this limitation re-quires a paradigm shift: reflection for VLMs must be trans-formed from an open-loop text generation step into a closed-loop grounded verification process. This perspective draws inspiration from human cognitive behavior—specifically the instinct to “look again” when detecting ambiguity (Yang et al., 2025). Aligned with the philosophy of “Thinking with Images”, we argue that an ideal system should possess the capability of closed-loop verification. The model should not only detect logical errors but also actively re-examine the image to find evidence, thereby ensuring reasoning is visually grounded. To achieve this, we propose MIRROR , a novel framework for m ultimodal iterative reasoning via r eflection on visual r egions, which regards visual reflection as a core mecha-1
+
+> arXiv:2602.18746v2 [cs.CV] 24 Feb 2026
+
+MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Question : What letters do you            
+
+> see?
+> Ground Truth : E R T S D F
+> <answer> I can see 4 planes in the image. </ answer>
+> <think> ... I realize there is still one plane that I missed. I need to look closely
+> at the plane hidden behind, as indicated by the purple ellipse ... </think>
+> Question : How many planes can
+> you see?
+> Ground Truth :5
+
+Round 1
+
+Round 2
+
+Round 1
+
+Round 2                                 
+
+> anchor : the plane hidden behind
+> color :purple
+> mark type : ellipse
+> The purple ellipse indicates the plane hidden
+> behind.
+> anchor : all the visible letters
+> color : yellow
+> mark type : point
+> The yellow points
+> indicate all the visible
+> letters .
+> <answer> I can see D, F, R, and T. </answer>
+> <think> ... I should check all the visible letters ,as highlighted by the yellow
+> points ... </think>
+> <answer> I see the letters D, F, R, T, S, and E. </answer>
+> <think> My answer is specific .. .</think >
+> <answer> I can see 5 planes in the image. There are 5 planes. </ answer>
+> <think> My answer is specific and practical .. .</think >
+
+Figure 1. Our visual reflective framework MIRROR improves visual question answering by iteratively verifying evidence in the image and revising the prediction. In each example, Round 1 produces an incorrect answer; the model then reflects with explicit visual grounding (e.g., yellow points/ purple ellipse) to re-check the relevant regions and corrects the response in Round 2, yielding a final accurate answer. 
+
+nism, upgrading the inference process into a closed-loop verification cycle. Unlike traditional methods, MIRROR em-powers the model to actively diagnose potential errors and utilize a tool-augmented visual prompt generator to check specific image regions, as shown in Figure 1. This process unfolds through a cycle of drafting, critiquing, region-based verification and revision, ensuring that every correction is anchored in concrete visual evidence. To instill this capa-bility, we construct ReflectV , a visual reflective dataset of approximately 24k samples using a multi-agent pipeline. Ranging from general scene understanding to complex rea-soning tasks, the dataset combines internal reflection with precise visual cues to teach the model how to reflect visually. We fine-tune Qwen2.5-VL on ReflectV and evaluate its per-formance on both general vision-language and visual reason-ing benchmarks. Experimental results show that MIRROR improves correctness and reduces hallucinations, demon-strating that reflection should be trained as an evidence-seeking process rather than a simple text revision step. In summary, our main contributions are as follows: • We propose MIRROR, a visual reflective framework. It enables VLMs to perform closed-loop reasoning by iteratively triggering self-reflection and invoking a visual prompt generator to verify visual details, thereby reducing hallucinations in complex tasks. • We construct ReflectV, a high-quality dataset of ap-proximately 24k samples. Through a novel multi-agent pipeline, we curate ReflectV that explicitly models the trajectory of error detection, visual verification, and answer correction. • We fine-tune Qwen2.5-VL on our dataset and obtain the MIRROR model. This model outperforms strong baselines across diverse vision-language benchmarks, demonstrating the efficacy of our closed-loop verifica-tion mechanism in reducing hallucinations and enhanc-ing grounded reasoning. 
+
+## 2. Related Work 
+
+2.1. Vision-Language Models 
+
+Recent years have witnessed rapid progress of Vision-Language Models (VLMs), which connect a powerful vi-sual encoder with a large language model (LLM) through lightweight adapters or cross-attention modules. Beyond generic image understanding, grounding and localization capabilities are increasingly integrated into VLMs to reduce hallucinations and support fine-grained visual reference. For example, LLaVA-NeXT (Liu et al., 2024a) leverages a dy-2MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+namic high-resolution strategy to preserve subtle visual cues, while Kosmos-2 (Peng et al., 2023) introduces a tokenization to represent grounded text spans linked to bounding boxes, allowing models to generate text grounded in image re-gions. Recent open-source VLMs such as Qwen2.5-VL (Bai et al., 2025) and InternVL3 (Zhu et al., 2025) scale training data and refine alignment pipelines to improve instruction following, localization, OCR, and general visual-language competence. Regarding closed-source models, Gemini-3.0 Pro (Google, 2025) and GPT-5.2 (OpenAI, 2025) demon-strate strong general multimodal capabilities and inspire new reasoning patterns, motivating research on grounding and visual feedback. Building on the instruction-tuned VLM paradigm, our approach targets a more structured capabil-ity: enabling the model to execute a closed-loop reasoning process with iterative visual reflection. 
+
+2.2. Multimodal Reasoning in VLMs 
+
+The paradigm of multimodal reasoning in VLMs has pro-gressed significantly, evolving from standard instruction following to incorporating Chain-of-Thought (CoT) mecha-nisms (Wei et al., 2022) that align logical generation with vi-sual context, e.g., LLaVA-CoT (Xu et al., 2025). To further enhance robustness and mitigate hallucinations, recent ap-proaches have introduced self-correction strategies. For in-stance, Critique Fine-Tuning (Wang et al., 2025d) integrates explicit critique steps into the training objective, while meth-ods like FIRE (Li et al., 2024c) employ “response-feedback-refinement” triplets to enable models to iteratively refine answers based on feedback signals. In parallel, research in visual grounding has employed visual prompts—such as bounding boxes and points—to enhance referential pre-cision. Models like Shikra (Chen et al., 2023) and SoM-GPT4V (Yang et al., 2023) demonstrate that explicit visual markers can significantly aid in parsing fine-grained details. Beyond static visual grounding, recent work has begun to explore a broader “Thinking with Images” paradigm (Su et al., 2025b;a; Zhang et al., 2025a), where VLMs actively attend to visual evidence during reasoning to acquire finer-grained visual signals for verification. Nevertheless, prior works lack a reflection-driven control signal, while visual tool usage is rarely leveraged to rectify errors and enable targeted region verification. 
+
+2.3. Reflection in Vision-language Models 
+
+Reflection aims to address core issues in VLMs, such as inadequate reasoning rigor, insufficient utilization of visual information, and difficulty in self-correcting errors. Rel-evant studies have explored solutions through optimizing reflection mechanisms, enhancing visual interaction, and integrating external knowledge. SRPO (Wan et al., 2025) introduces the ⟨reflection ⟩ token and GRPO (Shao et al., 2024) to strengthen the model’s self-reflection capability. VL-Rethinker (Wang et al., 2025a) adopts selective sam-ple replay for effective data filtering and forced rethinking strategies, alleviating the diminishing reflection advantage. Look-Back (Yang et al., 2025) designs ⟨back ⟩ token to guide the model to revisit image information. Reflection-V (Jian et al., 2025) leverages a cold-start supervised phase to ex-tract visual details and then employs reinforcement learning with attention-aware rewards to incentivize the model’s fo-cus on critical visual information. Additionally, some other studies attempt to improve reasoning performance through multi-agent collaboration (e.g., Mulberry (Yao et al., 2024)) or tool-chain expansion (e.g., Thyme (Zhang et al., 2025b)). However, most existing approaches limit reflection to tex-tual reflections or implicit representations, often failing to actively revisit visual evidence. In contrast, the proposed 
+
+MIRROR enables explicit visual reflection . By integrat-ing visual tools, our framework transforms reflection from a static revision step into an active verification process, where the model explicitly queries and checks specific image re-gions to ensure every correction is visually grounded. 
+
+## 3. Method 
+
+We propose MIRROR as shown in Figure 2, a visual re-flective framework that transforms one-pass VLM inference into a closed-loop verification process: (i) draft an initial an-swer; (ii) self-reflection to identify uncertainty or potential errors; (iii) visual verification by invoking a visual prompt generator to mark task-relevant regions; and (iv) refinement based on the updated visual evidence. 
+
+3.1. Formulation 
+
+We formulate the visual reflective reasoning task as a multi-turn generation process. Given an initial image I0 and a user query q, the objective of the VLM, denoted as πθ , is to gener-ate a structured reasoning trajectory Y = {y1, y 2, . . . , y K }
+
+over K interaction turns. Unlike standard CoT reasoning, which operates on static visual features, our framework in-corporates dynamic visual interactions. At each step k, the model generates an output tuple yk = ( ak, r k, v k), where 
+
+ak is the textual response, rk denotes the reflection content, and vk signifies the visual tool tokens for visual reflection. The tool tokens vk trigger a visual update function G, yield-ing an updated visual context Ik = G(I0, v k) that highlights specific regions for the subsequent step. Consequently, for the (k + 1) -th turn, the model takes the updated visual con-text Ik and the interaction history h<k +1 = {aj , r j , v j }kj=1 
+
+as input to generate the next response tuple yk+1 . This process can be formulated as: 
+
+yk+1 ∼ πθ (yk+1 | Ik, q, h <k +1 ) (1) where yk+1 = ( ak+1 , r k+1 , v k+1 ) represents the newly gen-erated answer, reflection, and visual tool tokens. This loop 3MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Image Tokens    
+
+> <image>
+> The green arrow /
+> pink ellipse indicates
+> the clock tower /
+> metal truss bridge .
+
+## Visual Encoder & MLP 
+
+# … … … 
+
+> Question:
+> Please describe
+> the image.
+
+## Large Language Model 
+
+Iterative Visual 
+
+Reflection Process     
+
+> <answer> This is a beautiful…
+> <answer><think> … a clock
+> tower …</think>
+> <answer> In addition to the
+> clock tower …<answer><think>
+> …metal truss bridge …</think>
+> <answer> This scenic …
+> <answer> <think>… I have
+> perfectly … </think>
+
+I1 I2
+
+I1 I2
+
+> Visual
+> Reflective Prompt
+
+Image Tokens 
+
+I0
+
+I0     
+
+> Final answer:
+> This scenic waterfront view showcases …
+> stands a clock tower topped with a red,
+> pointed roof. To its left, a metal truss
+> bridge spans the water, ...
+> <image>
+> The green arrow /
+> pink ellipse
+> indicates
+> the clock tower /
+> metal truss
+> bridge .
+
+Figure 2. MIRROR performs closed-loop visual reflection. The VLM alternates between drafting an answer, reflecting, invoking a visual tool for region-level verification, and revising based on the rendered visual evidence. 
+
+repeats until the model’s reflection validates the answer. 
+
+3.2. Tool-Augmented Visual Prompt Generation 
+
+A key innovation of MIRROR is the integration of the visual prompt generator G for visual reflection. This module allows the model to actively “verify” its reflection by grounding textual hypotheses into crucial visual signals. The workflow proceeds as follows: 
+
+Triggering the Tool: When the model identifies some con-tent in its reasoning chain for further verification, it initiates a request enclosed within a special token structure vk:
+
+<tool call> {
+
+name : "Visual Prompt Generator" ,
+
+flag : true/false anchor : "keywords..." args : {color : "red" , shape : "point" }}</tool call> 
+
+(2) where name invokes the visual module, anchor specifies the textual target derived from reflection for localization, and 
+
+args defines the rendering attributes for visual prompts. 
+
+Visual Reflection: Upon receiving vk, the generator G ex-ecutes a two-stage pipeline. First, it employs Molmo-7B (Deitke et al., 2025) to ground the text anchor into point coordinates. Second, these coordinates are used as prompts for SAM 2 (Ravi et al., 2024) to generate precise visual markers (e.g., masks or bounding boxes) overlaid on the original image, and we obtain a new image Ik.
+
+Reasoning Refinement: The resulting image Ik, now ex-plicitly highlighting the neglected or misinterpreted regions, is fed back into the VLM. This closes the loop, forcing the model to re-attend to the visual evidence ( Ik) alongside the query history before generating the next reasoning step. 
+
+3.3. Training for Reflective Reasoning 
+
+We utilize our constructed visual reflective dataset D (de-tailed in Section 4) to train the target VLM via Supervised Fine-Tuning. The training objective is designed to optimize the model’s ability to iteratively execute a closed-loop rea-soning process. We formulate the training objective as a multi-turn auto-regressive loss. Formally, for a training sam-ple (I0, q, Y), we maximize the likelihood of the structured sequence over K turns: 
+
+min  
+
+> θ
+
+E(I0,q, Y)∼D
+
+
+
+−
+
+> K
+
+X
+
+> k=1
+
+log πθ
+
+ ak, r k, v k | Ik−1, q, h <k 
+
+
+
+(3) where h<k = {aj , r j , v j }k−1 
+
+> j=1
+
+represents the input history, and Ik−1 denotes the visual input processed by the visual prompt generator in the previous turn. This objective en-sures that the model learns to jointly optimize its initial answer ( ak), reflective capability ( rk), and tool usage ( vk). 
+
+## 4. Visual Reflective Dataset Construction 
+
+To facilitate self-reflection in complex reasoning, we con-struct a high-quality dataset ReflectV via a multi-agent pipeline, as illustrated in Figure 3, comprising multi-turn di-alogue construction, text processing, and vision processing. 
+
+4.1. Multi-Turn Dialogue Construction 
+
+To construct a robust foundation for reflective reasoning, we adopt the data curation pipeline proposed in FIRE (Li et al., 4MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions chair: blue points     
+
+> writer: red line
+> book: orange bbox
+> bar :purple ellipse
+
+Keywords Extraction           
+
+> Reflection: Irealize my
+> answer is not correct. I
+> should focus on ... "
+> Feedback: Your answer
+> is not correct .You
+> should focus on … "
+
+Self -Reflective Conversion 
+
+Point List: (x, y) 
+
+Tool Arguments: 
+
+(color, shape) 
+
+Data Filtering 
+
+Visual Verifier 
+
+& Trajectory 
+
+Adaptation 
+
+Text Processing 
+
+Vision Processing 
+
+> <think> I can see the
+> grass …</think>
+> <answer> There are
+> many cows …</answer>
+> Question: Please
+> describe the picture
+> in details…
+> Score: 8. Your answer
+> is excellent but
+
+# …
+
+> <think> Oh …
+> <think> I can see the
+> grass …</think>
+> <answer> There are
+> many cows …</answer>
+> Question: Please
+> describe the picture
+> in details…
+> Score: 8. Your answer
+> is excellent but
+
+# … 
+
+> <think> Oh I made a …
+> <think> I can see the
+> grass …</think>
+> <answer> There are
+> many cows …</answer>
+> Question: Please
+> describe the picture
+> in detail.
+> Score: 6. Your answer
+> is excellent but …
+
+# …
+
+> <think> Oh …
+> Score: 10. Good! Your
+> answer is perfect.
+
+Multi -turn Dialogue Dataset ReflectV Dataset 
+
+Visual Prompt 
+
+Generator    
+
+> <think> I can see the
+> grass …</think>
+> <answer> There are
+> many cows …</answer>
+> Question: Please
+> describe the picture
+> in details…
+> Question: Please
+> describe the picture
+> in details…
+> Question: Please
+> describe the picture
+> in detail.
+> Ground Truth: The image depicts a
+> rural scene with a group of cattle
+> grazing in a grassy field. …
+
+# … … …
+
+Source 
+
+Dataset    
+
+> Caption OCR Doc Chart
+> <think> I can see the
+> grass …</think>
+> <answer> There are
+> many cows …</answer>
+> Question: Please
+> describe the picture
+> in details…
+> Score: 8. Your answer
+> is excellent but
+
+# …
+
+> <think> Oh …
+> <think> I can see the
+> grass …</think>
+> <answer> There are
+> many cows …</answer>
+> Question: Please
+> describe the picture
+> in details…
+> Score: 8. Your answer
+> is excellent but
+
+# … 
+
+> <think> Oh I made a …
+> Question: Please
+> describe the picture
+> in detail.
+
+# …           
+
+> <answer> There are many cows
+> I can see … </ answer ><think>
+> My answer is excellent but I
+> should focus more on the
+> missing … </think>
+> <answer> In the foreground,
+> there is … </answer ><think>
+> I have fully captured core
+> details … </think>
+
+You are a helpful assistant that 
+
+can generate a dialogue between 
+
+a teacher and a student .
+
+# …
+
+# …
+
+Figure 3. Overview of the ReflectV dataset construction pipeline. We transform external feedback into self-reflection using Qwen2.5-7B and ensure visual grounding via Molmo-7B and SAM 2. 
+
+2024c). Instead of relying solely on existing conversational datasets, we transformed multimodal QA pairs into multi-turn dialogues. Specifically, we employ GPT-4V (OpenAI, 2023) to simulate a “Student-Teacher” interaction based on ground truth annotations where the “Student” generates ini-tial attempts containing potential errors, while the “Teacher” provides a score st and progressive feedback until the cor-rect answer is reached, effectively converting static QA samples into rich correction histories. 
+
+4.2. Dialogue Filtering Strategy 
+
+To guarantee the instructional quality of the reflective tra-jectories, we enforce a rigorous filtering protocol based on the evaluation score st assigned to each turn t. A dia-logue trajectory is preserved only if it strictly adheres to the following criteria. Steady improvement: The scores must exhibit a strictly ascending trend ( st+1 > s t), ensur-ing that the model demonstrates a valid pathway of error correction rather than fluctuating reasoning; Successful con-vergence: The dialogue must conclude with a perfect score (sfinal = 10 ), indicating that the reflection successfully re-solved the initial error; Ground Truth alignment: Beyond the teacher’s score, the final student response must be semanti-cally consistent with the dataset’s ground truth, preventing false positives where the verifier might be misled. 
+
+4.3. Visual Grounding via Keyword Extraction 
+
+To prevent reflection from degenerating into text-only spec-ulation, we explicitly ground the introspective process with task-adaptive keywords that are later used as tool arguments for visual prompting (Section 3.2). Specifically, for general VQA, we parse entity-centric keywords directly from the reflection. In contrast, for dense perception tasks (e.g., OCR, ChartQ) where reflection lacks spatial specificity, we derive precise keywords from ground truth annotations. To ensure strict alignment between textual thought and visual evidence, we inject visual attribute descriptions (e.g., “as indicated by the red point” ) back into the reflection text. This visually grounded text is then paired with the marker-overlaid image to constitute a composite input for the subsequent iteration. 
+
+4.4. Self-Reflective Conversion Mechanism 
+
+To endow our model with self-correction capabilities, we propose a Self-reflective Conversion mechanism. Specifi-cally, we prompt Qwen2.5-7B (Yang et al., 2024) to rewrite the Teacher’s corrective feedback (e.g., “No, your answer is incorrect...” ) into a first-person reflective thought process (e.g., “Wait, upon closer inspection, I realize my previous answer was incorrect...” ). This effectively transforms exter-nal criticism into self-reflection, teaching the model how to diagnose its own errors. 
+
+4.5. Visual Verification and Trajectory Adaptation 
+
+To ensure precise visual grounding and maintain a balanced training distribution, we implement a dual-stage pipeline after being processed by the visual tool: 
+
+Visual Consistency Filtering. We employ a verifier, Qwen2.5-VL-7B (Bai et al., 2025) to assess the semantic consistency between the generated visual prompts and texts. This step ensures that the generated marks accurately align with the entities described in the corrective feedback, filter-ing out instances of ungrounded or ambiguous visualization. 
+
+Adaptive Trajectory Formatting. Based on verification, 5MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+Table 1. Performance comparison on General Capabilities and OCR & Document Benchmarks. The best and second-best results are highlighted in bold and underlined, respectively.                                                          
+
+> Model Param Size General Capabilities OCR & Document MM-Vet MMStar SeedBench-2-Plus TextVQA-Val OCRBench ChartQA-Test
+> LLaVA-OneVision 7B 48.80 61.70 –76.10 62.10 80.00 InternVL3 2B 54.95 60.70 64.95 77.00 82.20 76.08 InternVL3 8B 64.27 61.50 69.61 80.51 85.00 79.64 Qwen2.5-VL-3B 3B 47.39 55.87 68.81 79.12 82.60 83.20 Qwen2.5-VL-7B 7B 56.60 61.21 70.88 84.90 83.20 86.08
+> MIRROR (w/o tool) 7B 59.91 62.80 70.36 85.37 88.30 86.56
+> MIRROR (ours) 7B 66.70 73.33 76.86 86.62 92.00 87.92
+
+Table 2. Performance comparison on Hallucination, Fine-grained Perception, and Reasoning Benchmarks. The best and second-best results are highlighted in bold and underlined, respectively.                                                           
+
+> Model Param Size Hallucination Fine-grained Perception Math POPE HalluBench HRBench-4K MME-RW VStarBench MathVision
+> LLaVA-OneVision 7B 78.10 31.60 63.00 –72.30 18.30 InternVL3 2B 89.60 42.50 61.75 43.88 68.59 21.71 InternVL3 8B 90.37 49.90 70.00 48.83 68.06 20.39 Qwen2.5-VL-3B 3B 86.21 63.09 50.25 42.15 72.77 25.66 Qwen2.5-VL-7B 7B 86.45 68.66 68.87 44.29 75.39 23.36
+> MIRROR (w/o tool) 7B 87.95 68.24 69.13 46.01 76.44 27.30
+> MIRROR (ours) 7B 94.42 82.02 72.88 51.49 83.77 28.29
+
+we curate a hybrid composition: Reflective chains preserve verified multi-turn trajectories to supervise the closed-loop correction process; Truncated QA collapses failed or redun-dant sequences into QA pairs ( I0, q → afinal ), bypassing the intermediate states. This strategy eliminates noisy signals and mitigates “failure-first” bias, ensuring capabilities for both iterative correction and efficient one-pass inference. 
+
+## 5. Experiment 
+
+To comprehensively assess the performance of our model, we utilize the VLMEvalKit (Duan et al., 2024) framework, a standardized toolkit for evaluating VLMs. We employ GPT-4o-mini (Hurst et al., 2024) as the judge to evaluate the correctness of the model’s responses if needed for some specific benchmarks. We conduct a comprehensive evalu-ation across diverse benchmarks tailored to specific multi-modal capabilities. For General Capabilities, we employ MM-Vet (Yu et al., 2023), MMStar (Chen et al., 2024), and SeedBench2-Plus (Li et al., 2024a). In the domain of OCR & Document Understanding, we utilize TextVQA (Singh et al., 2019), OCRBench (Liu et al., 2024b), and ChartQA (Masry et al., 2022). To assess Hallucination and robust-ness, we include POPE (Li et al., 2023) and HallusionBench (Guan et al., 2024). Furthermore, we evaluate Fine-grained Perception using HRBench (Wang et al., 2025c), MME-RealWorld-Lite (Zhang et al., 2024), and VStarBench (Wu & Xie, 2023), alongside MathVision (Wang et al., 2024) for mathematical reasoning tasks. For further details on the dataset and experimental setup, including discussions on data quality and the effectiveness of trajectory adaptation, please refer to Appendix Sections A and B. 
+
+5.1. Comparison With Base Models 
+
+We compare MIRROR with SOTA MLLMs, including Qwen2.5-VL, InternVL3, LLaVA-OneVision (Li et al., 2024b), across a comprehensive suite of benchmarks as shown in Tables 1 and 2. As illustrated, MIRROR consis-tently outperforms its base model and other strong baselines. The discussions are categorized into three key dimensions: 
+
+General Capabilities and Math Reasoning. On bench-marks evaluating broad multimodal skills and mathematical reasoning, MIRROR demonstrates significant gains over the base models. As illustrated in the top row of Figure 4, standard models often fail in tasks requiring multi-step logic due to attention drift. In contrast, MIRROR actively iden-tifies and resolves logical discrepancies during complex problem-solving. Notably, despite the absence of mathemat-ical data, MIRROR still achieves notable enhancements in foundational mathematical logic. 
+
+OCR & Document Understanding. On text-intensive tasks classified under OCR and Document Understanding, MIR-6MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions GT: Yes . 
+
+> No, there is no chair in the image. There is a plastic
+> stool that has a red bucket placed on it.
+
+Qwen2.5 -VL -Instruct   
+
+> No, there is no chair in this image. The image shows a
+> person standing in front of a dark background.
+> <answer> There is a chair in the image.
+> </answer>
+
+MIRROR (wo tool) 
+
+MIRROR  
+
+> <think>I accurately identified the core
+> activity, designed precise visual prompts,
+> and achieved ideal effect after iterative
+> reflection.</think>
+> The cyan point
+> indicates the chair in
+> the image.
+> <USER_PROMPT>
+> Question: Subtract all red
+> things. Subtract all tiny matte
+> balls. How many objects are left?
+> Options:
+> A. 4 B. 5 C. 2 D. 3.
+> The answer is A. 4.
+
+Qwen2.5 -VL -Instruct   
+
+> After subtracting all red things and tiny matte balls,
+> there are 3 objects left. Answer: D.
+> <answer > After subtracting all red things and
+> tiny matte balls, there are 4 objects left .
+> </ answer>
+
+MIRROR (wo tool) 
+
+MIRROR   
+
+> <answer>After subtracting all red things
+> and tiny matte balls, there are 5 objects
+> left. </answer>
+> The blue circle
+> indicates the green
+> cylinder.
+> <USER_PROMPT>
+> GT: B
+
+. <think > I believe my answer is close, but not        
+
+> quite correct. I correctly identified the red
+> sphere and the tiny matte ball, but I missed
+> counting the green cylinder. I need to recount
+> the objects again, including the green cylinder ,
+> as highlighted by the blue circle .</ think>
+> <tool_call > { 'name': ' visual_prompt_generator ',
+> 'arguments': {'flag': true, 'anchor': 'green
+> cylinder ', 'color': ' blue ', ' mark_type ': 'circle '}}
+> </ tool_call >
+> <think>I accurately identified the core
+> activity, designed precise visual prompts,
+> and achieved ideal effect after iterative
+> reflection.</think>
+> <tool_call > {'name':' visual_prompt_generator ',
+> 'arguments': {'flag': true, 'anchor': ' chair in the
+> image ', 'color': ' cyan ',
+> 'mark_type ': ' point ' }} </ tool_call >
+> <think> I believe my answer is partially correct.
+> I correctly identified the chair, but I need to be
+> more specific. The question asks if there is a
+> chair in the image , and my answer should be a
+> clear yes or no. I will try to provide a more
+> definitive answer. </think>
+> <answer> Yes, there is a chair in the
+> image .
+> </answer>
+
+Round 2
+
+Round 2Round 1
+
+Round 1
+
+> Question: Is there a chair
+> in this image?
+
+Figure 4. Qualitative examples of iterative visual reflection. Compared to the baseline Qwen2.5-VL and the tool-free variant, MIRROR successfully corrects initial perception and reasoning errors. Top (Spatial Reasoning): The model initially misses the “green cylinder” (Round 1). By triggering the visual prompt generator to mark the neglected object with a blue circle, it successfully recounts and corrects the answer in Round 2. Bottom (Object Identification): Addressing the hallucination where the chair is neglected, the model uses the cyan point to actively verify the visual features, confirming the presence of “the chair”. 
+
+ROR achieves state-of-the-art performance. This suggests that our method effectively directs the model’s attention to neglected visual details, overcoming the limitations inherent in one-pass inference, as shown in Figure 17. 
+
+Hallucination Mitigation and Fine-grained Perception. 
+
+Crucially, MIRROR excels in reducing hallucinations (e.g., 
+
++13.36% on HallusionBench) and enhancing fine-grained perception. By anchoring intermediate reasoning in veri-fiable visual evidence, our method imposes a strong con-straint on the trajectory. This efficacy is exemplified in the bottom row of Figure 4: while baseline models are prone to hallucinating objects due to ambiguous features, MIRROR actively queries the image with visual markers, ensuring the response is grounded in actual visual pixels. 
+
+5.2. Comparison with Reasoning Models 
+
+To strictly evaluate the effectiveness of our closed-loop vi-sual reflection mechanism, we also compare MIRROR with two representative reasoning paradigms: Text Reflection ,exemplified by VL-Rethinker (Wang et al., 2025a), which employs text-based self-reflection to force rethinking; and 
+
+Thinking with Images , which equips VLMs with active visual capabilities. The latter includes PixelReasoner (Wang et al., 2025b), DeepEyes (Zheng et al., 2025), and Adaptive-CoF (Zhang et al., 2025a), which utilize operations like zoom-in or selective search. We selected one representative benchmark from each major category to ensure a compre-hensive assessment. 
+
+Table 3. Performance comparison with SOTA reasoning methods, which are all fine-tuned on Qwen2.5-VL-7B. The best and second-best results are highlighted in bold and underlined, respectively. 
+
+Method OCRBench POPE MME-RW MMVet 
+
+Text Reflection 
+
+VL-Rethinker 85.40 84.19 47.21 56.19 
+
+Thinking with Images 
+
+PixelReasoner 82.10 86.03 49.70 52.98 DeepEyes 88.10 87.70 49.50 60.28 Adaptive-CoF 86.00 89.30 50.90 66.21 
+
+MIRROR(ours) 92.00 94.42 51.49 66.70 
+
+As shown in Table 3, MIRROR achieves superior per-formance by addressing the inherent limitations of both paradigms. First, text-based reflection suffers from hal-lucination; for instance, VL-Rethinker scores lowest on POPE (84.19), confirming that self-correction without vi-sual grounding is speculative. Second, while “Thinking with Images” models introduce active visual tools, they operate in an open-loop, feed-forward manner, lacking an 7MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+error-correction mechanism to rectify perceptual failures. In contrast, MIRROR incorporates a closed-loop verifica-tion process. MIRROR surpasses the strongest baselines by significant margins—+3.90 on OCRBench and +5.12 on POPE—validating that looking again is only effective when coupled with reflective verification. For more efficiency analysis and visualization, please refer to Section D. 
+
+5.3. Ablation Experiments 
+
+5.3.1. T RAINING PARADIGM & M ODEL SIZE 
+
+Impact of Reflective Training Paradigm. To disentangle the benefits of our closed-loop reflective mechanism from the intrinsic quality of the domain-specific knowledge in ReflectV, we compare MIRROR against MIRROR-QA, a variant that is fine-tuned on the same dataset but reformatted into standard single-turn QA pairs. As shown in Table 4, while MIRROR-QA outperforms the Qwen2.5-VL baseline due to domain adaptation, the full MIRROR model achieves higher gains. This empirical ev-idence confirms that supplementary data alone is insuffi-cient for robust grounding; the explicit process of looking again —modeled via reflection and tool usage—is the deci-sive factor in mitigating hallucinations and correcting errors.                                
+
+> Table 4. Ablation study on training paradigms and model sizes. The best and second-best results are highlighted in bold and underlined, respectively.
+> Method OCRBench POPE VStarBench MMVet
+> 3B Model
+> Qwen2.5-VL-3B 82.60 86.20 72.77 47.39 MIRROR-QA-3B 81.60 86.31 75.92 56.33
+> MIRROR-3B 85.40 87.74 80.63 60.60
+> 7B Models
+> Qwen2.5-VL-7B 83.20 86.45 75.39 56.60 MIRROR-QA-7B 86.90 86.99 78.01 61.01
+> MIRROR-7B 92.00 94.42 83.77 66.70
+
+Scalability across Model Sizes. We further investigate the universality of our approach by applying MIRROR to a smaller architecture. As detailed in Table 4, the con-sistent performance improvements across both 3B and 7B scales demonstrate that our framework is model-agnostic. Remarkably, the MIRROR-3B model even surpasses the larger 7B baseline on several benchmarks. This suggests that equipping smaller models with active visual verifica-tion capabilities is a parameter-efficient strategy to achieve reasoning performance comparable to larger backbones. 5.3.2. T OOL USAGE 
+
+Quantitative results, as shown in Table 1 and Table 2, demon-strate that removing the visual prompt generator leads to significant performance drops, particularly on grounding-heavy tasks like MME-RealWorld-Lite (-5.48%) and POPE (-6.47%). This necessity of active verification is visually evidenced in Fig. 4. In the object counting case (top row), the tool-free variant correctly MIRROR(w/o tool) suspects an error but, lacking specific visual feedback, fails to locate the hidden “green cylinder” and hallucinates a wrong count. In contrast, MIRROR explicitly marks the overlooked re-gion, successfully grounding its reflection in pixel-level evidence. Notably, even without tool usage, MIRROR (w/o tool) consistently outperforms the Qwen2.5-VL-7B baseline across most benchmarks, demonstrating the robust intrinsic reasoning capabilities fostered by our reflective training. 5.3.3. T RAJECTORY ADAPTATION 
+
+To evaluate the effectiveness of our hybrid trajectory adap-tation strategy, we investigate the impact of ρ, defined as the ratio of multi-turn reflective chains, as shown in Table 5. Training exclusively on multi-turn reflective data ( ρ = 1 .0)leads to a significant performance degradation. This decline is primarily attributed to a “failure-first” bias, where the model over-fits to error-correction patterns and begins to doubt its own correct reasoning steps even when no errors are present. Conversely, lower ratios ( ρ ≤ 0.6) fail to pro-vide sufficient supervision for complex verification, whereas our balanced strategy with ρ = 0 .75 achieves the optimal performance across all metrics, effectively harmonizing effi-cient standard inference with robust reflective refinement.                                      
+
+> Table 5. Ablation study on the multi-turn sample ratio ρfor trajec-tory adaptation conducted on MM-Vet across different capabilities.
+> Model MM-Vet
+> OCR Math Spat Gen Rec Overall
+> ρ= 0 .561.85 51.54 59.73 45.75 55.61 55.87
+> ρ= 0 .664.81 56.15 62.13 56.75 61.28 60.32
+> ρ= 1 .065.19 56.54 61.47 54.12 59.04 58.81
+> ρ= 0 .75 69.90 60.77 70.80 61.62 64.40 66.70
+
+## 6. Conclusion 
+
+In this work, we have presented MIRROR , a framework that enhances multimodal reasoning by transforming reflec-tion from a purely textual revision into an active, closed-loop visual verification process. To facilitate this, we con-struct ReflectV , a high-quality dataset designed to teach models to explicitly ground their reasoning in specific im-age regions. Our experiments demonstrate that MIRROR significantly outperforms strong baselines, validating that equipping VLMs with the agency to “look again” and verify visual evidence is essential for reducing hallucinations and achieving robust reasoning. Despite its effectiveness, our approach currently faces limi-tations in abstract domains and coarse-grained attribute 
+
+8MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+binding , where spatial anchoring is inherently difficult. We provide a detailed analysis of these constraints in Appendix Section E. Future work will focus on enhancing the granu-larity of the verification process and exploring mechanisms to anchor symbolic reasoning within visual contexts. 
+
+## Impact Statement 
+
+This paper presents work aimed at advancing Vision-Language Models by enhancing their reasoning capabili-ties and mitigating hallucinations. By enabling models to verify their outputs against visual evidence, our framework, MIRROR, contributes to the development of more reliable, grounded, and trustworthy AI systems. While all AI ad-vancements carry potential societal implications, this work primarily focuses on improving technical robustness and correctness, and we do not foresee any specific negative societal consequences that must be highlighted here. 
+
+## References 
+
+Bai, S., Chen, K., Liu, X., Wang, J., Ge, W., Song, S., Dang, K., Wang, P., Wang, S., Tang, J., et al. Qwen2. 5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. Chen, K., Zhang, Z., Zeng, W., Zhang, R., Zhu, F., and Zhao, R. Shikra: Unleashing multimodal llm’s referential dialogue magic. arXiv preprint arXiv:2306.15195 , 2023. Chen, L., Li, J., Dong, X., Zhang, P., Zang, Y., Chen, Z., Duan, H., Wang, J., Qiao, Y., Lin, D., et al. Are we on the right way for evaluating large vision-language models? 
+
+Advances in Neural Information Processing Systems , 37: 27056–27087, 2024. Deitke, M., Clark, C., Lee, S., Tripathi, R., Yang, Y., Park, J. S., Salehi, M., Muennighoff, N., Lo, K., Soldaini, L., et al. Molmo and pixmo: Open weights and open data for state-of-the-art vision-language models. In Proceedings of the Computer Vision and Pattern Recognition Confer-ence , pp. 91–104, 2025. Duan, H., Yang, J., Qiao, Y., Fang, X., Chen, L., Liu, Y., Dong, X., Zang, Y., Zhang, P., Wang, J., et al. Vlmevalkit: An open-source toolkit for evaluating large multi-modality models. In Proceedings of the 32nd ACM international conference on multimedia , pp. 11198– 11201, 2024. Google. Gemini 3 pro: Best for complex tasks and bringing creative concepts to life. Google DeepMind Blog, 2025. URL https://deepmind.google/ models/gemini/pro/ . Accessed: Nov. 18, 2025. Guan, T., Liu, F., Wu, X., Xian, R., Li, Z., Liu, X., Wang, X., Chen, L., Huang, F., Yacoob, Y., et al. Hallusionbench: an advanced diagnostic suite for entangled language hal-lucination and visual illusion in large vision-language models. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pp. 14375– 14385, 2024. Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., Chen, W., et al. Lora: Low-rank adaptation of large language models. volume 1, pp. 3, 2022. Hudson, D. A. and Manning, C. D. Gqa: A new dataset for real-world visual reasoning and compositional question answering. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pp. 6700– 6709, 2019. Hurst, A., Lerer, A., Goucher, A. P., Perelman, A., Ramesh, A., Clark, A., Ostrow, A., Welihinda, A., Hayes, A., Radford, A., et al. Gpt-4o system card. arXiv preprint arXiv:2410.21276 , 2024. Jian, P., Wu, J., Sun, W., Wang, C., Ren, S., and Zhang, J. Look again, think slowly: Enhancing visual reflection in vision-language models. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pp. 9262–9281, 2025. Kafle, K., Price, B., Cohen, S., and Kanan, C. Dvqa: Under-standing data visualizations via question answering. In 
+
+Proceedings of the IEEE conference on computer vision and pattern recognition , pp. 5648–5656, 2018. Li, B., Ge, Y., Chen, Y., Ge, Y., Zhang, R., and Shan, Y. Seed-bench-2-plus: Benchmarking multimodal large lan-guage models with text-rich visual comprehension. arXiv preprint arXiv:2404.16790 , 2024a. Li, B., Zhang, Y., Guo, D., Zhang, R., Li, F., Zhang, H., Zhang, K., Zhang, P., Li, Y., Liu, Z., et al. Llava-onevision: Easy visual task transfer. arXiv preprint arXiv:2408.03326 , 2024b. Li, P., Gao, Z., Zhang, B., Yuan, T., Wu, Y., Harandi, M., Jia, Y., Zhu, S.-C., and Li, Q. Fire: A dataset for feedback integration and refinement evaluation of multimodal mod-els. Advances in Neural Information Processing Systems ,37:101618–101640, 2024c. Li, Y., Du, Y., Zhou, K., Wang, J., Zhao, W. X., and Wen, J.-R. Evaluating object hallucination in large vision-language models. arXiv preprint arXiv:2305.10355 ,2023. Lin, T.-Y., Maire, M., Belongie, S., Hays, J., Perona, P., Ra-manan, D., Doll ´ar, P., and Zitnick, C. L. Microsoft coco: Common objects in context. In European conference on computer vision , pp. 740–755. Springer, 2014. 9MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+Liu, H., Li, C., Wu, Q., and Lee, Y. J. Visual instruction tun-ing. Advances in neural information processing systems ,36:34892–34916, 2023. Liu, H., Li, C., Li, Y., Li, B., Zhang, Y., Shen, S., and Lee, Y. J. Llavanext: Improved reasoning, ocr, and world knowledge, 2024a. Liu, Y., Li, Z., Huang, M., Yang, B., Yu, W., Li, C., Yin, X.-C., Liu, C.-L., Jin, L., and Bai, X. Ocrbench: on the hidden mystery of ocr in large multimodal models. Sci-ence China Information Sciences , 67(12):220102, 2024b. Masry, A., Do, X. L., Tan, J. Q., Joty, S., and Hoque, E. Chartqa: A benchmark for question answering about charts with visual and logical reasoning. In Findings of the association for computational linguistics: ACL 2022 ,pp. 2263–2279, 2022. Mathew, M., Karatzas, D., and Jawahar, C. Docvqa: A dataset for vqa on document images. In Proceedings of the IEEE/CVF winter conference on applications of computer vision , pp. 2200–2209, 2021. Mishra, A., Shekhar, S., Singh, A. K., and Chakraborty, A. Ocr-vqa: Visual question answering by reading text in images. In 2019 international conference on document analysis and recognition (ICDAR) , pp. 947–952. IEEE, 2019. OpenAI. Gpt-4v(ision) system card, 2023. OpenAI. Introducing gpt-5.2: The most advanced frontier model for professional work and long-running agents. OpenAI Research, 2025. URL https://openai. com/index/introducing-gpt-5-2/ . Accessed: Dec. 11, 2025. Peng, Z., Wang, W., Dong, L., Hao, Y., Huang, S., Ma, S., and Wei, F. Kosmos-2: Grounding multimodal large language models to the world. arXiv preprint arXiv:2306.14824 , 2023. Ravi, N., Gabeur, V., Hu, Y.-T., Hu, R., Ryali, C., Ma, T., Khedr, H., R ¨adle, R., Rolland, C., Gustafson, L., et al. Sam 2: Segment anything in images and videos. arXiv preprint arXiv:2408.00714 , 2024. Shao, Z., Wang, P., Zhu, Q., Xu, R., Song, J., Bi, X., Zhang, H., Zhang, M., Li, Y., Wu, Y., et al. Deepseekmath: Push-ing the limits of mathematical reasoning in open language models. arXiv preprint arXiv:2402.03300 , 2024. Singh, A., Natarajan, V., Shah, M., Jiang, Y., Chen, X., Batra, D., Parikh, D., and Rohrbach, M. Towards vqa models that can read. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition ,pp. 8317–8326, 2019. Su, Z., Li, L., Song, M., Hao, Y., Yang, Z., Zhang, J., Chen, G., Gu, J., Li, J., Qu, X., et al. Openthinkimg: Learning to think with images via visual tool reinforcement learning. 
+
+arXiv preprint arXiv:2505.08617 , 2025a. Su, Z., Xia, P., Guo, H., Liu, Z., Ma, Y., Qu, X., Liu, J., Li, Y., Zeng, K., Yang, Z., et al. Thinking with images for multimodal reasoning: Foundations, methods, and future frontiers. arXiv preprint arXiv:2506.23918 , 2025b. Wan, Z., Dou, Z., Liu, C., Zhang, Y., Cui, D., Zhao, Q., Shen, H., Xiong, J., Xin, Y., Jiang, Y., et al. Srpo: En-hancing multimodal llm reasoning via reflection-aware reinforcement learning. arXiv preprint arXiv:2506.01713 ,2025. Wang, H., Qu, C., Huang, Z., Chu, W., Lin, F., and Chen, W. Vl-rethinker: Incentivizing self-reflection of vision-language models with reinforcement learning. arXiv preprint arXiv:2504.08837 , 2025a. Wang, H., Su, A., Ren, W., Lin, F., and Chen, W. Pixel reasoner: Incentivizing pixel-space reasoning with curiosity-driven reinforcement learning. arXiv preprint arXiv:2505.15966 , 2025b. Wang, K., Pan, J., Shi, W., Lu, Z., Ren, H., Zhou, A., Zhan, M., and Li, H. Measuring multimodal mathematical reasoning with math-vision dataset. Advances in Neural Information Processing Systems , 37:95095–95169, 2024. Wang, W., Ding, L., Zeng, M., Zhou, X., Shen, L., Luo, Y., Yu, W., and Tao, D. Divide, conquer and combine: A training-free framework for high-resolution image percep-tion in multimodal large language models. In Proceed-ings of the AAAI Conference on Artificial Intelligence ,volume 39, pp. 7907–7915, 2025c. Wang, Y., Yue, X., and Chen, W. Critique fine-tuning: Learning to critique is more effective than learning to imitate. arXiv preprint arXiv:2501.17703 , 2025d. Wei, J., Wang, X., Schuurmans, D., Bosma, M., Xia, F., Chi, E., Le, Q. V., Zhou, D., et al. Chain-of-thought prompting elicits reasoning in large language models. Advances in neural information processing systems , 35:24824–24837, 2022. Wu, P. and Xie, S. V*: Guided visual search as a core mechanism in multimodal llms. 2023. Xu, G., Jin, P., Wu, Z., Li, H., Song, Y., Sun, L., and Yuan, L. Llava-cot: Let vision language models reason step-by-step. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pp. 2087–2098, 2025. Yang, A. et al. Qwen2.5 technical report. arXiv preprint arXiv:2412.15115 , 2024. 10 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+Yang, J., Zhang, H., Li, F., Zou, X., Li, C., and Gao, J. Set-of-mark prompting unleashes extraordinary visual grounding in gpt-4v. arXiv preprint arXiv:2310.11441 ,2023. Yang, S., Niu, Y., Liu, Y., Ye, Y., Lin, B., and Yuan, L. Look-back: Implicit visual re-focusing in mllm reasoning. 
+
+arXiv preprint arXiv:2507.03019 , 2025. Yao, H., Huang, J., Wu, W., Zhang, J., Wang, Y., Liu, S., Wang, Y., Song, Y., Feng, H., Shen, L., et al. Mulberry: Empowering mllm with o1-like reasoning and reflection via collective monte carlo tree search. arXiv preprint arXiv:2412.18319 , 2024. Yu, W., Yang, Z., Li, L., Wang, J., Lin, K., Liu, Z., Wang, X., and Wang, L. Mm-vet: Evaluating large multi-modal models for integrated capabilities. arXiv preprint arXiv:2308.02490 , 2023. Zhang, X., Gao, Z., Zhang, B., Li, P., Zhang, X., Liu, Y., Yuan, T., Wu, Y., Jia, Y., Zhu, S.-C., et al. Chain-of-focus: Adaptive visual search and zooming for multimodal rea-soning via rl. arXiv preprint arXiv:2505.15436 , 2025a. Zhang, Y.-F., Zhang, H., Tian, H., Fu, C., Zhang, S., Wu, J., Li, F., Wang, K., Wen, Q., Zhang, Z., et al. Mme-realworld: Could your multimodal llm challenge high-resolution real-world scenarios that are difficult for hu-mans? arXiv preprint arXiv:2408.13257 , 2024. Zhang, Y.-F., Lu, X., Yin, S., Fu, C., Chen, W., Hu, X., Wen, B., Jiang, K., Liu, C., Zhang, T., et al. Thyme: Think beyond images. arXiv preprint arXiv:2508.11630 , 2025b. Zheng, Y., Zhang, R., Zhang, J., Ye, Y., Luo, Z., Feng, Z., and Ma, Y. Llamafactory: Unified efficient fine-tuning of 100+ language models. arXiv preprint arXiv:2403.13372 ,2024. Zheng, Z., Yang, M., Hong, J., Zhao, C., Xu, G., Yang, L., Shen, C., and Yu, X. Deepeyes: Incentivizing” thinking with images” via reinforcement learning. arXiv preprint arXiv:2505.14362 , 2025. Zhu, J., Wang, W., Chen, Z., Liu, Z., Ye, S., Gu, L., Tian, H., Duan, Y., Su, W., Shao, J., et al. Internvl3: Exploring advanced training and test-time recipes for open-source multimodal models. arXiv e-prints , 2025. 11 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+## A. Dataset Setting 
+
+A.1. Data Sources 
+
+We construct a high-quality visual reflective instruction-tuning dataset comprising approximately 24k samples. The data sources are curated from diverse public benchmarks, including COCO (Lin et al., 2014), LLaVA (Liu et al., 2023), GQA (Hudson & Manning, 2019), TextVQA (Singh et al., 2019), OCRVQA (Mishra et al., 2019), DOCVQA (Mathew et al., 2021), DVQA (Kafle et al., 2018) and ChartQA (Masry et al., 2022). These samples cover a wide range of visual domains and reasoning complexities, serving as the foundation for our fine-tuning process. To ensure balanced capability acquisition, we categorize these sources into four primary domains: General QA , Scene Text (OCR) , Document Understanding , and Chart Reasoning . As illustrated in Figure 5(a), this domain-specific distribution is strategically balanced to retain generalizability while boosting fine-grained perception. Furthermore, the statistics regarding the data filtering process and trajectory depth are detailed in Figure 5(b) and (c), respectively. Original Data Response-Filtered Data GT-Filtered Data                 
+
+> 0
+> 10 ,000
+> 20 ,000
+> 30 ,000
+> 40 ,000
+> Number of Samples
+> QA Doc OCR Chart
+> QA
+> 47.04%
+> Doc
+> 24.97%
+> 1Round
+> 6,152
+> 3Rounds
+> 5,047
+> 2Rounds
+> 12,669
+> 4Rounds
+> 276
+> (a). Dataset Category Distribution (c). Trajectory Length Distribution (b). Data Distribution for Different Stages
+> OCR
+> 17.89 %
+> Chart
+> 10.09 %
+
+Figure 5. Statistics and distribution of the ReflectV dataset construction. (a). Domain Distribution: The composition of the raw data spans four distinct capabilities: General QA, Document Understanding (Doc), Scene Text (OCR), and Chart Reasoning. (b). Filtering Pipeline: The data volume retention across the three construction stages (Original → Response-Filtered → GT-Filtered), illustrating the rigorous quality control process described in Section 4.2. (c). Trajectory Depth: We set the default mixing ratio to ρ = 0 .75 for our training. The distribution of samples based on the number of reflective rounds required for convergence illustrates the varying complexity of error correction. 
+
+A.2. Data Filtering 
+
+To demonstrate the effectiveness of our filtering strategy and the high quality of our data, we conducted a comparative quality scoring of the filtered, unfiltered, and discarded subsets, and further validated our approach by benchmarking our model against a baseline trained on raw, unfiltered data. 
+
+First , we conducted a blind quality assessment involving both human experts and GPT-4o-mini. We randomly sampled 100 trajectories from three subsets: the discarded noisy data ( Dnoise ), the raw unfiltered data ( Draw ), and our final filtered data (Dclean ). Each sample was scored on a scale of 1 to 5 based on Logical Coherence and Visual Validity .
+
+Table 6. Comparative quality assessment. We evaluate samples from Discarded ( Dnoise ), Unfiltered ( Draw ), and Filtered ( Dclean )subsets. The results demonstrate that our pipeline effectively isolates high-quality trajectories. 
+
+Dataset Human Eval GPT-4o-mini Eval Average Logic Visual Logic Visual Logic Visual 
+
+Dnoise (Discarded) 2.14 1.38 2.30 1.45 2.22 1.42 
+
+Draw (Unfiltered) 3.56 3.12 3.65 3.20 3.61 3.16 
+
+Dclean (Ours) 4.78 4.65 4.82 4.70 4.80 4.68 
+
+As reported in Table 6, Dclean consistently achieves the highest scores (Avg. 4.74 ), significantly surpassing the raw baseline (Draw , 3.39). Conversely, the discarded subset ( Dnoise ) exhibits the lowest performance, particularly in visual validity (1.42 ). This distinct stratification confirms that our pipeline effectively identifies and prunes samples with hallucinated or ungrounded visual prompts, ensuring high-quality training data. For more visualization of Dnoise , please refer to Figures 6 and 7. 12 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Question: What kind of book might one expect to read in this scene, and what is its theme? 
+
+<answer> 
+
+One might expect to read a romance novel in this scene. The theme could be centered around love and relationships, as suggested by the cover image of a man and a woman. 
+
+<answer> <think> 
+
+I believe my answer correctly identifies that the book has a French title and that the bed is unmade, suggesting recent use. However, I realize the theme of the book is not accurately identified. The cover image and the title ’Le Loup-Garou de Paris’ hint at a different genre. I need to consider the elements on the cover more closely, as indicated by the cyan points in the image, to determine the correct theme. 
+
+</think> 
+
+<tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘French title, unmade bed, urban horror theme’, ‘color’: ‘cyan’, ‘mark_type’: ‘point’}} </tool_call> <answer> 
+
+One might expect to read a horror novel in this scene. The theme could be centered around werewolves and supernatural events, as suggested by the title and cover image. 
+
+</answer> <think> 
+
+Much better! I correctly identified that the book is likely a horror novel and that its theme involves werewolves and supernatural events. I could improve my answer by mentioning the specific elements of fear and suspense that are typical of the horror genre, and how the unmade bed, indicated by the magenta ellipses in the image, might suggest the book was recently read or set down. 
+
+</think> 
+
+<tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘unmade bed, werewolves, fear, suspense novel’, ‘color’: ‘magenta’, ‘mark_type’: ‘ellipse’}} </tool_call> 
+
+Continued on next page. 
+
+1
+
+(a) Part 1 of case 1 from Dnoise .
+
+13 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+<answer> 
+
+In this scene, one would expect to read a horror book with a French title. The book is placed on an unmade bed, suggesting that it might have been recently picked up, read, or set down. Its theme is centered around werewolves, indicating that the story includes elements of fear, suspense, and potentially supernatural creatures, typical of a horror genre. One may find this book to be thrilling and engaging, particularly if they are a fan of horror or paranormal stories. 
+
+</answer> <think> 
+
+There is high consistency between my answer, image details and visual prompts, complete details and clear logic. 
+
+</think> 
+
+<tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: false, ‘anchor’: ‘None’, ‘color’: ‘None’, ‘mark_type’: ‘None’}} </tool_call> 
+
+2
+
+(b) Part 2 of case 1 from Dnoise .
+
+Figure 6. Case 1 from Dnoise .
+
+Second , we constructed a baseline named MIRROR-Raw . This variant was fine-tuned on the unrefined dataset ( ∼35k samples) obtained before our Multi-turn Dialogue Data Filtering and Visual Verification stage, containing noisy instances where visual reflection was either absent or failed verification. 
+
+Table 7. Ablation study on data filtering strategy conducted on MM-Vet across different capabilities. We compare MIRROR-Raw with MIRROR-0.75 ( ρ=0.75) and MIRROR-1.0 ( ρ=1.0) where ρ denotes the multi-turn sample ratio. The best and second-best results are highlighted in bold and underlined, respectively. 
+
+Model MM-Vet 
+
+OCR Math Spat Gen Rec Overall MIRROR-Raw 56.39 41.54 55.20 38.63 55.88 55.87 MIRROR-1.0 65.19 56.54 61.47 54.12 59.04 58.81 MIRROR-0.75 69.90 60.77 70.80 61.62 64.40 66.70 
+
+As presented in Table 7, we assess the efficacy of our visual verification filter by comparing the unrefined baseline, 
+
+MIRROR-Raw , against MIRROR-1.0 (ρ = 1 .0). It is crucial to note that both variants share an identical structural composition—consisting exclusively of multi-turn reflective trajectories ( ρ = 1 .0)—which isolates data quality as the sole variable. Despite MIRROR-Raw utilizing a significantly larger corpus ( ∼35k samples), it underperforms the filtered MIRROR-1.0 ( ∼24k samples) across all metrics. Specifically, MIRROR-Raw lags behind the structure-aligned MIRROR-1.0 (55.87 vs. 58.81) and exhibits a substantial deficit compared to our optimal hybrid model, MIRROR-0.75 (55.87 vs. 66.70). This massive performance gap confirms that data purity is paramount; retaining ∼11k noisy samples—where visual grounding is hallucinated or absent—introduces conflicting signals that severely hamper the model’s potential. In contrast, removing this noise enables the precise optimization seen in MIRROR-0.75. 14 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Question: What could be a possible reason for having such an ar-rangement in the room? 
+
+<answer> 
+
+The reason for having such an arrangement in the room could be that someone was in a hurry and left the items scattered around. 
+
+<answer> <think> 
+
+I believe my answer correctly identifies that the items are scattered, but it could be more thorough. I should consider why someone might have a large number of toothpaste boxes and toothbrushes, such as for a dental office or a bulk purchase, as indicated by the red masks in the image. I need to think about scenarios where bulk quantities of these items might be involved. 
+
+</think> 
+
+<tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘toothpaste boxes and toothbrushes for sale’, ‘color’: ‘red’, ‘mark_type’: ‘mask’}} </tool_call> <answer> 
+
+A possible reason for having such an arrangement in the room could be that the toothpaste boxes and toothbrushes were purchased in bulk and are currently being sorted or organized. 
+
+</answer> <think> 
+
+I think this answer is much closer to the groundtruth. I correctly identified that the items might have been purchased in bulk and are being sorted or organized. However, I could expand on why they might have been purchased in bulk. For instance, I should consider possible events or purposes for buying such large quantities, as indicated by the red bounding boxes in the image. 
+
+</think> 
+
+<tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘bulk purchase for a party supplies’, ‘color’: ‘red’, ‘mark_type’: ‘bbox’}} </tool_call> 
+
+Continued on next page. 
+
+1
+
+(a) Part 1 of case 2 from Dnoise .
+
+15 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+<answer> 
+
+A possible reason for having such an arrangement in the room could be that the toothpaste boxes and toothbrushes were purchased in bulk for a donation drive or a community event. They are currently being sorted or organized, which is why they are scattered around the room. 
+
+</answer> <think> 
+
+I’m glad my answer received a high score. I provided a detailed and plausible reason for the arrangement, including the possibility of a donation drive or community event. This answer is very close to the groundtruth. However, I might also consider mentioning other reasons for bulk buying, such as a sale or storage for future use. The red points in the image indicate areas where bulk items are stored, so it’s worth checking those sections for additional clues. 
+
+</think> 
+
+<tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘Bulk buying for sale or storage.<feedback>:Shoes|blue socks. nYour Answer: Shoes with blue socks.<feedback>:Clock|book|plants. nYour Answer: Clock, book, and plants together.<feedback>:Blackboard|chalk|students. nYour Answer: Blackboard, chalk, and students.<feedback>:Red apples|green apples. nYour Answer: Red and green apples.’, ‘color’: ‘red’, ‘mark_type’: ‘point’}} </tool_call> <answer> 
+
+A possible reason for having such an arrangement in the room could be that the toothpaste boxes and toothbrushes were purchased in bulk for a donation drive, community event, or due to a sale. They are currently being sorted or organized, which is why they are scattered around the room. 
+
+</answer> <think> 
+
+I made reasonable use of visual information, provided specific text description and suitable visual prompts, qualified answer. 
+
+</think> 
+
+<tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: false, ‘anchor’: ‘None’, ‘color’: ‘None’, ‘mark_type’: ‘None’}} </tool_call> 
+
+2
+
+(b) Part 2 of case 2 from Dnoise .
+
+Figure 7. Case 2 from Dnoise .
+
+16 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+## B. Implementation Details 
+
+B.1. Training Details. 
+
+We utilize LLaMA-Factory (Zheng et al., 2024) to perform Supervised Fine-Tuning (SFT) on the Qwen2.5-VL-7B (Bai et al., 2025). The training is conducted on 2 × NVIDIA H100 GPUs for 3.0 epochs. To ensure training efficiency and memory optimization, we utilize the DeepSpeed ZeRO-3 optimization and employ Low-Rank Adaptation (LoRA) (Hu et al., 2022) for parameter-efficient fine-tuning. The LoRA rank is set to r = 32 with the scaling factor α = 128 .
+
+B.2. Inference Details. 
+
+We perform all evaluations using the SFT-adapted MIRROR model. And we use the same hardware settings in all experiments. To ensure high-quality visual grounding, the visual prompt generator is powered by Molmo-7B (Deitke et al., 2025), which predicts precise point coordinates based on the model’s textual reflection. For mask generation, we employ the SAM 2.1 (Ravi et al., 2024) model, specifically loading the large-scale checkpoint sam2.1 hiera l.pt to ensure robust segmentation performance even in complex visual scenes. 
+
+B.3. Trajectory Length Analysis. 
+
+To understand the model’s dynamic behavior, we conducted a statistical analysis of the inference trajectories across evaluated benchmarks, as illustrated in Figure 8. We observe that the model adaptively adjusts its reasoning depth based on the inherent difficulty of the task: • Efficiency in Information Extraction: For straightforward queries where visual evidence is explicit, the model tends to converge efficiently. For instance, on ChartQA, which primarily involves direct value extraction, 98.7% of samples are resolved within a single round, minimizing unnecessary computational overhead. • Rigor in Complex Perception: In contrast, for tasks requiring fine-grained verification or hallucination mitigation, the trajectory extends significantly. On MME-RealWorld and HallusionBench, the model engages in a second round of visual reflection for 58.6% and 57.0% of cases, respectively. Notably, MathVision exhibits the highest proportion of trajectories exceeding three rounds (2.5%), reflecting the need for iterative correction in multi-step logical derivation. Overall, with 80.2% of total samples resolved in the first turn, this distribution confirms that MIRROR effectively balances efficiency and rigor, engaging in deep visual reflection only when the complexity of the query demands it. ChartQA MME-RealWorld               
+
+> Hallusion-Bench
+> MathVision TOTAL
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100 0.1%0.7%1.3%2.5%1%
+> 1.2%
+> 58 .6%57 %48 .7%
+> 18 .8%
+> 98 .7%
+> 40 .7%41 .7%48 .4%
+> 80 .2%
+> Percentage of Samples (%)
+> 1 Round 2 Rounds 3+ Rounds
+> Figure 8. Distribution of inference trajectory lengths across representative benchmarks. The stacked bars illustrate the percentage of samples resolved within 1, 2, or 3+ rounds.
+
+17 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+## C. Prompt 
+
+C.1. Prompt for Dataset Construction 
+
+To construct the training data for the ReflectV dataset, we employ a multi-stage prompting strategy to transform raw annotations into grounded, first-person reflective trajectories. First, we generate task-specific visual cues. For data-intensive tasks like Charts, OCR, and Doc, we utilize a specific prompt to extract key subjects and entities as shown in Figure 9. For general QA tasks, we employ a two-step process: in Figure 10, first identifying key physical objects mentioned in the feedback, and subsequently merging them into a concise caption. Next, we use a caption insertion prompt, as shown in Figure 11, to seamlessly blend these visual cues (e.g., specific marks or coordinates) into the corrective feedback, ensuring the text is visually grounded. Finally, in Figure 12, to simulate an internal self-correction process, we apply a role conversion prompt that transforms the content from a “teacher’s evaluation” perspective into a “student’s first-person reflection” (e.g., changing ”Your response is wrong” to “I think my response is wrong”). 
+
+C.2. Prompt for Iterative Reasoning 
+
+To enable the model with self-reflection and visual verification capabilities, we design a structured system prompt and user prompt that enforces a rigorous output protocol, as shown in Figure 13 and Figure 14. 
+
+## D. More Efficiency analysis and Visualization 
+
+D.1. Efficiency Analysis. 
+
+To evaluate the real-world practicality of MIRROR, we conduct a comparative analysis of inference efficiency on the MM-Vet dataset, employing average inference time per sample and average token consumption as metrics. As detailed in Table 8, we benchmark our method against representative baselines from two paradigms: Text Reflection (VL-Rethinker) and Thinking with Images (PixelReasoner, DeepEyes, Adaptive-CoF).                 
+
+> Table 8. Efficiency comparison on the MM-Vet dataset. We report the average time cost (seconds) and token consumption per sample. The best results are highlighted in bold . The results demonstrate that MIRROR achieves state-of-the-art efficiency.
+> Method Time (s/sample) ↓Tokens (per sample) ↓
+> Text Reflection
+> VL-Rethinker 5.56 229.33
+> Thinking with Images
+> PixelReasoner 64.12 273.95 DeepEyes 5.06 197.51 Adaptive-CoF 4.02 143.51
+> MIRROR (Ours) 3.73 112.58
+
+Compared to the Text Reflection model: Our method reduces inference time by 32.9% (3.73 s vs. 5.56 s) and token consumption by 50.9% (112.58 vs. 229.33) compared to VL-Rethinker. This significant reduction suggests that our targeted visual verification mechanism effectively circumvents the verbose and redundant self-correction chains often required by purely text-based reflection. Compared to Thinking with Images models: MIRROR significantly outperforms PixelReasoner (64.12 s) and DeepEyes (5.06 s) in terms of latency. Even compared to the highly efficient Adaptive-CoF, MIRROR maintains a distinct advantage, further reducing time cost by 7.2% and token usage by 21.5%. These findings confirm that MIRROR not only enhances reasoning accuracy but also ensures an efficient inference process, making it highly suitable for practical deployment. 
+
+D.2. Qualitative Analysis. 
+
+Beyond quantitative metrics, we provide comprehensive qualitative comparisons across diverse complex reasoning scenarios. 
+
+Comparison with Base Model. Figures 15 and 16 illustrate the reasoning trajectories of our model versus the base model Qwen2.5-VL-7B, highlighting our model’s ability to self-correct. 18 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions 
+
+Comparison with Competitive Baselines. We further compare MIRROR with two representative reasoning paradigms: (i) the ”Thinking with Images” approach (PixelReasoner, DeepEyes, Adaptive-CoF), and (ii) the textual self-reflection approach (VL-Rethinker). As illustrated in Figures 17 to 20, MIRROR demonstrates superior grounding and error correction capabilities. 
+
+## E. Limitation 
+
+To provide a comprehensive understanding of MIRROR’s boundaries, we present qualitative examples of failure cases in the figures below. These cases correspond to the two primary limitations discussed in the main paper: the difficulty in grounding abstract concepts and the lack of granularity in complex attribute binding. 
+
+1. Limited Applicability in Abstract Domains. Despite these improvements, MIRROR still faces challenges in symbolic derivation involving complex spatial mapping. Figure 21 illustrates a geometry problem requiring the calculation of a circle’s radius using the Pythagorean theorem. While the model correctly performs the symbolic derivation in the text, its attempt to invoke the visual prompt generator is ineffective. The model tries to ground the concept of “diameter calculation and radius division” into visual points. However, mathematical operations and logical variables are abstract concepts that lack a direct spatial mapping in the 2D image plane. Consequently, the generated visual cues (red points) provide no informative feedback for verifying the correctness of the arithmetic steps. 
+
+2. Coarse-grained Attribute Binding. Furthermore, MIRROR encounters difficulties in fine-grained attribute binding under compositional constraints. As shown in Figure 22, the user queries for a specific flower defined by a compositional constraint: “five petals and three leaves.” Although the underlying LLM correctly identifies the target option (E) via textual reasoning, the visual tool fails to strictly enforce these count-based attributes. Instead of isolating the specific target, the tool generates coarse visual markers (green points) on all flower instances in the image. This indicates that the visual prompt generator struggles to distinguish complex attribute combinations, defaulting to a generic object detection behavior (detecting ”flowers”) rather than precise constraint verification. 19 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Please generate a short phrase based on the given <question> , focusing on the **subject** (the core object/person/thing the question is about), the **key modifying words** (especially words related to data statistics like "total", "average", "sum", "difference", "median", "maximum", "minimum") and key associated information (such as time, category, attribute, etc) present in the question. 
+
+Requirements: 
+
+1. **Core Elements** : Must include both the clear subject from the question and the key modifying words (e.g., "total", "average", "maximum") if mentioned. 2. **Key Details** : Incorporate essential associated information (e.g., time, location, product type) related to the subject if specified. 3. **Avoid Redundancy** : Do not include interrogative words like "how many", "how much", "what" or explanatory words like "the amount of". 4. **Avoid Over-Simplicity** : Do not answer with only 1-2 words; the phrase should clearly link the modifying word, subject and context. 
+
+Examples: 
+
+Example1: 
+
+<question> : How many bikes are there in 2018? Your answer: bikes in 2018 Example2: 
+
+<question> : What is the total revenue of Company A in 2021 and 2022? Your answer: total revenue of Company A in 2021 and 2022 Example3: 
+
+<question> : What was the average monthly temperature in City C from 2019 to 2021? Your answer: average monthly temperature in City C from 2019 to 2021 Example4: 
+
+<question> : What is the difference in sales volume between 2020 and 2023 for Product B? Your answer: difference in sales volume of Product B in 2020 and 2023 Example5: 
+
+<question> : What’s the maximum value in the green line? Your answer: maximum value in the green line  
+
+> Figure 9. Subject Extraction Prompt: Extracts core subjects and key modifiers from questions to form concise visual descriptions for Chart, OCR, and Doc understanding tasks.
+
+20 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions You are given questions <question> , responds <respond> and feedbacks <feedback> . Please find out the 
+
+key objects in the <feedback> with the help of <question> and <respond> to help refine <respond> . The 
+
+<object> should only be from <feedback> and be few nouns enough that can be located in the image. 
+
+Remember only return in this format( no other words): <object1> |<object2> |...| <objectn> .
+
+Example 1: 
+
+<question> : "What rare species are depicted in the wildlife photograph?" 
+
+<respond> : "Thought: I see some grey animals along with another creature I can not recognize. Answer: 
+
+Just some grey animals." 
+
+<feedback> : "The image features grey cats and a white spotted leopard with piercing eyes, lying on a 
+
+rocky outcrop amidst snow-capped peaks." 
+
+Your Answer: grey cats|a white spotted leopard. 
+
+Example 2: 
+
+<question> : "What is in the glass on the left?" 
+
+<respond> : "Thought: I can see the left glass but I don’t know what is in the glass. Answer: Sorry, I don’t 
+
+know." 
+
+<feedback> : "The liquid in the left glass is yellow which is similar to some beverages." 
+
+Your Answer: left glass|yellow liquid. 
+
+You are given feedbacks <feedback> made of some key objects in this format: 
+
+<object1> |<object2> |...| <objectn> . Please help me combine them into a short caption. Remember only 
+
+return a short caption of no more 10 words. 
+
+For example: 
+
+<feedback> is "grey cats\a white spotted leopard." 
+
+Your Answer: grey cats and a white spotted leopard. 
+
+<feedback> is "left glass|yellow liquid." 
+
+Your Answer: yellow liquid in left glass.  
+
+> Figure 10. Visual Caption Generation Prompt: A two-step pipeline that first identifies key physical objects from feedback and then synthesizes them into short descriptive captions for QA tasks.
+
+21 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions You are given feedbacks <feedback> , marks <mark> and captions <caption> . The captions help to show some marks <mark> on the image. Please insert the captions along with the marks into the feedbacks and ensure that the new information blends seamlessly with the original content, maintaining the overall flow and coherence of the feedbacks. BUT DO NOT show the 
+
+<groundtruth> and answer in a diverse way. If <number> is 1 , you may use word like “a red point” or “the red point”. But if <number> is more than 1 , you may use word like “red points” or “the red points” 
+
+Example: 
+
+<feedback> : “Your observation that the flower is vibrant is partly right. However, the flower is not red. Take a closer look at the petals and think if there is another bright color that more accurately describes it.” 
+
+<mark> : “green point” 
+
+<caption> : “petals” 
+
+<number> : 1 
+
+Your answer can be one of the following examples: Example 1: “Your observation that the flower is vibrant is partly right. However, the flower is not red. Take a closer look at the petals and think if there is another bright color that more accurately describes it and can be seen with a green point in the <image> .” 
+
+Example 2: “Your observation that the flower is vibrant is partly right. However, the flower is not red. Take a closer look at the petals, as indicated by the green point in the <image> , and think if there is another bright color that more accurately describes it.” 
+
+Example 3: “Your observation that the flower is vibrant is partly right. However, the flower is not red. Check the petals closely, the area highlighted by a green point in the <image> , and consider if there is another bright color that more accurately describes it.” 
+
+Example 4: “Your observation that the flower is vibrant is partly right. However, the flower is not red. Inspect the petals, noted by the green point in the <image> , and think if there is another bright color that more accurately describes it.” 
+
+1 
+
+> Figure 11. Caption Insertion Prompt: Seamlessly integrates generated visual captions and spatial marks (e.g., points) into textual feedback to ensure visual grounding.
+
+22 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions You are given a SENTENCE . Please rewrite it to adopt a first-person perspective that reflects personal thinking or a subjective statement (utilizing "I" or "we") and diversify your answer. Your answer MUST be written in the first-person perspective . If the SENTENCE start with words like "Score: 1", "Feedback:", please remove these words like Example 2,3,4,5. 
+
+For example: Example 1 SENTENCE: Your response is wrong. The data for "Q3" shows a higher growth rate than "Q4". Check the bar chart again, especially the blue bars representing quarterly growth, and pick the quarter with the highest growth. 
+
+Your answer: I think my response is wrong. The data for "Q3" shows a higher growth rate than "Q4". Check the bar chart again, especially the blue bars representing quarterly growth, and pick the quarter with the highest growth. 
+
+Example 2 SENTENCE: Score: 3. Feedback: Correct! Your conclusion is wrong. The "Online Sales" segment outperforms "In-Store Sales" this quarter. Check the pie chart again, especially the blue section for online data, and confirm the top-performing segment. 
+
+Your answer: I believe my conclusion is wrong. The "Online Sales" segment outperforms "In-Store Sales" this quarter. Check the pie chart again, especially the blue section for online data, and confirm the top-performing segment. 
+
+Example 3 SENTENCE: Score: 8. Your conclusion is incorrect. The plant grows taller under "Full Sun" than "Partial Shade". Refer to the growth chart again, marked by the red lines for each light condition, and identify the optimal environment. 
+
+Your answer: I suspect my conclusion isn’t correct. The plant grows taller under "Full Sun" than "Partial Shade". Refer to the growth chart again, marked by the red lines for each light condition, and identify the optimal environment 
+
+Example 4 SENTENCE: Feedback: Correct! Your conclusion is inaccurate. The "18-25 Age Group" has higher engagement than "26-35". Review the user data again, specifically the green bars for engagement rates, and name the most engaged group. 
+
+Your answer: I’m starting to think my conclusion is inaccurate. The "18-25 Age Group" has higher engagement than "26-35". Review the user data again, specifically the green bars for engagement rates, and name the most engaged group. 
+
+Example 5 SENTENCE: Score: 6. Feedback: Correct! Your conclusion is mistaken. The chemical "Compound B" has a longer shelf life than "Compound A". Look at the stability test results again, as shown by the purple timelines in the table, and confirm the more stable compound. 
+
+Your answer: I fear my conclusion may be mistaken. The chemical "Compound B" has a longer shelf life than "Compound A". Look at the stability test results again, as shown by the purple timelines in the table, and confirm the more stable compound. 
+
+Figure 12. Self-Reflective Conversion Prompt: Rewrites teacher-side evaluations into first-person student self-reflections (e.g., changing ”Your response is wrong” to ”I think my response is wrong”). 
+
+23 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions You are an intelligent assistant with self-reflection and visual verification capabilities. 
+
+Core Task: 
+
+1. First, provide a direct answer to the user’s image-related query based on your initial observation. 2. Second, engage in a "post-hoc reflection" to strictly evaluate the accuracy of your initial answer and analyze visual evidence. 3. Third, determine if visual grounding tools are needed to verify or correct your answer. 
+
+Follow these rules strictly: 1. Output Structure & Order: 
+
+You must output exactly three parts in this specific order: 
+
+<answer> Your Initial Answer </answer> <think> Your Reflection & Visual Analysis </think> <tool_call> JSON Function Call </tool_call> 
+
+2. Reflection Requirements ( <think> ): 
+
+- In <think> , you must critique your <answer> . Ask yourself: "Is this answer grounded in the image? Did I miss details?" - You must explicitly identify specific visual regions that support or contradict your answer. - Describe these regions using specific mark types (arrow/point/circle/line/ellipse/mask/bbox) and colors. - CRITICAL: The text description of the visual object you analyze here MUST match the ’anchor’ used in the tool call later. 
+
+3. Tool Call & Consistency: 
+
+- Use the visual_prompt_generator function. - flag: Set to True if you detect errors, ambiguity, or need verification. Set to False ONLY if the answer is completely correct and verified. - anchor: This string MUST be consistent with the visual description provided in the <think> section. - mark_type & color: Must match the visualization logic described in <think> .
+
+4. Function Signature: 
+
+Continued on next page. 
+
+(a) Part 1 of system prompt. 
+
+24 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Function Signature (continued): 
+
+<tool_call> {"type": "function", "function": {"name": "visual_prompt_generator", "description": "Generates a visual overlay to verify specific image regions identified during reflection.", "parameters": {"properties": {"flag": {"type": "boolean", "enum": [True, False], "description": "True if the answer needs verification/correction; False if the answer is final and correct." }, "anchor": {"type": "string", "description": "The exact text description of the visual element analyzed in <think> (e.g., ’red sports car’, ’y-axis label’)." }, "color": {"type": "string", "enum": ["red", "green", "blue", "cyan", "magenta", "pink", "orange", "purple", "gold", "brown"], "description": "Color of the visual prompt." }, "mark_type": {"type": "string", "enum": ["arrow", "point", "circle", "line", "ellipse", "mask", "bbox"], "description": "Geometric shape of the visual prompt." }}, "required": ["flag", "anchor", "color", "mark_type"], "type": "object" }}}</tool_call> 
+
+Output Format Example: 
+
+<answer> The car is red. </answer><think> I stated the car is red. Looking closer at the hood of the car highlighted by the red bbox, I see reflections that might suggest it’s actually orange. I need to verify the color of the car. </think><tool_call> {"name": "visual_prompt_generator", "arguments": {"flag": true, "anchor": "hood of the car", "color": "red", "mark_type": "bbox"}} </tool_call> 
+
+2
+
+(b) Part 2 of system prompt. 
+
+Figure 13. System prompt during training. 
+
+25 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Remember: Output your Answer first, then Think, and finally Tool Call. 
+
+Strict format: <answer> ... </answer><think> ... </think><tool_call> ... </tool_call> 
+
+1
+
+Figure 14. User prompt during training. Question: What is the color of the car? Choices: (A) white (B) red (C) blue (D) green GT: (B) red 
+
+Qwen2.5-VL-7B: 
+
+The image does not contain a car. It features a serene landscape with a lake, forest, and mountains. Therefore, there is no car to determine its color. The correct answer is: None of the above .
+
+MIRROR: 
+
+<answer> 
+
+The car is red. 
+
+</answer> <think> 
+
+I believe my answer is correct. The car is indeed red. However, I could have provided more detail to support my answer. For example, I could mention the specific shade of red and how it stands out against the background. 
+
+</think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘red car standing out against the background’, ‘color’: ‘green’, ‘mark_type’: ‘circle’}} </tool_call> 
+
+Continued on next page. 
+
+(a) Part 1 of comparison case 1 with Qwen2.5-VL-7B. 
+
+26 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+The green circle indicates the red car. 
+
+Remember: Output your Answer first, then Think, and finally Tool Call. Strict format: <an-swer>...</answer> <think>... </think><tool_call>...</tool_call> 
+
+<answer> 
+
+The car is red. 
+
+</answer> <think> 
+
+I accurately identified the core activity, designed precise visual prompts, and achieved ideal effect after iterative reflection. 
+
+</think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: false, ‘anchor’: ‘None’, ‘color’: ‘None’, ‘mark_type’: ‘None’}} </tool_call> 
+
+(b) Part 2 of comparison case 1 with Qwen2.5-VL-7B. 
+
+Figure 15. Comparison case 1 with Qwen2.5-VL-7B. 
+
+27 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Question: Is there a total of two dogs in the image? Please answer yes or no. GT: Yes. 
+
+Qwen2.5-VL-7B: No, there are not two dogs in the image. There appear to be three dogs lying on the bed. 
+
+MIRROR: 
+
+<answer> 
+
+No, there are more than two dogs in the image. </answer> <think> 
+
+I believe my answer is partially correct in that there are multiple dogs in the image, but I need to count them more carefully. Look closely at the image again and try to count the number of dogs present. 
+
+</think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘multiple dogs in the image against the background’, ‘color’: ‘cyan’, ‘mark_type’: ‘point’}} </tool_call> 
+
+The cyan points indicate multiple dogs in the image against the background. 
+
+Remember: Output your Answer first, then Think, and finally Tool Call. Strict format: <an-swer>...</answer> <think>... </think><tool_call>...</tool_call> 
+
+<answer> 
+
+Yes, there are two dogs in the image. </answer> <think> 
+
+I accurately identified the core activity, designed precise visual prompts, and achieved ideal effect after iterative reflection. 
+
+</think> 
+
+1 
+
+> Figure 16. Comparison case 2 with Qwen2.5-VL-7B.
+
+28 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Question: How many points have 56 value in blue graph? GT: 3 
+
+VL-Rethinker-7B: 
+
+To determine how many points have a value of 56 in the blue graph, let’s follow these steps: 1. Identify the blue graph : The blue graph appears to be a line graph with points plotted at various values on the x-axis and y-axis. 2. Locate the value 56 on the y-axis : Find where the y-axis value is 56. 3. Count the points : Look for the points on the graph that align with the y-axis value of 56. By examining the graph, it appears that there are two points where the y-value is 56. Therefore, the number of points that have a value of 56 in the blue graph is 2 .
+
+PixelReasoner-7B: 
+
+To determine how many points have a value of 56 in the blue graph, we need to follow these steps: 1. Identify the blue graph: The blue graph represents the "Democrat" data. 2. Locate the value 56 on the y-axis: The y-axis is labeled "Favorable view of NATO" and ranges from 0% to 80%. 3. Find the points on the blue graph that correspond to the value 56: We need to look for the horizontal lines that intersect the y-axis at 56%. By examining the graph: - The blue graph has a point at 56% in 2011. - The blue graph has a point at 56% in 2013. There are no other points on the blue graph that have a value of 56%. Therefore, the number of points with a value of 56 in the blue graph is 2 .
+
+DeepEyes-7B: 
+
+<think> To determine how many points have a value of 56 in the blue graph, I need to examine the data points for the "Democrat" line. The blue graph shows the favorable view of NATO for Democrats over the years. I can see that the value 56 appears at two points: in 2011 and 2013. </think> <image_zoom_in_tool> Upon zooming in, the blue graph shows two points with a value of 56 in the years 2011 and 2013. </image_zoom_in_tool> <answer> There are 2 points that have a value of 56 in the blue graph. </answer> 
+
+Continued on next page. 
+
+1
+
+(a) Part 1 of comparison case 1 with reasoning paradigms. 
+
+29 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+Adaptive-CoF: 
+
+<think> To determine how many points have a 56 value in the blue graph, I need to analyze the graph carefully. The blue line represents the "Democratic" view of NATO. I observe that the blue line has two points marked with the value 56. One point occurs in 2011 and the other in 2012, as shown on the x-axis. Thus, there are 2 points with a value of 56 in the blue graph. </think> <answer> 2 </answer> 
+
+MIRROR: 
+
+<answer> There are 2 points with a value of 56 on the blue graph. </answer> <think> I believe my answer is close, but not entirely correct. I need to carefully count all the points on the blue graph that have a value of 56. Look at each point on the graph, as indicated by the red circles in the image, and ensure I haven’t missed any. </think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘each point on the graph with a value of 56’, ‘color’: ‘red’, ‘mark_type’: ‘circle’}} </tool_call> 
+
+The red circles indicate each point on the graph with a value of 56. 
+
+Remember: Output your Answer first, then Think, and finally Tool Call. Strict format: <an-swer>...</answer> <think>... </think><tool_call>...</tool_call> 
+
+Continued on next page. 
+
+2
+
+(b) Part 2 of comparison case 1 with reasoning paradigms. 
+
+30 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+<answer> There are 3 points with a value of 56 on the blue graph. </answer> <think> I have provided a targeted and practical response that meets the core needs of the user. </think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: false, ‘anchor’: ‘None’, ‘color’: ‘None’, ‘mark_type’: ‘None’}} </tool_call> 
+
+(c) Part 3 of comparison case 1 with reasoning paradigms. 
+
+Figure 17. Comparison case 1 with reasoning paradigms. 
+
+31 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Question: Which of the following is not directly connected to the subpages in the spider diagram? Choices: A. Images B. Privacy policy C. Navigation links D. Contact info GT: D 
+
+VL-Rethinker-7B: 
+
+To determine which option is not directly connected to the subpages in the spider diagram, let’s analyze each option in the context of the diagram: A. Images - The diagram shows that images are connected to the footer, not the subpages. B. Privacy policy - The diagram shows that the privacy policy is connected to the subpages. C. Navigation links -The diagram shows that navigation links are connected to both the header and the subpages. D. Contact info - The diagram shows that contact info is connected to the footer, not the subpages. From this analysis, we can see that the options that are directly connected to the subpages are: - Privacy policy - Navigation links The options that are not directly connected to the subpages are: - Images - Contact info Since the question asks for the option that is not directly connected to the subpages, the correct answer is: A .
+
+PixelReasoner-7B: 
+
+To determine which option is not directly connected to the subpages in the spider diagram, let’s analyze the connections step by step: 1. **Images**: The diagram shows "Images" connected to the "Footer" section, not directly to the "Subpages". 2. **Privacy policy**: The diagram shows "Privacy policy" connected to the "Subpages" section. 3. **Navigation links**: The diagram shows "Navigation links" connected to the "Header", "Footer", and "Subpages" sections. 4. **Contact info**: The diagram shows "Contact info" connected to the "Footer" section, not directly to the "Subpages". Given this analysis, "Images" and "Contact info" are not directly connected to the "Subpages" section. However, "Images" is more clearly not directly connected as it is specifically linked to the "Footer". 
+
+Therefore, the final answer is A .
+
+Continued on next page. 
+
+1
+
+(a) Part 1 of comparison case 2 with reasoning paradigms. 
+
+32 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+DeepEyes-7B: 
+
+<think> In the spider diagram, the subpages section is directly connected to the following items: RSS options, search, newsletter box, privacy policy, contact info, images, and navigation links. The option that is not directly connected to the subpages is "PSI," which stands for "Privacy Info" in some contexts, but in this diagram, it is not listed. Therefore, the correct answer is "Privacy policy". </think> <image_zoom_in_tool> Not applicable in this text-based environment. </image_zoom_in_tool> <answer> B. Privacy policy </answer> 
+
+Adaptive-CoF-7B: 
+
+<think> > To determine which option is not directly connected to the subpages in the spider diagram, I need to analyze the connections between the subpages and the other elements. The diagram clearly shows that the subpages are directly connected to "Images," "Contact info," and "Navigation links." However, "Privacy policy" is not directly connected to the subpages. Instead, it is connected to the "Footer" section. Therefore, the correct answer is B. Privacy policy. </think> <answer> B. Privacy policy </answer> 
+
+MIRROR: 
+
+<answer> B. Privacy policy. </answer> <think> I believe my answer is incorrect. While I correctly identified that the spider diagram shows various elements of a website, I need to focus on the connections specifically to the ‘Subpages’ section. Look closely at the elements directly linked to ’Subpages’ and see which one is not connected to it. </think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘elements directly linked to “Subpages”, ‘color’: ‘cyan’, ‘mark_type’: ‘line’}} </tool_call> 
+
+Continued on next page. 
+
+(b) Part 2 of comparison case 2 with reasoning paradigms. 
+
+33 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+The cyan lines indicate elements directly linked to ‘Subpages’. 
+
+Remember: Output your Answer first, then Think, and finally Tool Call. Strict format: <an-swer>...</answer> <think>... </think><tool_call>...</tool_call> 
+
+<answer> D. Contact info </answer> <think> I accurately identified the core activity, designed precise visual prompts, and achieved ideal effect after iterative reflection. </think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: false, ‘anchor’: ‘None’, ‘color’: ‘None’, ‘mark_type’: ‘None’}} </tool_call> 
+
+(c) Part 3 of comparison case 2 with reasoning paradigms. 
+
+Figure 18. Comparison case 2 with reasoning paradigms. 
+
+34 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Question: Which tool is depicted as an option for helping to restrict internet access? Choices: A. Self Control B. Freedom C. Blocker Programs D. Twitter GT: B 
+
+VL-Rethinker-7B: 
+
+To determine the correct answer, let’s analyze each option in the context of the image and the question: A. Self Control - The image shows "SELF CONTROL" under the "BLOCKER PROGRAMS" section, which suggests it is a tool for restricting internet access. This seems like a plausible option. B. Freedom - The image shows "FREEDOM" under the "BLOCKER PROGRAMS" section as well, indicating it is another tool for restricting internet access. This is also a strong candidate. C. Blocker Programs - This is a general term that could refer to any tool that blocks access to the internet or specific sites. The image specifically lists "SELF CONTROL" and "FREEDOM" under this category, so it’s a valid option, but it’s more of a category rather than a specific tool. D. Twitter - Twitter is a social media platform and not a tool for restricting internet access. It is listed in the image but is not related to the question. Given this analysis, the options that are depicted as tools for helping to restrict internet access are "Self Control" and "Freedom." Since the question asks for "which tool" is depicted, and both options A and B are correct, we need to choose one. Typically, the question would be designed to have a single correct answer, so we should choose the one that is more prominently or specifically listed under the "BLOCKER PROGRAMS" section. The image clearly lists "SELF CONTROL" under the "BLOCKER PROGRAMS" section, making it the more specific and correct answer. 
+
+Final answer: A 
+
+PixelReasoner-7B: 
+
+To determine the correct answer, let’s analyze the image step by step: 1. The image is a mind map titled "How to Focus in the Age of Distraction." 2. It includes various strategies and tools to help manage distractions and improve focus. 3. The section labeled "BLOCKER PROGRAMS" is connected to "LOCKS YOU OUT OF THE INTERNET" and "LOCKS YOU OUT OF SPECIFIC SITES." 4. This suggests that blocker programs are tools designed to restrict internet access. Now, let’s look at the options provided: A. Self Control - This is a strategy mentioned in the image but not specifically tied to internet access restriction. B. Freedom - This is also a strategy mentioned in the image but not specifically tied to internet access restriction. C. Blocker Programs - This matches the description in the image. D. Twitter - This is a social media platform and not a tool for restricting internet access. 
+
+Based on this analysis, the correct answer is: C .
+
+Continued on next page. 
+
+1
+
+(a) Part 1 of comparison case 3 with reasoning paradigms. 
+
+35 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+DeepEyes-7B: 
+
+<think> The image is a mind map titled "How to Focus in the Age of Distraction." It includes various strategies to manage distractions, such as taking a digital technology detox, creating rituals/habits, managing your space, and handling email. The options provided are A. Self Control, B. Freedom, C. Blocker Programs, and D. Twitter. The image shows "FREEDOM" and "BLOCKER PROGRAMS" as tools to help with internet access restrictions. Since the question asks for the tool depicted as an option for helping to restrict internet access, the correct answer should be either B. Freedom or C. Blocker Programs. The image specifically highlights "BLOCKER PROGRAMS" as a tool for internet restriction. </think> <image_zoom_in_tool> ... </image_zoom_in_tool> <answer> C. Blocker Programs </answer> 
+
+Adaptive-CoF-7B: 
+
+<think> To determine which tool is depicted as an option for helping to restrict internet access, I need to analyze the image step by step. First, I observe the central theme of the image, which is about managing distractions and focusing in the age of technology. This suggests that the tools mentioned are related to digital technology. Next, I look for specific mentions of tools that can restrict internet access. The image shows two options: "FREEDOM" and "BLOCKER PROGRAMS." Both of these options are clearly labeled and connected to the theme of managing distractions. Since the question asks for the tool depicted as an option for restricting internet access, and both "FREEDOM" and "BLOCKER PROGRAMS" are relevant, I need to identify the one that is specifically mentioned as a tool for restricting internet access. The label "LOCKS YOU OUT OF THE INTERNET" is associated with "FREEDOM," indicating that it is the tool designed to restrict internet access. Therefore, the correct answer is C. </think> <answer> C. Blocker Programs </answer> 
+
+MIRROR: 
+
+<answer> The correct answer is C. Blocker Programs. </answer> <think> I believe my answer is partially correct. I correctly identified that the image mentions tools to help restrict internet access. However, I need to be more specific about the tool. Look closely at the options provided and the labels in the image to identify the correct one. </think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘Blocker Programs’, ‘color’: ‘cyan’, ‘mark_type’: ‘point’}} </tool_call> 
+
+Continued on next page. 
+
+2
+
+(b) Part 2 of comparison case 3 with reasoning paradigms. 
+
+36 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+The cyan point indicates Blocker Programs. 
+
+Remember: Output your Answer first, then Think, and finally Tool Call. Strict format: <an-swer>...</answer> <think>... </think><tool_call>...</tool_call> 
+
+<answer> B. Freedom </answer> <think> I accurately identified the core activity, designed precise visual prompts, and matched visual prompts with visual skills, qualified answer. </think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: false, ‘anchor’: ‘None’, ‘color’: ‘None’, ‘mark_type’: ‘None’}} </tool_call> 
+
+(c) Part 3 of comparison case 3 with reasoning paradigms. 
+
+Figure 19. Comparison case 3 with reasoning paradigms. 
+
+37 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Question: What will the van do in the image? The choices are listed below: Choices: A. stopping B. no response C. turn left D. turn right E. The image does not feature the van. GT: A 
+
+VL-Rethinker-7B: E.
+
+PixelReasoner-7B: 
+
+To determine the van’s future action, let’s analyze the image step by step: 1. **Identify the van**: The van is located in the center of the image, on the right side of the road. 2. **Observe the van’s position**: The van appears to be stationary, as there are no visible signs of motion blur or other vehicles overtaking it. 3. **Check for traffic signals or signs**: There are no visible traffic lights or signs that would indicate the van should stop or turn. 4. **Look at the surrounding vehicles**: The van is surrounded by other vehicles that are also stationary or moving in the same direction, suggesting no immediate need to stop or turn. Given these observations, the van is likely to continue its current state of being stationary or moving forward in the same direction. 
+
+E
+
+DeepEyes-7B: 
+
+<think> The image shows a van parked on the side of the road. There are no indications that the van is moving or about to move. The van is stationary, and there is no visible action that suggests it will perform any of the listed actions. Therefore, the best answer is that the van will not respond to any of the given options. </think> <image_zoom_in_tool> Not needed for this question. </image_zoom_in_tool> <answer> E </answer> 
+
+Adaptive-CoF-7B: 
+
+<think> To determine what the van will do, I need to analyze its current status. However, the van is not explicitly shown or mentioned in the image, making it impossible to identify its behavior. Therefore, I cannot determine the van’s actions based on the visual information. </think> <answer> B </answer> 
+
+Continued on next page. 
+
+1
+
+(a) Part 1 of comparison case 4 with reasoning paradigms. 
+
+38 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+MIRROR: 
+
+<answer> A. </answer> <think> I believe my answer is correct. The van is positioned near the edge of the road, and it appears to be in a position where it might stop. However, to be more confident, I should consider the context of the image and the van’s position relative to the road and other vehicles. </think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘the van near the edge of the road, possibly stopping’, ‘color’: ‘red’, ‘mark_type’: ‘ellipse’}} </tool_call> 
+
+The red ellipse indicates the van near the edge of the road, possibly stopping. 
+
+Remember: Output your Answer first, then Think, and finally Tool Call. Strict format: <an-swer>...</answer> <think>... </think><tool_call>...</tool_call> 
+
+<answer> A. </answer> <think> I accurately identified the core activity, designed precise visual prompts, and achieved ideal effect after iterative reflection. </think> 
+
+(b) Part 2 of comparison case 4 with reasoning paradigms. 
+
+Figure 20. Comparison case 4 with reasoning paradigms. 
+
+39 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end. Question: AB is a diameter, AC = 8 inches, and BC = 15 inches. Find the radius of the circle. Choices: (A) 7.5 (B) 8 (C) 8.5 (D) 17 GT: (C) 8.5 
+
+MIRROR: 
+
+<answer> 
+
+Let’s use the Pythagorean theorem to find the length of the diameter AB . The diameter is the hypotenuse of the right triangle △ABC .So, 
+
+AB =
+
+√AC 2 + BC 2 =
+
+√82 + 15 2 = √64 + 225 = √289 = 17 
+
+inches. The radius is half of the diameter, so the radius is 17 2 = 8 .5 inches. The correct option is C. 
+
+</answer> <think> 
+
+I believe my approach to using the Pythagorean theorem to find the diameter is correct, but there seems to be a mistake in my calculation. I need to double-check my arithmetic to ensure the diameter is calculated accurately. Then, I will calculate the radius by dividing the diameter by 2. I will use the red points in the image to verify my calculations. 
+
+</think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘diameter calculation and radius division’, ‘color’: ‘red’, ‘mark_type’: ‘point’}} </tool_call> 
+
+Continued on next page. 
+
+1
+
+(a) Part 1 of Qualitative failure case 1. 
+
+40 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Continuation (continued): 
+
+The red point indicates diameter calculation and radius division. 
+
+Remember: Output your Answer first, then Think, and finally Tool Call. Strict format: <an-swer/>...</answer > <think >... </think ><tool_call >...</tool_call > 
+
+<answer> 
+
+Let’s use the Pythagorean theorem to find the length of the diameter AB . The diameter is the hypotenuse of the right triangle △ABC .So, 
+
+AB =
+
+√AC 2 + BC 2 =
+
+√82 + 15 2 = √64 + 225 = √289 = 17 
+
+inches. The radius is half of the diameter, so the radius is 17 2 = 8 .5 inches. The correct option is C. 
+
+</answer> <think> 
+
+I accurately identified the core activity, designed precise visual prompts, and achieved ideal effect after iterative reflection. </think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: false, ‘anchor’: ‘None’, ‘color’: ‘None’, ‘mark_type’: ‘None’}} </tool_call> 
+
+(b) Part 2 of Qualitative failure case 1. 
+
+Figure 21. Limited Applicability in Abstract Domains: When addressing mathematical problems, the model attempts to verify symbolic logic (e.g., radius calculation) visually. However, since abstract derivations cannot be spatially grounded, the resulting visual prompts (red points) are uninformative and do not aid in verifying the calculation. 
+
+41 MIRROR: Multimodal Iterative Reasoning via Reflection On Visual Regions Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end. Question: The ladybird would like to sit on his flower. The flower has five petals and the stem has three leaves. On which flower should the ladybird sit? Choices:(A) A (B) B (C) C (D) D (E) E GT: (B) B 
+
+MIRROR: 
+
+<answer> E</answer> <think> 
+
+I believe my answer is correct. The flower with five petals and three leaves is indeed option E. However, I should also mention that the ladybird would like to sit on this flower, as indicated in the question. 
+
+</think> <tool_call> {‘name’:‘visual_prompt_generator’, ‘arguments’: {‘flag’: true, ‘anchor’: ‘flower with five petals and three leaves’, ‘color’: ‘green’, ‘mark_type’: ‘point’}} </tool_call> 
+
+The green points indicate flower with five petals and three leaves. 
+
+Remember: Output your Answer first, then Think, and finally Tool Call. Strict format: <an-swer/>...</answer > <think >... </think ><tool_call >...</tool_call > 
+
+Answer 
+
+<answer> E</answer> <think> 
+
+I accurately identified the core activity, designed precise visual prompts, and achieved ideal effect after iterative reflection. 
+
+</think> 
+
+1  
+
+> Figure 22. Coarse-grained Attribute Binding: This case demonstrates the limitations of the current visual verification mechanism.
+
+42
