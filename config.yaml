@@ -25,3 +25,48 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: VLM RL
+      description: 查找vision-language agentic rl及vision-language reasoning相关的文章，排除diffusion model、robotics、video和audio。
+      enabled: true
+      keywords:
+        - keyword: vision-language agent
+          keyword_cn: 视觉语言智能体
+          query: vision-language agentic reinforcement learning
+        - keyword: multimodal RL
+          keyword_cn: 多模态强化学习
+          query: multimodal reinforcement learning with vision and language
+        - keyword: vision-language reasoning
+          keyword_cn: 视觉语言推理
+          query: reasoning in vision-language models
+        - keyword: VLM agent
+          keyword_cn: 视觉语言模型智能体
+          query: vision-language model based agents
+        - keyword: visual reasoning
+          keyword_cn: 视觉推理
+          query: visual reasoning and decision making
+        - keyword: multimodal reasoning
+          keyword_cn: 多模态推理
+          query: multimodal reasoning for reinforcement learning
+      intent_queries:
+        - query: vision language reinforcement learning for agentic reasoning
+          query_cn: 用于智能体推理的视觉语言强化学习
+          enabled: true
+          source: manual
+          note: ''
+        - query: advancements in vision language reasoning agents
+          query_cn: 视觉语言推理智能体的进展
+          enabled: true
+          source: manual
+          note: ''
+        - query: multimodal agentic reinforcement learning without robotics
+          query_cn: 非机器人领域的多模态智能体强化学习
+          enabled: true
+          source: manual
+          note: ''
+        - query: vision language models for complex reasoning tasks
+          query_cn: 用于复杂推理任务的视觉语言模型
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-18T09:57:38.662Z'
