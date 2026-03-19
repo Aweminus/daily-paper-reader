@@ -1,0 +1,374 @@
+Title: CrystaL: Spontaneous Emergence of Visual Latents in MLLMs
+
+URL Source: https://arxiv.org/pdf/2602.20980v1
+
+Published Time: Wed, 25 Feb 2026 02:11:46 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+Yang Zhang 1 * Danyang Li 1 * Yuxuan Li 1 † Xin Zhang 1 Tianyu Xie 2 Mingming Cheng 1 Xiang Li 3 1 †
+
+# Abstract 
+
+Multimodal Large Language Models (MLLMs) have achieved remarkable performance by inte-grating powerful language backbones with large-scale visual encoders. Among these, latent Chain-of-Thought (CoT) methods enable implicit rea-soning in continuous hidden states, facilitating seamless vision–language integration and faster inference. However, existing heuristically prede-fined supervision signals in latent CoT provide limited guidance for preserving critical visual in-formation in intermediate latent states. To ad-dress this limitation, we propose CrystaL (Crys-tallized Latent Reasoning), a single-stage frame-work with two paths to process intact and cor-rupted images, respectively. By explicitly align-ing the attention patterns and prediction distribu-tions across the two paths, CrystaL crystallizes latent representations into task-relevant visual semantics, without relying on auxiliary annota-tions or external modules. Extensive experiments on perception-intensive benchmarks demonstrate that CrystaL consistently outperforms state-of-the-art baselines, achieving substantial gains in fine-grained visual understanding while maintain-ing robust reasoning capabilities. 
+
+# 1. Introduction 
+
+The rapid evolution of Multimodal Large Language Mod-els (MLLMs) (Liu et al., 2023) has significantly bolstered general-purpose vision-language understanding through the integration of large-scale visual encoders and potent lan-guage backbones. By scaling model capacity and diversi-fying multimodal training corpora, recent systems (Chen et al., 2024; Bai et al., 2025; Wang et al., 2024; Yang et al., 2025a; Zhu et al., 2025) have achieved remarkable per-formance across a broad spectrum of tasks (Zhang et al., 
+
+> *
+
+Equal contribution 1VCIP, School of Computer Science, Nankai University 2Xiamen University 3Nankai International Advanced Research Institute (Shenzhen Futian). Correspon-dence to: Yuxuan Li <yuxuan.li.17@ucl.ac.uk >, Xiang Li <xi-ang.li.implus@nankai.edu.cn >.
+
+Preprint. February 25, 2026. 
+
+2025c; Li et al., 2026; Zhao et al., 2025b;a). To further cultivate complex reasoning, many MLLMs incorporate ex-plicit reasoning mechanisms inspired by Chain-of-Thought (CoT) (Zhang et al., 2023; Shao et al., 2024), which partition intricate queries into intermediate inferential steps. There are three main paradigms that exist for multimodal CoT, distinguished by their reasoning space. Textual CoT (Xu et al., 2025) converts visual inputs into discrete nat-ural language rationales, while tool-augmented CoT (Zheng et al., 2025) extends this space with dedicated tokens to invoke external modules. In contrast, latent CoT (Chen et al., 2025; Gao et al., 2025; Yang et al., 2025b) performs reasoning directly in continuous hidden states, preserving visual information, avoiding quantization loss, and enabling seamless integration of vision and language. This leads to faster inference and more coherent multimodal reasoning, driving recent advances in interleaved text–image tasks (Su et al., 2025; Zhang et al., 2025a). Despite these advantages, early latent CoT methods face a limitation: existing supervision signals are often not fully aligned with the nature of latent reasoning. In contrast to textual CoT, where the next-token prediction objective explicitly constrains each intermediate reasoning step, latent CoT relies on supervision that is only indirectly related to the underlying reasoning process. Specifically, the standard next-token loss provides supervision only at the final output level, offering little guidance on how intermediate latent states should encode or preserve critical visual evidence. To compensate for this mismatch, prior works introduce auxiliary supervision from external vision models such as CoVT (Qin et al., 2025) or human-annotated images such as Monet (Wang et al., 2025a), which is at the price of ex-ternal modules. However, such signals are heuristic and task-dependent, as they enforce similarity to pre-defined visual features rather than directly supervising reasoning fi-delity. Although recent work such as LIVR (Li et al., 2025b) attempts to address this problem via enforcing visual bottle-necks through attention masking, such approaches require multi-stage training pipelines and still cannot guarantee that latent tokens are functionally aligned with the final gener-ation objective. Consequently, such regularization fails to ensure that the latent space maintains semantically grounded visual information. This limitation indicates that the chal-1
+
+> arXiv:2602.20980v1 [cs.CV] 24 Feb 2026
+
+CrystaL: Spontaneous Emergence of Visual Latents in MLLMs d  
+
+> Vision Language Model
+> Align
+> Rely on additional data
+> Manual
+> annotation
+> b
+
+# / intact / corrupted image token  prompt token  visual latent token / intact / corrupted answer token     
+
+> a
+> Vision Language Model
+> Specific Model
+> Rely on external specific model
+> external feature
+> c
+> Vision Language Model
+> Align
+> corrupted sample
+> intact sample
+> No additional data !
+> No specific model!
+> CrystaL(Ours)
+
+Figure 1. Previous Paradigms vs. Our Paradigm (CrystaL). (a) describes the paradigm of supervising visual latent tokens via predefined features from specific models, such as SAM (Kirillov et al., 2023), DINO (Caron et al., 2021). (b) denotes the process of modifying original image to guide the reasoning steps. (c) While other methods use auxiliary modules or data to train the visual latent token, CrystaL can do it by self-supervising in a single-stage. 
+
+lenge lies not in the absence of supervision, but in the in-adequacy of existing supervision paradigms to effectively guide latent reasoning. In contrast, we propose CrystaL (Crystallized Latent Rea-soning), a principled single-stage framework designed to resolve the misalignment between existing supervision sig-nals and latent reasoning, through a consistency-driven train-ing paradigm. Unlike prior works that necessitate complex multi-stage pipelines, CrystaL employs a dual-path architec-ture comprising a intact path and a corrupted path . Specifi-cally, the intact path undergoes standard multimodal training on intact images, while the corrupted path processes visu-ally degraded counterparts. Visual latent representations are copied from the intact path to the corrupted one, enabling the model to recover the ground-truth answer despite the corrupted input. To ensure that these latents are function-ally indispensable, we minimize the divergence between the paths’ cross-path attention patterns and output distributions. By enforcing such cross-path consistency, we guide the la-tent states to “crystallize” into targeted visual semantics which compensate for the corrupted images. By virtue of this consistency-driven objective, CrystaL en-courages latent representations to anchor targeted visual in-formation in a fully self-supervised and task-aligned manner, effectively eliminating the dependence on external priors or manual annotations. Empirical evaluations on perception-intensive benchmarks (including CVBench (Tong et al., 2024), HRBench (Wang et al., 2025b), and VStarBench (Wu & Xie, 2024)) demonstrate that CrystaL yields substantial gains in fine-grained visual understanding while maintaining robust reasoning capabilities. Specifically, CrystaL achieves 76.6% on 2D CVBench, 84.4% on 3D CVBench, 73.4% on 4K HRBench, and 71.1% on 8K HRBench, surpassing CoVT and LIVR by substantial margins, while also yielding the highest average score (75.4%) across all benchmarks (See Table 2). These results suggest that CrystaL provides a scalable and semantically grounded solution to the long-standing challenge of misalignment between supervision signals and visual latent reasoning. By ensuring that la-tent inferential steps remain coupled with visual evidence, CrystaL facilitates a more reliable multimodal intelligence. In summary, this work makes the following contributions: 1. We propose CrystaL , a principled single-stage latent CoT framework that guides latent representations to capture task-relevant visual information, enabling efficient and coherent multimodal reasoning. 2. We introduce a dual-path consistency objective that pro-vides task-aligned self-supervision for latent representations, independent of auxiliary annotations or external modules. 3. Extensive experiments demonstrate that CrystaL substan-tially improves vision-dependent reasoning performance across multiple perception-intensive benchmarks, outper-forming strong baselines while maintaining efficient training and inference. 
+
+# 2. Related Work 
+
+2.1. Multimodal Chain-of-Thought Reasoning 
+
+Inspired by the success of CoT approaches in pure language models, recent research has focused on endowing MLLMs with similar multi-step reasoning capabilities. Early text-based CoT methods employed prompts to guide models in generating explicit reasoning steps before providing final answers (Zhang et al., 2023; 2025b; Xu et al., 2025). Whilst 2CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+effective for scientific Q&A and mathematical problems (Lu et al., 2023), these approaches remain constrained by the limited expressiveness of discrete linguistic symbols when describing continuous visual details. Models tend to rely on self-generated text rather than raw visual inputs, leading to information loss and hallucination phenomena (Wu et al., 2025b; Dong et al., 2025). To address this, tool-augmented frameworks such as Deep-Eyes (Zheng et al., 2025) and Visual Programming (Gupta & Kembhavi, 2023) delegate perception tasks to external vi-sion models. However, such pipelines are non-differentiable and heavily reliant on the quality of off-the-shelf tools. Re-cent hybrid approaches attempt to achieve visually anchored reasoning by interleaving visual features with text (Su et al., 2025), but these typically require costly human annotation of reasoning trajectories or bounding box supervision. In contrast, our proposed CrystaL framework cultivates an in-trinsic reasoning capability that is fully differentiable and self-supervised, eliminating reliance on external tools or dense annotations. 
+
+2.2. Latent Space Reasoning 
+
+Moving beyond explicit text generation, research focus has shifted towards latent reasoning, wherein the inferential pro-cess unfolds within a sequence of hidden states. Within the realm of pure language models, Coconut (Hao et al., 2024) and Quiet-STaR (Zelikman et al., 2024) demonstrate that models can engage in ‘thinking’ through implicit vectors prior to generating output responses, without requiring ver-bose textual expressions. This paradigm is now extending to multimodal large language models. For instance, Mint-CoT (Chen et al., 2025) establishes a mapping between patch indices and visual tokens to provide direct supervision. Monet introduces a specialized dataset featuring images that describe reasoning trajectories, supervising intermediate steps by aligning token features with dataset images. Sim-ilarly, CoVT (Qin et al., 2025) leverages external visual models to supervise the latent features of visual tokens. However, these approaches rely on generic language model-ing objectives (next-token prediction) and do not explicitly penalise the utility of visual information within reasoning. In contrast, our work distinguishes itself by introducing a visual consistency objective, explicitly compelling implicit inference chains to preserve targeted visual semantics even when inputs are corrupted. 
+
+2.3. Self-Supervised Visual Representation Learning 
+
+Our training paradigm draws inspiration from the success of self-supervised learning in computer vision. Masked image modeling (He et al., 2022) and contrastive learning (Chen et al., 2020; Grill et al., 2020) demonstrate that robust vi-sual representations can be learned by either reconstructing                                  
+
+> Table 1. Key properties of visual latent reasoning methods.
+> In contrast to prior works like Aurora (Bigverdi et al., 2025), SKILA (Tong et al., 2025), LVR (Li et al., 2025a), LIVR, and CoVT, our CrystaL is the only framework that simultaneously satisfies all criteria. Specifically, it eliminates the need for auxiliary modules and supplementary image labels while enabling efficient one-stage training. Symbols in green denote desired properties, while those in red denote undesired ones.
+> Desired Properties Aurora SKILA LVR LIVR CoVT Ours
+> No extra module ✗✗✓✓✗✓
+> No extra images needed for training ✓✗✓✓✓✓
+> One-stage training ✗✓✗✗✗✓
+> Reason in the continuous space ✗✓✓✓✓✓
+
+corrupted inputs. While these methods are originally de-signed for pretraining conventional encoders, recent studies on multimodal large language models began applying these principles during post-training alignment (Li et al., 2025c). For instance, visual Jigsaw (Wu et al., 2025a) enhances fine-grained perception through a jigsaw puzzle task, and CapPO (Tu et al., 2025) reduces hallucination via caption consistency. However, these approaches typically operate at the output level. In contrast, CrystaL applies consistency regularization directly within the latent reasoning space, requiring that implicit states derived from intact images effectively restore the model’s reasoning capability on cor-rupted inputs—thus grounding reasoning firmly in visual content. 
+
+# 3. Method 
+
+We propose CrystaL, a single-stage dual-path framework that instills robust latent reasoning into MLLMs via Latent Crystallization, which anchors targeted semantics into dedi-cated latent tokens. We first introduce the chain of thought reasoning in Sec. 3.1. We then introduce Stochastic Image Corruption (SIC) in Sec. 3.2. Next we describe the dual-path framework used to enforce latent-level dependencies in Sec. 3.3. Finally we formulate the objective of optimization in Sec. 3.4 and Sec. 3.5 
+
+3.1. Reasoning with Chain of Thoughts 
+
+In the context of Multimodal Large Language Models (MLLMs), let M denote the model. Given a visual in-put I and a textual query Q, the model generates an output sequence Y = {Y0, Y 1, . . . , Y n} token by token. The gener-ation process is formulated as: 
+
+PM(Y |I, Q ) = Y
+
+> i
+
+PM(Yi|Y<i , I, Q ), (1) where Y<i represents the sequence of tokens predicted prior to step i. In standard Fine-tuning for Visual Question An-swering (VQA), the objective is to maximize the likelihood of the ground-truth answer PM(Ans |I, Q ).3CrystaL: Spontaneous Emergence of Visual Latents in MLLMs VLM 
+
+…
+
+… …
+
+…
+
+…
+
+…
+
+…
+
+…
+
+> <|end|>
+
+# 𝑳𝑳 𝑲𝑲 𝑳𝑳 𝑲𝑲 
+
+# / intact / corrupted image token  prompt token  visual latent token  
+
+> normal forward damaged forward
+
+# / intact / corrupted answer token 
+
+(a) CrystaL forward pipline  (b) Attention map alignment  
+
+> Q: Answer Tokens
+> K:  Latents
+> From intact forward
+> From corrupted forward
+
+align  
+
+> LLM Layer -1
+
+extract           
+
+> Figure 2. An overview of CrystaL. (a) Starting by corrupting the raw image, we construct two types of visual tokens from vision encoder. Then both the Sint and Scor in Sec. 3.3 are fed into the model to compute the Pint and Pcor . But the hidden states of corrput forward (dashed arrow) indeed come from the the intact forward (solid arrow). For the objective function, we adopt a combination of cross entropy loss and alignment loss, the attention map alignment is illustrated in (b).
+
+To enhance the model’s complex reasoning capabilities, we incorporate the Chain-of-Thought (CoT) paradigm. Un-der this setting, the objective function is based on a joint probability distribution: 
+
+PM(Ans, CoT |I, Q ), (2) where CoT represents a sequence of intermediate reasoning steps. The introduction of CoT effectively decomposes the complex mapping from visual-textual inputs to the final answer, allowing the model to allocate more computational steps to internal logic before arriving at a conclusion. While conventional CoT sequences consist of discrete tex-tual tokens, the concept of Latent CoT has been proposed. In this formulation, reasoning steps are represented as con-tinuous latent variables within the model’s hidden space. Our framework primarily supervises the representations in the latent space during training to preserve high-dimensional semantic nuances that discrete tokens might fail to capture. 
+
+3.2. Visual Corruption as Information Bottleneck 
+
+A fundamental challenge in training latent reasoning models is to ensure the visual latent tokens used, since raw visual tokens often contain sufficient cues for the model to answer the question, it tends to skip these latent reasoning paths. This implicitly hinders the emergence of genuine visual latent reasoning, as the model arrives at answers without ef-fectively engaging the continuous hidden states. To address this, we introduce the Stochastic Image Corruption (SIC) 
+
+module. SIC acts as a generalized operator C that maps the high-fidelity image I into a degraded observation Icor :
+
+Icor = C(I; η, S), η ∼ p(H), (3) where S denotes the corruption mode and η is the stochastic intensity sampled from a prior distribution p(H). To explore the resilience of latent reasoning, we consider a diverse library of corruption primitives S ∈ {G , K, V, N } :• Spectral Decay ( G): Gaussian-based low-pass filtering that suppresses high-frequency textures while preserv-ing global topology. • Spatial Discontinuity ( K): Random cropping, mask-ing, or Jigsaw shuffling that disrupts the geometric coherence of visual evidence. • Chromatic Distortion ( V): Jittering color distribu-tions to isolate semantic shape from pixel-level inten-sity by decoupling invariant structural geometry from transient global photometric fluctuations. • Stochastic Noise ( N ): Additive Gaussian or impulse noise to the input tensors. 
+
+3.3. Dual-Path Latent Reasoning Framework 
+
+The model processes the multimodal query through two parallel streams illustrated in Fig. 2. During training, the 
+
+causal attention mechanism allows the computation of output logits for the entire sequence in a single forward pass. Specifically, for an input containing an image I and text sequence text = {t1, t 2, . . . , t L} of length L, the model M
+
+can generate a sequence of hidden states H = {h1, . . . , h L},which are subsequently mapped to the predicted probability distributions (logits) over the vocabulary V at each position. So in the training stage the labels directly come from the shifted sequence. As we add several pad tokens to shape the CoT = {intermediate steps, < visual tokens > },4CrystaL: Spontaneous Emergence of Visual Latents in MLLMs GT     
+
+> corrupted
+> answer token
+> visual latent token
+> Question …
+> Question …
+> copy
+> <|end|>
+> corrupt
+> copy forward concat
+> …
+> Intact path: upper
+> Corrupted path: lower
+> Figure 3. Detailed illustration of visual latent token copying.
+> For the forward process, the autoregressive hidden states of visual latent tokens in the corrupted path is copied from the intact path.
+
+the sequence is like {I, Q, CoT, Ans }, where Ans is the ground-truth answer. Then we process the sequence in the dual-path framework. 
+
+The Intact Path. This path receives the high-fidelity image Iint = I. The input sequence is formulated as 
+
+Sint = {Iint , Q, CoT, Ans }. As the “teacher” stream, it leverages complete visual evidence to compute the latent states value of visual tokens Tlat = {T1, T 2, . . . , T l} (l
+
+represents the number of layers of the language model) to provide the raw information of an intact sample such that the corrupted path will borrow the latents to conduct the “crytalization” operation. And the intact path naturally gen-erates the logits Pint for the computation of cross entropy loss and work as a reference of the corrupted path. 
+
+The Corrupted Path. This path operates on the perturbed image Icor = C(I). The corresponding input sequence 
+
+Scor = {Icor , Q, CoT, Ans }. We enforce a latent-level dependency by replacing the latent representations at each decoder layers in the corrupted path with corresponding latents in Tlat derived from the intact path. The model then generates the logits Pcor for the perturbed sequence. By constructing the dual-path framework, we bypass the difficulty of labeling data by hand to supervise the visual tokens. Because the Tlat with complementary information from intact path will facilitate the corrupted path, which enforce the visual tokens to work as indispensible ingredient of reasoning. The supervision from the next token loss will naturally work on the visual tokens. 
+
+3.4. Alignment Objectives 
+
+As the above dual-path framework constructs the base of “crystalization”, the hidden states Tlat has been copied from the intact path to the corrupted path. Then we need to supervise the model to motivate the Tlat to absorb the robust feature of the image. 
+
+Predictive Distribution Consistency ( Lkl ). To effec-tively anchor the reasoning process within the latent space, we supervise the corrupted path using the high-fidelity out-puts of the intact path as a reference. This is achieved through a consistency-driven alignment objective applied to the predictive distributions. Specifically, the objective is to conduct a logit-level loss be-tween Pint and Pcor , targeting at the tokens corresponding to the ground-truth Ans . This targeted alignment compels the latent reasoning states to “crystallize” into targeted vi-sual representations that are functionally indispensable for the final generative process. To ensure that the model maintains robust decision-making despite visual degradation, we minimize the Kullback-Leibler (KL) divergence between the output probability distributions of the two paths. Specifically, this loss is cal-culated over the tokens corresponding to the ground-truth answer A = {a1, . . . , a M }, forcing the corrupted path to emulate the predictive confidence of the intact path: 
+
+Lkl = 1
+
+M
+
+X
+
+> i∈ΩA
+
+DKL (P(ˆ yi|Sint ) ∥ P (ˆ yi|Scor )) , (4) where ΩA denotes the set of indices for the answer tokens, and P(ˆ yi|· ) represents the predicted probability distribution over the vocabulary V at the i-th position. By optimizing this objective, we compel the model to recover the targeted semantics from the transferred latent tokens Tlat , bridging the gap caused by the input corruption. 
+
+Mechanistic Consistency ( Lattn ). While predictive con-sistency aligns the final outputs, it does not inherently guar-antee that both path follow the same inferential pattern. We then enforce consistency within the internal attention mechanism. Specifically, we constrain the attention weights assigned by the answer tokens to the visual latent tokens. Let A ∈ RH×M ×K denote the aggregated attention maps across H heads, representing the attention scores from M
+
+answer tokens to K latent tokens. We minimize the squared Frobenius norm of the discrepancy between the two paths: 
+
+Lattn = El∈L sub A(l) 
+
+> int
+
+− A(l)
+
+> cor
+> 2
+> F
+
+, (5) where Lsub represents a selected subset of decoder layers. By optimizing Lattn , we ensure that even when fine-grained visual details are neutralized, the model’s reasoning be-havior—reflected in its localized attention over the latent space—remains stable and firmly grounded in the semantic representations encoded by the visual latent tokens distilled from the original image. 
+
+3.5. Overall Training Objective 
+
+To facilitate latent crystallization while preserving the fun-damental instruction-following and generative capabilities 5CrystaL: Spontaneous Emergence of Visual Latents in MLLMs                                                                                                       
+
+> Table 2. Comparison of model performance across diverse visual benchmarks. The results highlight CrystaL’s superior capabilities comparing with baselines including Qwen2.5-VL-7B (Bai et al., 2025).
+> CVBench HRBench Method 2D 3D 4K 8K BLINK RWQA V* POPE Average Closed-source Methods
+> Claude-4-Sonnet --32.3 22.7 39.6 63.7 15.2 --GPT-4o --50.6 46.7 63.0 69.7 42.9 --
+> Open-source Methods
+> Qwen2.5-VL-7B 75.0 73.3 68.6 64.9 55.7 68.6 76.4 86.5 71.1 CoVT (Qin et al., 2025) 75.1 84.7 71.0 69.4 56.0 71.6 78.0 84.6 73.8 LVR (Li et al., 2025a) --69.6 66.1 52.5 67.7 81.7 --Vision-R1 (Huang et al., 2025) 8.0 37.6 64.8 57.0 51.0 9.4 80.1 77.8 48.2 LIVR (Li et al., 2025b) 73.9 82.7 72.4 69.0 56.3 69.2 79.1 89.5 74.0 SKILA (Tong et al., 2025) --72.0 66.5 56.7 70.5 84.3 87.3 -
+> Our Method CrystaL 76.6 84.4 73.4 71.1 55.9 70.6 82.7 88.7 75.4
+> ∆(vs Qwen2.5-VL-7B) +1.6 +11.1 +4.8 +6.2 +0.2 +2.0 +6.3 +2.2 +4.3
+
+of the MLLM, we integrate the proposed alignment objec-tives with the cross entropy loss into a unified single-stage 
+
+optimization framework. 
+
+Cross Entropy Loss Lint ce and Lcor ce . A cross-entropy loss on the corrupted path, denoted as Lcor ce , encourages the model to seek information from the visual latent tokens when the visual input is corrupted and thus unavailable, thereby enabling the latent representations to encode mean-ingful visual information. In order to keep the model output the sequence in the format of standard chain of thought, a cross entropy loss in the intact path Lint ce is also introduced. 
+
+Lint ce will then enforce the model make use of the visual latent tokens to keep reasoning ability in the vanilla mode where the image is intact. The total training loss is formulated as a combination of the generative and consistency-driven terms: 
+
+Ltotal = Lint ce + Lcor ce + Lkl + Lattn , (6) where Lint ce and Lcor ce denote the standard next-token predic-tion losses (cross-entropy) computed on the intact and cor-rupted paths, respectively. Under this unified formulation, the model is incentivized not only to generate coherent textual responses but also to actively encode task-essential visual semantics into the specialized latent tokens Tlat . As a result, Tlat functions as a repository of semantic invariants that capture high-level visual evidence capable of sustaining complex reasoning even under severely degraded perceptual conditions. This objective ensures the emergence of a latent reasoning path that is both consistent across diverse visual views and 
+
+deeply grounded in the underlying visual logic, providing a scalable solution to the challenge of misalignment between supervision signals and visual latent CoT. 
+
+# 4. Experiment 
+
+4.1. Experimental Setup Training Configurations We fine-tune our model using LoRA (Hu et al., 2022) with a rank r = 16 and an alpha 
+
+α = 32 . The learning rates are set to 2 × 10 −4 for LoRA adapters. All experiments are conducted on a workstation equipped with 4 × NVIDIA A40 GPUs. 
+
+Benchmarks. We evaluate all models using VLMEvalKit (Duan et al., 2024), a standardized evaluation framework for multimodal large language models. To comprehensively assess the visual perception and reasoning capabilities of CrystaL, we conduct experi-ments across multiple representative benchmarks covering complementary evaluation aspects. We adopt RealWorldQA (RWQA) (Zhang et al., 2024), BLINK (Fu et al., 2024), V*Bench (V*) (Wu & Xie, 2024), and HRBench (HR4K and HR8K) (Wang et al., 2025b). These benchmarks focus on fine-grained visual understanding, compositional reasoning, and high-resolution image comprehension, encompassing challenging real-world scenarios such as complex visual layouts and detailed spatial relations. To further examine the robustness of CrystaL against multimodal hallucination, we evaluate our model on POPE (Li et al., 2023), which is specifically designed to diagnose hallucinated visual claims in MLLMs. 
+
+Baselines. We compare CrystaL with several represen-tative methods that explore latent or explicit reasoning in multimodal models. LVR is a two-stage framework that performs supervised fine-tuning followed by reinforcement learning to induce latent visual reasoning. SKILA intro-duces a sketch-in-latent paradigm, aiming to elicit unified 6CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+Figure 4. Comparison of performance and training data size. 
+
+Our method achieves superior performance while utilizing signif-icantly fewer samples than baselines, demonstrating exceptional data efficiency. 
+
+multimodal reasoning by encoding structured visual abstrac-tions into latent representations. LIVR constructs an im-plicit visual bottleneck via non-causal attention masking, encouraging the model to rely on latent visual cues rather than direct pixel-level features. Vision-R1 (Huang et al., 2025) enhances multimodal reasoning ability through a com-bination of supervised fine-tuning and reinforcement learn-ing, focusing on reasoning behavior rather than directly supervising by visual grounding. 
+
+4.2. Quantitative analysis 
+
+Comprehensive results are summarized in Table 2, where the data reveals that CrystaL sets a new state-of-the-art across most benchmarks, achieving a leading average score of 75.4%. Specifically, CrystaL demonstrates a significant advantage in high-resolution perception, outperforming the baseline Qwen2.5vl by 4.8% and 6.2% on the challenging HRBench 4K and 8K tracks. Furthermore, while models like LIVR and SKILA show competitive results in specific hallucination or video bench-marks (e.g., POPE and VStarBench), CrystaL maintains the most balanced performance profile. The comparative degra-dation of Vision-R1 in CVBench-2D and RWQA highlights the robustness of our architectural design in maintaining multimodal reasoning consistency. 
+
+Data Efficiency. We evaluate the training efficiency of our framework by comparing the performance against vari-ous baselines on the intersection of benchmarks, including BLINK, HRBench, RealWorld-QA, and VStarBench. As illustrated in Fig. 4, our method achieves a state-of-the-art accuracy using only 16k training samples. Notably, this outperforms SKILA, which requires 100k samples. This comparison highlights that our latent reasoning mechanism enables the model to achieve superior multimodal under-standing with over 6× fewer data, demonstrating a signifi-
+
+Table 3. Ablation on the quantity and content of latent reason-ing tokens. The upper section denotes configurations using same tokens, while the lower section utilizes diverse tokens.                                                       
+
+> Quantity CV 2DCV 3DBLINK HR 4KHR 8KRWQA Avg Baseline Qwen2.5-VL 75.0 73.3 55.7 68.6 64.9 68.6 67.7 Identical latent token 4 tokens 74.7 74.7 52.9 73.8 71.0 68.0 69.2 8 tokens 75.7 83.7 54.4 74.4 72.0 69.3 71.6 16 tokens 72.3 80.6 52.3 71.5 68.1 69.7 69.1 Diverse latent token 4 tokens 75.1 82.9 55.3 73.8 70.8 69.8 71.3 8 tokens 76.6 84.4 55.9 73.4 71.1 70.6 72.0
+> 16 tokens 74.0 72.6 53.9 74.3 71.4 71.6 69.6
+
+Table 4. Ablation on alignment strategy. Both the Lkl and Lattn 
+
+play a critical role in our method. And the type of Lattn is also important. Here, “Cor.” means “corrupted”.                                                              
+
+> Strategy CV 2DCV 3DBLINK HR 4KHR 8KRWQA Avg How does the intact path assist corrupted path? Qwen2.5-VL 75.0 73.3 55.7 68.6 64.9 68.6 67.7 + Cor. CE 74.7 83.3 54.6 73.0 70.3 69.9 71.0 + Cor. CE + KL 75.2 83.6 54.1 75.0 71.1 71.1 71.7 + Cor. CE + Att. Align 76.2 84.0 57.1 72.6 70.4 70.3 71.8 + All 76.6 84.4 55.9 73.4 71.1 70.6 72.0
+> Attention map alignment strategy Answer to All (KL) 73.6 79.5 53.9 74.8 69.4 69.5 70.1 Answer to Latents (KL) 76.6 84.4 55.9 73.4 71.1 70.6 72.0
+> Answer to Latents (MSE) 76.3 83.1 54.0 73.8 71.4 70.2 71.4
+
+cant advantage in data-scarce scenarios. 
+
+4.3. Ablation Study Ablation on token numbers and type. This section pro-vides a detailed analysis that elucidates the impact of latent token configurations on the overall capacity of CrystaL. As Table 3 shows, our results reveal two key insights: first, employing diverse tokens consistently outperforms the use of identical tokens, a finding which underscores that se-mantic variety in the latent space is crucial for capturing complex multimodal dependencies. Second, we observe a non-monotonic relationship between performance and token count, where a length of 8 tokens achieves the optimal bal-ance, surpassing both shorter (4) and longer (16) sequences in both settings. 
+
+Abalation on alignment strategy. To demonstrate the effec-tiveness of our alignment strategy, we conduct an ablation study on the loss functions. As shown in Table 4, the model yields the lowest performance when optimized solely with cross-entropy loss. Incorporating KL-loss or Alignment-loss into the objective consistently improves results, with the performance reaching its peak when all components are combined in the Full configuration. 7CrystaL: Spontaneous Emergence of Visual Latents in MLLMs                                             
+
+> Table 5. Ablation on corruption strategy. The Gaussian blur behaves best in all the corruption strategies, while random mask is also useful for learning visual latents.
+> Strategy CV 2DCV 3DBLINK HR 4KHR 8KRWQA Avg Gaussian Blur 76.6 84.4 55.9 73.4 71.1 70.6 72.0 Random Mask 76.3 84.7 55.2 71.9 69.4 68.4 71.0 Jigsaw Shuffling 73.6 82.5 54.0 71.4 69.0 65.2 69.3 Gaussian Noise 74.9 81.8 54.1 72.0 69.8 69.9 70.4 Colour Distortion 74.8 80.3 54.6 72.3 70.4 70.6 70.5
+> Figure 5. Direct Finetune vs CrystaL. CrystaL outperforms direct finetuning’capabilities across all the tasks.
+
+Furthermore, we investigate how the specific formulation of alignment affects model performance. While adopting a standard MSE-based alignment provides marginal gains, it lacks the flexibility to capture complex cross-modal de-pendencies. Notably, we found that applying KL-type align-ment to the entire attention map (from answer to both im-age and latent tokens) actually degrades performance. The model achieves its best performance only when the align-ment is restricted to the attention from answer tokens (as queries) to latent tokens (as keys). 
+
+Abalation on corruption strategy. We evaluate different corruption strategies C in the proposed SIC module, includ-ing Gaussian blur, random masking, colour distortion, jig-saw shuffling, additive Gaussian noise. As shown in Table 5, Gaussian blur consistently achieves the best performance across all benchmarks, while other corruption types lead to inferior results. We hypothesize that spatial perturbations (e.g., Jigsaw or random masking) often introduce artificial edge artifacts that lead to a distribution shift in the visual encoder’s feature map, potentially hindering the model’s basic recognition. But Gaussian blur strikes the best balance between informa-tion suppression and semantic preservation, making it the most suitable corruption strategy in our framework. Conse-quently, we adopt Gaussian-based corruption as the default setting in other experiments. 
+
+Ablation on direct finetune To isolate the contribution of our latent reasoning mechanism, we conduct an ablation   
+
+> Figure 6. Qualitative comparison on CVBench-2D. We illustrate the responses from CoVT and CrystaL to a question regarding spatial-relational reasoning between objects.
+
+study comparing CrystaL with a direct fine-tuning (Direct FT) baseline. As shown in Fig. 5, although Direct FT im-proves upon the base model, it consistently underperforms compared to CrystaL across all eight benchmarks. Specif-ically, in perception-intensive tasks such as CVBench2D and VStarBench, CrystaL achieves absolute gains of 2.7% and 4.2% over Direct FT, respectively. This performance gap demonstrates that simply updating model weights via standard supervised fine-tuning is insufficient for complex multimodal tasks. Instead, our latent thinking process pro-vides a more effective pathway for the model to internalize and utilize dense visual evidence for inference. 
+
+4.4. Qualitative Analysis 
+
+To demonstrate the enhanced perceptual capabilities af-forded by our CrystaL framework, we present a case study from the CVBench-2D dataset where CrystaL outperforms CoVT as Fig. 6 shows. Notably, even with the integration of SAM, DINO, Depth Anything (Yang et al., 2024) for structural alignment, CoVT struggles in relations between objects while CrystaL yields the correct answer. 
+
+# 5. Conclusion 
+
+In this paper, we introduced CrystaL, a novel single-stage training framework for visual latent reasoning. By employ-ing a dual-path architecture, CrystaL enables visual latent tokens to be naturally supervised without relying on exter-nal modules or auxiliary images. Our experimental results demonstrate that CrystaL not only achieves superior per-formance across various benchmarks but also establishes a more efficient paradigm for visual reasoning. This work provides a scalable and streamlined approach for the devel-opment of multimodal large language models. 8CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+# Impact Statement 
+
+This paper presents work whose goal is to advance the field of Machine Learning. There are many potential societal consequences of our work, none which we feel must be specifically highlighted here. 
+
+# References 
+
+Acharya, M., Kafle, K., and Kanan, C. Tallyqa: Answer-ing complex counting questions. In Proceedings of the AAAI conference on artificial intelligence , pp. 8076–8084, 2019. Bai, S., Chen, K., Liu, X., Wang, J., Ge, W., Song, S., Dang, K., Wang, P., Wang, S., Tang, J., et al. Qwen2. 5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. Bigverdi, M., Luo, Z., Hsieh, C.-Y., Shen, E., Chen, D., Shapiro, L. G., and Krishna, R. Perception tokens en-hance visual reasoning in multimodal language models. In Proceedings of the Computer Vision and Pattern Recog-nition Conference , pp. 3836–3845, 2025. Caron, M., Touvron, H., Misra, I., J ´egou, H., Mairal, J., Bojanowski, P., and Joulin, A. Emerging properties in self-supervised vision transformers. In Proceedings of the IEEE/CVF international conference on computer vision ,pp. 9650–9660, 2021. Chen, T., Kornblith, S., Norouzi, M., and Hinton, G. Asimple framework for contrastive learning of visual rep-resentations. In International conference on machine learning , pp. 1597–1607. PmLR, 2020. Chen, X., Zhang, R., Jiang, D., Zhou, A., Yan, S., Lin, W., and Li, H. Mint-cot: Enabling interleaved visual tokens in mathematical chain-of-thought reasoning. arXiv preprint arXiv:2506.05331 , 2025. Chen, Z., Wu, J., Wang, W., Su, W., Chen, G., Xing, S., Zhong, M., Zhang, Q., Zhu, X., Lu, L., et al. Internvl: Scaling up vision foundation models and aligning for generic visual-linguistic tasks. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pp. 24185–24198, 2024. Dong, B., Ni, M., Huang, Z., Yang, G., Zuo, W., and Zhang, L. Mirage: Assessing hallucination in multimodal rea-soning chains of mllm. arXiv preprint arXiv:2505.24238 ,2025. Duan, H., Yang, J., Qiao, Y., Fang, X., Chen, L., Liu, Y., Dong, X., Zang, Y., Zhang, P., Wang, J., et al. Vlmevalkit: An open-source toolkit for evaluating large multi-modality models. In Proceedings of the 32nd ACM international conference on multimedia , pp. 11198– 11201, 2024. Fu, X., Hu, Y., Li, B., Feng, Y., Wang, H., Lin, X., Roth, D., Smith, N. A., Ma, W.-C., and Krishna, R. Blink: Multi-modal large language models can see but not perceive. In 
+
+European Conference on Computer Vision , pp. 148–166. Springer, 2024. Gao, J., Li, Y., Cao, Z., and Li, W. Interleaved-modal chain-of-thought. In Proceedings of the Computer Vision and Pattern Recognition Conference , pp. 19520–19529, 2025. Grill, J.-B., Strub, F., Altch ´e, F., Tallec, C., Richemond, P., Buchatskaya, E., Doersch, C., Avila Pires, B., Guo, Z., Gheshlaghi Azar, M., et al. Bootstrap your own latent-a new approach to self-supervised learning. Advances in neural information processing systems , 33:21271–21284, 2020. Gupta, T. and Kembhavi, A. Visual programming: Compo-sitional visual reasoning without training. In Proceedings of the IEEE/CVF conference on computer vision and pat-tern recognition , pp. 14953–14962, 2023. Hao, S., Sukhbaatar, S., Su, D., Li, X., Hu, Z., Weston, J., and Tian, Y. Training large language models to reason in a continuous latent space. arXiv preprint arXiv:2412.06769 , 2024. He, K., Chen, X., Xie, S., Li, Y., Doll ´ar, P., and Girshick, R. Masked autoencoders are scalable vision learners. In 
+
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pp. 16000–16009, 2022. Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., Chen, W., et al. Lora: Low-rank adaptation of large language models. ICLR , 1(2):3, 2022. Huang, W., Jia, B., Zhai, Z., Cao, S., Ye, Z., Zhao, F., Xu, Z., Hu, Y., and Lin, S. Vision-r1: Incentivizing reasoning capability in multimodal large language models. arXiv preprint arXiv:2503.06749 , 2025. Kirillov, A., Mintun, E., Ravi, N., Mao, H., Rolland, C., Gustafson, L., Xiao, T., Whitehead, S., Berg, A. C., Lo, W.-Y., et al. Segment anything. In Proceedings of the IEEE/CVF international conference on computer vision ,pp. 4015–4026, 2023. Li, B., Zhang, Y., Guo, D., Zhang, R., Li, F., Zhang, H., Zhang, K., Zhang, P., Li, Y., Liu, Z., et al. Llava-onevision: Easy visual task transfer. arXiv preprint arXiv:2408.03326 , 2024. Li, B., Sun, X., Liu, J., Wang, Z., Wu, J., Yu, X., Chen, H., Barsoum, E., Chen, M., and Liu, Z. Latent visual reasoning. arXiv preprint arXiv:2509.24251 , 2025a. Li, D., Wu, T., Lin, B., Chen, Z., Zhang, Y., Li, Y., Cheng, M.-M., and Li, X. WOW-seg: A word-free 9CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+open world segmentation model. In The Fourteenth International Conference on Learning Representations ,2026. URL https://openreview.net/forum? id=AyJPSnE1bq .Li, K., Shang, C., Karlinsky, L., Feris, R., Darrell, T., and Herzig, R. Latent implicit visual reasoning. arXiv preprint arXiv:2512.21218 , 2025b. Li, Y., Du, Y., Zhou, K., Wang, J., Zhao, W. X., and Wen, J.-R. Evaluating object hallucination in large vision-language models. arXiv preprint arXiv:2305.10355 ,2023. Li, Y., Zhang, Y., Tang, W., Dai, Y., Cheng, M.-M., Li, X., and Yang, J. Visual instruction pretraining for domain-specific foundation models. arXiv preprint arXiv:2509.17562 , 2025c. Liu, H., Li, C., Wu, Q., and Lee, Y. J. Visual instruction tun-ing. Advances in neural information processing systems ,36:34892–34916, 2023. Lu, P., Bansal, H., Xia, T., Liu, J., Li, C., Hajishirzi, H., Cheng, H., Chang, K.-W., Galley, M., and Gao, J. Mathvista: Evaluating mathematical reasoning of foundation models in visual contexts. arXiv preprint arXiv:2310.02255 , 2023. Qin, Y., Wei, B., Ge, J., Kallidromitis, K., Fu, S., Darrell, T., and Wang, X. Chain-of-visual-thought: Teaching vlms to see and think better with continuous visual tokens. arXiv preprint arXiv:2511.19418 , 2025. Shao, H., Qian, S., Xiao, H., Song, G., Zong, Z., Wang, L., Liu, Y., and Li, H. Visual cot: Advancing multi-modal language models with a comprehensive dataset and benchmark for chain-of-thought reasoning. Advances in Neural Information Processing Systems , 37:8612–8642, 2024. Su, Y., Zhang, H., Li, S., Liu, N., Liao, J., Pan, J., Liu, Y., Xing, X., Sun, C., Li, C., et al. Patch-as-decodable-token: Towards unified multi-modal vision tasks in mllms. arXiv preprint arXiv:2510.01954 , 2025. Tong, J., Gu, J., Lou, Y., Fan, L., Zou, Y., Wu, Y., Ye, J., and Li, R. Sketch-in-latents: Eliciting unified reasoning in mllms. arXiv preprint arXiv:2512.16584 , 2025. Tong, P., Brown, E., Wu, P., Woo, S., IYER, A. J. V., Akula, S. C., Yang, S., Yang, J., Middepogu, M., Wang, Z., et al. Cambrian-1: A fully open, vision-centric exploration of multimodal llms. Advances in Neural Information Processing Systems , 37:87310–87356, 2024. Tu, S., Zhang, Q., Sun, J., Fu, Y., Li, L., Lan, X., Jiang, D., Wang, Y., and Zhao, D. Perception-consistency multimodal large language models reason-ing via caption-regularized policy optimization. arXiv preprint arXiv:2509.21854 , 2025. Wang, P., Bai, S., Tan, S., Wang, S., Fan, Z., Bai, J., Chen, K., Liu, X., Wang, J., Ge, W., et al. Qwen2-vl: Enhancing vision-language model’s perception of the world at any resolution. arXiv preprint arXiv:2409.12191 , 2024. Wang, Q., Shi, Y., Wang, Y., Zhang, Y., Wan, P., Gai, K., Ying, X., and Wang, Y. Monet: Reasoning in latent visual space beyond images and language. arXiv preprint arXiv:2511.21395 , 2025a. Wang, W., Ding, L., Zeng, M., Zhou, X., Shen, L., Luo, Y., Yu, W., and Tao, D. Divide, conquer and combine: A training-free framework for high-resolution image per-ception in multimodal large language models. In Proceed-ings of the AAAI Conference on Artificial Intelligence , pp. 7907–7915, 2025b. Wu, P. and Xie, S. V?: Guided visual search as a core mechanism in multimodal llms. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pp. 13084–13094, 2024. Wu, P., Zhang, Y., Diao, H., Li, B., Lu, L., and Liu, Z. Vi-sual jigsaw post-training improves mllms. arXiv preprint arXiv:2509.25190 , 2025a. Wu, Q., Yang, X., Zhou, Y., Fang, C., Song, B., Sun, X., and Ji, R. Grounded chain-of-thought for multimodal large language models. arXiv preprint arXiv:2503.12799 ,2025b. Xu, G., Jin, P., Wu, Z., Li, H., Song, Y., Sun, L., and Yuan, L. Llava-cot: Let vision language models reason step-by-step. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pp. 2087–2098, 2025. Yang, A., Li, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Gao, C., Huang, C., Lv, C., et al. Qwen3 technical report. arXiv preprint arXiv:2505.09388 , 2025a. Yang, L., Kang, B., Huang, Z., Xu, X., Feng, J., and Zhao, H. Depth anything: Unleashing the power of large-scale unlabeled data. In Proceedings of the IEEE/CVF con-ference on computer vision and pattern recognition , pp. 10371–10381, 2024. Yang, Z., Yu, X., Chen, D., Shen, M., and Gan, C. Machine mental imagery: Empower multimodal reasoning with latent visual tokens. arXiv preprint arXiv:2506.17218 ,2025b. 10 CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+Zelikman, E., Harik, G., Shao, Y., Jayasiri, V., Haber, N., and Goodman, N. D. Quiet-star: Language models can teach themselves to think before speaking. arXiv preprint arXiv:2403.09629 , 2024. Zhang, H., Wu, W., Li, C., Shang, N., Xia, Y., Huang, Y., Zhang, Y., Dong, L., Zhang, Z., Wang, L., et al. Latent sketchpad: Sketching visual thoughts to elicit multimodal reasoning in mllms. arXiv preprint arXiv:2510.24514 ,2025a. Zhang, J., Xue, L., Song, L., Wang, J., Huang, W., Shu, M., Yan, A., Ma, Z., Niebles, J. C., Savarese, S., et al. Provi-sion: Programmatically scaling vision-centric instruction data for multimodal language models. arXiv preprint arXiv:2412.07012 , 2024. Zhang, R., Zhang, B., Li, Y., Zhang, H., Sun, Z., Gan, Z., Yang, Y., Pang, R., and Yang, Y. Improve vision language model chain-of-thought reasoning. In Proceed-ings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pp. 1631–1662, 2025b. Zhang, X., Li, D., Dong, X., Wu, T., Yu, H., Wang, J., Li, Q., and Li, X. Unichange: Unifying change detection with multimodal large language model. arXiv preprint arXiv:2511.02607 , 2025c. Zhang, Z., Zhang, A., Li, M., Zhao, H., Karypis, G., and Smola, A. Multimodal chain-of-thought reasoning in lan-guage models. arXiv preprint arXiv:2302.00923 , 2023. Zhao, P., Tian, J., Xing, Q., Zhang, X., Li, Z., Qian, J., Cheng, M.-M., and Li, X. Naipv2: Debiased pairwise learning for efficient paper quality estimation. arXiv preprint arXiv:2509.25179 , 2025a. Zhao, P., Xing, Q., Dou, K., Tian, J., Tai, Y., Yang, J., Cheng, M.-M., and Li, X. From words to worth: Newborn article impact prediction with llm. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 39, pp. 1183–1191, 2025b. Zheng, Z., Yang, M., Hong, J., Zhao, C., Xu, G., Yang, L., Shen, C., and Yu, X. Deepeyes: Incentivizing” thinking with images” via reinforcement learning. arXiv preprint arXiv:2505.14362 , 2025. Zhou, B., Zhao, H., Puig, X., Fidler, S., Barriuso, A., and Torralba, A. Scene parsing through ade20k dataset. In 
+
+Proceedings of the IEEE conference on computer vision and pattern recognition , pp. 633–641, 2017. Zhu, J., Wang, W., Chen, Z., Liu, Z., Ye, S., Gu, L., Tian, H., Duan, Y., Su, W., Shao, J., et al. Internvl3: Exploring advanced training and test-time recipes for open-source multimodal models. arXiv preprint arXiv:2504.10479 ,2025. 11 CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+# A. Appendix 
+
+A.1. Experiment Details Training Datasets. To ensure a fair comparison and maintain consistency with prior work, we directly adopt the training suite established by (Qin et al., 2025) without any additional modification. The dataset comprises vision-centric subsets from LLaVA-OneVision (Li et al., 2024), TallyQA (Acharya et al., 2019), and ADE20K-Depth (Zhou et al., 2017), following the exact configuration described in the original study. 
+
+Training Configurations. We fine-tune our model using LoRA (Hu et al., 2022) with a rank r = 16 and an alpha α = 32 .The learning rates are set to 2 × 10 −4 for LoRA adapters. All experiments are conducted on a workstation equipped with 
+
+4 × NVIDIA A40 GPUs. 
+
+Settings of baselines We directly obtained the reported results of SKILA and LVR from their respective papers. For 
+
+SKILA , we adopt the Unified Reasoning Model (SKILA) rather than SKILA-V. The results for LVR are taken from the experimental reports in the SKILA paper.For CoVT , we downloaded the CoVT-seg-dino-depth model and conducted local evaluation following the official setup.For LIVR , we follow the training protocol described in the original paper, performing a two-stage training process with 4K steps for each stage. 
+
+A.2. Examples of conversation on different tasks 
+
+We provide more question and answer examples in Fig. 7 and Fig. 8.  
+
+> Figure 7. Results on counting and depth
+
+A.3. Demonstration on corrupted examples 
+
+The illustration of five kinds of corruption C is in Fig. 9, 10, 12, 11, 13 
+
+A.4. Attention map during training 
+
+To analyze how the two paths work, we visualize the attention maps during training in Fig. 14, 15, 16. The left part corresponds to the intact path, while the right one corresponds to the corrupted path. 12 CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+Figure 8. Results on relation and distance. 
+
+Figure 9. Gaussian blur variations. We illustrate the multi-scale blurring responses applied to the input samples, showing the original image and three levels of Gaussian smoothing ( r = 2 , 5, 10 ). 
+
+13 CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+Figure 10. Jigsaw. We apply Jigsaw augmentation to the input samples to challenge the model’s ability to capture global structural consistency. Three levels of shuffling ratios ( ρ ∈ { 20% , 50% , 80% }) are illustrated to demonstrate increasing spatial complexity. 
+
+Figure 11. Colour Distort. We illustrate the visual variations generated by the color jittering module by modulating brightness, contrast, saturation, and hue with increasing intensities ( s ∈ { 0.5, 1.0, 2.0}). 
+
+14 CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+Figure 12. Gaussian Noise. We illustrate the original image and its corrupted versions subjected to additive Gaussian noise with varying standard deviations ( σ ∈ { 15 , 30 , 50 }). 
+
+Figure 13. Random mask. We demonstrate the original image alongside three variants of Random Erasing at different scales (s ∈ { 0.2, 0.5, 0.8}). 
+
+15 CrystaL: Spontaneous Emergence of Visual Latents in MLLMs 
+
+Figure 14. Attention differences. The intact path attends to detroit while the corrupted path attends to all the labels. 
+
+Figure 15. Attention differences. The intact path attends to random positions while the corrupted path attends to the text behind the man. 
+
+Figure 16. Attention differences. The intact path attends to random positions while the corrupted path attends to the man. 
+
+16
