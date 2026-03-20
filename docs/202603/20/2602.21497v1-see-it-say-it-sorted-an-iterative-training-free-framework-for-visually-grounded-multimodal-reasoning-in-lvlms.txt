@@ -1,0 +1,551 @@
+Title: See It, Say It, Sorted: An Iterative Training-Free Framework for Visually-Grounded Multimodal Reasoning in LVLMs
+
+URL Source: https://arxiv.org/pdf/2602.21497v1
+
+Published Time: Thu, 26 Feb 2026 01:20:57 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# See It, Say It, Sorted: An Iterative Training-Free Framework for Visually-Grounded Multimodal Reasoning in LVLMs 
+
+## Yongchang Zhang 1* , Xianzheng Ma 2* , Tianyi Liu 1† , Guangquan Zhou 1† , Yang Chen 1† 1Southeast University 2University of Oxford 
+
+yongchangzhang2005@gmail.com 
+
+https://github.com/uuuuZYC/See-It-Say-It-Sorted 
+
+## Abstract 
+
+Recent large vision-language models (LVLMs) have demonstrated impressive reasoning ability by generating long chain-of-thought (CoT) responses. However, CoT rea-soning in multimodal contexts is highly vulnerable to visual hallucination propagation: once an intermediate reasoning step becomes inconsistent with the visual evidence, subse-quent steps—even if logically valid—can still lead to incor-rect final answers. Existing solutions attempt to mitigate this issue by training models to “think with images” via reinforcement learning (RL). While effective, these meth-ods are costly, model-specific, and difficult to generalize across architectures. Differently, we present a lightweight method that bypasses RL training and provides an itera-tive, training-free, plug-and-play framework for visually-grounded multimodal reasoning. Our key idea is to su-pervise each reasoning step at test time with visual evi-dence, ensuring that every decoded token is justified by cor-responding visual cues. Concretely, we construct a textual visual-evidence pool that guides the model’s reasoning gen-eration. When existing evidence is insufficient, a visual de-cider module dynamically extracts additional relevant evi-dence from the image based on the ongoing reasoning con-text, expanding the pool until the model achieves sufficient visual certainty to terminate reasoning and produce the fi-nal answer. Extensive experiments on multiple LVLM back-bones and benchmarks demonstrate the effectiveness of our approach. Our method achieves 16.5%–29.5% improve-ments on TreeBench and 13.7% RH-AUC gains on RH-Bench, substantially reducing hallucination rates while im-proving reasoning accuracy without additional training. 
+
+## 1. Introduction 
+
+Large vision–language models (LVLMs) now generate long chain-of-thought (CoT) explanations and solve diverse mul-    
+
+> *Equal contribution †Corresponding author Base VLM
+> Base VLM
+> call  tool
+> correct reasoning trace wrong reasoning trace hallucination step
+> RLHF  original
+> image
+> interest
+> of
+> region
+> inject
+> visual decider
+> supervisor evidence pool
+
+(a) 
+
+(b) 
+
+(c) 
+
+> Base VLM
+> Trained VLM
+
+Figure 1. Reasoning pattern comparison. (a) Greedy decoding: the base VLM selects the top-1 token at each step; any hallucina-tion in an intermediate step propagates to an incorrect final answer. (b) RLHF-based “think-with-images”: the model learns when to call tools to zoom or crop the image and re-inject cropped re-gions into the reasoning context—effective but costly and model-specific. (c) Ours: a lightweight, training-free, model-agnostic framework. A supervisor maintains a dynamic visual-evidence pool to detect and correct hallucination steps. When uncertainty arises, it invokes a visual decider to extract new evidence, enabling visually grounded reasoning throughout the chain. 
+
+timodal reasoning tasks [7, 18, 20, 22, 23]. Yet, the very ability to “think more” often coincides with “seeing less”. [10] During inference-time decoding, a model must balance three competing contexts: the image, a growing tex-tual context, and instruction tokens. As the context length-ens, subtle but decisive visual cues are easily dominated by language priors. Even a single token that departs from the visual evidence can steer the remaining chain of thought toward a fluent but visually inconsistent trajectory (Fig. 1 (a)). This reasoning–perception drift originates at decoding time—not because the model lacks visual understanding, but because long-horizon token generation gradually ampli-
+
+> arXiv:2602.21497v1 [cs.CV] 25 Feb 2026
+
+fies language priors over visual grounding [9, 11, 17, 25]. A prevailing solution is to explicitly train models to “think with images” by learning when and where to zoom or crop during CoT generation (Fig. 1(b)). These RL- or preference-optimization pipelines train a policy to call vi-sual tools, inspect regions, and re-inject pixels into the rea-soning context. While effective, they rely on curated data, reward design, heavy computation, and tight coupling to specific backbones. The learned policy intertwines spa-tial exploration with the CoT, repeatedly encoding cropped views and incurring latency. As model scale increases, such visually grounded training becomes prohibitively ex-pensive, limiting accessibility for broader use. To address these limitations, we pursue a different prin-ciple: rather than learning when to look at training time, we supervise each reasoning step with visual evidence at test time (Fig. 1 (c)). We introduce an iterative, training-free, plug-and-play framework that treats decoding as a sequence of evidence-justified token selections. The system main-tains a textual evidence pool that operates alongside the base LVLM. At each step, the LVLM proposes a compact top-k set of candidate tokens from its local probability dis-tribution. A lightweight supervisor computes an evidence-induced preference over these candidates and negotiates a reweighted distribution with the base probabilities, preserv-ing confident behavior while reallocating probability mass toward tokens consistent with accumulated evidence. When residual uncertainty remains, a visual decider inspects the image under the current reasoning context and generates a concise micro-observation in natural language. This obser-vation is appended to the evidence pool and reused in all subsequent reasoning steps. This design exhibits three key properties that directly mitigate the limitations of RL-based pipelines such as Pix-elReasoner [19] and DeepEyes [29]. First, it is training-free and inherently transferable: the framework wraps around a frozen LVLM with a lightweight decider, requiring no task-specific finetuning or policy optimization. Second, it is cost-aware by construction. A simple uncertainty test on the negotiated distribution determines whether to in-voke the decider, ensuring that additional visual computa-tion occurs only when most likely to prevent a hallucina-tion. Third, it represents evidence in text rather than pix-els, enabling subsequent tokens to directly reference prior micro-observations without repeatedly re-encoding image crops. This textual form makes the framework easier to de-ploy at inference time and substantially reduces computa-tional overhead compared with pixel-level reasoning. Empirically, the framework improves both grounding and end-task accuracy across backbones and benchmarks while keeping overhead modest. Because evidence is accu-mulated on demand, fine-grained cues can be reused down-stream to stabilize the remainder of the chain. Qualitative analyses show that many previously cascading failures re-duce to one or two decisive micro-observations that the decider contributes precisely at uncertain steps; Quantita-tively, we observe a clear accuracy–latency trade-off as the uncertainty threshold varies, allowing flexible adaptation to different deployment budgets. The main contributions are summarized as follows: • We present a training-free, plug-and-play decoding framework that supervises token selection with a growing textual evidence pool and negotiates next-token probabil-ities with the base model rather than relying on learned tool-calling policies. • An uncertainty-triggered visual decider emits concise, reusable micro-evidence only when necessary, yielding strong cost–accuracy trade-offs. • The approach transfers across LVLM backbones and con-sistently reduces hallucination while obviously improv-ing task accuracy on a wide range of benchmarks. 
+
+## 2. Methodology 
+
+2.1. Visual Description Grounded Decoding 
+
+Let a VLM define, at decoding step i, a next-token distribu-tion: 
+
+pi(w) = pVLM (xi=w | x<i ), w ∈ V . (1) Visual description grounded decoding (VDGD) first asks the model to produce one global textual description d =(d1, . . . , d L) of image and then constrains decoding by knee truncation to select top-k plausible tokens and a description-based KL preference. If p(1) ≥ p(2) ≥ · · · are sorted proba-bilities of pi, the knee index can be defined as follows: 
+
+k⋆ = arg max 
+
+> k
+
+ p(k) − p(k+1) 
+
+. (2) And then we can define the candidate set: 
+
+Ci = Top-k⋆ pi
+
+. (3) For a candidate token w ∈ C i and a prefix of description length j (1 ≤ j ≤ L), VDGD measures the deviation: 
+
+KL  onehot( w) pVLM (· | d<j ) = − log pVLM (w | d<j ),
+
+(4) then takes a minimum value over j (the best prefix) and replaces the base logits with these values before softmax. While effective in its one-shot setting, fixed logit replace-ment tied to a single static caption is less self-adaptive, and it does not preserve the base model’s calibrated confidence on already-confident steps. 
+
+2.2. Distribution Supervisor 
+
+As shown in Fig. 2, The distribution supervisor keeps the spirit of description-guided preference yet makes two prin-cipled changes: (a) we convert VDGD’s min-over-prefix KL into a mean-over-prefix probability that is further av-eraged across multiple evidences, and (b) we mix the Token Answer:  
+
+> Question: What is the color of the
+> third dress from the right-hand
+> side, located in the upper right
+> corner of the image?
+> The image depicts an outdoor
+> market scene with various stalls
+> selling clothes and souvenirs. ... The
+> dresses come in different patterns
+> and colors, including blue and white,
+> red and white, black and white, and
+> black and red.
+
+Initial Global Evidence 
+
+Evidence Pool 
+
+Confident 
+
+Enough?  
+
+> Token
+> Distribution
+> Token Probability
+> Base Model
+> red
+> blue
+> ......
+> 0.504
+> 0.486
+> ......
+> evidence1 from visual decider
+> evidence2 from visual decider
+> ......
+
+top-k 
+
+Accumulated Evidence Before Step i  
+
+> Evidence-Induced
+> Token Probability
+> red
+> blue
+> ......
+> 0.522
+> 0.468
+> ......
+> new evidence from visual decider
+
+Step i   
+
+> Reweighted
+> Token Probability
+> red
+> blue
+> ......
+> 0.513
+> 0.477
+> ......
+> Negotiate
+> Base VLM
+> To determine the color of the third dress
+> from the right-hand side in the upper right
+> corner of the image, I need to focus on the
+> dresses displayed there. The dresses are
+> hanging on a line, and the one in the middle
+> appears to be black and white. The other
+> two dresses on either side have different
+> colors.\n\n1. The first dress from the right is
+> Visual
+> Decider
+> YES NO
+> Step (i+1 )
+> evidence: The first dress from the right-hand
+> side is blue, partially hidden by the tree.
+
+Step (i+1) 
+
+tokens 
+
+CoT Before Step i 
+
+> Supervisor
+
+KL Divergence 
+
+> red
+> blue
+
+Figure 2. Overview of evidence-constrained reweighting decoding (ECRD) at decoding step i. The base VLM emits a top-k candidate set; the supervisor builds an evidence-induced distribution from the current evidence pool and negotiates with the base probabilities to reweight candidates. If confidence remains low, the visual decider reads the image with the current prefix, commits a token, and adds a short textual evidence for later steps. 
+
+evidence-induced distribution with the base model instead of overwriting logits. 
+
+From VDGD’s KL to ECRD’s evidence score. Let 
+
+Ei = ( e1, . . . , e L) be a piece of evidence sentence. VDGD’s min-over-prefix KL is well suited to the static captioning regime where the most supportive partial description is se-lected. In our dynamic regime, where evidence accrues incrementally over steps and will be mixed with the base distribution, thus, we need an aggregator that rewards sus-tained support across the sentence rather than one sharp peak without robustness, and compiles smoothly across multiple evidence. We therefore replace the min with a mean-over-prefix probability: 
+
+qE (w) = 1
+
+L
+
+LX
+
+j=1 
+
+pVLM (w | e<j ). (5) Given a pool Ei = {E 1, . . . , EN } of evidence available at step i, we average their supports: 
+
+Si(w) = − log 
+
+ 1
+
+N
+
+X
+
+E
+
+qE (w)
+
+
+
+, (6) and restrict to Ci to obtain the evidence-induced distribu-tion: 
+
+ri(w) = 
+
+
+
+exp {− Si(w)}
+
+P
+
+u∈C i exp {− Si(u)} , w ∈ C i,
+
+0, otherwise .
+
+(7) 
+
+Negotiated reweighting. Let pi be the base distribution. We form a mass-matched version ˜ri , the rationale is as fol-lows: pi and the evidence-induced distribution ri are not on the same scale. ri is normalized only over the candidate set 
+
+Ci (and zero elsewhere), whereas pi spreads probability over the full vocabulary. We therefore perform a proportional rescaling of ri within Ci so that the total mass assigned to 
+
+Ci matches that of pi. The resulting scaled distribution is denoted ˜ri. Concretely, 
+
+˜ri(w) = 
+
+
+
+ri(w) ·
+
+P
+
+u∈C i pi(u)
+
+P
+
+u∈C i ri(u) , w ∈ C i,
+
+0, otherwise ,
+
+(8) which ensures that we only reallocate the probability mass within Ci without varying its total amount: 
+
+X
+
+w∈C i
+
+˜ri(w) = X
+
+w∈C i
+
+pi(w). (9) and then let the base distribution and the evidence-induced distribution negotiate a mixture: 
+
+pmix 
+
+i (w) = 
+
+(αi pi(w) + (1 − αi) ˜ ri(w), w ∈ C i,αi pi(w), w / ∈ C i. (10) The adaptive weight is chosen without hyper-parameters as: 
+
+αi = p(1) , (11) the top probability of the base model before mixing. This choice aligns with empirical statistics reported by [5]: hal-lucination steps tend to have larger knee-selected k⋆ and diffuse local distributions with small variance. However, non-hallucination steps are sharply peaked with average 
+
+k⋆ ≈ 1. Consequently, when p(1) is large (confident step), we keep the base distribution predominates; when p(1) is small (hallucination-critical moments), evidence receives more weight. It reflects a general intervention principle: when the base distribution is sharp, evidence should act as a light prior; when it is diffuse, evidence should carry more weight. This makes mixture responsive to local uncertainty while preserving the behavior of base model in easy steps. When to acquire new evidence. After Eq. (10), we in-spect the negotiated margin: 
+
+∆i = pmix  
+
+> (1)
+
+− pmix  
+
+> (2)
+
+. (12) If k⋆ > 1 and ∆i ≤ δ (δ is a hyperparameter), we consider step i a probable trigger for hallucination and acquire new evidence. Otherwise, we directly select pmix  
+
+> (1)
+
+.
+
+2.3. Dynamic evidence pool and the visual decider 
+
+Invocation and interface. When the trigger in Eq. (12) fires, we call a lightweight visual decider instantiated by GRIT [4], which built on Qwen2.5-VL-3B [1], except for the basic answer, it can optionally output the coordinates of one or more image regions that the model needs to refer to during its reasoning process when generating an answer. GRIT receives the image, the tail of the textual prefix, and the candidates Ci. It should be noted that GRIT does not receive the original question at this stage, as we only aim to mitigate possible hallucinations occurring in the current step. The model is required to resolve the content of this step alone, rather than the complete question. We obtain (i) a choice w⋆ ∈ C i, (ii) a single human-readable evidence sentence Ei from its answer. We then force w⋆ at step i and append the sentence to the evidence pool: 
+
+Ei+1 ← Ei ∪ {E i}. (13) 
+
+Representation. Crucially, only the text participates in scoring via Eqs. (5) to (7), and coordinates are stored as an-notations for interpretability and for binding the sentence to concrete regions but never participate in scoring steps. This design is deliberate. Injecting raw crops back into the con-text, such as in zoom-in pipelines, repeatedly couples pixel processing with the entire reasoning chain and typically re-quires additional supervision or preference optimization for the model to learn when and where to zoom. In contrast, textual evidence is compact, semantic, and model-native: it lives in the same token space as the decoder, can be scored without revisiting pixels, and naturally composes with prior sentences. This keeps the intervention lightweight while saving a verifiable trail. 
+
+Initialization and growth. We initialize E0 with a global description dglobal to provide broad coverage but not to act as the sole evidence source. Thereafter the evidence pool grows only on demand. This maintains modest com-putation, preserves determinism in non-ambiguous regions, and lets evidence accumulate precisely where it is most use-ful for subsequent decisions. 
+
+Semantics and micro-views. Although textual, each sentence implicitly refers to one or multiple related sub-views of the image, especially when GRIT generates the answer with coordinates. Because every sentence is gener-ated to resolve a specific local choice, the evidence pool ac-cumulates a set of semantically linked micro-observations that remain logically connected to the evolving chain of thought. Eqs. (6) and (7) convert these micro-observations into reusable probability mass, allowing later steps to ben-efit from earlier visual disambiguation without re-encoding crops. Therefore ECRD is a bridge that allows base model to interact with a collection of subviews organized by rea-soning needs, rather than with isolated cropped regions, thereby enabling reuse across the whole sequence. 
+
+## 3. Experiment 
+
+3.1. Setups 
+
+We evaluate ECRD across benchmarks grouped by the ca-pabilities they probe: (i) visual grounded reasoning under long chains, (ii) reasoning–perception balance and halluci-nation control, and (iii) broad multimodal competence. In the experiments reported in Tabs. 1 to 5, we set the uncer-tainty threshold δ = 0 .08 . No additional training are used. 
+
+3.2. Benchmarks and base models 
+
+Benchmarks. We evaluate on three groups of benchmarks. TreeBench [24] probes “thinking with images” by sepa-rating Perception (identify, localize, read, attribute) from Reasoning (operate over aggregated visual evidence such as occlusion, containment, ordering, perspective); the met-ric is answer accuracy. RH-Bench [10] reports Reason and Perception scores and RH-AUC [10], which summarizes the trade-off between reasoning length and hallucination (higher is better). For general multimodal competence, we use V*Bench [27], MathVista [13], ChartQA [14], OCR-Bench [12], and HallusionBench [6], evaluated by accuracy. 
+
+Base models. Unless otherwise specified, the visual de-cider is GRIT-3B [4], which is built upon Qwen2.5-VL-3B [1] and optimized for visual grounding. To assess plug-and-play generality and scale robustness, we also attach ECRD without any finetuning to three open-source gen-eral model families: LLaVA-OneVision [8] (7B and 72B), Qwen2.5-VL [1] (7B, 32B and 72B), and InternVL3 [30] (8B, 38B and 78B). All checkpoints and inference recipes follow the authors’ official releases. ECRD modifies only the decoding procedure at test time and leaves the under-lying encoders or decoders frozen. For reference lines on TreeBench, we also report private models GPT-4o [15] and o3 [16] as well as Gemini-2.5-Flash [2] and Gemini-2.5-Pro [3], and include recent RL-based visually-grounded rea-soning systems DeepEyes [29], Pixel-Reasoner [19], and TreeVGR-7B [24] for comparison. The paper that presents the TreeVGR-7B [24] method also introduces TreeBench. 
+
+3.3. Main results and analysis 
+
+As demonstrated in Tab. 1, ECRD delivers consistent gains across all open-source general backbones and scales on TreeBench, showing that the method is truly plug-and-play Perception Reasoning 
+
+Overall Attr. Mater. Phys. ObjRet. OCR Persp. Order. Cont.&Oc. Contain. Compar. 
+
+Private Models 
+
+Gemini-2.5-Flash-0520 [2] 45.9 48.3 53.9 69.6 68.8 75.0 15.3 19.3 56.1 72.4 43.2 GPT-4o-1120 [15] 46.9 51.7 61.5 65.2 43.8 69.1 18.8 38.6 48.8 72.4 43.2 Gemini-2.5-Pro-0605 [3] 54.1 51.7 61.5 56.5 75.0 83.8 20.0 36.8 65.9 86.2 54.6 o3-0416 [16] 54.8 69.0 69.2 65.2 68.8 79.4 22.4 38.6 61.0 86.2 50.0 
+
+Open-source General Models 
+
+Qwen2.5-VL-7B [1] 37.0 55.2 53.8 56.5 62.5 27.9 20.0 35.1 39.0 44.8 43.2 
+
++ ECRD 47.9 ↑ 10.9 72.4 ↑ 17.2 53.8 0.0 73.9 ↑ 17.4 62.5 0.0 54.4 ↑ 26.5 20.0 0.0 35.1 0.0 56.1 ↑ 17.1 75.9 ↑ 31.1 45.5 ↑ 2.3 
+
+Qwen2.5-VL-32B [1] 42.5 51.7 53.8 69.6 62.5 54.4 16.5 33.3 46.3 62.1 38.6 
+
++ ECRD 48.6 ↑ 6.1 62.1 ↑ 10.4 53.8 0.0 73.9 ↑ 4.3 62.5 0.0 60.3 ↑ 5.9 23.5 ↑ 7.0 35.1 ↑ 1.8 61.0 ↑ 14.7 65.5 ↑ 3.4 45.5 ↑ 6.9 
+
+Qwen2.5-VL-72B [1] 42.2 65.5 69.2 56.5 56.3 48.5 11.8 33.3 51.2 72.4 38.6 
+
++ ECRD 49.9 ↑ 7.7 65.5 0.0 69.2 0.0 65.2 ↑ 8.7 62.5 ↑ 6.2 69.1 ↑ 20.6 20.0 ↑ 8.2 36.8 ↑ 3.5 58.5 ↑ 7.3 75.9 ↑ 3.5 40.9 ↑ 2.3 
+
+LLaVA-OneVision-7B [8] 37.3 55.2 53.8 56.5 50.0 32.4 21.2 22.8 41.5 72.4 36.4 
+
++ ECRD 43.5 ↑ 6.2 55.2 0.0 61.5 ↑ 7.7 60.9 ↑ 4.4 56.3 ↑ 6.3 47.1 ↑ 14.7 23.5 ↑ 2.3 28.0 ↑ 5.2 53.7 ↑ 12.2 72.4 0.0 40.9 ↑ 4.5 
+
+LLaVA-OneVision-72B [8] 40.5 62.1 53.8 65.2 62.5 36.8 12.9 28.1 53.7 65.5 47.7 
+
++ ECRD 46.9 ↑ 6.4 62.1 0.0 61.5 ↑ 7.7 69.6 ↑ 4.4 68.8 ↑ 6.3 51.5 ↑ 14.7 18.8 ↑ 5.9 29.8 ↑ 1.7 61.0 ↑ 7.3 72.4 ↑ 6.9 52.3 ↑ 4.6 
+
+InternVL3-8B [30] 38.8 51.7 69.2 56.5 56.3 33.7 21.2 24.6 39.0 72.4 43.2 
+
++ ECRD 45.2 ↑ 6.4 51.7 0.0 69.2 0.0 69.6 ↑ 13.1 62.5 ↑ 6.2 50.0 ↑ 16.3 24.7 ↑ 3.5 29.8 ↑ 5.2 43.9 ↑ 4.9 72.4 0.0 50.0 ↑ 6.8 
+
+InternVL3-38B [30] 42.0 51.7 61.5 52.2 68.8 51.5 12.9 33.3 56.1 65.5 38.6 
+
++ ECRD 48.4 ↑ 6.4 51.7 0.0 69.2 ↑ 7.7 65.2 ↑ 13.0 75.0 ↑ 6.2 58.8 ↑ 7.3 22.4 ↑ 9.5 36.8 ↑ 3.5 56.1 0.0 69.0 ↑ 3.5 50.0 ↑ 11.4 
+
+InternVL3-78B [30] 46.4 62.1 61.5 52.2 68.8 52.9 16.5 33.3 61.0 86.2 45.5 
+
++ ECRD 50.9 ↑ 4.5 65.5 ↑ 3.4 69.2 ↑ 7.7 65.2 ↑ 13.0 75.0 ↑ 6.2 60.3 ↑ 7.4 21.2 ↑ 4.7 35.1 ↑ 1.8 63.4 ↑ 2.4 86.2 0.0 47.7 ↑ 2.2 
+
+Open-source Visual Grounded Reasoning Models 
+
+DeepEyes-7B [29] 37.5 62.1 53.8 65.2 68.8 51.5 11.8 24.6 36.6 51.7 47.7 Pixel-Reasoner-7B [19] 39.0 58.6 61.5 65.2 50.0 48.5 14.1 31.6 39.0 44.8 40.9 TreeVGR-7B [24] 50.4 65.5 53.8 82.6 68.8 63.3 22.4 36.8 61.0 69.0 45.5 
+
+Table 1. Results of different models on TreeBench. Best performances for open-source models are highlighted in bold . ECRD consistently improves open-source general models across architectures and scales, confirming training-free plug-and-play applicability. 
+
+rather than model-specific. On Qwen2.5-VL-7B the overall accuracy rises from 37.0% to 47.9%, and similar improve-ments appear on LLaVA-OneVision-7B and InternVL3-8B, as well as on larger models such as Qwen2.5-VL-32B/72B, LLaVA-OneVision-72B, and InternVL3-38B/78B, where the absolute lifts are typically in the +4-8 point band. The sub-category pattern matches our design: competencies that rely on checkable visual facts such as OCR, Phys-ical State and Comparison benefit the most. Compared to RLHF-based visual-grounded reasoning models, ECRD on Qwen2.5-VL-7B surpasses DeepEyes-7B and Pixel-Reasoner-7B and approaches TreeVGR-7B, yet it requires no additional training, curated traces, or reinforcement op-timization. It also exceeds several strong closed models such as Gemini-2.5-Flash and GPT-4o while still trailing Gemini-2.5-Pro and o3. To further position ECRD against established training-free baselines beyond RL-based systems, we compare it on TreeBench using the same base model (Qwen2.5-VL-7B) with: inference-time correction (Woodpecker [28]), pro-grammatic reasoning (ViperGPT [21]), and visual prompt-ing (ControlMLLM [26]). We also evaluate standard decod-ing alternatives, including beam search, self-consistency,                 
+
+> Method Base Woodpecker ViperGPT ControlMLLM Beam Self-cons. Diverse ECRD Overall 37.0 36.3 38.3 40.5 38.8 39.0 38.3 47.9
+
+Table 2. Comparison with training-free baselines and decoding alternatives on TreeBench. Best result are highlighted in bold .ECRD performs markedly better among all plug-and-play settings. 
+
+and diverse sampling. As shown in Tab. 2, all these base-lines underperform ECRD, indicating a significantly better performance of ECRD among plug-and-play approaches. Tab. 4 shows that ECRD improves Reasoning from 39.6% to 46.4% and Perception from 50.2% to 57.1%, lift-ing RH-AUC from 0.51 to 0.58 on RH-Bench . A higher RH-AUC value indicates that as the chain grows longer, ac-curacy remains at a higher level and the balance between reasoning and hallucination is better maintained. Finally, across five general multimodal benchmarks in Tab. 5, ECRD brings broad, task-general gains on both Qwen2.5-VL-7B and LLaVA-OneVision-7B: V*Bench overall rises by several points, MathVista and ChartQA see steady improvements, OCRBench jumps by around +8–12 points, and HallusionBench improves by roughly +8–11 points, reflecting fewer visually induced slips that would otherwise propagate through the chain. Perception Reasoning                                                                              
+
+> Overall Attr. Mater. Phys. ObjRet. OCR Persp. Order. Cont.&Oc. Contain. Compar. GRIT-3B [4] 30.1 31.0 23.1 56.5 25.0 39.7 21.2 17.5 36.6 48.3 20.5 Qwen2.5-VL-7B [1] 37.0 55.2 53.8 56.5 62.5 27.9 20.0 35.1 39.0 44.8 43.2 Qwen2.5-VL-7B + VDGD 39.5 58.6 53.8 52.2 62.5 50.0 17.6 29.8 39.0 48.3 40.9
+> Qwen2.5-VL-7B + supervisor 40.7 58.6 53.8 56.5 62.5 51.5 18.8 31.6 41.5 44.8 43.2
+> Qwen2.5-VL-7B + ECRD (Qwen2.5-VL-3B as visual decider) 43.7 62.1 53.8 69.6 62.5 52.9 20.0 31.6 43.9 62.1 43.2
+> Qwen2.5-VL-7B + ECRD 47.9 72.4 53.8 73.9 62.5 54.4 20.0 35.1 56.1 75.9 45.5
+> Table 3. TreeBench ablations on Qwen2.5-VL-7B. Best performances are highlighted in bold . The supervisor provides a stable boost and the visual decider adds the remaining lift; both components are necessary and complementary.
+
+Model RH-Bench 
+
+Reas. Perc. RH-AUC Qwen2.5-VL-7B [1] 39.6 50.2 0.51 
+
+Qwen2.5-VL-7B + supervisor 42.0 53.3 0.54 
+
+Qwen2.5-VL-7B + ECRD 46.4 57.1 0.58   
+
+> Table 4. Results on RH-Bench. Reas. indicates Reasoning , and Perc. indicates Perception . Best performances are highlighted in
+> bold . ECRD improves both Reasoning and Perception while in-creasing RH-AUC, indicating a better balance between reasoning and hallucination over longer chains.
+
+3.4. Ablation study 
+
+The ablations on Qwen2.5-VL-7B in Tab. 3 isolate where the lift comes from. First, GRIT-3B alone yields the low-est TreeBench accuracy among all rows, yet ECRD, invok-ing GRIT-3B only at uncertain steps, reaches 47.9% (+17.8 over GRIT-3B and +10.9 over the 7B base), which rules out the hypothesis that gains are driven by a stronger perception model and points instead to the decoding design, specifi-cally ECRD’s ability to fully leverage the small model ex-actly where it matters. Second, replacing VDGD’s prefix-wise minimum with our mean-over-prefix evidence scoring already helps without any decide, confirming that averaging stabilizes token selection. Third, adding a grounded decider matters: using Qwen2.5-VL-3B, a generic VLM, as the decider improves further, and swapping in the grounding-oriented GRIT-3B yields the full ECRD gains, with the largest margins on visually consequential categories. The same staged pattern appears beyond TreeBench: as shown in Tabs. 4 and 5, on RH-Bench and on the five general mul-timodal benchmarks, the variant without the decider consis-tently lies between the base and the full method, showing that both parts are necessary: the supervisor provides a ro-bust, always-on stabilization under uncertainty, and the vi-sual decider supplies sparse but decisive micro-observations only when ambiguity persists, converting the remaining hard steps and propagating benefits through rest of chain. 
+
+3.5. Efficiency analysis and uncertainty threshold 
+
+ECRD adds two sources of computation on top of the base decoder: (i) evidence scoring over the knee-selected can-didate set and (ii) decider calls triggered when uncertainty persists. The former is lightweight. At step t, after knee truncation produces Ct = {w1, . . . , w k}, scoring requires a pass over the evidence pool Et to form the KL-style pref-erence s(wi|Et). Because each evidence contributes pre-computed log-likelihoods on a separate and cache-disabled backend (stored as FP16 on CPU), the inference-time com-putation is O(k|Et|) with negligible GPU pressure. In prac-tice k is single-digit and |Et| grows slowly, so this path con-tributes only a small fraction of total latency. The heavier component is the visual decider. Let r de-note the average number of decider calls per question. As Fig. 3 shows, increasing the uncertainty threshold δ mono-tonically raises r (right panel), while accuracy (left panel) exhibits a consistent elbow: a rapid lift for small δ, fol-lowed by saturation. The knee for all five benchmarks con-centrates around the gray dashed line ( δ ≈ 0.08 ), which is precisely where the negotiated distribution most often flags genuinely ambiguous, visually charged steps. Bench-marks whose items hinge on precise perceptual grounding such as OCRBench and HallusionBench benefit early and strongly, their curves rise steeply with a small number of calls, whereas tasks that already align well with text-only priors like ChartQA show milder, earlier saturation. Math-Vista and V* Bench lie in between: accuracy improves steadily as a handful of targeted micro-observations are in-jected, then flattens when further calls add little new infor-mation. Importantly, beyond the knee, the invocation of vi-sual decider grows faster than accuracy, and some curves even level off or gently fluctuate, reflecting diminishing re-turns once the few decisive ambiguities have been resolved. The cost trend aligns with a simple latency model grounded in Tab. 6. Let t0 be the base time per question at δ = 0 (no calls) and l0 be the average marginal latency of a single call. Then the end-to-end time obeys 
+
+T (δ) ≈ t0 + l0 r(δ). (14) Model V* Bench MathVista ChartQA OCRBench HallusionBench 
+
+Attr Spatial Overall LLaVA-OneVision-7B [8] 73.0 60.5 68.1 63.2 80.0 62.2 55.1 
+
+LLaVA-OneVision-7B + ECRD 74.8 65.8 71.2 67.9 86.3 73.8 63.7 
+
+Qwen2.5-VL-7B [1] 73.9 67.1 71.2 68.2 84.4 82.3 61.3 
+
+Qwen2.5-VL-7B + supervisor 73.9 71.1 72.8 69.8 86.8 85.7 67.5 
+
+Qwen2.5-VL-7B + ECRD 74.8 75.0 74.9 72.3 88.3 90.7 72.5 
+
+Table 5. Results on five general multimodal benchmarks. Better performances are highlighted in bold . ECRD brings consistent gains across diverse tasks on both Qwen2.5-VL-7B and LLaVA-OneVision-7B, demonstrating backbone-agnostic, task-general effectiveness. 85                     
+
+> 90
+> 0.000 0.025 0.050 0.075 0.100 0.125 0.150 0.175 0.200
+> 70
+> 75
+> 0.000 0.025 0.050 0.075 0.100 0.125 0.150 0.175 0.200
+> 0
+> 1
+> 2
+> 3
+> Invocation rate  r (calls / question)
+> Accuracy (%)
+> V* Bench MathVista ChartQA OCRBench HallusionBench
+
+Figure 3. Analysis of the uncertainty threshold δ: accuracy as a function of δ across five benchmarks, and the average visual decider invocation rate (calls per question) as δ varies. The gray dashed line marks δ = 0 .08 .            
+
+> Benchmark V* Bench MathVista ChartQA OCRBench HallusionBench
+> t08.98 12.92 9.76 3.24 11.67
+> l01.32 1.46 1.30 1.12 1.43
+
+Table 6. Average time per question at δ = 0 (t0, seconds per question) and global average latency of a single visual decider call (l0, seconds). Note that l0 is computed as an overall mean across all benchmarks and δ settings, and is not restricted to the δ = 0 
+
+condition. All tests are conducted on a single H20-NVLink GPU. 
+
+with t0 varying by benchmark and l0 staying in a narrow band (single-second scale) across settings. Combined with Fig. 3, this explains the observed cost–accuracy balance: near δ ≈ 0.08 , accuracy captures most of the attainable gain while r remains in the low single-digit regime, yielding modest overhead relative to t0, whereas pushing δ higher mainly increases r (and thus T ) with little additional accu-racy. Hence we adopt δ = 0 .08 as a default: it lies at the elbow where added calls cease to be cost-effective, yet the model already recovers most of the gains in Tabs. 1 to 5. 
+
+3.6. Qualitative analysis: how ECRD works 
+
+As shown in Figs. 2 and 4, we present three representative cases that correct typical failure modes, corresponding to ECRD’s two components—the supervisor and the visual de-cider: (i) negotiated reweighting with textual evidence and (ii) on-demand visual arbitration when uncertainty persists. 
+
+Case A: Negotiated evidence resolves the step. As shown in Fig. 4, the question asks whether rubber cars are fewer than brown jets. At critical steps, ECRD does not trig-ger the decider because of the large reweighted gap, instead, it reweights the candidates so that tokens consistent with ev-idence are favored, yielding the correct answer “Yes”. 
+
+Case B.1: Visual decider supplies mid-chain ground-ing. As shown in Fig. 2 (full examples are provided in sup-plementary material), at the key step the candidate set is 
+
+{ “blue”, “red” }. The base slightly prefers “red”, while the evidence-induced distribution prefers “blue”; the nego-tiated gap remains small, so the trigger fires. This choice is pivotal for the rest of the chain: if the model commits to “red”, the subsequent localization and description would drift toward the red garment and propagate errors. The vi-sual decider reads the image with the current prefix and returns the grounding sentence: “The first dress from the right-hand side is blue, partially hidden by the tree.” ECRD forces “blue” for the current step and adds this sentence to the pool. Later tokens then follow this micro-observation to correctly describe all three dresses and reach the right final color judgment for the queried position. 
+
+Case B.2: Visual decider supplies the final answer. As shown in Fig. 4, here the candidate set at the decisive step is { “5”, “3” }. The base leans toward “5”, the evidence-induced distribution leans toward “3”, and the small nego-tiated gap triggers the decider. The visual decider localizes the tag behind the box and returns: “The number behind the cardboard box with the ‘favorita’ brand and banana illus-tration is ‘300’.” ECRD commits token “3” and inserts the sentence into the pool; at the next two steps the supervisor Question: Is the number 
+
+> of rubber cars less than
+> the number of brown jets?
+> Greedy Decoding
+
+ECRD Case A: negotiated evidence resolves the step.   
+
+> There are two rubber cars
+> in the image: one cyan car
+> and one green car . There
+> are two brown jets in the
+> image: one large jet and
+> one small jet. Since the
+> number of rubber cars (2)
+> is equal to the number of
+> brown jets (2). Therefore,
+> the answer is No .
+
+Model Answer: 
+
+Let's count the rubber cars and brown jets. There is 1 rubber car (a cyan minivan) near 
+
+the center , and there are 2 brown jets (one large and one small) with one at the back and 
+
+one near the center-right . Since the number of rubber cars (1) is less than the number of 
+
+brown jets (2), the statement is true. Therefore, the answer is Yes .
+
+Critical Evidence: 
+
+The image shows 9 objects in total with colors including yellow, blue, cyan, green, brown, 
+
+gray, and orange. A yellow bicycle is on the left, a blue car is near the center, a cyan van 
+
+is near the center, a yellow train is near the center, a gray train is in front, a brown road 
+
+bike is on the right, a green car is on the right, a brown small airplane is near the center-
+
+right, and a brown large airplane is at the back. For the task, note that there are 2 brown 
+
+jets (one large at the back and one small near the center-right) , and there is 1 rubber car 
+
+(a rubber cyan minivan) near the center . No text is visible. 
+
+Question: Recognize the 
+
+question and options in 
+
+the image and answer it. 
+
+ECRD Case B: visual decider corrects the chain. 
+
+Model Answer Prefix: 
+
+The question asks for the object located 
+
+directly behind the cardboard box with the 
+
+\"favorita\" brand and banana illustration. 
+
+In the image, there is a cardboard box 
+
+with the \"favorita\" logo and bananas on 
+
+it. Directly behind this box, there is a 
+
+price tag with the number \" 
+
+Negotiation (token, probability): 
+
+base model : (5, 0. 498 ) (3, 0. 483 )
+
+evidence : (5, 0. 503 ) (3, 0. 478 )
+
+reweighted : (5, 0. 501 ) (3, 0. 480 )
+
+Candidate Set: { “5”, “3” }
+
+Visual Decider Output:   
+
+> coordinate s: see the red box in the left image.
+> evidence: The number behind the cardboard box with the
+> \"favorita\" brand and banana illustration is \"300\".
+> answer: 3
+
+Model Final Answer: 
+
+The question asks for the object located directly behind the cardboard box with the \"favorita\" brand and 
+
+banana illustration. In the image, there is a cardboard box with the \"favorita\" logo and bananas on it. 
+
+Behind this box, there is a price tag with the number \" 300\" written on it. Therefore, the correct answer 
+
+should be the price tag with \"300\" in text. Figure 4. Two typical application cases of ECRD. 11.4% 
+
+> 18.2%
+> 70.4%
+> Gain Source
+> Final-answer decider
+> Mid-chain grounding
+> decider
+> Supervisor & indirect
+> (evidence pool)
+
+Figure 5. Breakdown of ECRD’s gain on TreeBench based on Qwen2.5-VL-7B. 
+
+prefers tokens consistent with this evidence, selecting “0” then “0” without additional calls. The chain thus outputs the correct answer “300”. 
+
+Where the gains come from. Based on a detailed sta-tistical analysis of the experimental results, we find that on Qwen2.5-VL-7B, ECRD yields a +10.9-point overall im-provement on TreeBench. As shown in Fig. 5, within this lift, cases where the visual decider directly outputs the final answer account for 11.4% of the gain, while cases where the decider injects a mid-chain visual grounding that unlocks the rest of the reasoning account for 18.2%. The remaining improvement primarily comes from the supervisor’s nego-tiated reweighting and the indirect benefits of an expand-ing evidence pool, which stabilizes later token choices even when no further decider calls are needed. 
+
+## 4. Conclusion 
+
+We presented ECRD, a decoding-time, training-free, plug-and-play framework for visually grounded reasoning. By reconciling base probabilities with an evidence-guided dis-tribution, ECRD preserves model confidence, invokes a lightweight visual decider only when necessary, and prop-agates visual grounding through reasoning chain. Experi-ments show consistent gains across diverse benchmarks. References 
+
+[1] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, et al. Qwen2.5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. 4, 5, 6, 7 [2] Google DeepMind. Gemini-2.5-flash, 2025. 4, 5 [3] Google DeepMind. Gemini-2.5-pro, 2025. 4, 5 [4] Yue Fan, Xuehai He, Diji Yang, Kaizhi Zheng, Ching-Chen Kuo, Yuting Zheng, Sravana Jyothi Narayanaraju, Xinze Guan, and Xin Eric Wang. Grit: Teaching mllms to think with images. arXiv preprint arXiv:2505.15879 , 2025. 4, 6 [5] Sreyan Ghosh, Chandra Kiran Reddy Evuru, Sonal Kumar, Utkarsh Tyagi, Oriol Nieto, Zeyu Jin, and Dinesh Manocha. Visual description grounding reduces hallucinations and boosts reasoning in lvlms. arXiv preprint arXiv:2405.15683 ,2024. 3 [6] Tianrui Guan, Fuxiao Liu, Xiyang Wu, Ruiqi Xian, Zongxia Li, Xiaoyu Liu, Xijun Wang, Lichang Chen, Furong Huang, Yaser Yacoob, et al. Hallusionbench: an advanced diagnos-tic suite for entangled language hallucination and visual il-lusion in large vision-language models. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 14375–14385, 2024. 4 [7] Dong Guo, Faming Wu, Feida Zhu, Fuxing Leng, Guang Shi, Haobin Chen, Haoqi Fan, Jian Wang, Jianyu Jiang, Jiawei Wang, et al. Seed1. 5-vl technical report. arXiv preprint arXiv:2505.07062 , 2025. 1 [8] Bo Li, Yuanhan Zhang, Dong Guo, Renrui Zhang, Feng Li, Hao Zhang, Kaichen Zhang, Peiyuan Zhang, Yanwei Li, Zi-wei Liu, et al. Llava-onevision: Easy visual task transfer. 
+
+arXiv preprint arXiv:2408.03326 , 2024. 4, 5, 7 [9] Junnan Li, Dongxu Li, Silvio Savarese, and Steven Hoi. Blip-2: Bootstrapping language-image pre-training with frozen image encoders and large language models. In In-ternational conference on machine learning , pages 19730– 19742. PMLR, 2023. 2 [10] Chengzhi Liu, Zhongxing Xu, Qingyue Wei, Juncheng Wu, James Zou, Xin Eric Wang, Yuyin Zhou, and Sheng Liu. More thinking, less seeing? assessing amplified hallucina-tion in multimodal reasoning models, 2025. 1, 4 [11] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. Visual instruction tuning. Advances in neural information processing systems , 36:34892–34916, 2023. 2 [12] Yuliang Liu, Zhang Li, Mingxin Huang, Biao Yang, Wenwen Yu, Chunyuan Li, Xu-Cheng Yin, Cheng-Lin Liu, Lianwen Jin, and Xiang Bai. Ocrbench: on the hidden mystery of ocr in large multimodal models. Science China Information Sciences , 67(12):220102, 2024. 4 [13] Pan Lu, Hritik Bansal, Tony Xia, Jiacheng Liu, Chunyuan Li, Hannaneh Hajishirzi, Hao Cheng, Kai-Wei Chang, Michel Galley, and Jianfeng Gao. Mathvista: Evaluating mathemat-ical reasoning of foundation models in visual contexts. arXiv preprint arXiv:2310.02255 , 2023. 4 [14] Ahmed Masry, Do Xuan Long, Jia Qing Tan, Shafiq Joty, and Enamul Hoque. Chartqa: A benchmark for question an-swering about charts with visual and logical reasoning. arXiv preprint arXiv:2203.10244 , 2022. 4 [15] OpenAI. Openai-gpt-4o, 2024. 4, 5 [16] OpenAI. Openai-o3, 2025. 4, 5 [17] Anna Rohrbach, Lisa Anne Hendricks, Kaylee Burns, Trevor Darrell, and Kate Saenko. Object hallucination in image cap-tioning. arXiv preprint arXiv:1809.02156 , 2018. 2 [18] Hao Shao, Shengju Qian, Han Xiao, Guanglu Song, Zhuo-fan Zong, Letian Wang, Yu Liu, and Hongsheng Li. Visual cot: Advancing multi-modal language models with a com-prehensive dataset and benchmark for chain-of-thought rea-soning. Advances in Neural Information Processing Systems ,37:8612–8642, 2024. 1 [19] Alex Su, Haozhe Wang, Weiming Ren, Fangzhen Lin, and Wenhu Chen. Pixel reasoner: Incentivizing pixel-space rea-soning with curiosity-driven reinforcement learning. arXiv preprint arXiv:2505.15966 , 2025. 2, 4, 5 [20] Guangyan Sun, Mingyu Jin, Zhenting Wang, Cheng-Long Wang, Siqi Ma, Qifan Wang, Tong Geng, Ying Nian Wu, Yongfeng Zhang, and Dongfang Liu. Visual agents as fast and slow thinkers. arXiv preprint arXiv:2408.08862 , 2024. 1[21] D´ ıdac Sur´ ıs, Sachit Menon, and Carl Vondrick. Vipergpt: Visual inference via python execution for reasoning. In Pro-ceedings of the IEEE/CVF international conference on com-puter vision , pages 11888–11898, 2023. 5 [22] Kimi Team, Angang Du, Bofei Gao, Bowei Xing, Changjiu Jiang, Cheng Chen, Cheng Li, Chenjun Xiao, Chenzhuang Du, Chonghua Liao, et al. Kimi k1.5: Scaling reinforcement learning with llms. arXiv preprint arXiv:2501.12599 , 2025. 1[23] Kimi Team, Angang Du, Bohong Yin, Bowei Xing, Bowen Qu, Bowen Wang, Cheng Chen, Chenlin Zhang, Chen-zhuang Du, Chu Wei, et al. Kimi-vl technical report. arXiv preprint arXiv:2504.07491 , 2025. 1 [24] Haochen Wang, Xiangtai Li, Zilong Huang, Anran Wang, Jiacong Wang, Tao Zhang, Jiani Zheng, Sule Bai, Zijian Kang, Jiashi Feng, et al. Traceable evidence enhanced visual grounded reasoning: Evaluation and methodology. arXiv preprint arXiv:2507.07999 , 2025. 4, 5 [25] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, et al. Chain-of-thought prompting elicits reasoning in large lan-guage models. Advances in neural information processing systems , 35:24824–24837, 2022. 2 [26] Mingrui Wu, Xinyue Cai, Jiayi Ji, Jiale Li, Oucheng Huang, Gen Luo, Hao Fei, Guannan Jiang, Xiaoshuai Sun, and Ron-grong Ji. Controlmllm: Training-free visual prompt learning for multimodal large language models. Advances in Neural Information Processing Systems , 37:45206–45234, 2024. 5 [27] Penghao Wu and Saining Xie. V*: Guided visual search as a core mechanism in multimodal llms. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 13084–13094, 2024. 4 [28] Shukang Yin, Chaoyou Fu, Sirui Zhao, Tong Xu, Hao Wang, Dianbo Sui, Yunhang Shen, Ke Li, Xing Sun, and Enhong Chen. Woodpecker: Hallucination correction for multimodal large language models. Science China Information Sciences ,67(12):220105, 2024. 5 [29] Ziwei Zheng, Michael Yang, Jack Hong, Chenxiao Zhao, Guohai Xu, Le Yang, Chao Shen, and Xing Yu. Deep-eyes: Incentivizing” thinking with images” via reinforce-ment learning. arXiv preprint arXiv:2505.14362 , 2025. 2, 4, 5 [30] Jinguo Zhu, Weiyun Wang, Zhe Chen, Zhaoyang Liu, Shen-glong Ye, Lixin Gu, Hao Tian, Yuchen Duan, Weijie Su, Jie Shao, et al. Internvl3: Exploring advanced training and test-time recipes for open-source multimodal models. arXiv preprint arXiv:2504.10479 , 2025. 4, 5

@@ -1,0 +1,288 @@
+Title: When More Is Less: A Systematic Analysis of Spatial and Commonsense Information for Visual Spatial Reasoning
+
+URL Source: https://arxiv.org/pdf/2602.21619v1
+
+Published Time: Thu, 26 Feb 2026 01:39:12 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# When More Is Less: A Systematic Analysis of Spatial and Commonsense Information for Visual Spatial Reasoning 
+
+## Muku Akasaka 
+
+akasakam@student.unimelb.edu.au The University of Melbourne Melbourne, Victoria, Australia 
+
+## Soyeon Caren Han 
+
+caren.han@unimelb.edu.au The University of Melbourne Melbourne, Victoria, Australia 
+
+Abstract 
+
+Visual spatial reasoning (VSR) remains challenging for modern vision-language models (VLMs), despite advances in multimodal ar-chitectures. A common strategy is to inject additional information at inference time, such as explicit spatial cues, external common-sense knowledge, or chain-of-thought (CoT) reasoning instructions. However, it remains unclear when such information genuinely im-proves reasoning and when it introduces noise. In this paper, we conduct a hypothesis-driven analysis of information injection for VSR across three representative VLMs and two public benchmarks. We examine (i) the type and number of spatial contexts, (ii) the amount and relevance of injected commonsense knowledge, and (iii) the interaction between spatial grounding and CoT prompting. Our results reveal a consistent pattern: more information does not necessarily yield better reasoning. Targeted single spatial cues out-perform multi-context aggregation, excessive or weakly relevant commonsense knowledge degrades performance, and CoT prompt-ing improves accuracy only when spatial grounding is sufficiently precise. These findings highlight the importance of selective, task-aligned information injection and provide practical guidance for designing reliable multimodal reasoning pipelines. 
+
+1 Introduction 
+
+Visual spatial reasoning (VSR), understanding relations such as left/right, front/back, overlap, and proximity, remains a persistent challenge for vision-language models (VLMs) [ 5, 14 ]. Although recent multimodal systems demonstrate strong performance on general image-text tasks, they often struggle when spatial relations are ambiguous, frame-dependent, or require precise grounding. Re-cent efforts address this limitation either through spatially-aware architectures and specialised datasets [ 1, 2], or by injecting ex-ternal spatial cues at inference time without additional training [4 , 10 ]. In this work, we focus on the inference-time setting and aug-ment inputs with explicit spatial contexts, relational commonsense knowledge, or chain-of-thought (CoT) reasoning instructions [ 11 ]. Intuitively, providing richer input should facilitate better reasoning. However, additional information does not consistently improve per-formance. Injected context may be redundant, weakly aligned with the task, or difficult to integrate, and structured reasoning prompts can either clarify inference or amplify incorrect assumptions. These observations raise a central question: When does information in-jection genuinely improve visual spatial reasoning, and when does it become harmful?  
+
+> ©2026 Muku Akasaka and Soyeon Caren Han. This is the authors’ submitted version of a work submitted to the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval (SIGIR ’26). It is posted here for personal use. Not for redistribution. If the work is published in the ACM Digital Library, the Version of Record link (including the DOI) will be added to this record.
+
+We address this question through a hypothesis-driven empirical analysis. Rather than proposing a new architecture, we treat VLMs as fixed black-box systems and systematically vary the type and quantity of injected information. We evaluate three representative VLMs (Qwen-2-VL [ 9 ], LLaVA-Next-1.6 [ 6], and BLIP-3 [ 12 ]) on two public VSR benchmarks [ 3, 5] and test three hypotheses: (1) Not all spatial contexts contribute equally; single, task-relevant cues out-perform multi-context aggregation. (2) Excessive or weakly relevant commonsense knowledge degrades reasoning due to information overload. (3) CoT prompting improves performance only when spa-tial grounding is sufficiently precise. Importantly, improvements obtained through information injection can mask fragile reasoning behaviour. A model may appear more capable simply because it leverages injected cues heuristically, rather than developing robust spatial grounding. Without understanding how different forms of information interact with internal representations, it is difficult to assess whether performance gains reflect genuine improvements in reasoning or merely the exploitation of superficial shortcuts. Across models and datasets, we observe a consistent pattern: more infor-mation does not necessarily lead to better reasoning. Effective VSR requires selective, task-aligned grounding rather than indiscrimi-nate context accumulation. Our findings provide practical guidance for designing and evaluating multimodal reasoning pipelines and highlight the importance of representation and information control in VLM-based reasoning. Main contributions are as follows: (1) A hypothesis-driven empirical analysis of information injection for visual spatial reasoning across three representative VLM families and two public benchmarks. (2) Systematic evaluation of spatial context type, context aggrega-tion, commonsense relevance threshold, and CoT prompting under controlled input interventions. (3) Empirical evidence that more information does not necessarily improve reasoning, revealing diminishing returns, overload effects, and grounding-dependent CoT behaviour. (4) Practical insights for designing reliable multimodal prompting strategies through selective, task-aligned information injection. 
+
+2 Hypotheses 
+
+Recent VLMs still struggle with VSR, and a common practice is to inject additional information, including spatial cues, commonsense knowledge, or chain-of-thought (CoT) instructions, to compensate for missing grounding or reasoning capabilities. However, more in-formation does not necessarily translate to better reasoning: added context can be ignored, misused, or even act as noise. In this paper, we formulate three hypotheses to systematically characterise when 
+
+injected information helps and when it harms. 
+
+> arXiv:2602.21619v1 [cs.CL] 25 Feb 2026
+
+Muku Akasaka and Soyeon Caren Han (1) Spatial Context (SC) Generation      
+
+> Patches/
+> RoIs
+> Commonsense
+> Knowledge
+> (i.e. ATOMIC -COMET)
+> (2) Commonsense Knowledge (CK) Extraction
+> Input Image
+> Proposal Score Object Detection
+> / Segmentation
+> Object Orientation
+> / Depth Estimation
+> Spatial Information
+> Generation
+> Is the caption correct?
+> “A chicken is facing the dog ”
+> Input Text
+> chicken
+> Noun/Entity
+> Extraction
+> dog
+> VLM
+> (Visual Language Model)
+> (3) Spatial Reasoning (SR) Instruction Integration
+> Provide step -by -step reasoning. You may use the following
+> information in your reasoning.
+> Spatial Contexts
+> Bounding Boxes: Dog: [0, 12, 176, 147], Chicken […]
+> ...
+> Commonsense Knowledge
+> Dogs often turn their heads toward moving animals.
+> …
+> No, the chicken is not
+> directly facing the dog
+> ## Bounding Boxes
+> Dog: [0, 12, 176, 147 ]
+> ## Depth Relations
+> Close: Chicken, Far: Dog
+> …
+
+Figure 1: Overview of the controlled input intervention setup. We treat VLMs as black-box systems and vary only the in-jected information: (1) Spatial Contexts (SC), (2) Common-sense Knowledge (CK) retrieved from a knowledge base, and (3) Spatial Reasoning instructions (SR). H1: Not all spatial contexts contribute equally to VSR. Sin-gle, targeted spatial cues yield larger and more reliable gains than aggregating multiple spatial contexts. We expect (i) substantial variance across different spatial context types, and (ii) diminish-ing returns or degradation as more contexts are appended, due to increased integration burden. 
+
+H2: Excessive or weakly relevant commonsense knowl-edge can degrade VSR. Commonsense injection is beneficial only when it is both relevant and concise; otherwise, it introduces dis-traction and overwhelms reasoning. We operationalise this hy-pothesis by varying both (i) the relevance threshold controlling the amount/quality of retrieved knowledge, and (ii) the knowledge type, and test whether performance peaks at selective settings rather than at maximal injection. 
+
+H3: Chain-of-Thought helps only when spatial grounding is sufficiently precise. CoT-style prompting improves VSR when the model has reliable premises (i.e., accurate grounding and un-ambiguous inference), but can amplify errors when grounding is uncertain, or the task is frame-dependent. We test this primarily through qualitative comparisons, complemented by quantitative trends observed across settings. 
+
+3 Intervention Setup: Injected Information 
+
+We analyse how external information affects visual spatial reason-ing in VLMs by treating each model as a black-box image–text in-terface and varying only the input conditions. Given an image and a question, we optionally append (i) explicit spatial contexts extracted by off-the-shelf vision modules, (ii) relational commonsense state-ments retrieved from a knowledge base, and (iii) chain-of-thought style reasoning instructions. The following types of information are used in our interventions. 
+
+Spatial Contexts (SC). We extract three spatial values and six interpretable spatial contexts that describe pairwise relations or object attributes: bounding boxes, orientation angles, metric depth values, lateral (left/right), vertical (above/below), orientation (fac-ing direction), depth (close/far), overlap (occlusion-like), and size (large/small). These contexts are provided in a structured format. 
+
+Commonsense Knowledge (CK). To study relational priors be-yond geometry, we retrieve short commonsense statements from ATOMIC 20 20 that describe plausible interactions between detected OA Implicit SC CK SR SC+CK+SR        
+
+> 0.10
+> 0.05
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> Accuracy difference
+> Baseline Ours
+> 0.032
+> 0.013
+> 0.038
+> 0.001
+> 0.006
+> 0.013 0.010
+> 0.038
+> 0.051
+> 0.006
+> 0.096
+> 0.001
+> 0.033
+> 0.006
+> 0.020
+> 0.020
+> 0.014
+> 0.007
+> 0.122
+> 0.101
+> 0.024
+> 0.097
+> VSR-Qwen VSR-LLaVA VSR-BLIP Emb-Qwen Emb-LLaVA Emb-BLIP
+
+Figure 2: Overall performance comparison between models on VSR and EmbSpatial. The accuracy difference is calcu-lated from the zero-shot performance. OA, SC, CK, and SR stand for Orient Anything, Spatial Contexts, Commonsense Knowledge, and Spatial Reasoning Instructions, respectively. 
+
+entities. Candidate statements are selected based on their seman-tic similarity to the caption and detected entities. We control the amount and relevance of injected knowledge using a similarity threshold and knowledge type (PE/EC/SI). 
+
+Spatial Reasoning Instructions (SR). We prepend brief step-by-step reasoning instructions that encourage the model to use the provided spatial and commonsense information before answering. Across all experiments, LVLM parameters remain fixed; only these input conditions are varied to isolate the causal effect of each information type. 
+
+4 Evaluation Setup 
+
+We design our experiments to test the hypotheses in Section 2 by analysing how different forms of injected information affect visual spatial reasoning under controlled input interventions. We treat each VLM as a fixed black-box and vary only the input condi-tions defined in Section 3. We evaluate three representative VLMs: Qwen-2-VL-7B (Qwen) [ 9 ], LLaVA-Next-1.6-7B (LLaVA) [ 6], and BLIP-3-5B (BLIP) [ 12 ], which span diverse architectural and training paradigms. Experiments are conducted on two public benchmarks. The VSR dataset [ 5] evaluates fine-grained spatial relations across 66 categories, while the EmbSpatial dataset [ 3] focuses on reasoning in cluttered, object-dense scenes. Together, they test both explicit spatial grounding and abstract relational reasoning. All results are reported using accuracy. Injected spatial and relational informa-tion is generated using off-the-shelf perception models: Grounding DINO [ 7], Segment Anything 2 [ 8 ], Depth Anything v2 [ 13 ], and Orient Anything [ 10 ]. These components are used solely to con-struct input contexts; VLM parameters remain fixed throughout. 
+
+5 Results 5.1 Overall Performance 
+
+To examine how injected information affects VSR, we compare intervention settings, including Orient Anything (OA) [ 10 ]. Fig-ure 2 reports the best accuracy gains over zero-shot prompting on VSR and EmbSpatial in each setting. Zero-shot includes the image, caption, task description, and answer options. Implicit prompting adds light spatial cues without explicit external information. We reproduce OA following the original procedure. When More Is Less: A Systematic Analysis of Spatial and Commonsense Information for Visual Spatial Reasoning Qwen LLaVA BLIP Zero-shot BB LC VC OV OC DV DC OvC RC 
+
+> Prompt Type
+> 0.60
+> 0.70
+> 0.80
+> Accuracy
+> 0.772
+> 0.786
+> 0.763
+> 0.638
+> 0.653
+> 0.636
+> 0.662
+> 0.713
+> 0.633
+
+(a) VSR BB LC VC OV OC DV DC OvC RC  
+
+> Prompt Type
+> 0.40
+> 0.50
+> 0.60
+> Accuracy
+> 0.618
+> 0.636
+> 0.593
+> 0.501
+> 0.495
+> 0.409
+> 0.463
+> 0.559
+> 0.460
+
+(b) EmbSpatial 
+
+Figure 3: Spatial context overall accuracy (%). Prompt types are abbreviated as follows (BB: bounding box, LC: lateral context, VC: vertical context, OV: orientation angle, OC: ori-entation context, DV: metric depth value, DC: depth context, OvC: overlap context, and RC: relative size context). Testing H1 (Spatial Contexts). Injecting explicit spatial con-texts yields the most consistent improvements across models and datasets. SC improves accuracy by up to 9.6% and consistently out-performs OA, which often underperforms zero-shot. This supports 
+
+H1 : targeted spatial grounding is more effective than generic or aggregated cues. 
+
+Testing H2 (Commonsense Knowledge). The impact of CK is model-dependent. While Qwen and BLIP-3 benefit, LLaVA shows slight degradation (–0.6%) across datasets, indicating that additional relational information can introduce noise. These results support 
+
+H2 , suggesting that commonsense knowledge must be selectively injected to avoid overload. 
+
+Testing H3 (Spatial Reasoning Instructions). Spatial reason-ing instructions (SR) exhibit divergent effects across datasets. On EmbSpatial, SR substantially improves performance for LLaVA and BLIP-3 (up to +12.2%), whereas on VSR it degrades accuracy by up to 2.0%. This contrast supports H3 , suggesting that CoT-style prompting is helpful primarily in settings where clear premises are provided, but can be detrimental when ambiguity persists and over-reasoning amplifies errors. 
+
+Combined Interventions and Cognitive Overload. Finally, com-bining SC, CK, and SR does not lead to additive gains. In several cases, the full combination (SC+CK+SR) significantly reduces accu-racy compared to simpler interventions. This observation provides further evidence of cognitive overload : simultaneously injecting multiple signals increases the integration burden on current VLMs and leads to confusion rather than synergy. Overall, these results reinforce a consistent theme across hypotheses: for current VLMs, injecting a single, task-relevant spatial context is more effective than aggregating multiple forms of external information. 
+
+5.2 Analysis of Spatial Context 
+
+To directly test H1 , we examine how individual spatial contexts affect visual spatial reasoning when injected in isolation. Figure 3 reports accuracy for each spatial context across models on the VSR and EmbSpatial datasets. Across both datasets, injecting spa-tial information generally improves performance over zero-shot prompting; however, the magnitude and direction of improvement Qwen LLaVA BLIP Zero-shot 1 2 3 4 5 6 7 8 9 
+
+> Number of Spatial Contexts
+> 0.60
+> 0.70
+> 0.80
+> Accuracy
+> 0.772
+> 0.785
+> 0.764
+> 0.662
+> 0.713
+> 0.655 0.638
+> 0.650
+> 0.619
+
+(a) VSR 1 2 3 4 5 6 7 8 9 
+
+> Number of Spatial Contexts
+> 0.40
+> 0.50
+> 0.60
+> Accuracy
+> 0.618
+> 0.654
+> 0.609
+> 0.463
+> 0.552
+> 0.459
+> 0.501
+> 0.495
+> 0.406
+
+(b) EmbSpatial 
+
+Figure 4: Performance trend of each model over different numbers of spatial contexts. 
+
+vary substantially across spatial context types. On the VSR dataset, Qwen benefits most from depth-related cues, LLaVA from orienta-tional context, and BLIP-3 from lateral relations. On EmbSpatial, Qwen performs best with vertical context, LLaVA with overlap re-lations, while BLIP-3 again favours lateral context. This variability indicates that spatial contexts are not interchangeable and that their utility depends on both the model and the reasoning demands of the dataset. The observed differences align with the evaluation focus of each dataset. VSR probes fine-grained spatial relations across 66 categories, where three-dimensional cues such as orientation and depth are often informative. In contrast, EmbSpatial evaluates reasoning in cluttered scenes with many irrelevant objects, where two-dimensional relational cues such as lateral and overlap rela-tions are more effective. These results suggest that spatial context utility is tightly coupled to the underlying spatial abstraction re-quired by the task. A consistent trend across models and datasets is that verbalised spatial contexts outperform their numerical counter-parts. In particular, raw orientation values and depth values degrade performance for most models (by up to 9.2%), whereas their ver-balised forms lead to stable improvements. This finding challenges the assumption that more precise, fine-grained numerical inputs are inherently beneficial. Instead, continuous numeric cues introduce additional integration complexity, requiring models to normalise and interpret values before reasoning. For current VLMs, this added burden often outweighs the potential informational gain. 
+
+Implications for H1. Together, these results provide strong evi-dence for H1 . While spatial context injection can improve VSR per-formance, not all spatial contexts contribute equally, and increased representational precision does not guarantee better reasoning. Ef-fective spatial grounding requires selecting a single, task-relevant 
+
+spatial cue and expressing it in a form that the model can reliably consume. When spatial information is mismatched to the task or overly complex, it is frequently treated as noise. 
+
+5.3 Effect of Number of Spatial Contexts 
+
+To further test H1 , we analyse how performance changes as multi-ple spatial contexts are aggregated. Figure 4 shows accuracy trends as the number of injected contexts increases from 0 to 9, added cumulatively in descending order of single-context effectiveness. Across all three models, performance peaks with a single spatial context and generally declines as more contexts are appended. A no-table drop appears around five contexts, after which accuracy does Muku Akasaka and Soyeon Caren Han 
+
+Figure 5: Performance trend of each model over different thresholds of commonsense knowledge similarity on VSR. 
+
+not recover to earlier levels. Although minor fluctuations occur, no model achieves higher accuracy with more than four contexts than with three. These results provide strong support for H1 . Aggre-gating multiple spatial cues yields diminishing returns and often degrades performance, suggesting that current VLMs struggle to integrate multiple spatial signals simultaneously. 
+
+5.4 Commonsense Knowledge Analysis 
+
+To test H2 , we analyse how the amount and type of injected com-monsense knowledge affect VSR. Figure 5 shows performance as the similarity threshold varies from 0.1 to 0.9 for three knowledge types: Physical-Entity (PE), Event-Centred (EC), and Social-Interaction (SI). Higher thresholds retain fewer but more relevant statements, whereas lower thresholds admit loosely related knowledge. Across all models, performance peaks at high thresholds (0.7–0.9) and de-clines as the threshold decreases. At suboptimal thresholds (e.g., 0.2 for Qwen and BLIP-3, 0.4 for LLaVA), accuracy falls below zero-shot, indicating that loosely aligned knowledge introduces noise rather than support. At high thresholds, all knowledge types achieve com-parable peak performance, suggesting that diverse but relevant com-monsense can assist reasoning. However, PE knowledge exhibits instability at mid-level thresholds, implying that even spatially aligned commonsense can be harmful when injected imprecisely or excessively. These findings strongly support H2 : commonsense improves VSR only when selectively injected, while excessive or weakly aligned knowledge induces information overload. 
+
+5.5 Impact of Chain-of-Thought Reasoning 
+
+To test H3 , we examine when chain-of-thought (CoT) prompting improves VSR and when it amplifies errors. Figure 6 provides qual-itative examples highlighting the role of grounding precision and frame specification. Figure 6a shows a case with an ambiguous frame of reference. The teddy bear appears on the right of the cat from the camera’s perspective, but on the left from the cat’s intrinsic perspective. Because the frame is unspecified, “A is on the right of B” does not entail “A is not on the left of B.” Under CoT prompting, the model constructs an explicit reasoning chain and incorrectly applies this negation, reinforcing the ambiguity and producing a wrong answer. By contrast, Figure 6b presents a proxemic distance Caption : The teddy bear is at the left side of the cat. (GT: Yes )         
+
+> CoT Prompt: Provide step -by -step reasoning about the
+> spatial relationship between objects in the image.
+> Answer for Zero -shot prompting :Yes CoT Prompting :No
+> In the image, there is a cat and a teddy bear. The cat is lying
+> down on a surface, and the teddy bear is positioned to the
+> right of the cat. The teddy bear is wearing a red hat. Based
+> on this description, the correct answer is B. No
+
+(a) Example of CoT prompting leading to an incorrect answer Caption : The cat is away from the umbrella. (GT: No )         
+
+> CoT Prompt: Provide step -by -step reasoning about the
+> spatial relationship between objects in the image.
+> Answer for Zero -shot prompting :Yes CoT Prompting :No
+> To determine the spatial relationship between the cat and the
+> umbrella, let's analyze the image step by step:
+> 1. The cat is standing on the umbrella.
+> 2. The umbrella is open and appears to be resting on the ground.
+> 3. The cat is positioned on the umbrella, which is not in an
+> upright position.
+> Based on the image, the cat is not "away from" the umbrella. The
+> cat is directly on the umbrella, which is not in its usual position
+> for use. Therefore, the correct answer is B. No
+
+(b) Example of CoT prompting leading to a correct answer. 
+
+Figure 6: Qualitative examples of CoT prompting under dif-ferent frames. 
+
+relation that is frame-independent. Since the grounding premise is unambiguous (the cat is physically on the umbrella), CoT helps articulate the reasoning and leads to the correct prediction. 
+
+Implications for H3. These examples provide evidence for H3 .CoT prompting is beneficial only when spatial grounding is suffi-ciently precise and the underlying inference is unambiguous. When grounding information is incomplete, frame-dependent, or uncer-tain, CoT can amplify erroneous assumptions by enforcing a co-herent but incorrect reasoning chain. Therefore, CoT should not be applied indiscriminately in VSR tasks; its effectiveness depends critically on the reliability of the underlying spatial premises. 
+
+6 Conclusion 
+
+We conducted a hypothesis-driven analysis of information injection for visual spatial reasoning in vision-language models. Across three representative VLMs and two benchmarks, our results consistently show that more information does not necessarily lead to better rea-soning. First, spatial context improves performance only when care-fully selected; certain representations enhance grounding, while others introduce integration difficulty. Second, both spatial and commonsense knowledge provide gains only when selectively in-jected—excessive or weakly aligned information degrades accuracy, revealing clear overload effects. Third, chain-of-thought prompting is beneficial only under precise and unambiguous spatial grounding; otherwise, it can amplify erroneous assumptions. Overall, effec-tive VSR therefore requires controlled, task-aligned information injection rather than indiscriminate context accumulation. 
+
+References 
+
+[1] Boyuan Chen, Zhuo Xu, Sean Kirmani, Brian Ichter, Dorsa Sadigh, Leonidas Guibas, and Fei Xia. 2024. SpatialVLM: Endowing Vision-Language Models with Spatial Reasoning Capabilities. In 2024 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) . 14455–14465. doi:10.1109/CVPR52733.2024.01370 [2] An-Chieh Cheng, Hongxu Yin, Yang Fu, Qiushan Guo, Ruihan Yang, Jan Kautz, Xiaolong Wang, and Sifei Liu. 2024. SpatialRGPT: grounded spatial reasoning in vision-language models. In Proceedings of the 38th International Conference on Neural Information Processing Systems (Vancouver, BC, Canada) (NIPS ’24) . Curran When More Is Less: A Systematic Analysis of Spatial and Commonsense Information for Visual Spatial Reasoning 
+
+Associates Inc., Red Hook, NY, USA, Article 4293, 32 pages. doi:10.52202/079017-4293 [3] Mengfei Du, Binhao Wu, Zejun Li, Xuanjing Huang, and Zhongyu Wei. 2024. EmbSpatial-Bench: Benchmarking Spatial Understanding for Embodied Tasks with Large Vision-Language Models. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 2: Short Papers) , Lun-Wei Ku, Andre Martins, and Vivek Srikumar (Eds.). Association for Computational Linguistics, Bangkok, Thailand, 346–355. doi:10.18653/v1/2024.acl-short.33 [4] Mengdi Jia, Zekun Qi, Shaochen Zhang, Wenyao Zhang, XinQiang Yu, Jiawei He, He Wang, and Li Yi. 2026. OmniSpatial: Towards Comprehensive Spatial Reasoning Benchmark for Vision Language Models. In The Fourteenth Interna-tional Conference on Learning Representations . https://openreview.net/forum? id=6nZKT2rL0H [5] Fangyu Liu, Guy Emerson, and Nigel Collier. 2023. Visual Spatial Reasoning. 
+
+Transactions of the Association for Computational Linguistics 11 (2023), 635–651. doi:10.1162/tacl_a_00566 [6] Haotian Liu, Chunyuan Li, Yuheng Li, Bo Li, Yuanhan Zhang, Sheng Shen, and Yong Jae Lee. 2024. LLaVA-NeXT: Improved reasoning, OCR, and world knowledge. https://llava-vl.github.io/blog/2024-01-30-llava-next/ [7] Shilong Liu, Zhaoyang Zeng, Tianhe Ren, Feng Li, Hao Zhang, Jie Yang, Qing Jiang, Chunyuan Li, Jianwei Yang, Hang Su, Jun Zhu, and Lei Zhang. 2025. Grounding DINO: Marrying DINO with Grounded Pre-training for Open-Set Object Detection. In Computer Vision – ECCV 2024 , Aleš Leonardis, Elisa Ricci, Stefan Roth, Olga Russakovsky, Torsten Sattler, and Gül Varol (Eds.). Springer Nature Switzerland, Cham, 38–55. doi:10.1007/978-3-031-72970-6_3 [8] Nikhila Ravi, Valentin Gabeur, Yuan-Ting Hu, Ronghang Hu, Chaitanya Ryali, Tengyu Ma, Haitham Khedr, Roman Rädle, Chloe Rolland, Laura Gustafson, Eric Mintun, Junting Pan, Kalyan Vasudev Alwala, Nicolas Carion, Chao-Yuan Wu, Ross Girshick, Piotr Dollar, and Christoph Feichtenhofer. 2025. SAM 2: Segment Anything in Images and Videos. In International Conference on Learning Representations , Y. Yue, A. Garg, N. Peng, F. Sha, and R. Yu (Eds.), Vol. 2025. 28085–28128. https://openreview.net/forum?id=Ha6RTeWMd0 [9] Peng Wang, Shuai Bai, Sinan Tan, Shijie Wang, Zhihao Fan, Jinze Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Yang Fan, Kai Dang, Mengfei Du, Xuancheng Ren, Rui Men, Dayiheng Liu, Chang Zhou, Jingren Zhou, and Junyang Lin. 2024. Qwen2-VL: Enhancing Vision-Language Model’s Perception of the World at Any Resolution. arXiv preprint arXiv:2409.12191 (2024). doi:10.48550/ ARXIV.2409.12191 [10] Zehan Wang, Ziang Zhang, Tianyu Pang, Chao Du, Hengshuang Zhao, and Zhou Zhao. 2025. Orient Anything: Learning Robust Object Orientation Estimation from Rendering 3D Models. In Proceedings of the 42nd International Conference on Machine Learning (Proceedings of Machine Learning Research, Vol. 267) , Aarti Singh, Maryam Fazel, Daniel Hsu, Simon Lacoste-Julien, Felix Berkenkamp, Tegan Maharaj, Kiri Wagstaff, and Jerry Zhu (Eds.). PMLR, 65556–65574. https: //proceedings.mlr.press/v267/wang25er.html [11] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, brian ichter, Fei Xia, Ed Chi, Quoc V Le, and Denny Zhou. 2022. Chain-of-Thought Prompting Elicits Reasoning in Large Language Models. In Advances in Neural Information Processing Systems , S. Koyejo, S. Mohamed, A. Agar-wal, D. Belgrave, K. Cho, and A. Oh (Eds.), Vol. 35. Curran Associates, Inc., 24824–24837. https://proceedings.neurips.cc/paper_files/paper/2022/file/ 9d5609613524ecf4f15af0f7b31abca4-Paper-Conference.pdf [12] Le Xue, Manli Shu, Anas Awadalla, Jun Wang, An Yan, Senthil Purushwalkam, Honglu Zhou, Viraj Prabhu, Yutong Dai, Michael S Ryoo, Shrikant Kendre, Jieyu Zhang, Shaoyen Tseng, Gustavo Adolfo Lujan-Moreno, Matthew Lyle Olson, Musashi Hinck, David Cobbley, Vasudev Lal, Can Qin, Shu Zhang, Chia-Chih Chen, Ning Yu, Juntao Tan, Tulika Manoj Awalgaonkar, Shelby Heinecke, Huan Wang, Yejin Choi, Ludwig Schmidt, Zeyuan Chen, Silvio Savarese, Juan Carlos Niebles, Caiming Xiong, and Ran Xu. 2025. BLIP-3: A Family of Open Large Multimodal Models. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) Workshops . 6124–6135. [13] Lihe Yang, Bingyi Kang, Zilong Huang, Zhen Zhao, Xiaogang Xu, Jiashi Feng, and Hengshuang Zhao. 2024. Depth Anything V2. In Advances in Neural Information Processing Systems , A. Globerson, L. Mackey, D. Belgrave, A. Fan, U. Paquet, J. Tomczak, and C. Zhang (Eds.), Vol. 37. Curran Associates, Inc., 21875–21911. doi:10.52202/079017-0688 [14] Rowan Zellers, Yonatan Bisk, Ali Farhadi, and Yejin Choi. 2019. From Recognition to Cognition: Visual Commonsense Reasoning. In 2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) . 6713–6724. doi:10.1109/CVPR. 2019.00688
