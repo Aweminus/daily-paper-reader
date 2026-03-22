@@ -1,0 +1,437 @@
+Title: Locatability-Guided Adaptive Reasoning for Image Geo-Localization with Vision-Language Models
+
+URL Source: https://arxiv.org/pdf/2603.13628v1
+
+Published Time: Tue, 17 Mar 2026 00:48:26 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+# Locatability-Guided Adaptive Reasoning for Image Geo-Localization with Vision-Language Models 
+
+# Bo Yu 1 Fengze Yang 1 Yiming Liu 2 Chao Wang 3 Xuewen Luo 1
+
+# Taozhe Li 2 Ruimin Ke 4 Xiaofan Zhou 5 Chenxi Liu 1* 1The University of Utah 2The University of Oklahoma 
+
+> 3
+
+# Worcester Polytechnic Institute 4Rensselaer Polytechnic Institute 
+
+> 5
+
+# University of Illinois Chicago 
+
+bo.yu@utah.edu, chenxi.liu@utah.edu 
+
+# Abstract 
+
+The emergence of Vision-Language Models (VLMs) has introduced new paradigms for global image geo-localization through retrieval-augmented generation (RAG) and reasoning-driven inference. However, RAG meth-ods are constrained by retrieval database quality, while reasoning-driven approaches fail to internalize image lo-catability, relying on inefficient, fixed-depth reasoning paths that increase hallucinations and degrade accuracy. To overcome these limitations, we introduce an Optimized Lo-catability Score that quantifies an image’s suitability for deep reasoning in geo-localization. Using this metric, we curate Geo-ADAPT-51K, a locatability-stratified reason-ing dataset enriched with augmented reasoning trajecto-ries for complex visual scenes. Building on this founda-tion, we propose a two-stage Group Relative Policy Opti-mization (GRPO) curriculum with customized reward func-tions that regulate adaptive reasoning depth, visual ground-ing, and hierarchical geographical accuracy. Our frame-work, Geo-ADAPT, learns an adaptive reasoning policy, achieves state-of-the-art performance across multiple geo-localization benchmarks, and substantially reduces halluci-nations by reasoning both adaptively and efficiently. 
+
+# 1. Introduction 
+
+Global image geo-localization [52] refers to the task of esti-mating the geographic coordinates of a scene from a single image captured at any location on Earth. It is a core problem in computer vision with broad applications in autonomous navigation, social media analysis, disaster management, and environmental monitoring [12, 23, 43]. In contrast to region-specific methods [12], global-scale image localiza-tion must address the extensive geographic range and visual 
+
+Figure 1. Illustration of locatability-guided adaptive reasoning. Current reasoning VLMs for image geo-localization are trained on fixed chain of thoughts, generating predetermined reasoning trajectories step by step without considering the actual image lo-catability during inference. In our work, we propose Geo-ADAPT, an adaptive reasoning framework that dynamically adjusts reason-ing depth based on the image’s Optimized Locatability Score Lopt .
+
+heterogeneity of the entire planet, a task made challenging by significant visual ambiguity and large intra-class varia-tion. Traditional approaches are typically categorized into classification-based methods [8, 14, 39, 45, 58], which suf-fer from a fundamental precision-versus-scalability trade-off, and retrieval-based methods [29, 32, 59, 68, 74, 75], which are constrained by the cost, density, and coverage of their required geo-referenced databases. The emergence of VLMs [4, 22, 54] has introduced a new paradigm for image geo-localization, branching into two primary avenues: RAG [18, 19, 21, 73] and reasoning-driven inference [25, 27, 53]. RAG, while effective, re-mains reliant on the quality of its retrieval databases and does not fully leverage the advanced reasoning capabili-ties of VLMs. In contrast, reasoning-driven methods aim to emulate the multi-step cognitive process of image geo-1
+
+> arXiv:2603.13628v1 [cs.CV] 13 Mar 2026
+
+localization [27, 53]. However, they face a critical flaw: they fail to internalize a robust concept of image locatability in the reasoning process [25], which quantifies how visually identifiable a location is, resorting to inefficient, fixed-depth reasoning paths. This “one-size-fits-all” policy applies the same inferential depth to simple and complex images alike, increasing hallucinations and degrading accuracy. Figure 1 illustrates the limitations of current VLMs reasoning for image geo-localization and our proposed solution. To address these challenges, we propose Geo-ADAPT ,a novel framework that learns an adaptive reasoning pol-icy for image geo-localization. Our approach is three-fold: First, we introduce an Optimized Locatability Score 
+
+Lopt , a metric that differentiates an image that is truly non-localizable from one that simply requires multi-step, im-plicit inference (deep reasoning) to solve. Second, using this metric, we curate Geo-ADAPT-51K , a new 51K-image dataset from IMAGEO-Bench [26] and X (formerly Twit-ter). This dataset is uniquely stratified by the Optimized Locatability Score Lopt and enriched with augmented, im-plicit reasoning trajectories for complex scenes requiring deep reasoning. Third, we propose a two-stage GRPO [46]-based curriculum built on tailored reward functions govern-ing adaptive reasoning depth, visual grounding, and hier-archical geographical accuracy. Specifically, this curricu-lum trains the policy in two phases: Stage 1 (Reasoning Formation) focuses on learning how and when to reason deeply and in a visually-grounded manner. Stage 2 (Local-ization Refinement) then optimizes for precise, hierarchical geo-prediction accuracy, while a KL penalty preserves the foundational reasoning skills. The resulting model Geo-ADAPT-8B achieves state-of-the-art performance, signifi-cantly reducing hallucinations by reasoning adaptively, ac-curately, and efficiently. To summarize, our contributions are as follows: • We propose an Optimized Locatability Score Lopt that quantifies real reasoning feasibility for image geo-localization, forming the basis for stratified data curation, customized reward construction, and GRPO training. • We curate Geo-ADAPT-51K, a 51K-image dataset strat-ified by the Optimized Locatability Score Lopt and en-riched with implicit reasoning trajectories for deep rea-soning, the first dataset designed for training adaptive rea-soning policies in image geo-localization. • We develop a two-stage GRPO curriculum that learns adaptive policies by first optimizing reasoning formation, then refining hierarchical localization, achieving state-of-the-art performance across multiple benchmarks. 
+
+# 2. Related Work 
+
+2.1. Traditional Methods 
+
+Image geo-localization is a challenging task in computer vision [52], GeoAI [17, 25, 35], and spatial data min-ing [28, 55]. Traditional approaches have been dominated by two paradigms. The first, classification-based methods [8, 14, 39, 45, 58], partitions the Earth’s surface into a dis-crete grid, creating an inflexible trade-off between local-ization precision and output space scalability. The second, retrieval-based methods [29, 32, 51, 59, 68, 74, 75], matches a query against a large geo-referenced database but is fun-damentally constrained by the database’s cost, density, and coverage. The advent of VLMs, however, has introduced a paradigm shift, offering new potential to overcome the lim-itations of these traditional approaches. 
+
+2.2. Vision Language Models 
+
+VLMs are variants of Large Language Models (LLMs). In addition to processing and understanding text, they also have the advanced ability to process visual informa-tion. Their evolution progressed from contrastive learn-ing [24, 40] and early multimodal analysis [2] to sophis-ticated instruction-tuned systems [10, 31]. Recent models like GPT-4o [37] and other advanced VLMs [22, 30, 54, 67] now exhibit powerful multimodal reasoning [4], which has spurred two distinct approaches in image geo-localization: RAG and reasoning-driven inference. RAG-based methods [18, 19, 73] provide VLMs with ex-ternal image candidates with extra information such as brief text and coordinates. However, their performance remains fundamentally bottlenecked by the quality and coverage of the reference datasets, and they under-utilize the VLM’s advanced reasoning capabilities. Conversely, reasoning-driven inference [25, 27, 53] aims to maximize the VLM’s internal prior knowledge, often refined via Supervised Fine-Tuning (SFT) or Reinforcement Learning (RL), to perform localization without an external database. These methods, however, suffer from a critical flaw: they employ inefficient, “one-size-fits-all” reasoning policies. By failing to internal-ize image locatability, they apply a fixed reasoning depth to all images, which increases hallucinations and degrades ac-curacy. Thus, there is an urgent need for adaptive reasoning methods to address these limitations. 
+
+2.3. Reinforcement Learning 
+
+RL is one of the candidates that has the greatest poten-tial to solve this problem. Recently, RL has proven highly effective for enhancing complex reasoning in the text do-main, with notable successes in tasks like mathematics [5, 46, 54, 62] and coding [16, 20, 44, 66, 69]. Break-throughs such as DeepSeek-R1 [11], which utilize GRPO [46], have demonstrated that RL can instill robust reasoning abilities, even replacing conventional SFT stages. While RL has become a standard tool for enhancing the reasoning and instruction-following abilities of LLMs [1, 6, 38, 41, 47, 48, 61, 65, 72, 76], its application to the unique challenges of multimodal reasoning in VLMs is a more nascent research 2area. In the multimodal domain, however, RL research has been less focused on core reasoning. Instead, it is primar-ily employed to mitigate hallucinations or align VLMs with human preferences [34, 48, 63, 64, 70, 71]. A significant gap persists in applying RL to enhance the visual and spa-tial reasoning of VLMs for complex tasks. Our work addresses this gap by introducing a novel, two-stage GRPO [46] curriculum for the image geo-localization task. We apply a suite of verifiable, customized task-specific rewards to train an adaptive policy, improving the VLM’s ability to process diverse inputs and reason about visual-spatial evidence. Additionally, our work lever-ages VLMs within a locatability-guided, adaptive, retrieval-free framework that internalizes an Optimized Locatability Score, enabling the model to dynamically allocate its rea-soning depth based on the scene’s difficulty. 
+
+# 3. Methodology 
+
+Given an image I captured at an unknown location, the goal of image geo-localization is to predict its geographi-cal location g = ( c, t, coord ), where c denotes the coun-try, t the city, and coord the GPS coordinates. Un-like traditional classification or retrieval-based approaches, reasoning-driven geo-localization aims to generate inter-pretable reasoning trajectories r = {s1, s 2, . . . , s n} that ar-ticulate the visual cues and geographical knowledge leading to the prediction. However, current reasoning methods ap-ply fixed-depth inference uniformly across all images with pre-designed chain of thoughts. To address this challenge, we propose a novel framework, Geo-ADAPT, illustrated in Figure 2. The following subsections detail each compo-nent: Optimized Locatability Score (Section 3.1), data cu-ration (Section 3.2), reward construction (Section 3.3), and GRPO-based RL (Section 3.4). 
+
+3.1. Optimized Locatability Score 
+
+The original locatability score for a given image [25], rang-ing from 0 to 1, quantifies how visually identifiable a lo-cation is, with higher scores indicating more distinctive scenes. The score is computed by taking the area ratios of MaskFormer segmentation classes [7], deriving importance weights from CLIP- and Sentence-BERT–based text–label similarities [25, 40, 42], normalizing them, and then sum-ming the class ratios weighted by these learned importance values. However, this metric exhibits two limitations: (1) it serves primarily as a post-hoc analysis or data curation tool, rather than as a dynamic signal integrated into a model’s reasoning inference; and (2) this metric is designed for SFT, is static and superficial, failing to assess an image’s amenability to deep reasoning. That means the metric can-not differentiate an image that is truly non-localizable from one that simply requires multi-step, implicit inference (deep reasoning) to solve. To address these shortcomings, we pro-pose the Optimized Locatability Score that explicitly quan-tifies an image’s amenability to deep, multi-step reasoning, serving as a dynamic signal integrated into the model’s pol-icy rather than as a post-hoc analysis tool for data curation. 
+
+Reasoning Locatability Score. While Lvisual captures explicit, static cues, it fails to address the limitations we identified previously. To quantify this potential for image geo-localization by leveraging deep, multi-step inference, inspired by DeepSeek-R1 [13], we introduce the Reasoning Locatability Score Lreason to optimize the Original Locata-bility Score Lvisual for image geo-localization. The design of Lreason stems from a key observa-tion based on two mainstream VLM-based image geo-localization paradigms: RAG and reasoning inference. Reasoning-driven VLMs excel at localizing images with explicit visual cues (e.g., landmarks, signage), while RAG methods leverage retrieved candidates to better handle im-ages with subtle, implicit patterns. However, current RAG approaches fail to convert these implicit visual cues from retrieved candidates into rich semantic priors that can guide VLM reasoning. Through experiments, we find that extract-ing implicit cues from RAG-retrieved top-k image candi-dates and integrating them into reasoning chains substan-tially enhances geo-localization performance for a large number of images. This motivates our Lreason formula-tion: we quantify reasoning locatability via the performance gap between RAG and reasoning approaches. Images where RAG significantly outperforms reasoning indicate learnable implicit patterns that benefit from enriched reasoning trajec-tories, while superior or comparable VLM reasoning per-formance suggests sufficient explicit cues for standard rea-soning. This idea enables systematic identification of im-ages amenable to deep reasoning enhancement and accu-rately reflects reasoning-based locatability. The design mo-tivation for the Reasoning Locatability Score Lreason and the locatability-guided adaptive reasoning mechanism in-troduced in Sections 3.3 and 3.4 is illustrated in Figure 3. To compute this, we first establish baseline performance with ground-truth coordinates PGT . We generate predic-tions ( PRAG ) from a SOTA RAG method, GeoRanker [19], and predictions ( PReason ) from a SOTA reasoning VLM, GRE Suite [53]. We then compute their respective Haver-sine distances to the ground truth: dRAG = d(PRAG , P GT )
+
+and dReason = d(PReason , P GT ). Thus, the Reasoning Lo-catability Score Lreason is as below: 
+
+Lreason = exp( −γ1 · dReason )
+
+| {z }
+
+> Lbase
+
+· exp ( −γ2 · max(0 , d Reason − dRAG )) 
+
+| {z }
+
+> Lgap
+
+, (1) where γ1, γ 2 > 0 are scaling hyperparameters. The base term Lbase represents absolute reasoning accuracy, while 3Figure 2. Overview of Geo-ADAPT framework. Our approach comprises three components: (1) an Optimized Locatability Score Lopt 
+
+> quantifying reasoning feasibility, (2) locatability-stratified dataset curation Geo-ADAPT-51K with enriched implicit reasoning trajectories, and (3) two-stage GRPO training with adaptive depth, grounding, and hierarchical accuracy rewards for dynamic reasoning allocation.
+
+the gap term Lgap imposes an asymmetric penalty when reasoning underperforms RAG ( dReason > d RAG ), sug-gesting that the image is better suited to RAG, is difficult to geo-localize by standard reasoning trajectories, and may re-quire extended deep reasoning. Critically, when reasoning outperforms or matches RAG, no penalty is applied, mean-ing standard reasoning suffices for the given image. 
+
+Optimized Locatability Score. We formulate Lopt as a multiplicative formulation where Lreason modulates the original visual locatability score: 
+
+Lopt = Lvisual · [(1 − α) + α · Lreason ] , (2) where α ∈ [0 , 1] controls the modulation strength. This for-mulation treats Lvisual as an optimistic upper bound based on explicit visual features, while Lreason provides an em-pirical correction based on actual reasoning model perfor-mance. When reasoning models effectively leverage visual cues ( Lreason ≈ 1), minimal adjustment occurs; when they struggle ( Lreason ≪ 1), the score is proportionally reduced. The bounded range Lopt ∈ [0 , L visual ] ensures consistency, yielding a principled measure of reasoning-based locatabil-ity that guides model selection, data curation, and adaptive reasoning inference strategies. 
+
+3.2. Data Curation with Optimized Locatability 
+
+A precise computation of the Optimized Locatability Score 
+
+Lopt is critical for our adaptive reasoning framework, as this score is derived from the performance of SOTA RAG-based and reasoning inference methods as described in Sec-tion 3.1. Instead of using the MP16-Pro dataset [18] as in previous research, which has been used to train the SOTA models, we require entirely distinct, unseen data resources to avoid biased performance metrics and the resulting in-accurate Lopt scores from such data contamination. We therefore construct our dataset from two distinct sources: the IMAGEO-Bench [26] (approx. 9K images) and a novel 120K image corpus we collected from X with geo-tags (for-merly Twitter) globally. This clean and unseen dataset en-sures a valid and accurate calculation of the Optimized Lo-catability Score Lopt for the training stage in Section 3.4. 
+
+Initial Data Stratification. Our curation process com-mences by applying the Optimized Locatability Score Lopt 
+
+to the new dataset. We first generate the SOTA RAG and reasoning VLM predictions for each image, which are pre-requisites for calculating Lopt according to Equations 1 and 2. This Lopt score and its components enable us to strat-ify the dataset. We identify a RAG-superior subset where 
+
+dReason > d RAG + τmargin (τmargin is a distance thresh-old to ensure meaningful performance gaps). For this sub-set, we augment the data by retrieving the top-3 image can-didates using the RAG method from [19], yielding (origi-nal, similar) image pairs. We thus divide our initial dataset into a standard image subset for standard reasoning trajec-tories and a RAG-superior subset for deep reasoning that leverages implicit cues from the top-3 image candidates of RAG. For all images, we use the method in [57] to gener-4Figure 3. Motivation for Optimized Locatability Score Lopt and locatability-guided adaptive reasoning strategies. (a) RAG re-trieves visually similar candidates but fails due to being unable to convert implicit visual cues to rich semantic priors. (b) Stan-dard reasoning initially fails similarly, but integrating implicit cues from retrieved image candidates into deep reasoning enables cor-rect localization. Images where dReason > d RAG + τmargin re-ceive lower Lopt , triggering adaptive deep reasoning. 
+
+ate reasoning trajectories and the method in [27] for cross-verification to guarantee reasoning data quality. Through this process, we curate a dataset with 51K images. 
+
+Reasoning Augmentation and Validation. For the RAG-superior image subset, in addition to standard rea-soning trajectories, we also extract implicit reasoning cues from the top-3 RAG image candidates using visual ground-ing. Each reasoning step si is checked by Grounding-DINO [33] to verify visual presence. Steps with confidence below 0.3 are marked as implicit (e.g., “architectural style sug-gests...”), while explicit ones (e.g., “the sign reads...”) are removed. Implicit steps must apply to at least 2 of 3 sim-ilar images for validation. We use Gemini 2.5 Flash [9] to verify that this removal step is conducted correctly. The resulting implicit cues are then merged into standard rea-soning chains, producing approximately 16K images with augmented reasoning trajectories. 
+
+3.3. Reward Construction 
+
+Based on the dataset detailed in Section 3.2, we introduce three specialized reward functions to independently evalu-ate different aspects of the model’s geographical reasoning. Using supervised annotations, these combined rewards pro-vide the feedback required to guide the reinforcement learn-ing updates described in Section 3.4. Formally, let D = {(Ii, y i, g i, r i)}Ni=1 denote the curated dataset of N samples, where Ii is an image, yi ∈ [0 , 1] is the Optimized Locatability Score Lopt (Ii), gi is the ground-truth geolocation, and ri is the reasoning trajectory. 
+
+3.3.1. Adaptive Reasoning Depth Reward 
+
+To enable adaptive reasoning patterns, we formulate a bi-nary classification reward that guides the model to iden-tify when deep reasoning with implicit cues is necessary. Specifically, we leverage the stratification from Section 3.2: an image belongs to the RAG-superior subset if dReason >dRAG + τmargin , indicating that standard reasoning is in-sufficient and that deep reasoning is required. We define a binary ground-truth label ℓi for each image: 
+
+ℓi = I[dReason (Ii) > d RAG (Ii) + τmargin ], (3) where ℓi = 1 indicates that the image requires elongated reasoning with implicit cue reflection, and ℓi = 0 indicates that standard reasoning suffices. The model learns to predict a reasoning depth indicator ˆℓi ∈ { 0, 1} based on visual fea-tures and intermediate reasoning states. The adaptive rea-soning depth reward is defined as: 
+
+Rdepth (Ii, ˆℓi) = I[ˆℓi = ℓi], (4) yielding a reward of 1 for correct classification and 0 for misclassification. This non-negative formulation ensures training stability in RL while providing a clear binary sig-nal: when ˆℓi = 1 , the model triggers elongated reason-ing trajectories with reflection on implicit geographical pat-terns; when ˆℓi = 0 , the model proceeds with efficient stan-dard reasoning trajectories. 
+
+3.3.2. Visual Grounding Reward 
+
+We introduce a visual grounding objective to suppress hallucinatory generation and ensure the rationale remains strictly tethered to the observed visual elements. This is achieved by evaluating both entity-level accuracy and the overall consistency of the inference path. Formally, given an instance (Ii, r i), with ˆri representing the generated ra-tionale and ri serving as the baseline, we employ named entity recognition to identify the respective sets of dis-tinct entities: Ei = {e1, . . . , e n} from the prediction and 
+
+E∗ 
+
+> i
+
+= {e∗
+
+> 1
+
+, . . . , e ∗
+
+> m
+
+} from the ground truth. For each predicted entity ej ∈ Ei, we compute a ground-ing score G(ej , I i) ∈ [0 , 1] using Grounding-DINO [33], which returns the maximum detection confidence for ej in the image Ii. We define the visual grounding reward as: 
+
+Rvis (Ii, ˆri, r i) = 1
+
+|Ei|
+
+> |Ei|
+
+X
+
+> j=1
+
+G(ej , I i)
+
+| {z }
+
+> Rgrounding
+
+· J(Ei, E ∗ 
+
+> i
+
+)
+
+| {z }
+
+> Ralignment
+
+(5) where Rgrounding measures the average grounding confi-dence of predicted entities, Ralignment = |Ei∩E∗   
+
+> i||Ei∪E∗
+> i|
+
+evalu-ates semantic alignment with the reference trajectory. 53.3.3. Hierarchical Geo-localization Reward 
+
+Image geo-localization predictions exhibit a natural hierar-chy (country → city → coordinates), where coarse-level er-rors are amplified, leading to larger coordinate inaccuracies. To address this hierarchical structure, we design a unified well-structured hierarchical reward. Let the ground-truth location be gi = ( ci, t i, coord i),where ci and ti denote the country and city, respectively, and coord i denotes the coordinates. Let the prediction be 
+
+ˆgi = (ˆ ci, ˆti, \coord i). Based on the hierarchy inherent to geo-localization, we define a three-tier reward structure: 
+
+Rgeo (ˆ gi, g i) = 
+
+
+
+0 if ˆci̸ = ci
+
+λ1 · Rcoord if ˆci = ci ∧ ˆti̸ = ti
+
+λ1 + λ2 · Rcoord if ˆci = ci ∧ ˆti = ti
+
+,
+
+(6) where λ1 and λ2 are hyperparameters satisfying λ1 + λ2 =1, and the continuous coordinate reward Rcoord ∈ [0 , 1] is computed via distance-based exponential decay: 
+
+Rcoord = exp 
+
+
+
+− dσ
+
+
+
+, (7) with d representing the geodesic distance in kilometers and 
+
+σ as a distance scale parameter. This formulation is logi-cally hierarchical: (1) A catastrophic error (wrong country) receives zero reward. (2) A correct country but wrong city receives a reward scaled only by coordinate accuracy. (3) Only a correct country and city prediction receives the base reward plus the full scaled coordinate reward. 
+
+3.4. GRPO-Based RL 
+
+Using the rewards defined in Section 3.3, we fine-tune the base model with a two-stage curriculum based on GRPO [46]. GRPO trains a policy while maintaining a reference policy for stability. For each prompt, the model samples several candidate answers and scores them, centering re-wards within the same prompt to emphasize relative quality. The policy is then updated with a clipped objective and a KL penalty to keep it close to the reference model, ensuring stable, preference-aware learning. This curriculum splits training into two stages: (1) reasoning formation, where the model learns adaptive reasoning depth and consistent visual grounding, and (2) geo-localization refinement, where geo-prediction accuracy is optimized. The reference policy πref 
+
+is initialized from the SFT model to provide a stable start-ing point. The following sections detail these two stages and their customized reward functions. 
+
+3.4.1. Stage 1: Reasoning Formation 
+
+The first stage trains the model to reason for image geo-localization by optimizing two key skills: (1) adaptive depth: deciding when to reason deeply or briefly, and (2) grounded reasoning: keeping steps faithful to visual cues. We instantiate the GRPO reward for Stage 1 by defining the reward r(j) 
+
+> i
+
+= Rstage1 as below: 
+
+Rstage1 (Ii, ˆℓi, ˆri) = w1 ·Rdepth (Ii, ˆℓi)+ w2 ·Rvis (Ii, ˆri, r i),
+
+(8) where Rdepth (Eq. 4) guides adaptive depth allocation and Rvis (Eq. 5) enforces grounding consistency. The weights w1 and w2 control the relative importance of these two objectives. We train Stage 1 for 3 epochs over the cu-rated dataset in Section 3.2, producing checkpoint θ∗
+
+> stage1
+
+.
+
+3.4.2. Stage 2: Geo-Localization Refinement 
+
+The second stage optimizes geo-localization accuracy while preserving the capabilities from Stage 1. Initialize the pol-icy π(2)  
+
+> θ
+
+= πθ∗ 
+
+> stage1
+
+. The reward used in stage 2 is: 
+
+Rstage2 (ˆ gi, g i) = Rgeo (ˆ gi, g i), (9) where Rgeo is defined in Eq. 6. This objective optimiza-tion enables the model to concentrate on improving geo-localization accuracy. Crucially, we also update the refer-ence policy to π(2)  
+
+> ref
+
+= πθ∗ 
+
+> stage1
+
+. We train Stage 2 for 2 epochs. 
+
+# 4. Experiments 
+
+We conduct extensive experiments to evaluate our frame-work, Geo-ADAPT, and its resulting model, Geo-ADAPT-8B. Our evaluation is designed to demonstrate two key points: (1) that our proposed Optimized Locatability Score 
+
+Lopt , curated dataset, customized rewards, and two-stage GRPO curriculum yield a superior, adaptive reasoning pol-icy compared to standard supervised fine-tuning or pre-vious RL methods; and (2) that our final model, Geo-ADAPT-8B, achieves state-of-the-art performance against leading open- and closed-source VLMs on multiple geo-localization benchmarks. We also provide qualitative and quantitative analyses to verify that our adaptive policy effec-tively reduces hallucinations and improves reasoning qual-ity for image geo-localization. More experimental details are provided in the supplementary materials. 
+
+4.1. Experiments Setup 
+
+Datasets. The curated dataset Geo-ADAPT-51K comprises two subsets: Geo-ADAPT-Standard-35K with 35K sam-ples with standard reasoning trajectories and Geo-ADAPT-Augmented-16K with 16K samples with enriched reason-ing trajectories. We split both datasets at an 8.5:1.5 ratio for training and testing. Our resulting model, Geo-ADAPT-8B, is evaluated on both our test split and two public geo-localization benchmarks, IM2GPS3K [15] and YFCC4K [50] for comprehensive comparison with baseline methods. 
+
+Evaluation Metrics. We adopt different evaluation met-rics to account for the varying annotation formats across datasets. For the Geo-ADAPT-51K test set, we evaluate 6Table 1. Performance comparison for Geo-ADAPT-8B on IM2GPS3K and YFCC4K with baseline methods. For all metrics, higher is better. The best performances are highlighted in bold , while the best performances among baselines are underlined. Change represents the relative improvement ↑ or decline ↓ of our method over the best baseline. 
+
+IM2GPS3K YFCC4K Methods Street 1km City 25km Region 200km Country 750km Continent 2500km Street 1km City 25km Region 200km Country 750km Continent 2500km [L]kNN, sigma=4 [52] 7.5 18.3 27.7 38.7 57.2 2.4 6.2 9.8 23.9 43.1 PlaNet [58] 7.8 25.8 33.7 48.7 63.2 6.5 14.2 22.4 36.0 56.4 CPlaNet [45] 11.3 25.7 34.7 47.7 65.3 6.6 15.4 21.6 36.9 54.5 ISNs [36] 10.1 29.2 35.5 50.5 64.5 6.7 15.7 25.1 36.7 55.1 Translocator [39] 12.1 30.5 47.6 57.7 80.5 7.6 19.7 25.6 41.8 60.2 GeoDecoder [8] 11.8 34.0 45.6 62.4 74.8 10.9 23.5 34.9 48.9 69.5 GeoCLIP [51] 14.3 34.0 51.4 68.7 83.9 9.3 20.4 31.4 55.6 73.9 IMG2Loc [73] 14.9 40.7 52.3 70.0 82.7 20.3 30.0 42.4 56.7 74.3 PIGEON [14] 12.3 36.5 54.3 71.8 86.1 9.3 23.8 40.2 62.9 76.8 G3 [18] 15.4 42.1 55.1 71.8 83.9 24.9 34.9 47.2 64.0 78.6 GeoRanker [19] 18.7 45.8 60.4 76.6 88.7 33.8 42.3 54.8 69.1 83.9 GRE [53] 13.0 34.4 52.0 69.6 86.1 10.5 35.5 43.6 68.5 78.8 
+
+Geo-ADAPT-8B (Ours) 17.9 45.3 62.6 77.9 89.5 32.5 39.1 55.4 70.8 84.5 
+
+Change ↓ 4.3% ↓ 1.1% ↑ 3.6% ↑ 1.7% ↑ 0.9% ↓ 3.8% ↓ 7.6% ↑ 1.1% ↑ 2.5% ↑ 0.7% 
+
+country- and city-level naming accuracy. For public bench-marks, following standard practices [18, 25, 51, 52], we re-port the percentage of predictions falling within predefined geodesic distance thresholds (1km, 25km, 200km, 750km, and 2500km) from the ground-truth coordinates. 
+
+Implementation Details. We implement Geo-ADAPT based on Qwen3-VL-8B [3, 60], a publicly available VLM with strong multimodal understanding capabilities. We first train the model for 1 epoch using SFT as a cold start, then apply the two-stage GRPO curriculum described in Section 3.4 with our customized task-specific rewards. All training is conducted on the Geo-ADAPT-51K training split using 4 NVIDIA H200 GPUs on our lab computing server. 
+
+4.2. Main Results 
+
+As shown in Table 1, Geo-ADAPT achieves highly com-petitive results against state-of-the-art methods on public benchmarks, establishing new SOTA performance on the majority of coarse-grained evaluation thresholds. For in-stance, on the IM2GPS3K dataset, Geo-ADAPT improves the Region-level (200km) accuracy by 3.6% and Country-level (750km) accuracy by 1.7% over the strongest base-line, GeoRanker [19]. This pattern of superior performance on broad-scale metrics is consistent on YFCC4K, with rela-tive gains of 1.1% for Region-level, 2.5% for Country-level, and 0.7% for Continent-level (2500km). A clear trade-off is visible between our reasoning-driven framework and RAG methods like GeoRanker [19] and G3 [18]. The RAG base-lines excel at fine-grained (Street/City) levels, which is ex-pected as they leverage large retrieval databases for precise instance-level matching. In contrast, Geo-ADAPT operates                         
+
+> Table 2. Localization accuracy for city and country name pre-diction on the Geo-ADAPT-51K test split compared with baseline reasoning VLMs. †denotes models that are not publicly available.
+> Geo-ADAPT-51K Test Methods City Name Acc. Country Name Acc. Gemma3-27B [49] 37.6 71.9 InternVL3.5-38B [56] 36.1 79.4 Gemini 2.5 Flash †[9] 54.1 87.2 Qwen3-VL-30B [3] 43.9 83.5 GeoReasoner [25] 31.8 67.9 GRE [53] 49.7 82.3
+> Geo-ADAPT-8B (Ours) 55.8 89.2
+> Improvement ↑3.1% ↑2.3%
+
+without an external database at inference time, only relying on its prior knowledge. This distinction explains why our model is outperformed on fine-grained metrics like Street 1km, yet it remains highly comparable at the City level and significantly outperforms these SOTA RAG methods on all coarse-grained metrics across both datasets. Furthermore, to evaluate the model’s core reasoning capabilities, we compare it against other leading reason-ing VLMs on our Geo-ADAPT-51K test split in Table 2. This test measures semantic accuracy (Country/City Name) rather than coordinate distance. The results confirm our framework’s superiority: Geo-ADAPT-8B achieves a City Name Accuracy of 55.8 and a Country Name Accuracy of 89.2, outperforming all other open- and closed-source baseline models in our experiments. This represents a rel-ative improvement of 3.1% (City Name) and 2.3% (Coun-7try Name) over the strongest baseline, Gemini 2.5 Flash †.This combined analysis validates our hypothesis. While RAG methods lead in fine-grained retrieval, Geo-ADAPT demonstrates a superior hierarchical understanding of geog-raphy and spatial relationships, enabling it to win on broad-scale distance metrics. More importantly, it also achieves state-of-the-art performance in pure, retrieval-free semantic reasoning, confirming that our locatability-guided adaptive policy learns to reason more accurately and effectively. 
+
+4.3. Ablation Study 
+
+To better understand the contribution and effectiveness of each component, we conduct ablation studies by systemati-cally analyzing key modules of our approach, Geo-ADAPT. (1) w/o Daug denotes our dataset without augmented reason-ing trajectories with implicit cues. (2) w/o Rdepth denotes our method without the adaptive reasoning depth reward. (3) w/o Rvis denotes our method without the visual ground-ing reward. (4) w/o Rgeo denotes our method without the hierarchical geo-localization reward. (5) w/o TSFT denotes our method without the SFT cold start.                                     
+
+> Table 3. Ablation study on IM2GPS3K. The worst performance results in ablation study are underlined.
+> IM2GPS3K Methods Street 1km City 25km Region 200km Country 750km Continent 2500km w/o Daug 17.7 43.2 60.1 75.4 89.2 w/o Rdepth 17.2 44.3 60.5 76.7 88.9 w/o Rvis 17.4 43.7 60.8 76.8 89.0 w/o Rgeo 15.3 40.4 58.9 75.7 87.9 w/o TSFT 17.8 44.9 61.3 76.5 89.1
+> Ours 17.9 45.3 62.6 77.9 89.5
+> Table 4. Ablation study on Geo-ADAPT-51K test. The worst per-formance results in ablation study are underlined.
+
+Geo-ADAPT-51K Test Methods City Name Acc. Country Name Acc. w/o Daug 53.1 87.5 w/o Rdepth 54.7 88.6 w/o Rvis 53.9 87.8 w/o Rgeo 51.4 86.3 w/o TSFT 54.9 88.4 
+
+Ours 55.8 89.2 
+
+Tables 3 and 4 present the ablation results on the IM2GPS3K and Geo-ADAPT-51K test, respectively. From these results, we draw several key insights: (1) All com-ponents contribute positively to the final performance. The full Geo-ADAPT-8B model consistently outperforms all ab-lation variants across both datasets, demonstrating the ef-fectiveness of our overall framework design. (2) The hier-archical geo-localization reward ( Rgeo ) is the most critical component. Removing it results in the most significant per-formance degradation across all metrics on both datasets. This critically highlights that the Stage 2 geo-localization refinement, which optimizes for localization accuracy with the customized hierarchical geo-localization reward ( Rgeo ), is essential for achieving SOTA performance. (3) The core components of our adaptive policy are highly effective. Re-moving either the augmented reasoning trajectories ( Daug )or the adaptive reasoning depth reward ( Rdepth ) leads to a clear drop in performance. This confirms our hypothesis that explicitly training the model on locatability-stratified data, using a reward that encourages an adaptive policy for reasoning, is superior to a standard fixed-depth approach. (4) Finally, removing either the visual grounding reward (Rvis ) or the SFT cold-start ( TSFT ) also degrades perfor-mance. This indicates that the SFT initialization provides a strong foundation for the two-stage GRPO curriculum, and that the visual grounding reward ( Rvis ) is effective in align-ing the model’s reasoning with visual evidence, supporting our goal of reducing hallucination. 
+
+# 5. Conclusion 
+
+To address the limitations of fixed-depth reasoning policies in VLM-based geo-localization, we propose Geo-ADAPT, a framework for learning adaptive reasoning policies. We introduce an Optimized Locatability Score Lopt to quan-tify an image’s suitability for deep reasoning and use this metric to curate Geo-ADAPT-51K, a novel locatability-stratified dataset. Building on this foundation, we develop a two-stage GRPO curriculum with customized rewards gov-erning adaptive depth, visual grounding, and hierarchical accuracy. Extensive experiments demonstrate that Geo-ADAPT achieves state-of-the-art performance across multi-ple benchmarks while substantially reducing hallucinations. 
+
+Limitations. Despite its effectiveness, Geo-ADAPT faces challenges in fine-grained street-level localization compared to SOTA RAG methods. Without retrieval-based reference candidates, our reasoning-only approach strug-gles to achieve precise predictions for images lacking dis-tinctive landmarks or readable signage. This limitation re-flects a fundamental constraint of current VLMs: the diffi-culty of inferring exact coordinates from subtle visual cues in a single image without additional information support. 
+
+Future Directions. Several promising directions emerge naturally from this work. First, hybrid architectures that dynamically integrate retrieval and deep reasoning based on locatability could effectively combine the strengths of both paradigms. Second, incorporating multi-image rea-soning or temporal context from image sequences may fur-8ther enhance fine-grained localization. Third, extending our adaptive framework to agentic AI systems where models can autonomously select and invoke external tools during their reasoning could enable even more flexible and power-ful geo-localization capabilities. Finally, integrating com-plementary data sources such as remote sensing imagery, satellite views, or cross-view datasets (e.g., street-to-aerial matching) could bridge the gap in fine-grained localization by providing critical additional spatial context that pure rea-soning alone simply cannot capture. 
+
+# References 
+
+[1] Marwa Abdulhai, Isadora White, Charlie Snell, Charles Sun, Joey Hong, Yuexiang Zhai, Kelvin Xu, and Sergey Levine. Lmrl gym: Benchmarks for multi-turn reinforcement learn-ing with language models. arXiv preprint arXiv:2311.18232 ,2023. 2 [2] Jean-Baptiste Alayrac, Jeff Donahue, Pauline Luc, Antoine Miech, Iain Barr, Yana Hasson, Karel Lenc, Arthur Men-sch, Katherine Millican, Malcolm Reynolds, et al. Flamingo: a visual language model for few-shot learning. Advances in neural information processing systems , 35:23716–23736, 2022. 2 [3] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, Humen Zhong, Yuanzhi Zhu, Mingkun Yang, Zhao-hai Li, Jianqiang Wan, Pengfei Wang, Wei Ding, Zheren Fu, Yiheng Xu, Jiabo Ye, Xi Zhang, Tianbao Xie, Zesen Cheng, Hang Zhang, Zhibo Yang, Haiyang Xu, and Jun-yang Lin. Qwen2.5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. 7 [4] Florian Bordes, Richard Yuanzhe Pang, Anurag Ajay, Alexander C. Li, Adrien Bardes, Suzanne Petryk, Oscar Ma˜ nas, Zhiqiu Lin, Anas Mahmoud, et al. An introduction to vision-language modeling, 2024. 1, 2 [5] Zheng Cai, Maosong Cao, Haojiong Chen, Kai Chen, Keyu Chen, Xin Chen, Xun Chen, Zehui Chen, Zhi Chen, Pei Chu, et al. Internlm2 technical report. arXiv preprint arXiv:2403.17297 , 2024. 2 [6] Thomas Carta, Cl´ ement Romac, Thomas Wolf, Sylvain Lam-prier, Olivier Sigaud, and Pierre-Yves Oudeyer. Grounding large language models in interactive environments with on-line reinforcement learning. In International Conference on Machine Learning , pages 3676–3713. PMLR, 2023. 2 [7] Bowen Cheng, Alexander G. Schwing, and Alexander Kir-illov. Per-pixel classification is not all you need for semantic segmentation. In NeurIPS , pages 17864–17875, 2021. 3 [8] Brandon Clark, Alec Kerrigan, Parth Parag Kulkarni, Vi-cente Vivanco Cepeda, and Mubarak Shah. Where we are and what we’re looking at: Query based worldwide image geo-localization using hierarchies and scenes. In Proceed-ings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 23182–23190, 2023. 1, 2, 7 [9] Gheorghe Comanici, Eric Bieber, Mike Schaekermann, Ice Pasupat, Noveen Sachdeva, Inderjit Dhillon, Marcel Blis-tein, Ori Ram, Dan Zhang, Evan Rosen, et al. Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long context, and next generation agentic capabilities. arXiv preprint arXiv:2507.06261 , 2025. 5, 7 [10] Wenliang Dai, Junnan Li, Dongxu Li, Anthony Tiong, Junqi Zhao, Weisheng Wang, Boyang Li, Pascale N Fung, and Steven Hoi. Instructblip: Towards general-purpose vision-language models with instruction tuning. Advances in neural information processing systems , 36:49250–49267, 2023. 2 [11] Daya Guo DeepSeek-AI et al. Deepseek-r1: Incentiviz-ing reasoning capability in llms via reinforcement learning, 2025. 2 [12] Abhilash Durgam, Sidike Paheding, Vikas Dhiman, and Vi-jay Devabhaktuni. Cross-view geo-localization: a survey. 
+
+IEEE Access , 2024. 1 [13] Duo Guo, Dejian Yang, Hongzhe Zhang, et al. Deepseek-r1 incentivizes reasoning in llms through reinforcement learn-ing. Nature , 645:633–638, 2025. 3 [14] Lukas Haas, Michal Skreta, Silas Alberti, and Chelsea Finn. Pigeon: Predicting image geolocations. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 12893–12902, 2024. 1, 2, 7 [15] James Hays and Alexei A Efros. Im2gps: estimating geo-graphic information from a single image. In 2008 ieee con-ference on computer vision and pattern recognition , pages 1–8. IEEE, 2008. 6 [16] Binyuan Hui, Jian Yang, Zeyu Cui, Jiaxi Yang, Dayiheng Liu, Lei Zhang, Tianyu Liu, Jiajun Zhang, Bowen Yu, Kem-ing Lu, et al. Qwen2. 5-coder technical report. arXiv preprint arXiv:2409.12186 , 2024. 2 [17] Krzysztof Janowicz, Song Gao, Grant McKenzie, Yingjie Hu, and Budhendra Bhaduri. Geoai: spatially explicit arti-ficial intelligence techniques for geographic knowledge dis-covery and beyond, 2020. 2 [18] Pengyue Jia, Yiding Liu, Xiaopeng Li, Xiangyu Zhao, Yuhao Wang, Yantong Du, Xiao Han, Xuetao Wei, Shuaiqiang Wang, and Dawei Yin. G3: an effective and adaptive framework for worldwide geolocalization using large multi-modality models. In NeurIPS , pages 53198–53221, 2024. 1, 2, 4, 7 [19] Pengyue Jia, Seongheon Park, Song Gao, Xiangyu Zhao, and Sharon Li. Georanker: Distance-aware ranking for worldwide image geolocalization. In The Thirty-ninth An-nual Conference on Neural Information Processing Systems ,2025. 1, 2, 3, 4, 7 [20] Fangkai Jiao, Geyang Guo, Xingxing Zhang, Nancy F Chen, Shafiq Joty, and Furu Wei. Preference optimiza-tion for reasoning with pseudo feedback. arXiv preprint arXiv:2411.16345 , 2024. 2 [21] Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin, Naman Goyal, Heinrich K¨ uttler, Mike Lewis, Wen-tau Yih, Tim Rockt¨ aschel, et al. Retrieval-augmented generation for knowledge-intensive nlp tasks. Advances in neural information processing systems ,33:9459–9474, 2020. 1 [22] Bo Li, Yuanhan Zhang, Dong Guo, Renrui Zhang, Feng Li, Hao Zhang, Kaichen Zhang, Peiyuan Zhang, Yanwei Li, Zi-wei Liu, et al. Llava-onevision: Easy visual task transfer. 
+
+arXiv preprint arXiv:2408.03326 , 2024. 1, 2 
+
+9[23] Hao Li, Fabian Deuser, Wenping Yin, Xuanshu Luo, Paul Walther, Gengchen Mai, Wei Huang, and Martin Werner. Cross-view geolocalization and disaster mapping with street-view and vhr satellite imagery: A case study of hurricane ian. ISPRS Journal of Photogrammetry and Remote Sensing ,220:841–854, 2025. 1 [24] Junnan Li, Dongxu Li, Caiming Xiong, and Steven Hoi. Blip: Bootstrapping language-image pre-training for unified vision-language understanding and generation. In Interna-tional conference on machine learning , pages 12888–12900. PMLR, 2022. 2 [25] Ling Li, Yu Ye, Bingchuan Jiang, and Wei Zeng. Georea-soner: Geo-localization with reasoning in street views using a large vision-language model. In Forty-first International Conference on Machine Learning , 2024. 1, 2, 3, 7 [26] Lingyao Li, Runlong Yu, Qikai Hu, Bowei Li, Min Deng, Yang Zhou, and Xiaowei Jia. From pixels to places: A systematic benchmark for evaluating image geolocal-ization ability in large language models. arXiv preprint arXiv:2508.01608 , 2025. 2, 4 [27] Ling Li, Yao Zhou, Yuxuan Liang, Fugee Tsung, and Jia-heng Wei. Recognition through reasoning: Reinforcing im-age geo-localization with large vision-language models. In 
+
+NeurIPS , 2025. 1, 2, 5 [28] Yuxuan Liang, Haomin Wen, Yutong Xia, Ming Jin, Bin Yang, Flora Salim, Qingsong Wen, Shirui Pan, and Gao Cong. Foundation models for spatio-temporal data science: A tutorial and survey. In Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V. 2 , pages 6063–6073, 2025. 2 [29] Jinliang Lin, Zhedong Zheng, Zhun Zhong, Zhiming Luo, Shaozi Li, Yi Yang, and Nicu Sebe. Joint representa-tion learning and keypoint detection for cross-view geo-localization. IEEE Transactions on Image Processing , 31: 3780–3792, 2022. 1, 2 [30] Aixin Liu, Bei Feng, Bing Xue, Bingxuan Wang, Bochao Wu, Chengda Lu, Chenggang Zhao, Chengqi Deng, Chenyu Zhang, Chong Ruan, et al. Deepseek-v3 technical report. 
+
+arXiv preprint arXiv:2412.19437 , 2024. 2 [31] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. Visual instruction tuning. Advances in neural information processing systems , 36:34892–34916, 2023. 2 [32] Liu Liu and Hongdong Li. Lending orientation to neural networks for cross-view geo-localization. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 5624–5633, 2019. 1, 2 [33] Shilong Liu, Zhaoyang Zeng, Tianhe Ren, Feng Li, Hao Zhang, Jie Yang, Qing Jiang, Chunyuan Li, Jianwei Yang, Hang Su, et al. Grounding dino: Marrying dino with grounded pre-training for open-set object detection. In Euro-pean conference on computer vision , pages 38–55. Springer, 2024. 5 [34] Ziyu Liu, Yuhang Zang, Xiaoyi Dong, Pan Zhang, Yuhang Cao, Haodong Duan, Conghui He, Yuanjun Xiong, Dahua Lin, and Jiaqi Wang. Mia-dpo: Multi-image augmented di-rect preference optimization for large vision-language mod-els, 2024. 3 [35] Gengchen Mai, Weiming Huang, Jin Sun, Suhang Song, Deepak Mishra, Ninghao Liu, Song Gao, Tianming Liu, Gao Cong, Yingjie Hu, et al. On the opportunities and chal-lenges of foundation models for geoai (vision paper). ACM Transactions on Spatial Algorithms and Systems , 10(2):1– 46, 2024. 2 [36] Eric Muller-Budack, Kader Pustu-Iren, and Ralph Ewerth. Geolocation estimation of photos using a hierarchical model and scene classification. In ECCV , pages 563–579, 2018. 7 [37] OpenAI. Hello gpt-4o, 2024. 2 [38] Long Ouyang, Jeffrey Wu, Xu Jiang, Diogo Almeida, Car-roll Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al. Training language models to follow instructions with human feedback. Ad-vances in neural information processing systems , 35:27730– 27744, 2022. 2 [39] Shraman Pramanick, Ewa M Nowara, Joshua Gleason, Car-los D Castillo, and Rama Chellappa. Where in the world is this image? transformer-based geo-localization in the wild. In European Conference on Computer Vision , pages 196– 215. Springer, 2022. 1, 2, 7 [40] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever. Learning transferable visual models from natural language supervision. pages 8748– 8763, 2021. 2, 3 [41] Rajkumar Ramamurthy, Prithviraj Ammanabrolu, Kiant´ eBrantley, Jack Hessel, Rafet Sifa, Christian Bauckhage, Han-naneh Hajishirzi, and Yejin Choi. Is reinforcement learning (not) for natural language processing: Benchmarks, base-lines, and building blocks for natural language policy opti-mization. arXiv preprint arXiv:2210.01241 , 2022. 2 [42] Nils Reimers and Iryna Gurevych. Sentence-bert: Sentence embeddings using siamese BERT-networks. In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Confer-ence on Natural Language Processing (EMNLP-IJCNLP) ,pages 3982–3992, 2019. 3 [43] Davide Savarro, Davide Zago, and Stefano Zoia. Leveraging large language models to geolocate linguistic variations in social media posts. arXiv preprint arXiv:2407.16047 , 2024. 1[44] John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Rad-ford, and Oleg Klimov. Proximal policy optimization algo-rithms. arXiv preprint arXiv:1707.06347 , 2017. 2 [45] Paul Hongsuck Seo, Tobias Weyand, Jack Sim, and Bohyung Han. Cplanet: Enhancing image geolocalization by combi-natorial partitioning of maps. In Proceedings of the Euro-pean Conference on Computer Vision (ECCV) , pages 536– 551, 2018. 1, 2, 7 [46] Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei Zhang, Mingchuan Zhang, YK Li, Yang Wu, et al. Deepseekmath: Pushing the limits of math-ematical reasoning in open language models. arXiv preprint arXiv:2402.03300 , 2024. 2, 3, 6 [47] Charlie Snell, Ilya Kostrikov, Yi Su, Mengjiao Yang, and Sergey Levine. Offline rl for natural language genera-
+
+10 tion with implicit language q learning. arXiv preprint arXiv:2206.11871 , 2022. 2 [48] Zhiqing Sun, Sheng Shen, Shengcao Cao, Haotian Liu, Chunyuan Li, Yikang Shen, Chuang Gan, Liangyan Gui, Yu-Xiong Wang, Yiming Yang, et al. Aligning large multimodal models with factually augmented rlhf. In Findings of the As-sociation for Computational Linguistics: ACL 2024 , pages 13088–13110, 2024. 2, 3 [49] Gemma Team, Aishwarya Kamath, Johan Ferret, Shreya Pathak, Nino Vieillard, Ramona Merhej, Sarah Perrin, Ta-tiana Matejovicova, Alexandre Ram´ e, Morgane Rivi` ere, and et al. Gemma 3 technical report. arXiv preprint arXiv:2503.19786 , 2025. 7 [50] Bart Thomee, David A Shamma, Gerald Friedland, Ben-jamin Elizalde, Karl Ni, Douglas Poland, Damian Borth, and Li-Jia Li. Yfcc100m: The new data in multimedia research. 
+
+Communications of the ACM , 59(2):64–73, 2016. 6 [51] Vicente Vivanco Cepeda, Gaurav Kumar Nayak, and Mubarak Shah. Geoclip: Clip-inspired alignment be-tween locations and images for effective worldwide geo-localization. Advances in Neural Information Processing Systems , 36:8690–8701, 2023. 2, 7 [52] Nam Vo, Nathan Jacobs, and James Hays. Revisiting im2gps in the deep learning era. In ICCV , pages 2621–2630, 2017. 1, 2, 7 [53] Chun Wang, Yuxin Chen, Yishuai Chen, Yuhang Wang, Qi-hang Zhao, and Jiehui Huang. Gre suite: Geo-localization in-ference via fine-tuned vision-language models and enhanced reasoning chains. In NeurIPS , 2025. 1, 2, 3, 7 [54] Peng Wang, Shuai Bai, Sinan Tan, Shijie Wang, Zhihao Fan, Jinze Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, et al. Qwen2-vl: Enhancing vision-language model’s perception of the world at any resolution. arXiv preprint arXiv:2409.12191 , 2024. 1, 2 [55] Senzhang Wang, Jiannong Cao, and S Yu Philip. Deep learn-ing for spatio-temporal data mining: A survey. IEEE trans-actions on knowledge and data engineering , 34(8):3681– 3700, 2020. 2 [56] Weiyun Wang, Zhangwei Gao, Lixin Gu, Hengjun Pu, Long Cui, Xingguang Wei, Zhaoyang Liu, Linglin Jing, Sheng-long Ye, Jie Shao, et al. Internvl3.5: Advancing open-source multimodal models in versatility, reasoning, and efficiency. 
+
+arXiv preprint arXiv:2508.18265 , 2025. 7 [57] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, et al. Chain-of-thought prompting elicits reasoning in large lan-guage models. Advances in neural information processing systems , 35:24824–24837, 2022. 4 [58] Tobias Weyand, Ilya Kostrikov, and James Philbin. Planet-photo geolocation with convolutional neural networks. In 
+
+European conference on computer vision , pages 37–55. Springer, 2016. 1, 2, 7 [59] Scott Workman, Richard Souvenir, and Nathan Jacobs. Wide-area image geolocalization with aerial reference im-agery. In Proceedings of the IEEE International Conference on Computer Vision , pages 3961–3969, 2015. 1, 2 [60] An Yang, Anfeng Li, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chang Gao, Chengen Huang, Chenxu Lv, et al. Qwen3 technical report. arXiv preprint arXiv:2505.09388 , 2025. 7 [61] Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik R Narasimhan, and Yuan Cao. React: Synergizing reasoning and acting in language models. In The eleventh international conference on learning representations , 2022. 2[62] Huaiyuan Ying, Shuo Zhang, Linyang Li, Zhejian Zhou, Yunfan Shao, Zhaoye Fei, Yichuan Ma, Jiawei Hong, Kuikun Liu, Ziyi Wang, et al. Internlm-math: Open math large lan-guage models toward verifiable reasoning. arXiv preprint arXiv:2402.06332 , 2024. 2 [63] Tianyu Yu, Yuan Yao, Haoye Zhang, Taiwen He, Yifeng Han, Ganqu Cui, Jinyi Hu, Zhiyuan Liu, Hai-Tao Zheng, and Maosong Sun. Rlhf-v: Towards trustworthy mllms via be-havior alignment from fine-grained correctional human feed-back. In CVPR , pages 13807–13816, 2024. 3 [64] Tianyu Yu, Haoye Zhang, Qiming Li, Qixin Xu, Yuan Yao, Da Chen, Xiaoman Lu, Ganqu Cui, Yunkai Dang, Taiwen He, Xiaocheng Feng, Jun Song, Bo Zheng, Zhiyuan Liu, Tat-Seng Chua, and Maosong Sun. Rlaif-v: Open-source ai feedback leads to super gpt-4v trustworthiness, 2025. 3 [65] Yuhang Zang, Wei Li, Jun Han, Kaiyang Zhou, and Chen Change Loy. Contextual object detection with multi-modal large language models. International Journal of Com-puter Vision , 133(2):825–843, 2025. 2 [66] Kechi Zhang, Ge Li, Yihong Dong, Jingjing Xu, Jun Zhang, Jing Su, Yongfei Liu, and Zhi Jin. Codedpo: Aligning code models with self generated and verified source code. In Pro-ceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 15854–15871, 2025. 2 [67] Pan Zhang, Xiaoyi Dong, Yuhang Zang, Yuhang Cao, Rui Qian, Lin Chen, Qipeng Guo, Haodong Duan, Bin Wang, Linke Ouyang, et al. Internlm-xcomposer-2.5: A versatile large vision language model supporting long-contextual in-put and output. arXiv preprint arXiv:2407.03320 , 2024. 2 [68] Xiaohan Zhang, Xingyu Li, Waqas Sultani, Yi Zhou, and Safwan Wshah. Cross-view geo-localization via learning disentangled geometric layout correspondence. In Proceed-ings of the AAAI conference on artificial intelligence , pages 3480–3488, 2023. 1, 2 [69] Yuxiang Zhang, Shangxi Wu, Yuqi Yang, Jiangming Shu, Jinlin Xiao, Chao Kong, and Jitao Sang. o1-coder: an o1 replication for coding, 2024. 2 [70] Zhiyuan Zhao, Bin Wang, Linke Ouyang, Xiaoyi Dong, Ji-aqi Wang, and Conghui He. Beyond hallucinations: Enhanc-ing lvlms through hallucination-aware direct preference op-timization, 2024. 3 [71] Yiyang Zhou, Chenhang Cui, Rafael Rafailov, Chelsea Finn, and Huaxiu Yao. Aligning modalities in vision large lan-guage models via preference fine-tuning, 2024. 3 [72] Yifei Zhou, Andrea Zanette, Jiayi Pan, Sergey Levine, and Aviral Kumar. Archer: Training language model agents via hierarchical multi-turn rl. arXiv preprint arXiv:2402.19446 ,2024. 2 [73] Zhongliang Zhou, Jielu Zhang, Zihan Guan, Mengxuan Hu, Ni Lao, Lan Mu, Sheng Li, and Gengchen Mai. Img2loc: 
+
+11 Revisiting image geolocalization using multi-modality foun-dation models and image-based retrieval-augmented gener-ation. In Proceedings of the 47th international acm sigir conference on research and development in information re-trieval , pages 2749–2754, 2024. 1, 2, 7 [74] Sijie Zhu, Taojiannan Yang, and Chen Chen. Vigor: Cross-view image geo-localization beyond one-to-one retrieval. In 
+
+Proceedings of the IEEE/CVF Conference on Computer Vi-sion and Pattern Recognition , pages 3640–3649, 2021. 1, 2[75] Sijie Zhu, Mubarak Shah, and Chen Chen. Transgeo: Trans-former is all you need for cross-view image geo-localization. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 1162–1171, 2022. 1, 2[76] Daniel M Ziegler, Nisan Stiennon, Jeffrey Wu, Tom B Brown, Alec Radford, Dario Amodei, Paul Christiano, and Geoffrey Irving. Fine-tuning language models from human preferences. arXiv preprint arXiv:1909.08593 , 2019. 2 
+
+12 Appendix A. Implementation Details 
+
+A.1. More Information on Training and Inference 
+
+In this section, we provide additional details regarding the training and inference setup. Table 5 summarizes the key settings used during these phases. All experiments were conducted on four NVIDIA H200 GPUs. We employed a global batch size of 64 (16 per device) using DeepSpeed Stage 2. In this configuration, the training process con-sumed approximately 90 GB of GPU memory per device with gradient checkpointing disabled. 
+
+> Table 5. More Details on Training and Inference.
+
+Parameter Setting 
+
+GPU NVIDIA H200 × 4Dataset Samples 51K Batch Size 64 Batch Size per Device 16 Training GPU Memory 90 GB / GPU Base Model Qwen3-VL-8B-Instruct Deepspeed Stage 2 
+
+A.2. Hyper-parameter Settings 
+
+Table 6 provides a summary of the hyperparameter settings employed for training Geo-ADAPT-8B. The configuration is organized into four primary modules: optimizer settings, learning rate schedules, locatability score parameters, and reward weighting. Following state-of-the-art practices for VLM fine-tuning, we utilize the AdamW optimizer with a cosine decay scheduler. Crucially, we adopt a differential learning rate strategy, utilizing a standard rate of 2e-5 for the SFT cold start while reducing it to 1e-6 for the GRPO stages to ensure policy stability during reinforcement learn-ing. Specific parameters governing the Optimized Locata-bility Score (e.g., α = 0 .6, γ1,2 = 0 .01 ) and the hierar-chical rewards were empirically calibrated through prelim-inary ablation studies on a held-out validation set. Unless otherwise noted, this configuration is maintained across all experiments to ensure reproducibility. 
+
+A.3. Prompts 
+
+We standardize the input format for VLMs using a unified prompt template to generate reasoning data. This template establishes an “expert geospatial analyst” persona and en-forces a structured, three-phase reasoning protocol designed to systematically decompose visual evidence processing. Specifically, the prompt guides the model to first conduct an Explicit Cues Scan (Phase 1) for direct identifiers such as landmarks and text, followed by an Implicit Cues Analysis 
+
+> Table 6. Hyper-parameter Settings of Proposed Geo-ADAPT.
+
+Hyper-parameter Value 
+
+Optimizer Settings 
+
+Optimizer AdamW Adam β1 0.9 Adam β2 0.95 Weight Decay 0.1 
+
+Learning Rate Schedule 
+
+SFT Learning Rate 2e-5 Stage 1 Learning Rate 1e-6 Stage 2 Learning Rate 1e-6 LR Scheduler Cosine Warmup Ratio 0.01 
+
+Optimized Locatability Score 
+
+γ1 (Lreason base) 0.01 
+
+γ2 (Lreason gap) 0.01 
+
+α (Lopt modulation) 0.6 
+
+τmargin (km) 50 
+
+Reward Weights 
+
+w1 (Depth Reward) 0.5 
+
+w2 (Visual Grounding Reward) 0.5 
+
+λ1 (Hierarchical Reward) 0.3 
+
+λ2 (Hierarchical Reward) 0.7 
+
+σ (Distance Scale, km) 100 (Phase 2) focusing on environmental context such as vege-tation and architectural styles. These observations are then integrated during Phase 3: Synthesis & Localization to gen-erate a hierarchical prediction that progresses from region to precise coordinates. To guarantee parsability and inter-pretability, the output is strictly constrained to a specific for-mat utilizing <think> tags for chain-of-thought reasoning and <answer> tags for the final prediction. This standard-ized configuration is maintained throughout both the fine-tuning curriculum and final evaluation to ensure equitable performance comparisons. 
+
+Unified Prompt Design 
+
+<System Instruction >
+
+You are an expert geospatial analyst. Your task is to infer the location depicted in an input image by sys-tematically analyzing visible evidence. Distinguish between Explicit Cues and Implicit Cues to create a hierarchical prediction. 
+
+<User Prompt >
+
+Image: [INPUT IMAGE] 
+
+13 Begin with a concise checklist (3–7 bullets) out-lining your planned analysis steps before starting the detailed reasoning phases. 
+
+Analyze this image to determine its location. Fol-low this structured, three-phase reasoning process: 
+
+PHASE 1: EXPLICIT CUES SCAN 
+
+Inspect the image for direct identifiers. If present, analyze and cite them clearly and specifically: • Landmarks & Structures: Global or national landmarks (e.g., Eiffel Tower), distinctive re-gional architecture (e.g., identifiable castles, tem-ples), or unique buildings (e.g., specific bridges, religious structures). • Language & Text: Road signs, storefronts, or graffiti. Identify the script (e.g., Arabic, Cyrillic, Latin) and the precise language. • Symbolic Signals: Administrative identifiers (e.g., license plate formats and country codes), currency, or national flags. 
+
+PHASE 2: IMPLICIT CUES ANALYSIS 
+
+Examine the scene for contextual or environmental cues. If present, analyze and cite them specifically: • Geographical Features: Landforms (e.g., karst landscapes, salt flats) and vegetation types (e.g., cacti indicate desert regions, birch forests suggest temperate zones, palm trees indicate tropical ar-eas). • Architectural Style & Layout: Building styles (e.g., Spanish colonial, Neoclassical, earthen structures) and street features (e.g., cobblestone roads, grid layouts, road markings). • Social Characteristics: Clothing or customs (e.g., kimono, sari, traditional plaid) and trans-portation modes (e.g., rickshaws, gondolas, dis-tinctive bus colors). • Climate & Atmosphere: Latitude and climate zone inferred from weather phenomena (e.g., au-rora borealis, sandstorms, monsoon rain) and lighting conditions. 
+
+PHASE 3: SYNTHESIS & LOCALIZATION 
+
+Integrate both explicit and implicit evidence to pro-gressively narrow the location: Region → Country 
+
+→ City → Coordinates. 
+
+Output Format: 1. Reasoning: 
+
+Based on the explicit and implicit cues identified and analyzed, systematically deduce the most likely country and city, then estimate the correspond-ing coordinates. Present this structured reasoning within <think>...</think> tags, articulating your step-by-step process. 
+
+2. Final Answer: 
+
+Present the final answers in 
+
+<answer>...</answer> tags using the format below: • Country: [Country Name] • City: [City Name] • Estimated Coordinates: [Latitude (to two deci-mal places), Longitude (to two decimal places)] 
+
+3. Validation & Constraints: 
+
+After presenting your answer, validate whether all explicit and implicit cues have been adequately con-sidered and clearly referenced. If validation fails, briefly self-correct or clarify limitations before fi-nalizing the output. 
+
+Strict Adherence Rules: 
+
+• Output must be plaintext only (no JSON or Mark-down tables). • Return a single country, city, and coordinate set. • If multiple locations appear equally likely, report only the most probable one and explain the tie-breaking logic in the <think> section. • If no location can be determined due to insuffi-cient cues, set each field in <answer> to “Un-known” and provide justification in <think> .
+
+# B. Qualitative Results 
+
+To validate the effectiveness of our adaptive reasoning policy, we present qualitative comparisons between Geo-ADAPT-8B and a state-of-the-art baseline, Gemini 2.5 Flash. A defining characteristic of Geo-ADAPT is its ability to dynamically allocate computational resources commen-surate with scene complexity. As illustrated in these exam-ples, our framework leverages the Optimized Locatability Score ( Lopt ) to modulate reasoning depth: expanding infer-ence steps for more challenging scenes while accelerating convergence for distinct landmarks. 
+
+Deep Reasoning on Weakly Localizable Scenes ( Lopt =0.42 ). Figure 4 demonstrates a challenging scenario char-acterized by relatively low locatability. The scene depicts a generic suburban strip mall lacking globally recognizable landmarks. Facing this ambiguity, Geo-ADAPT’s policy triggers an extended reasoning trajectory, consuming 202 tokens. Guided by the visual grounding reward ( Rvis ), the model engages in a multi-step forensic analysis: it ex-plicitly extracts fine-grained textual evidence (the address “17510”), identifies the specific store combination (“Cold Stone” and “Paris Baguette”), and synthesizes these with implicit environmental cues (subtropical vegetation). This deep, deliberative process allows the model to successfully pinpoint the specific shopping center in Tampa, whereas the baseline, despite generating more tokens (318), fails to 14 ground its reasoning in specific evidence and defaults to a generic prediction. 
+
+Efficient Reasoning on Localizable Landmarks ( Lopt =0.67 ). In contrast, Figure 5 presents a scenario with rel-atively high locatability containing prominent landmarks. Here, Geo-ADAPT demonstrates adaptive efficiency. Rec-ognizing the high distinctiveness of the Olympic Rings, the policy condenses its reasoning path, requiring only 156 to-kens, significantly fewer than the complex case above. In-stead of unnecessary exploration, the model rapidly con-structs a concise verification chain, cross-referencing the rings with the “SkyView” Ferris wheel and “The Legacy” building to confirm Atlanta, GA. This demonstrates that our Stage 1 Adaptive Depth Reward ( Rdepth ) successfully teaches the model to avoid over-reasoning when strong ex-plicit cues are present, achieving precise localization with optimal computational cost. 15 Figure 4. Qualitative comparison on a weakly localizable sample ( Lopt = 0 .42 ). Facing visual ambiguity, Geo-ADAPT adaptively expands its reasoning depth (202 tokens), conducting a detailed forensic scan to extract the address “17510” and localize the exact shopping center. In contrast, the baseline generates a longer but less grounded response (318 tokens) and fails to identify the city. 
+
+16 Figure 5. Qualitative comparison on a highly localizable sample ( Lopt = 0 .67 ). Recognizing the strong explicit cues (Olympic Rings), Geo-ADAPT adaptively shortens its reasoning path for efficiency (156 tokens), rapidly converging on the correct location. This contrasts with the baseline, which engages in verbose description (329 tokens) without improving precision. 
+
+17
