@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-22
-- 运行时间：2026-03-22 19:32:14 UTC
+- 最新运行日期：2026-03-23
+- 运行时间：2026-03-23 20:16:15 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦多模态智能体进化，深度解析视觉推理增强与复杂工具链协作的最新突破。
-重点推荐通过迭代证据精炼提升推理精度，以及利用 VTC-Bench 评估智能体在视觉任务中的主动规划能力。
-建议普通读者关注多模态模型如何从单一生成转向具备“思考与创作”能力的智能体化发展。
-- 详情：[/202603/22/README](/202603/22/README)
+今日深度解析 AgentVLN 与 SLEA-RL 等 17 篇论文，聚焦智能体化导航与多轮强化学习的前沿突破。
+重点关注 AgentVLN 提出的智能体导航新范式，以及 SLEA-RL 如何通过步级经验增强显著提升多轮任务的训练效率。
+建议关注思维链（CoT
+- 详情：[/202603/23/README](/202603/23/README)
 
 ### 精读区论文标签
-1. [Improving Visual Reasoning with Iterative Evidence Refinement](/202603/22/2603.14117v1-improving-visual-reasoning-with-iterative-evidence-refinement)  
+1. [AgentVLN: Towards Agentic Vision-and-Language Navigation](/202603/23/2603.17670v1-agentvln-towards-agentic-vision-and-language-navigation)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：通过迭代证据细化提高视觉语言模型的视觉推理能力
-2. [VTC-Bench: Evaluating Agentic Multimodal Models via Compositional Visual Tool Chaining](/202603/22/2603.15030v2-vtc-bench-evaluating-agentic-multimodal-models-via-compositional-visual-tool-chaining)  
+   evidence：采用VLM作为大脑范式的智能视觉语言导航
+2. [SLEA-RL: Step-Level Experience Augmented Reinforcement Learning for Multi-Turn Agentic Training](/202603/23/2603.18079v1-slea-rl-step-level-experience-augmented-reinforcement-learning-for-multi-turn-agentic-training)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：智能体多模态模型与工具链
-3. [Rationale Matters: Learning Transferable Rubrics via Proxy-Guided Critique for VLMReward Models](/202603/22/2603.16600v1-rationale-matters-learning-transferable-rubrics-via-proxy-guided-critique-for-vlmreward-models)  
+   evidence：用于智能体训练的步级经验增强强化学习
+3. [AcceRL: A Distributed Asynchronous Reinforcement Learning and World Model Framework for Vision-Language-Action Models](/202603/23/2603.18464v2-accerl-a-distributed-asynchronous-reinforcement-learning-and-world-model-framework-for-vision-language-action-models)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：将代理引导的准则验证引入VLM奖励模型的强化学习中
-4. [Ruyi2.5 Technical Report](/202603/22/2603.17311v1-ruyi25-technical-report)  
+   evidence：视觉-语言-动作模型的强化学习框架
+4. [Teaching an Agent to Sketch One Part at a Time](/202603/23/2603.19500v1-teaching-an-agent-to-sketch-one-part-at-a-time)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于多模态行为推理的强化学习微调
-5. [ORCA: Orchestrated Reasoning with Collaborative Agents for Document Visual Question Answering](/202603/22/2603.02438v1-orca-orchestrated-reasoning-with-collaborative-agents-for-document-visual-question-answering)  
+   evidence：非机器人领域的绘图智能体强化学习
+5. [PROSPECT: Unified Streaming Vision-Language Navigation via Semantic--Spatial Fusion and Latent Predictive Representation](/202603/23/2603.03739v1-prospect-unified-streaming-vision-language-navigation-via-semantic--spatial-fusion-and-latent-predictive-representation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于文档视觉问答复杂推理的多智能体框架
-6. [Locatability-Guided Adaptive Reasoning for Image Geo-Localization with Vision-Language Models](/202603/22/2603.13628v1-locatability-guided-adaptive-reasoning-for-image-geo-localization-with-vision-language-models)  
+   evidence：用于导航智能体的流式视觉-语言-动作策略
+6. [HiMemVLN: Enhancing Reliability of Open-Source Zero-Shot Vision-and-Language Navigation with Hierarchical Memory System](/202603/23/2603.14807v1-himemvln-enhancing-reliability-of-open-source-zero-shot-vision-and-language-navigation-with-hierarchical-memory-system)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型的推理驱动推断
+   evidence：基于LLM的视觉语言导航智能体及分层记忆系统
 
 ### 速读区论文标签
-1. [Agentic Mixed-Source Multi-Modal Misinformation Detection with Adaptive Test-Time Scaling](/202603/22/2603.02519v1-agentic-mixed-source-multi-modal-misinformation-detection-with-adaptive-test-time-scaling)  
+1. [RAGNav: A Retrieval-Augmented Topological Reasoning Framework for Multi-Goal Visual-Language Navigation](/202603/23/2603.03745v1-ragnav-a-retrieval-augmented-topological-reasoning-framework-for-multi-goal-visual-language-navigation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：连接视觉语言模型智能体进行多模态推理的智能体系统
-2. [VisionCreator: A Native Visual-Generation Agentic Model with Understanding, Thinking, Planning and Creation](/202603/22/2603.02681v1-visioncreator-a-native-visual-generation-agentic-model-with-understanding-thinking-planning-and-creation)  
+   evidence：具有拓扑推理能力的视觉语言导航智能体
+2. [Seeing as Experts Do: A Knowledge-Augmented Agent for Open-Set Fine-Grained Visual Understanding](/202603/23/2603.03762v1-seeing-as-experts-do-a-knowledge-augmented-agent-for-open-set-fine-grained-visual-understanding)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：具有思考和规划能力的原生视觉生成智能体模型
-3. [Specificity-aware reinforcement learning for fine-grained open-world classification](/202603/22/2603.03197v1-specificity-aware-reinforcement-learning-for-fine-grained-open-world-classification)  
+   evidence：用于细粒度视觉推理的知识增强智能体
+3. [FreeFly-Thinking : Aligning Chain-of-Thought Reasoning with Continuous UAV Navigation](/202603/23/2603.07181v2-freefly-thinking--aligning-chain-of-thought-reasoning-with-continuous-uav-navigation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于推理型多模态大模型分类任务的强化学习
-4. [Beyond Accuracy: Evaluating Visual Grounding In Multimodal Medical Reasoning](/202603/22/2603.03437v1-beyond-accuracy-evaluating-visual-grounding-in-multimodal-medical-reasoning)  
+   evidence：使用思维链推理的无人机视觉语言导航框架
+4. [3ViewSense: Spatial and Mental Perspective Reasoning from Orthographic Views in Vision-Language Models](/202603/23/2603.07751v1-3viewsense-spatial-and-mental-perspective-reasoning-from-orthographic-views-in-vision-language-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于多模态推理的可验证奖励强化学习
-5. [AgroNVILA: Perception-Reasoning Decoupling for Multi-view Agricultural Multimodal Large Language Models](/202603/22/2603.14342v1-agronvila-perception-reasoning-decoupling-for-multi-view-agricultural-multimodal-large-language-models)  
+   evidence：视觉语言模型中的空间推理
+5. [Deeper Thought, Weaker Aim: Understanding and Mitigating Perceptual Impairment during Reasoning in Multimodal Large Language Models](/202603/23/2603.14184v1-deeper-thought-weaker-aim-understanding-and-mitigating-perceptual-impairment-during-reasoning-in-multimodal-large-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：复杂农业规划中的多模态推理
-6. [OxyGen: Unified KV Cache Management for Vision-Language-Action Models under Multi-Task Parallelism](/202603/22/2603.14371v1-oxygen-unified-kv-cache-management-for-vision-language-action-models-under-multi-task-parallelism)  
+   evidence：理解多模态大模型推理过程中的感知受损
+6. [WorldVLM: Combining World Model Forecasting and Vision-Language Reasoning](/202603/23/2603.14497v1-worldvlm-combining-world-model-forecasting-and-vision-language-reasoning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于具身智能体的视觉-语言-动作模型
-7. [WorldVLM: Combining World Model Forecasting and Vision-Language Reasoning](/202603/22/2603.14497v2-worldvlm-combining-world-model-forecasting-and-vision-language-reasoning)  
+   evidence：用于决策和场景理解的视觉语言模型
+7. [GameUIAgent: An LLM-Powered Framework for Automated Game UI Design with Structured Intermediate Representation](/202603/23/2603.14724v1-gameuiagent-an-llm-powered-framework-for-automated-game-ui-design-with-structured-intermediate-representation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：驾驶决策中的视觉语言推理
-8. [RenderMem: Rendering as Spatial Memory Retrieval](/202603/22/2603.14669v1-rendermem-rendering-as-spatial-memory-retrieval)  
+   evidence：视觉语言模型引导的智能体UI设计推理
+8. [CAMD: Coverage-Aware Multimodal Decoding for Efficient Reasoning of Multimodal Large Language Models](/202603/23/2603.14745v1-camd-coverage-aware-multimodal-decoding-for-efficient-reasoning-of-multimodal-large-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：具身推理智能体的空间记忆
-9. [Confusion-Aware In-Context-Learning for Vision-Language Models in Robotic Manipulation](/202603/22/2603.15134v1-confusion-aware-in-context-learning-for-vision-language-models-in-robotic-manipulation)  
+   evidence：通过覆盖感知解码实现多模态大语言模型的高效推理
+9. [Two Birds, One Projection: Harmonizing Safety and Utility in LVLMs via Inference-time Feature Projection](/202603/23/2603.14825v1-two-birds-one-projection-harmonizing-safety-and-utility-in-lvlms-via-inference-time-feature-projection)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：VLM在机器人操作易混淆场景中的表现
-10. [SAGE: Multi-Agent Self-Evolution for LLM Reasoning](/202603/22/2603.15255v1-sage-multi-agent-self-evolution-for-llm-reasoning)  
+   evidence：大型视觉语言模型中用于视觉接地推理的推理时特征投影
+10. [LLMind: Bio-inspired Training-free Adaptive Visual Representations for Vision-Language Models](/202603/23/2603.14882v1-llmind-bio-inspired-training-free-adaptive-visual-representations-for-vision-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：多智能体推理演化的强化学习
-11. [Directional Embedding Smoothing for Robust Vision Language Models](/202603/22/2603.15259v1-directional-embedding-smoothing-for-robust-vision-language-models)  
+   evidence：视觉语言模型的自适应视觉表示
+11. [CyCLeGen: Cycle-Consistent Layout Prediction and Image Generation in Vision Foundation Models](/202603/23/2603.14957v1-cyclegen-cycle-consistent-layout-prediction-and-image-generation-in-vision-foundation-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：保障智能体AI系统中的VLM安全
+   evidence：统一视觉语言模型中通过强化学习实现的自我改进
 
 
 <div class="dpr-home-promo-card">

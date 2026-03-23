@@ -1,0 +1,244 @@
+Title: FreeFly-Thinking : Aligning Chain-of-Thought Reasoning with Continuous UAV Navigation
+
+URL Source: https://arxiv.org/pdf/2603.07181v2
+
+Published Time: Thu, 12 Mar 2026 00:30:29 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# FreeFly-Thinking : Aligning Chain-of-Thought Reasoning with Continuous UAV Navigation 
+
+Jiaxu Zhou 1, Shaobo Wang 1,2, Zhiyuan Yang 3, Zhenjun Yu 1, and Tao Li 1 
+
+> 1
+
+SJTU Paris Elite Institute of Technology, Shanghai Jiao Tong University, China 
+
+{1729722474-qq.com, shaobo.wang, jeffson-yu , taoli}@sjtu.edu.cn  
+
+> 2
+
+School of Physics and Astronomy, Shanghai Jiao Tong University, China  
+
+> 3
+
+Tongji University, China 
+
+2253350@tongji.edu.cn 
+
+Abstract. Vision-Language Navigation(VLN) aims to enable agents to understand natural language instructions and carry out appropriate nav-igation actions in real-world environments. Most work focuses on indoor settings, with little research in complex outdoor scenes. Current UAV Vision-and-Language Navigation models typically act as black boxes without explicit reasoning. We introduce FreeFly-thinking, an end-to-end VLN framework that converts the UAV agent’s egocentric images and language instructions into a series of actions, inspired by environ-ment of urban architecture proposed by OpenFly. We first construct a UAV dataset for navigation task, and then performing natural language chain of thought. We adopt a two-stage training strategy: Supervised fine-tuning(SFT) and Reinforcement fine-tuning(RFT). Experiments on unseen test demonstrate a strong performance, presenting robustness and efficiency in UAV navigation issue. 
+
+Keywords: Vision-Language Navigation · UAV · Cot Reasoning 
+
+# 1 Introduction 
+
+Embodied AI has emerged as a pivotal frontier in artificial intelligence, aim-ing to bridge the gap between high-level semantic understanding and low-level robotic execution by enabling autonomous agents to perceive, reason, and navi-gate within complex, real-world environments [7, 19, 26]. In recent years, Vision-and-Language Navigation(VLN) [2,25] has sparked widespread research interest, which stands as a fundamental challenge in the pursuit of Embodied AI. Specifi-cally, this task requires the agent to parse complex natural language instructions and dynamically correlate them with visual observations and environmental in-formation to execute a series of navigation maneuvers toward the target desti-nation. Existing research predominantly focuses on indoor environments (e.g., R2R [3], RxR [1], VLN-CE [12]) and ground-based navigation, leaving outdoor and Unmanned Aerial Vehicle(UAV) scenarios comparatively under-explored. Given the widespread adoption of UAVs in fields such as environmental sensing   
+
+> arXiv:2603.07181v2 [cs.CV] 11 Mar 2026 2J. Zhou et al.
+> Fig. 1: Overview for our work, illustrating the complete pipeline from automated Chain-of-Thought (CoT) data preparation based on visual observations and instruc-tions, to the two-stage training paradigm (SFT and RFT) that optimizes the dual-head Freefly-thinking model for UAV navigation.
+
+and autonomous logistics [17], there has been a significant surge in the require-ment for robust systems that can accurately translate human intentions into specific navigation actions. Current UAV [22, 23] VLN methods predominantly rely on black-box archi-tectures mapping multimodal inputs directly to discrete actions. This paradigm lacks both interpretability and physical grounding, failing to bridge the semantic-to-control gap between high-level instructions and low-level kinematics. This limitation arises because effective UAV navigation requires a cohesive Image-Instruction-Control logic chain, where reasoning serves as the essential link be-tween multimodal perception and physical flight execution. Moreover, real-world aerial navigation entails multi-stage missions within visually dense environments, necessitating the resolution of intricate distractors and the maintenance of strict sequential logic to fulfill long-horizon objectives. To address the limitations of VLN for UAVs, we propose Freefly-thinking, a novel end-to-end Vision-Language-Action(VLA) [5] model designed to bridge the gap between semantic and control by simultaneously generating explain-able Chain-of-Thought(CoT) rationales and continuous flight control vectors. This framework enables autonomous navigation through a dual-head architec-ture [18] comprising a language adaptor and a waypoint adaptor. Both heads de-code features from shared hidden states to ensure synchronized decision-making. Specifically, the language adaptor generates CoT and discrete actions, while the waypoint adaptor predicts continuous relative waypoints and yaw angles. By integrating these processes, our method unifies spatial understanding, control reasoning, and multimodal alignment. We introduce our dataset, built upon FreeFly-Thinking 3
+
+OpenFly, to address the critical lack of reasoning annotations in existing UAV VLN benchmarks that merely support direct control mapping. Augmenting the standard vision-instruction-action triplets, we curate the dataset by leveraging a Vision-Language Model (VLM) [4, 6] to synthesize explicit CoT rationales for ground-truth controls, while intelligently extracting visual landmarks to demar-cate multi-stage trajectory transitions. We adopt a two-stage training paradigm. In the first stage, Supervised Fine-Tuning (SFT) [14], both the generated tex-tual rationales and control waypoints are strictly supervised to ensure precise alignment with ground-truth annotations. Subsequently, we introduce a Rein-forcement Fine-Tuning (RFT) [24] stage utilizing Group Relative Policy Opti-mization (GRPO). Guided by carefully crafted reward functions to evaluate and validate the textual outputs, this RFT stage fundamentally enhances the model’s reasoning capabilities across the cohesive Image-Instruction-Control logic chain. Freefly-thinking achieves state-of-the-art navigation performance and intro-duces explicit reasoning and question-answering (QA) capabilities to the VLN domain. We evaluate the navigation capabilities of our framework across un-seen dataset splits and novel simulated environments. Results demonstrate the superior generalization and leading efficacy compared to existing baselines. In summary, our work makes these major contributions:(1) We propose Freefly-thinking, a dual-head VLA framework that bridges the semantic-to-control gap by simultaneously generating explainable CoT rationales and continuous flight control vectors; (2) We curate a comprehensive multi-stage UAV VLN dataset derived from OpenFly, augmenting standard image-instruction-action triplets with explicit CoT reasoning annotations and visual landmarks; (3) We design a two-stage training paradigm featuring SFT and GRPO, enabling the model to achieve state-of-the-art generalization, reasoning, and question-answering per-formance across unseen environments. Fig. 1 provides an overview of our work and highlights. 
+
+# 2 Related Work 
+
+2.1 Vision-and-Language Navigation 
+
+VLA models and CoT reasoning have revolutionized Embodied AI in domains like robotic manipulation and autonomous driving by enhancing interpretability and complex planning capabilities [10, 16]. However, extending these paradigms to UAVs introduces profound challenges due to the high-frequency dynamics and unconstrained 6-Degree-of-Freedom motion inherent to 3D aerial environments. Historically, UAV Vision-and-Language Navigation (VLN) adapted ground-based frameworks to aerial scenarios, pioneered by works like AerialVLN [15]. Consequently, UAV VLN in recent years methodologies largely bifurcate into two distinct categories: zero-shot [11] navigation using frozen LLMs as high-level planners, which often suffer from insufficient continuous spatial perception, and fine-tuned end-to-end models [8,13,21], which process multimodal inputs to directly output discrete actions or continuous waypoints. 4 J. Zhou et al.  
+
+> Fig. 2: Architecture for Freefly model, which extracts shared multimodal representa-tions from sequential visual observations and language instructions to simultaneously predict explicit Chain-of-Thought reasoning via a Language Model head and continu-ous 3D spatial waypoints via a Waypoint head
+
+By operating as "black boxes" devoid of explicit reasoning, these exist-ing frameworks suffer from a severe semantic-to-control gap, leading to fre-quent navigation failures in multi-stage 3D environments. To solve this problem, our Freefly-thinking model introduces a novel dual-head VLA architecture that strictly aligns step-by-step CoT rationales with continuous flight waypoints to unify cognitive planning with precise physical execution. 
+
+2.2 Reinforcement Learning and Reasoning 
+
+Reinforcement Fine-Tuning (RFT) performs better for complex tasks [9, 20]. Specifically, GRPO uses verifiable rewards to elicit explicit Chain-of-Thought reasoning. Despite this, current UAV navigation still relies heavily on pure SFT, which lacks the exploration needed for complex flight dynamics. Our framework solves this by pioneering GRPO-based RFT for UAVs. We design environment-grounded rewards for policy optimization. This strictly aligns textual CoT with continuous physical trajectories. 
+
+# 3 Methodology 
+
+In this section, we introduce our Methodology. Sec. 3.1 covers the review of our Freefly-thinking framework, Sec. 3.2 details the architecture of the VLA model, Sec. 3.3 outlines the dataset construction and data collection pipeline, and finally, Sec. 3.4 elaborates the reinforcement learning strategy. FreeFly-Thinking 5
+
+3.1 Overview 
+
+We formulate autonomous navigation as a control policy π. At each time step t,the policy takes the current RGB observation ot ∈ O and the language instruc-tion L as input. Unlike traditional direct-mapping methods, our policy π employs a dual-head architecture to generate three distinct output variables: an explicit CoT rationale rt ∈ R , a continuous control waypoint wt ∈ W and a discrete control action at ∈ A . Our objective is to derive an optimal policy π∗ : ( O, L ) →
+
+(R, A, W) that generates a collision-free trajectory τ = {w0, w 1, . . . , w T }. The specific architecture of the model is shown in Fig. 2. 
+
+3.2 VLA model for UAV navigation 
+
+UAV navigation in unconstrained 3D environments is complex, as executing long-horizon, multi-stage instructions requires profound spatial awareness. To address this, we introduce explicit CoT reasoning into the navigation framework; more crucially, we couple this CoT generation with continuous waypoint prediction for two critical reasons: Bridging the Semantic-Kinematic Gap: CoT decomposes ambiguous language instructions into structured, intermediate sub-goals, directly grounding the high-level cognitive planning into explainable and precise low-level flight control vec-tors. Anchoring Trajectory Robustness: Step-by-step reasoning acts as a cognitive anchor at each decision juncture, ensuring the waypoints and actions strictly adhere to the correct overarching navigational intent. Motivated by these insights, we propose Freefly-thinking, a dual-head VLA architecture that integrates reasoning with UAV control. The framework is built upon a Qwen-VL3-4B backbone to extract rich multimodal features. Leveraging the shared hidden states, the model employs two output branches: a Language Model head (LM-head) that autoregressively generates the CoT rationales and discrete action instructions, and an auxiliary continuous waypoint head dedi-cated to predicting relative 3D waypoints and yaw angles. 
+
+Vision-Language Model . We adopt Qwen3-VL as our foundational back-bone because its DeepStack architecture inherently provides the exceptional 3D spatial awareness required for complex aerial navigation. The lightweight Qwen3-VL-4B variant is selected to strike the balance between reasoning and the strict computational constraints of UAV deployment. 
+
+Dual-head architecture . We build upon the VLM backbone to process multimodal inputs and extract shared hidden states. Utilizing one and only representation space ensures that both high-level semantic reasoning and low-level spatial planning are grounded in the exact same perceptual context; this multi-task learning paradigm significantly reduces computational overhead while preventing representation misalignment. During the tokenization and label construction phase, we append three spe-cial tokens at the end of the text sequence. The hidden states corresponding to 6 J. Zhou et al. 
+
+these three tokens are then routed directly into the continuous action head to predict the precise waypoints for the next three future time steps. Finally, the architecture diverges into two output branches: the LM-head autoregressively generates the CoT rationales and discrete actions, while the Waypoint-head directly outputs the continuous 3D coordinate and yaw vectors. 
+
+3.3 Dataset and Data collection 
+
+During trajectory sample construction, each sample is formulated with a global instruction, four sequential visual frames (the current observation alongside three historical frames) and corresponding historical flight actions. To acquire high-quality planning and reasoning data, we use a more powerful large multimodal model Qwen-VL-Plus. By providing this teacher model with prompts containing the flight scenario, we instruct it to generate concise decision-making processes. The generated CoT rationales accurately articulate the current navigation stage, prominent visual landmarks, and logical action planning. Following the quality inspection and the diversified style processing, we obtain a robust dataset of explicit planning rationales. A primary challenge in UAV navigation datasets is severe class imbalance, as routine "straight" commands dominate the action space. To mitigate this, we introduce a temporal windowing strategy for other critical maneuvers. In details, for the two time steps immediately preceding the execution of a critical action (e.g., turning), we relabel the default "straight" annotations to match the upcoming maneuver. This approach not only augments minority action classes but also aligns closely with real-world flight controls, where initiating a critical operation within a reasonable temporal proximity is both valid and safe. Overall, the final dataset comprises 6820 short trajectories, yielding a total of 101220 images, with an average of 2.89 critical operations 81 meters length per trajectory. We partition this dataset into a 95 % training set and a 5 % validation set, while an unseen test set consisting of 192 trajectories is reserved for evalu-ation. During the training process, the entirety of the training set is utilized for SFT. In RFT stage, we construct a high-quality subset using the CLIP model by extracting the top 10,000 samples with the highest similarity scores. This RFT subset maintains a 4:6 ratio between straight flights and critical maneuvers. The visual characteristics of the dataset are shown in Fig. 3 
+
+3.4 Two-Stage Training 
+
+We employ a two-stage training paradigm consisting of SFT and RFT. SFT uti-lizes dense supervision to clone expert behaviors, while RFT optimizes Instruction-Image-Action alignment through exploration-driven learning. 
+
+SFT stage . We optimize the dual-head model to mimic expert trajectories. Given the visual observation ot and instruction L, the model jointly predicts a textual sequence yt (containing the CoT rationale and discrete action) and a continuous n-step waypoint trajectory ˆwt+1: t+n (n = 3 ). For the LM-head, we FreeFly-Thinking 7   
+
+> (a) Distribution of primary ma-neuvers
+> (b) Trajectory length distribu-tion
+> (c) Word cloud of CoT ratio-nales
+
+Fig. 3: Statistical overview of our constructed UAV navigation dataset. (a) The sample size distribution of primary flight maneuvers (e.g., straight, turn). (b) The distribution of physical trajectory lengths. (c) A word cloud visualization highlighting the most frequent terms in the generated Chain-of-Thought (CoT) rationales. 
+
+minimize the standard autoregressive cross-entropy loss over the ground-truth text tokens y∗ = {y∗ 
+
+> 1
+
+, y ∗ 
+
+> 2
+
+, . . . , y ∗ 
+
+> M
+
+}:
+
+LLM = −
+
+> M
+
+X
+
+> j=1
+
+log P (y∗ 
+
+> j
+
+|y∗
+
+> 1: j−1
+
+, o t, L ) (1) Concurrently, for the Waypoint-head, we apply an L1 regression loss between the predicted spatial waypoints ˆwt+k and the expert ground-truth w∗
+
+> t+k
+
+:
+
+LWP =
+
+> n
+
+X
+
+> k=1
+
+∥ ˆwt+k − w∗
+
+> t+k
+
+∥1 (2) The overall SFT loss is computed as the weighted sum of both branches to jointly learn compositional reasoning and spatial kinematics: 
+
+LSFT = LLM + λLWP  (3) where λ is a learnable parameter balancing the textual reasoning and con-tinuous physical control objectives. 
+
+RFT stage . We select GRPO as our reinforcement learning algorithm for two reasons. First, famous models like DeepSeek-R1 prove that GRPO provides superior training stability and computational efficiency. Second, its group-based relative optimization perfectly suits UAV navigation, since spatial planning en-tails multiple flight action choices to next targets in a traj navigation. To enforce Image-Instruction-Action alignment, we design four verifiable re-ward functions to guide the GRPO exploration. Format Reward: This reward strictly regularizes the model’s output struc-ture. It ensures the cognitive reasoning and final actions are properly enclosed in predefined XML tags for downstream execution. 8 J. Zhou et al. 
+
+Action Correctness Reward: This metric evaluates whether the predicted discrete action perfectly matches the expert ground truth. It heavily rewards the model when the generated CoT reasoning explicitly leads to the correct physical maneuver. This ensures that the flight action is driven by strict logical deduction rather than random guessing. Grounding Correctness Reward: We utilize an external vision-language reranker to verify visual-textual semantic alignment. It accurately scores whether the gen-erated rationales explicitly observe the correct visual landmarks and navigation phases. This verification minimizes visual cognitive errors, providing a more solid CoT foundation. Length Penalty Reward: We encourage the model to generate slightly longer rationales than the expert samples to foster deeper reasoning. However, we strictly penalize excessively verbose text during exploration. This forces concise reasoning and guarantees low inference latency for real-time flight. These rewards are aggregated to compute the GRPO loss for parameter opti-mization. Notably, only the language generation parameters are updated during this stage. 
+
+# 4 Experiments 
+
+4.1 Experimental details 
+
+This section presents the experimental details, evaluation performance, and ab-lation experiments of our proposed approach. 
+
+SFT training details . Our model is initialized from the Qwen3-VL-4B-Instruct backbone and optimized for one epoch using a cosine learning rate scheduler with a peak learning rate of 2 × 10 −5, a 10 % warmup ratio, and a weight decay of 0.01. To ensure computational efficiency and memory optimiza-tion during training, we employ bfloat16 precision alongside FlashAttention-2, maintaining a per-device batch size of 6 with 8 gradient accumulation steps. 
+
+RFT training details . For the RFT stage, we adopt a reduced peak learn-ing rate of 2×10 −6 and apply a KL divergence penalty coefficient ( β) of 0.001. To encourage diverse trajectory exploration, we sample G = 4 rollouts per prompt during training, utilizing a stochastic decoding strategy configured with a tem-perature of 0.9, a top-p of 0.9, and a top-k of 40. The hardware setup maintains the identical bfloat16, while adjusting the per-device batch size to 8 with 8 gra-dient accumulation steps to stabilize the reinforcement learning updates. 
+
+Evaluation Metrics . We adopt four key metrics to evaluate our model. Success Rate(SR) measures the percentage of flight episodes where the UAV’s final predicted position is bounded within a 20-meter radius of the intended destination. Navigation Error(NE) quantifies the final spatial distance between the predicted trajectory endpoint and the actual ground-truth target. Average Displacement Error(ADE) computes the mean spatial deviation between the predicted sequence of waypoints and the expert trajectory across all n time steps. It is formally defined as: FreeFly-Thinking 9             
+
+> Table 1: Evaluation results on the unseen test set. NE and ADE are measured in meters (lower is better), while SR and Act. Acc are presented as percentages (higher is better). Method NE ↓SR ↑ADE ↓
+> AerialVLN 45.9 4.3% 3.7 OpenFly 32.7 11.3% 2.6 Ours 28.0 13.1% 2.3
+
+ADE = 1
+
+n
+
+> n
+
+X
+
+> k=1
+
+∥ ˆwt+k − w∗
+
+> t+k
+
+∥2 (4) Sample-wise Action Prediction Accuracy evaluates the classification correct-ness of the model’s discrete linguistic maneuver predictions (e.g., straight, turn left) against the expert annotations at each individual time step. 
+
+4.2 Evaluation performence 
+
+To ensure a fair and rigorous comparison, all baseline methods are evaluated under the exact same training dataset and evaluation protocol. The quantitative results on the unseen test set are summarized in Tab. 1. Our Freefly-thinking model(best sft version) consistently outperforms established baselines, achieving the lowest Navigation Error (28.0m) and Average Displacement Error (2.3m) alongside a state-of-the-art Success Rate of 13.1 %. The performance gap stems directly from inherent architectural differences: AerialVLN relies on a traditional model that severely struggles with complex 3D spatial perception, while the stronger OpenFly baseline lacks intermediate logical planning by directly pre-dicting flight maneuvers. In contrast, our dual-head generates step-by-step CoT rationales prior to physical execution, effectively enabling the agent to reason before acting and significantly mitigating continuous trajectory deviations. 
+
+4.3 Ablation experiments 
+
+Tab. 2 details our ablation experiments across three configurations. The re-sults validate our architectural design. The <SFT dual head> model strictly outperforms the <SFT w/o thinking> baseline. Specifically, Waypoint-head Success Rate (SR) improves from 11.0 % to 13.1 %. Its Navigation Error (NE) also decreases from 31.8 to 28.0. This confirms that explicit reasoning directly enhances continuous physical execution. Furthermore, applying Reinforcement Fine-Tuning (RFT) maximizes cognitive performance. Under RFT, the LM-head achieves the best reasoning metrics, reaching a peak SR of 30.4 % and an Ac-tion Accuracy of 84.5 %. RFT did not optimize the Waypoint-head. It traded a decrease in waypoint precision for superior logical planning capabilities. This outcome aligns perfectly with our expectations. 10 J. Zhou et al. 
+
+Table 2: Evaluation results for ablation experiments. Method LM-head Waypoint-head NE ↓ SR ↑ ADE ↓ Act. Acc ↑ NE ↓ SR ↑ ADE ↓
+
+RFT 16.5 30.4% 1.4 84.5% 35.1 9.6% 3.2 SFT w/o thinking 19.1 27.2% 1.5 83.0% 31.8 11.0% 2.5 SFT dual head 18.7 27.6% 1.5 83.1% 28.0 13.1% 2.3 
+
+# 5 Conclusion 
+
+Current UAV Vision-and-Language Navigation (VLN) models typically act as black boxes without explicit reasoning. To overcome this limitation, we pro-pose Freefly-thinking, a novel dual-head Vision-Language-Action (VLA) archi-tecture designed for aerial navigation. Our model simultaneously predicts explicit step-by-step Chain-of-Thought (CoT) rationales and continuous 3D spatial way-points. We optimize this framework through Supervised Fine-Tuning (SFT) for foundational control alignment and Reinforcement Fine-Tuning (RFT) for en-hanced logical planning. Extensive experiments demonstrate that our approach significantly outperforms established baselines in both spatial trajectory preci-sion and overall navigation success rate. 
+
+# References 
+
+1. An, D., Wang, Z., Li, Y., Wang, Y., Hong, Y., Huang, Y., Wang, L., Shao, J.: 1st place solutions for rxr-habitat vision-and-language navigation competition (cvpr 2022) (2022), https://arxiv.org/abs/2206.11610 
+
+2. Anderson, P., Wu, Q., Teney, D., Bruce, J., Johnson, M., Sünderhauf, N., Reid, I., Gould, S., Van Den Hengel, A.: Vision-and-language navigation: Interpreting visually-grounded navigation instructions in real environments. In: Proceedings of the IEEE conference on computer vision and pattern recognition. pp. 3674–3683 (2018) 3. Anderson, P., Wu, Q., Teney, D., Bruce, J., Johnson, M., Sünderhauf, N., Reid, I., Gould, S., van den Hengel, A.: Vision-and-language navigation: Interpreting visually-grounded navigation instructions in real environments (2018), https:// arxiv.org/abs/1711.07280 
+
+4. Bai, S., Cai, Y., Chen, R., et al.: Qwen3-vl technical report (2025), https://arxiv. org/abs/2511.21631 
+
+5. Brohan, A., Brown, N., Carbajal, J., Chebotar, Y., Chen, X., Choromanski, K., Ding, T., Driess, D., Dubey, A., Finn, C., Florence, P., Fu, C., Arenas, M.G., Gopalakrishnan, K., Han, K., Hausman, K., Herzog, A., Hsu, J., Ichter, B., Irpan, A., Joshi, N., Julian, R., Kalashnikov, D., Kuang, Y., Leal, I., Lee, L., Lee, T.W.E., Levine, S., Lu, Y., Michalewski, H., Mordatch, I., Pertsch, K., Rao, K., Reymann, K., Ryoo, M., Salazar, G., Sanketi, P., Sermanet, P., Singh, J., Singh, A., Soricut, R., Tran, H., Vanhoucke, V., Vuong, Q., Wahid, A., Welker, S., Wohlhart, P., FreeFly-Thinking 11 Wu, J., Xia, F., Xiao, T., Xu, P., Xu, S., Yu, T., Zitkovich, B.: Rt-2: Vision-language-action models transfer web knowledge to robotic control (2023), https: //arxiv.org/abs/2307.15818 
+
+6. Chen, Z., Wu, J., Wang, W., Su, W., Chen, G., Xing, S., Zhong, M., Zhang, Q., Zhu, X., Lu, L., Li, B., Luo, P., Lu, T., Qiao, Y., Dai, J.: Internvl: Scaling up vision foundation models and aligning for generic visual-linguistic tasks (2024), 
+
+https://arxiv.org/abs/2312.14238 
+
+7. Duan, J., Yu, S., Tan, H.L., Zhu, H., Tan, C.: A survey of embodied ai: From simu-lators to research tasks. IEEE Transactions on Emerging Topics in Computational Intelligence 6(2), 230–244 (2022) 8. Gao, Y., Li, C., You, Z., Liu, J., Li, Z., Chen, P., Chen, Q., Tang, Z., Wang, L., Yang, P., Tang, Y., Tang, Y., Liang, S., Zhu, S., Xiong, Z., Su, Y., Ye, X., Li, J., Ding, Y., Wang, D., Li, X., Wang, Z., Zhao, B.: Openfly: A comprehensive platform for aerial vision-language navigation (2026), https://arxiv.org/abs/2502.18041 
+
+9. Guo, D., Yang, D., Zhang, H., et al.: Deepseek-r1 incentivizes reasoning in llms through reinforcement learning. Nature 645 (8081), 633–638 (Sep 2025). https:// doi.org/10.1038/s41586-025-09422-z , http://dx.doi.org/10.1038/s41586-025-09422-z 
+
+10. Jiang, B., Chen, S., Zhang, Q., Liu, W., Wang, X.: Alphadrive: Unleashing the power of vlms in autonomous driving via reinforcement learning and reasoning (2025), https://arxiv.org/abs/2503.07608 
+
+11. Kim, M.J., Pertsch, K., Karamcheti, S., Xiao, T., Balakrishna, A., Nair, S., Rafailov, R., Foster, E., Lam, G., Sanketi, P., Vuong, Q., Kollar, T., Burchfiel, B., Tedrake, R., Sadigh, D., Levine, S., Liang, P., Finn, C.: Openvla: An open-source vision-language-action model (2024), https://arxiv.org/abs/2406.09246 
+
+12. Krantz, J., Wijmans, E., Majumdar, A., Batra, D., Lee, S.: Beyond the nav-graph: Vision-and-language navigation in continuous environments (2020), https: //arxiv.org/abs/2004.02857 
+
+13. Lee, J., Miyanishi, T., Kurita, S., Sakamoto, K., Azuma, D., Matsuo, Y., Inoue, N.: Citynav: A large-scale dataset for real-world aerial navigation (2025), https: //arxiv.org/abs/2406.14240 
+
+14. Liu, H., Li, C., Wu, Q., Lee, Y.J.: Visual instruction tuning (2023), https:// arxiv.org/abs/2304.08485 
+
+15. Liu, S., Zhang, H., Qi, Y., Wang, P., Zhang, Y., Wu, Q.: Aerialvln: Vision-and-language navigation for uavs (2023), https://arxiv.org/abs/2308.06735 
+
+16. Qi, Z., Zhang, Z., Yu, Y., Wang, J., Zhao, H.: Vln-r1: Vision-language navigation via reinforcement fine-tuning (2025), https://arxiv.org/abs/2506.17221 
+
+17. Quan, L., Han, L., Zhou, B., Shen, S., Gao, F.: Survey of uav motion planning. IET Cyber-Systems and Robotics 2, 14–21 (03 2020). https://doi.org/10.1049/iet-csr.2020.0004 
+
+18. Renz, K., Chen, L., Arani, E., Sinavski, O.: Simlingo: Vision-only closed-loop au-tonomous driving with language-action alignment (2025), https://arxiv.org/ abs/2503.09594 
+
+19. Savva, M., Kadian, A., Maksymets, O., Zhao, Y., Wijmans, E., Jain, B., Straub, J., Liu, J., Koltun, V., Malik, J., et al.: Habitat: A platform for embodied ai research. In: Proceedings of the IEEE/CVF international conference on computer vision. pp. 9339–9347 (2019) 20. Shao, Z., Wang, P., Zhu, Q., Xu, R., Song, J., Bi, X., Zhang, H., Zhang, M., Li, Y.K., Wu, Y., Guo, D.: Deepseekmath: Pushing the limits of mathematical reasoning in open language models (2024), https://arxiv.org/abs/2402.03300 12 J. Zhou et al. 21. Sun, X., Si, W., Ni, W., Li, Y., Wu, D., Xie, F., Guan, R., Xu, H.Y., Ding, H., Wu, Y., Yue, Y., Huang, Y., Xiong, H.: Autofly: Vision-language-action model for uav autonomous navigation in the wild (2026), https://arxiv.org/abs/2602.09657 
+
+22. Wang, X., Yang, D., Wang, Z., Kwan, H., Chen, J., Wu, W., Li, H., Liao, Y., Liu, S.: Towards realistic uav vision-language navigation: Platform, benchmark, and methodology (2024), https://arxiv.org/abs/2410.07087 
+
+23. Xu, Z., Lu, B., Bao, W., Zhu, Z., Zhang, J., Yan, H., Lu, W., Wang, J.: Fly0: Decou-pling semantic grounding from geometric planning for zero-shot aerial navigation (2026), https://arxiv.org/abs/2602.15875 
+
+24. Yu, T., Yao, Y., Zhang, H., He, T., Han, Y., Cui, G., Hu, J., Liu, Z., Zheng, H.T., Sun, M., Chua, T.S.: Rlhf-v: Towards trustworthy mllms via behavior alignment from fine-grained correctional human feedback (2024), https://arxiv.org/abs/ 2312.00849 
+
+25. Zhou, G., Hong, Y., Wang, Z., Wang, X.E., Wu, Q.: Navgpt-2: Unleashing nav-igational reasoning capability for large vision-language models (2024), https: //arxiv.org/abs/2407.12366 
+
+26. Zhu, F., Zhu, Y., Lee, V., Liang, X., Chang, X.: Deep learning for embodied vision navigation: A survey. arXiv preprint arXiv:2108.04097 (2021)
