@@ -6,73 +6,87 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-26
-- 运行时间：2026-03-26 20:20:45 UTC
+- 最新运行日期：2026-03-27
+- 运行时间：2026-03-27 20:30:27 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：6
+- 本次总论文数：22
+- 精读区：11
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析 17 篇论文，重点攻克多模态智能体的感知加速与具身自进化难题。
-SpecEyes 凭借投机性感知显著提升 MLLM 响应速度，ELITE 则通过经验学习实现具身智能体的持续自我进化。
-建议重点关注“投机推理”与“自进化闭环”在提升智能体实时交互效率中的核心作用。
-- 详情：[/202603/26/README](/202603/26/README)
+今日精选 22 篇前沿论文，深度聚焦多模态大模型在感知与逻辑推理领域的关键突破。
+重点关注两篇满分论文，它们通过 Token 权重重
+- 详情：[/202603/27/README](/202603/27/README)
 
 ### 精读区论文标签
-1. [SpecEyes: Accelerating Agentic Multimodal LLMs via Speculative Perception and Planning](/202603/26/2603.23483v1-speceyes-accelerating-agentic-multimodal-llms-via-speculative-perception-and-planning)  
+1. [Bridging Perception and Reasoning: Token Reweighting for RLVR in Multimodal LLMs](/202603/27/2603.25077v1-bridging-perception-and-reasoning-token-reweighting-for-rlvr-in-multimodal-llms)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：多模态LLM的可验证奖励强化学习
+2. [R-C2: Cycle-Consistent Reinforcement Learning Improves Multimodal Reasoning](/202603/27/2603.25720v1-r-c2-cycle-consistent-reinforcement-learning-improves-multimodal-reasoning)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：通过循环一致性改进多模态推理的强化学习框架
+3. [Thinking with Constructions: A Benchmark and Policy Optimization for Visual-Text Interleaved Geometric Reasoning](/202603/27/2603.18662v1-thinking-with-constructions-a-benchmark-and-policy-optimization-for-visual-text-interleaved-geometric-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：通过投机规划加速智能体多模态大模型
-2. [ELITE: Experiential Learning and Intent-Aware Transfer for Self-improving Embodied Agents](/202603/26/2603.24018v1-elite-experiential-learning-and-intent-aware-transfer-for-self-improving-embodied-agents)  
+   evidence：视觉-文本交错几何推理的策略优化
+4. [When Models Judge Themselves: Unsupervised Self-Evolution for Multimodal Reasoning](/202603/27/2603.21289v1-when-models-judge-themselves-unsupervised-self-evolution-for-multimodal-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：自改进VLM智能体的经验学习
-3. [Your Vision-Language-Action Model Already Has Attention Heads For Path Deviation Detection](/202603/26/2603.13782v1-your-vision-language-action-model-already-has-attention-heads-for-path-deviation-detection)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：导航智能体的VLA模型推理
-4. [AerialVLA: A Vision-Language-Action Model for UAV Navigation via Minimalist End-to-End Control](/202603/26/2603.14363v1-aerialvla-a-vision-language-action-model-for-uav-navigation-via-minimalist-end-to-end-control)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：用于无人机导航智能体的视觉-语言-动作框架
-5. [Recurrent Reasoning with Vision-Language Models for Estimating Long-Horizon Embodied Task Progress](/202603/26/2603.17312v1-recurrent-reasoning-with-vision-language-models-for-estimating-long-horizon-embodied-task-progress)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：利用VLM进行循环推理以估计任务进度
-6. [RewardFlow: Topology-Aware Reward Propagation on State Graphs for Agentic RL with Large Language Models](/202603/26/2603.18859v1-rewardflow-topology-aware-reward-propagation-on-state-graphs-for-agentic-rl-with-large-language-models)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：使用状态图进行推理任务的LLM代理强化学习
+   evidence：无机器人参与的多模态推理无监督自我进化
+5. [Let's Think with Images Efficiently! An Interleaved-Modal Chain-of-Thought Reasoning Framework with Dynamic and Precise Visual Thoughts](/202603/27/2603.21754v1-lets-think-with-images-efficiently-an-interleaved-modal-chain-of-thought-reasoning-framework-with-dynamic-and-precise-visual-thoughts)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：交织模态思维链推理框架
+6. [UniGRPO: Unified Policy Optimization for Reasoning-Driven Visual Generation](/202603/27/2603.23500v1-unigrpo-unified-policy-optimization-for-reasoning-driven-visual-generation)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：推理驱动多模态生成的强化学习
+7. [CAPTCHA Solving for Native GUI Agents: Automated Reasoning-Action Data Generation and Self-Corrective Training](/202603/27/2603.23559v1-captcha-solving-for-native-gui-agents-automated-reasoning-action-data-generation-and-self-corrective-training)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：基于原生视觉语言模型的 GUI 智能体，用于自动化推理与行动
+8. [CarePilot: A Multi-Agent Framework for Long-Horizon Computer Task Automation in Healthcare](/202603/27/2603.24157v1-carepilot-a-multi-agent-framework-for-long-horizon-computer-task-automation-in-healthcare)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：用于长程计算机任务的多模态智能体流水线
+9. [Memory-Augmented Vision-Language Agents for Persistent and Semantically Consistent Object Captioning](/202603/27/2603.24257v1-memory-augmented-vision-language-agents-for-persistent-and-semantically-consistent-object-captioning)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：用于探索的记忆增强视觉语言智能体
+10. [MoE-GRPO: Optimizing Mixture-of-Experts via Reinforcement Learning in Vision-Language Models](/202603/27/2603.24984v1-moe-grpo-optimizing-mixture-of-experts-via-reinforcement-learning-in-vision-language-models)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：基于强化学习的视觉语言模型专家路由优化框架
+11. [Pixelis: Reasoning in Pixels, from Seeing to Acting](/202603/27/2603.25091v1-pixelis-reasoning-in-pixels-from-seeing-to-acting)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：通过好奇心相干奖励从后果中学习的像素空间智能体
 
 ### 速读区论文标签
-1. [VisBrowse-Bench: Benchmarking Visual-Native Search for Multimodal Browsing Agents](/202603/26/2603.16289v2-visbrowse-bench-benchmarking-visual-native-search-for-multimodal-browsing-agents)  
+1. [FloorPlan-VLN: A New Paradigm for Floor Plan Guided Vision-Language Navigation](/202603/27/2603.17437v1-floorplan-vln-a-new-paradigm-for-floor-plan-guided-vision-language-navigation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：多模态浏览器智能体与视觉推理能力
-2. [EmergeNav: Structured Embodied Inference for Zero-Shot Vision-and-Language Navigation in Continuous Environments](/202603/26/2603.16947v1-emergenav-structured-embodied-inference-for-zero-shot-vision-and-language-navigation-in-continuous-environments)  
+   evidence：使用空间先验的视觉语言导航智能体
+2. [FailureMem: A Failure-Aware Multimodal Framework for Autonomous Software Repair](/202603/27/2603.17826v1-failuremem-a-failure-aware-multimodal-framework-for-autonomous-software-repair)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：将零样本视觉语言导航建模为结构化具身推理
-3. [MSRAMIE: Multimodal Structured Reasoning Agent for Multi-instruction Image Editing](/202603/26/2603.16967v1-msramie-multimodal-structured-reasoning-agent-for-multi-instruction-image-editing)  
+   evidence：用于自主智能体修复的多模态框架
+3. [Counting Circuits: Mechanistic Interpretability of Visual Reasoning in Large Vision-Language Models](/202603/27/2603.18523v1-counting-circuits-mechanistic-interpretability-of-visual-reasoning-in-large-vision-language-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：基于多模态大语言模型的结构化推理智能体框架
-4. [PaAgent: Portrait-Aware Image Restoration Agent via Subjective-Objective Reinforcement Learning](/202603/26/2603.17055v1-paagent-portrait-aware-image-restoration-agent-via-subjective-objective-reinforcement-learning)  
+   evidence：大型视觉语言模型中视觉推理的机械可解释性
+4. [MultihopSpatial: Multi-hop Compositional Spatial Reasoning Benchmark for Vision-Language Model](/202603/27/2603.18892v1-multihopspatial-multi-hop-compositional-spatial-reasoning-benchmark-for-vision-language-model)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：使用多模态大模型和强化学习的图像修复智能体
-5. [OmniVLN: Omnidirectional 3D Perception and Token-Efficient LLM Reasoning for Visual-Language Navigation across Air and Ground Platforms](/202603/26/2603.17351v1-omnivln-omnidirectional-3d-perception-and-token-efficient-llm-reasoning-for-visual-language-navigation-across-air-and-ground-platforms)  
+   evidence：视觉语言模型的多跳组合空间推理基准
+5. [Mind the Rarities: Can Rare Skin Diseases Be Reliably Diagnosed via Diagnostic Reasoning?](/202603/27/2603.18418v1-mind-the-rarities-can-rare-skin-diseases-be-reliably-diagnosed-via-diagnostic-reasoning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于视觉语言导航智能体的大模型推理
-6. [Cross-Domain Demo-to-Code via Neurosymbolic Counterfactual Reasoning](/202603/26/2603.18495v1-cross-domain-demo-to-code-via-neurosymbolic-counterfactual-reasoning)  
+   evidence：评估大型视觉语言模型的诊断推理能力
+6. [TerraScope: Pixel-Grounded Visual Reasoning for Earth Observation](/202603/27/2603.19039v1-terrascope-pixel-grounded-visual-reasoning-for-earth-observation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：机器人编程中视觉语言模型的神经符号反事实推理
-7. [Agentic Flow Steering and Parallel Rollout Search for Spatially Grounded Text-to-Image Generation](/202603/26/2603.18627v1-agentic-flow-steering-and-parallel-rollout-search-for-spatially-grounded-text-to-image-generation)  
+   evidence：基于VLM的像素级地理空间推理
+7. [Tinted Frames: Question Framing Blinds Vision-Language Models](/202603/27/2603.19203v1-tinted-frames-question-framing-blinds-vision-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：VLM在智能体流转向中担任语义评论员
-8. [Perceptio: Perception Enhanced Vision Language Models via Spatial Token Generation](/202603/26/2603.18795v1-perceptio-perception-enhanced-vision-language-models-via-spatial-token-generation)  
+   evidence：研究VLM中的视觉推理以及语言框架如何影响注意力
+8. [Tinted Frames: Question Framing Blinds Vision-Language Models](/202603/27/2603.19203v2-tinted-frames-question-framing-blinds-vision-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：通过LVLM中的标记生成进行空间推理
-9. [P$^{3}$Nav: End-to-End Perception, Prediction and Planning for Vision-and-Language Navigation](/202603/26/2603.17459v1-p3nav-end-to-end-perception-prediction-and-planning-for-vision-and-language-navigation)  
+   evidence：语言框架下视觉语言模型的视觉推理
+9. [Gastric-X: A Multimodal Multi-Phase Benchmark Dataset for Advancing Vision-Language Models in Gastric Cancer Analysis](/202603/27/2603.19516v1-gastric-x-a-multimodal-multi-phase-benchmark-dataset-for-advancing-vision-language-models-in-gastric-cancer-analysis)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：具有规划和感知的视觉语言导航智能体
-10. [ReLaGS: Relational Language Gaussian Splatting](/202603/26/2603.17605v1-relags-relational-language-gaussian-splatting)  
+   evidence：视觉语言模型在医学诊断中的多模态推理
+10. [Gastric-X: A Multimodal Multi-Phase Benchmark Dataset for Advancing Vision-Language Models in Gastric Cancer Analysis](/202603/27/2603.19516v2-gastric-x-a-multimodal-multi-phase-benchmark-dataset-for-advancing-vision-language-models-in-gastric-cancer-analysis)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：利用VLM进行3D场景图构建和关系推理
-11. [Complementary Reinforcement Learning](/202603/26/2603.17621v1-complementary-reinforcement-learning)  
+   evidence：视觉语言模型在医学分析中的多模态推理能力
+11. [Beyond detection: cooperative multi-agent reasoning for rapid onboard EO crisis response](/202603/27/2603.19858v1-beyond-detection-cooperative-multi-agent-reasoning-for-rapid-onboard-eo-crisis-response)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：基于LLM智能体的强化学习与经验协同演化
+   evidence：用于事件驱动决策的多智能体推理
 
 
 <div class="dpr-home-promo-card">

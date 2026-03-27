@@ -1,0 +1,601 @@
+Title: Thinking with Constructions: A Benchmark and Policy Optimization for Visual-Text Interleaved Geometric Reasoning
+
+URL Source: https://arxiv.org/pdf/2603.18662v1
+
+Published Time: Fri, 20 Mar 2026 01:02:30 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Thinking with Constructions: A Benchmark and Policy Optimization for Visual-Text Interleaved Geometric Reasoning 
+
+Haokun Zhao 1, ∗† * Wanshi Xu 2, ∗ Haidong Yuan 3 Songjun Cao 4
+
+Long Ma 4, † Yanghua Xiao 1, †
+
+> 1
+
+College of Computer Science and Artificial Intelligence, Fudan University 
+
+> 2
+
+School of ECE, Peking University 
+
+> 3
+
+School of Software and Microelectronics, Peking University 
+
+> 4
+
+Tencent Youtu Lab 
+
+hkzhao23@m.fudan.edu.cn , shawyh@fudan.edu.cn {xwanshi, oseast}@stu.pku.edu.cn , {songjuncao, malonema}@tencent.com 
+
+Abstract 
+
+Geometric reasoning inherently requires 
+
+"thinking with constructions" —the dynamic manipulation of visual aids to bridge the gap between problem conditions and solutions. However, existing Multimodal Large Language Models (MLLMs) are largely confined to passive inference with static diagrams, lacking the strategic knowledge of when and how to construct effective visual aids. To address this, we present a framework for Visual-Text Interleaved Chain-of-Thought . We first introduce GeoAux-Bench , the first bench-mark comprising 4,334 geometry problems that aligns textual construction steps with ground-truth visual updates. Our pilot study reveals two critical insights: (1) interleaved visual-textual aids outperform single-modality counterparts, which cannot losslessly capture geometric synergy; and (2) valid constructions act as entropy reducers, strongly correlating with reduced reasoning perplexity. Building on these findings, we propose Action Ap-plicability Policy Optimization (A 2PO) , a reinforcement learning paradigm for mastering strategic construction. A employs Adaptive Reward Shaping to regulate the timing and quality of visual aids via counterfactual sam-pling to distinguish necessary from redundant constructions. Experiments demonstrate our approach enables MLLMs to leverage selective auxiliary constructions, yielding a 3.51% gain over strong baselines. Code and data are available on GitHub 1.
+
+1 Introduction 
+
+Recent advancements in Large Language Models (LLMs) have demonstrated remarkable proficiency in mathematical reasoning (Shao et al., 2024; Yang  
+
+> *∗
+
+These authors contributed equally to this work. 
+
+> †
+
+Corresponding author. 
+
+> 1
+
+https://anonymous.4open.science/r/GeoAux-5863 Q : In quadrangular pyramid 𝑃 − 𝐴𝐵𝐶 𝐷 … Point 𝐺 lies                                                              
+
+> on segment 𝑃𝐵 such that the cosine of the dihedral
+> angle 𝐺 −𝐶𝐷 −𝐵 is !"
+> ".Find: The value of #$
+> #% .
+> S:<aux> Let 𝑂 ,𝐻 be midpoints of 𝐴𝐷 ,𝐵𝐶 .
+> Establish Cartesian system 𝑂 −𝑥𝑦𝑧 with axes along
+> 𝑂𝐴 ,𝑂𝐻 ,𝑂𝑃 respectively. Then, connect 𝐷𝐺 .</aux>
+> Since 𝑃𝐴 =𝑃𝐷 and 𝑃𝐴𝐷 ⊥𝐴𝐵𝐶𝐷 , implies altitude 𝑃𝑂 ⊥𝐴𝐵𝐶𝐷 .From
+> 𝑉 =&
+> ',we get 𝑃𝑂 =2.In Cartesian system 𝑂 −𝑥𝑦𝑧 …Thus, #$
+> #% =(
+> '.
+> Iori g
+> Iau x
+> Taux
+
+Figure 1: A representative sample from GeoAux-Bench. The solution trajectory is structured in a visual-text interleaved format : the textual auxiliary construction step (e.g., <aux>... </aux> ) is explicitly paired with a corresponding auxiliary diagram ( Iaux ). 
+
+et al., 2024; Chen et al., 2025a), largely driven by the Chain-of-Thought (CoT) technique (Wei et al., 2022). However, geometry problem solv-ing remains a significant hurdle. Unlike algebraic tasks that rely on symbolic manipulation, geomet-ric reasoning is intrinsically multimodal (Lu et al., 2021; Kazemi et al., 2023): human experts do not merely read static diagrams; they solve problems by constructing and manipulating visual aids (e.g., drawing auxiliary lines) to bridge the gap between conditions and solutions. This process of auxiliary construction is the quintessential embodiment of 
+
+“thinking with images,” where the visual context dynamically evolves to reveal hidden geometric properties (Chern et al., 2025; Li et al., 2025b). To emulate this process, the community has ac-tively explored Visual Chain-of-Thought (VCoT) .However, existing paradigms generally fall into three categories, each facing distinct limitations: (1) Agent-based approaches manipulate geomet-ric code to render diagrams but often rely on ground-truth code inputs, diverging from the nat-ural visual perception of raw images (Hu et al., 2024; Wang et al., 2025b); (2) Formal Abstraction 
+
+1
+
+> arXiv:2603.18662v1 [cs.AI] 19 Mar 2026
+
+methods convert diagrams into formal languages, acting as a lossy compression that strips away vi-sual intuition and risks hallucination (Sharma et al., 2024; Trinh et al., 2024; Yang et al., 2025); and (3) 
+
+Unified Multimodal Models attempt to natively generate visual thoughts (Shi et al., 2025; Li et al., 2025a). While promising, even SOTA models like Nano-Banana-Pro (Team et al., 2025) suffer from pixel-level structural hallucinations that mislead the reasoning process. Consequently, most MLLMs are confined to a passive static inference mode, un-able to update their visual context to match their reasoning steps. This disconnect highlights a critical gap: models lack the strategic procedural knowledge to employ visual aids effectively—specifically, the decision-making of when to draw, what to draw, and how to leverage the visualization for subsequent deduc-tion. Crucially, such constructions significantly re-duce problem-solving difficulty, particularly when diagrams are inherently complex or benefit from intrinsic properties (Chervonyi et al., 2025). To address this, we conducted an ablation study by injecting oracle auxiliary aids in different modal-ities. Our findings confirm that single-modality auxiliary aids—whether consisting solely of tex-tual instructions or visual diagrams—cannot serve as a lossless substitute for the interleaved provision of construction statements and corresponding im-ages, as they fail to fully encapsulate the synergis-tic information inherent in the multimodal context. Furthermore, we observed that this visual feedback correlates strongly with a reduction in reasoning perplexity (PPL), mirroring a “cognitive epiphany” 
+
+where correctly constructed auxiliary lines dras-tically reduce the uncertainty of the subsequent reasoning trajectory. Building on these insights, we propose a frame-work for Visual-Text Interleaved Chain-of-Thought. We first introduce GeoAux-Bench , a benchmark comprising 4,334 geometry problems and 8,470 diagrams. As illustrated in Figure 1, it establishes a precise interleaved mapping where each textual construction ( Taux ) is explicitly paired with its cor-responding ground-truth visual update ( Iaux ). To effectively leverage this data, we present Action Applicability Policy Optimization (A 2PO), a re-inforcement learning paradigm designed to mas-ter strategic visual construction. A 2PO employs a Tri-Partition Sampling strategy to construct coun-terfactual reasoning paths (mandatory vs. prohib-ited). Based on these baselines, we employ Adap-tive Reward Shaping to orchestrate the reasoning process: (1) A Timing Reward to discern the ne-cessity of auxiliary lines; complemented by (2) a 
+
+Quality Reward , grounded in reasoning perplex-ity, to ensure constructions genuinely simplify the solution path. During inference, we implement Vi-sual Re-prompting to dynamically inject auxiliary diagrams, enabling the model to reason in a truly interleaved manner. In summary, our contributions are as follows: 1. We present GeoAux-Bench , the first geometry benchmark to explicitly associate textual auxil-iary construction steps with corresponding aux-iliary diagrams. 2. We provide empirical evidence that interleaved visual-textual auxiliary representations signifi-cantly outperform single-modality counterparts by up to 1.97% . We further demonstrate that high-quality auxiliary constructions act as an 
+
+entropy reducer , narrowing the solution search space and lowering reasoning uncertainty. 3. We propose A2PO , a reinforcement learning paradigm utilizing Adaptive Reward Shaping .By strictly regulating the timing and evaluating the quality of visual aids, A 2PO achieves a max-imum performance gain of 3.51% over GRPO and unconditional reinforcement strategies. 
+
+2 Related Work 
+
+2.1 Benchmarks for Multimodal Mathematical Reasoning 
+
+Visual-mathematical reasoning benchmarks, from foundational datasets (Lu et al., 2021, 2022) to recent suites like MMMU (Yue et al., 2023) and MathVista (Lu et al., 2023), have advanced MLLMs (Wang et al., 2024; Zhang et al., 2024; Kazemi et al., 2023). However, they rely on static pairs, lacking step-by-step visual demonstrations for dynamic reasoning. While Shi et al. (2025) explored interleaved formats, such data remains scarce. GeoAux-Bench bridges this gap via explicit text-visual alignment to provide dense supervision. 
+
+2.2 Visual Chain-of-Thought (VCoT) 
+
+Textual Chain-of-Thought (Wei et al., 2022; Fang et al., 2025b,a) dominates symbolic reasoning but fails to capture spatial dynamics for geometry. Vi-sual CoT addresses this by integrating visual syn-thesis into deduction, with two primary streams: (1) Tool-augmented approaches (Hu et al., 2024; Wang et al., 2025b; Zheng et al., 2025) suffer from 2procedural rigidity, treating diagramming as a static step rather than a fluid cognitive strategy; (2) In-trinsic generation models (Shi et al., 2025; Li et al., 2025a) are prone to structural hallucinations and lack geometric precision. Our framework syn-thesizes these paradigms via Visual Re-prompting, combining symbolic precision with dynamic rea-soning feedback. 
+
+2.3 Reinforcement Learning for Reasoning 
+
+Reinforcement learning is central to reasoning breakthroughs (DeepSeek-AI et al., 2025). Algo-rithms like GRPO (Shao et al., 2024), DAPO (Yu et al., 2025), and VAPO (Yue et al., 2025) excel in text, vision (Meng et al., 2025), and tool-use (Li et al., 2025c; Hong et al., 2025b), but apply-ing RL to geometry is non-trivial—intermediate visual constructions lack verifiable outcomes. Ex-isting methods like GeometryZero (Wang et al., 2025c) optimize timing via tool priors (Li et al., 2025c) but overlook reasoning efficacy. Our A 2PO addresses this via Adaptive Reward Shaping, us-ing contrastive sampling for timing and reasoning perplexity for utility assessment, ensuring construc-tions actively facilitate solutions. 
+
+3 The GeoAux Benchmark and Reasoning Dynamics 
+
+In this section, we introduce GeoAux , a bench-mark tailored for Interleaved-Modal Chain-of-Thought (VCoT) . To capture the dynamic nature of geometric reasoning, GeoAux explicitly aligns textual auxiliary instructions with their correspond-ing visual updates ( Taux ↔ Iaux ). We first detail the benchmark construction pipeline, followed by a pilot study that quantitatively validates the cogni-tive synergy between these modalities. 
+
+3.1 GeoAux-Bench Construction 
+
+To foster research into active visual-textual reason-ing, we construct GeoAux-Bench , consisting of two subsets: the expert-annotated GeoAux-Core 
+
+and the adapted GeoAux-Canvas .
+
+GeoAux-Core. We curated geometric problems predominantly requiring auxiliary constructions from secondary school curricula and Olympiad competitions (post-January 2024) to minimize data contamination. Crucially, we restructure the so-lution trajectory into an interleaved format. We introduce a dedicated token pair <aux> ... </aux> to encapsulate the Auxiliary Construction Instruction (Taux ). The closing tag </aux> explicitly marks the insertion point for the corresponding Auxiliary Diagram ( Iaux ). This structure acts as a transition operator mapping the initial visual state ( Iorig ) to an updated state ( Iaux ): 
+
+M : ( Iorig , T aux ) → Iaux (1) Here, Taux contains explicit directives (e.g., “Connect AB ”), while Iaux renders these elements visually. A representative sample is shown in Fig-ure 1. The subset is stratified into four difficulty levels: Curriculum-Junior/Senior and Olympiad-Junior/Senior. 
+
+GeoAux-Canvas. To assess generalization at scale, we adapted samples from MathCanvas-Bench (Shi et al., 2025). We filtered for construction-heavy problems and applied our annotation pipeline to generate corresponding 
+
+(Taux , I aux ) pairs. This subset retains fine-grained subject tags (e.g., Analytic Geometry, Trigonome-try), enabling detailed capability analysis. 
+
+Quality Control and Standardization. We en-forced a rigorous three-stage pipeline: (1) Solvabil-ity Verification: Using Gemini-2.5-Pro (Comanici et al., 2025) to ensure problem conditions are suffi-cient for a unique solution; (2) Symbolic Normal-ization: Parsing all mathematical expressions into a unified L ATEX format; (3) Visual Enhancement: We utilized Seedream 4.0 (Chen et al., 2025b) for super-resolution to enhance image quality, fol-lowed by normalization to 512 × 512 . Further-more, to enable deterministic evaluation of open-ended proofs, we reformulate proof problems (e.g., “Prove A = B”) into verifiable computational prob-lems (e.g., “Find the ratio A/B ”). 
+
+Statistics. GeoAux-Bench comprises 4,334 prob-lems (6,523 queries) and 8,470 geometric diagrams, with an extremely high image-to-problem ratio as illustrated in Figure 2. Detailed statistics are pro-vided in Appendix B. 
+
+3.2 Pilot Study: Complementarity of Auxiliary Modalities in Interleaved Geometric Reasoning 
+
+We conceptualize geometric construction as a criti-cal Interleaved Reasoning Step with dual represen-tations: the Auxiliary Construction Instruction 
+
+(Taux ) and the Auxiliary Diagram (Iaux ). While recent unified MLLMs (e.g., Chameleon-7B (Team et al., 2024), Bagle-7B-MoT (Deng et al., 2025)) 3Plane Geometry   
+
+> Solid Geometry
+> Trigonometry
+> Calculus & Vector
+> Statistics
+> Transformational Geometry Algebra Analytic
+> Geometry
+> Junior
+> Junior
+> Olym
+> Senior
+> Senior
+> Olym
+> GeoAux -Core
+
+(a) Subject & Difficulty Distribution 0 1 > 1 
+
+> Image number
+> Nums.
+> 1,148
+> 2,890
+> 294
+> 225
+> 3,572
+> 535
+> Question
+> Solution
+
+(b) Image Count 0 2000 4000 6000  
+
+> Text length
+> 0.000
+> 0.001
+> 0.002
+> 0.003
+> Frequency
+> Question
+> Solution
+
+(c) Text Length Distribution 
+
+Figure 2: Overview of GeoAux-Bench. 
+
+attempt end-to-end interleaved generation, their ca-pability to precisely render geometric constraints remains nascent. Consequently, prior works often resort to compromises: they convert diagrams that ought to be presented via the visual modality into single-modal formal languages or drawing code, thereby circumventing the challenge of visual gen-eration. This raises a fundamental research question: 
+
+Does Taux —the textual modality describing the vi-sual diagram—fully encapsulate the latent spatial information contained in the corresponding visual diagram Iaux , or do these two modalities offer com-plementary cognitive grounding? To disentangle the contributions of the semantic instruction and the corresponding visual diagram, we design a con-trolled ablation study. Let Q denote the problem text and Iorig the initial diagram. We evaluate per-formance under four experimental settings: • Standard Settings: (Q, I orig ). Baseline reason-ing without hints. • Textual-Only Settings: (Q, I orig , T aux ). Pro-viding only the auxiliary construction instruction. • Visual-Only Settings: (Q, I orig , I aux ). Provid-ing only the auxiliary diagram. • Interleaved Settings: (Q, I orig , T aux , I aux ).Simulating an ideal interleaved reasoning step with both modalities. 
+
+Perceptual Saliency Control (Visual Enhance-ment). A potential confounder in the Visual-Only Setting is visual saliency: standard (typically dashed) auxiliary lines may be too subtle for de-tection, leading to false negatives from perceptual misses .To boost the saliency of these elements and prevent them from being overlooked in complex geometric configurations, we introduce a Visual Enhancement Protocol, as illustrated in Figure 3. Specifically, we identified 200 hard samples where models succeeded with the Textual-Only Settings 
+
+but failed with the Visual-Only Settings ; to these, we applied the enhanced annotation (denoted Ired aux )to ensure visibility, yielding two control settings: 
+
+Enhanced Visual-Only (Q, I orig , I red aux ) and En-hanced Dual-Modal (Q, I orig , T aux , I red aux ).Iaux Iaux 
+
+> red
+
+Figure 3: Visual Enhancement Protocol. Bold red lines are used to highlight auxiliary elements ( Ired aux ). 
+
+Analysis of Reasoning Dynamics. Table 1presents the performance metrics. By analyzing the intra-group trends, we derive three critical in-sights into the cognitive mechanism of auxiliary construction:                                  
+
+> Setting Input Modality Acc% ( ∆)Tokens PPL
+> G1: Text-Only Settings
+> Standard Q, I orig 23.68 1336.2 1.1250 Text-Only +Taux 24.24 (+0.56) 1241.3 1.1185
+> G2: Visual-Only Settings
+> Visual-Only +Iaux 23.34 (-0.34) 1258.0 1.1340 Enhanced Visual +Ired aux 24.44 (+0.76) 1303.6 1.1310
+> G3: Interleaved Settings
+> Dual-Modal +Taux +Iaux 24.90 (+1.22) 1230.7 1.1350 Enhanced Dual +Taux +Ired aux 25.31 (+1.63) 1270.5 1.1323
+
+Table 1: Reasoning Performance under Different Modal Input Combinations. Experiments are grouped by con-text structure for fair intra-group comparisons. 
+
+(1) Irreplaceability and Complementarity of Modalities. While the Text-Only Setting outper-forms the baseline, it still falls 1.07% short of the Interleaved Setting . This directly answers our research question: Textual instructions ( Taux )cannot fully replace visual diagrams ( Iaux ). The two modalities provide complementary cognitive grounding: text defines operational instructions to 4guide focus on target elements and resolve seman-tic ambiguity, while diagrams deliver spatial rela-tionships to clarify geometric connections and re-duce uncertainty. Optimal reasoning performance arises only when the model “sees” the spatial real-ization of its intent. (2) Lower PPL Correlates with Higher Accu-racy Across Modal Settings. Across all groups, we observe a strong positive correlation between reduced Perplexity and improved reasoning accu-racy under the same modal configuration—notably, with no significant correlation between accuracy and generated token length. This aligns with hu-man geometric reasoning intuition: just as a well-constructed auxiliary line triggers an "epiphany" that simplifies a complex problem, valid auxiliary information lowers the model’s predictive entropy. A lower PPL may signals a clearer, less ambiguous solution path, which empirically boosts the likeli-hood of correct reasoning—an insight we leverage in our reward shaping design. (3) Visual Saliency Matters. Comparing Visual-Only with Enhanced Visual (and Interleaved analo-gously), enhancing visual saliency consistently re-duces PPL and improves Accuracy (up to +1.10%). Notably, this performance gain stems from modi-fying only 200 specific samples. This sensitivity indicates the model’s performance is highly reliant on the perceptual clarity of auxiliary elements. We hypothesize visual feature enhancement enables the model’s visual system to more reliably detect and anchor geometric configuration changes. This confirms visual perceptibility is a strict prerequisite for geometric reasoning. For qualitative analysis of attentional patterns, see Appendix A. 
+
+4 Method 
+
+4.1 Preliminaries: GRPO 
+
+We adopt Group Relative Policy Optimization (GRPO) as our optimization backbone. GRPO eliminates the separate value function by estimat-ing the baseline from the group average. Formally, given a question q, the policy gener-ates a group of outputs {oi}Gi=1 . The advantage Ai
+
+is estimated by normalizing group rewards:          
+
+> Ai=Ri−mean ({Rj}Gj=1 )
+> std ({Rj}Gj=1 ) + ϵ,(2)
+
+where ϵ is a small constant. GRPO optimizes the surrogate objective, averaged over tokens:       
+
+> JGRP O (θ) = Eq, o
+> "
+> 1
+> G
+> GX
+> i=1
+> 1
+> |oi|
+> |oi|
+> X
+> t=1
+> 
+> min
+> 
+> ri,t Ai,
+> clip (ri,t ,1−ε, 1+ ε)Ai
+> 
+> −βDKL (πθ|| πref )
+> #
+> ,
+> (3)
+
+where ri,t = πθ (oi,t |q,o i,<t )  
+
+> πθold (oi,t |q,o i,<t )
+
+is the probability ratio, and o = {oi}Gi=1 denotes the sampled group. 
+
+4.2 Overview of A 2PO 
+
+Building upon GRPO, we propose Action Ap-plicability Policy Optimization (A 2PO) . While standard GRPO optimizes solely for outcome cor-rectness, geometric reasoning requires mastering the strategic applicability of auxiliary construc-tions—specifically, discerning whether a visual modification is beneficial for the specific problem configuration. To explicitly model this applicabil-ity, A 2PO introduces a Tri-Partition Sampling 
+
+mechanism. As illustrated in Figure 4, instead of sampling from a single policy distribution, we partition the rollout trajectories into three distinct subsets. This structure enables the construction of counterfactual baselines—comparing scenarios where auxiliary lines are enforced versus prohib-ited—to derive an Adaptive Reward that guides the model on when to construct (Timing) and how 
+
+to construct efficiently (Quality). 
+
+4.3 Tri-Partition Sampling with Visual Re-prompting 
+
+To quantify the marginal utility of auxiliary con-structions, we sample trajectories via three distinct conditioning protocols, aggregating them into a rollout set G = {O+, O −, O }. For a given query 
+
+q and initial diagram Iorig , we sample N trajecto-ries for each subset. Prompts for each protocol are provided in Appendix E: • Mandatory Subset ( O+): We employ Prefix Forcing to enforce geometric intervention. Given that the model is fine-tuned during the supervised warm-up to encapsulate auxiliary commands in 
+
+<aux> tags, we pre-populate the generation prefix with <aux> . This strictly forces a valid auxiliary construction step while retaining the standard prompt context. • Prohibited Subset ( O−): We impose a Hard Constraint to disable visual updates. In addition to appending a negative constraint to the sys-tem prompt, we explicitly mask the logits of the 5𝑄 , 𝐼 !"#$            
+
+> Policy
+> Model
+> Reference
+> Model
+> Reward
+> Model
+> …
+> 𝑂 %
+> 𝑜 &
+> %𝑜 '
+> %𝑜 (
+> %
+> …
+> 𝑂 )
+> 𝑜 &
+> )𝑜 '
+> )𝑜 (
+> )
+> r&
+> r'
+> r(
+> …
+> Adaptive
+> Reward Shaping
+> Group
+> Computation
+> Re−Prompting
+> …
+> 𝑂
+> 𝑜 &𝑜 '
+> *𝑜 (
+> +𝑇 +,-
+> +𝐼 +,-
+> Aux
+> VeriFier
+> N
+> Y
+> KL
+
+A!PO 𝐴 &    
+
+> 𝐴 '
+> 𝐴 (
+> …
+> 𝑄 ,𝐼 !"#$
+> Policy
+> Model
+> Reference
+> Model
+> Reward
+> Model
+> r&
+> r'
+> r(
+> …
+> Group
+> Computation …
+> 𝑂
+> 𝑜 &𝑜 '
+> *𝑜 (
+> KL
+
+GR PO 𝐴 &  
+
+> 𝐴 '
+> 𝐴 (
+> …
+> Trained Model s
+> Frozen Model s
+
+Figure 4: The framework of Action Applicability Policy Optimization (A 2PO). The upper panel shows standard GRPO, while the lower panel illustrates our tri-partition sampling and adaptive reward shaping mechanism. 
+
+<aux> and </aux> tokens during decoding, guar-anteeing a reasoning trajectory devoid of auxil-iary constructions and forcing the model to rely solely on the initial visual context. • Natural Subset ( O): The model samples au-tonomously using the same standard prompt as 
+
+G+, without any intervention. This subset repre-sents the target policy to be optimized. 
+
+Visual Re-prompting. To simulate interleaved visual reasoning despite current rendering limita-tions, we employ a retrieval-based injection strat-egy within the Natural Subset. Upon detecting a completed auxiliary command, an Aux Verifier evaluates its semantic equivalence to the ground truth. If and only if the construction is equiva-lent to the ground truth, we trigger re-prompting: the generation is paused, and the model is queried again with an augmented context that appends a structured “Hint” containing the ground-truth in-struction ( Taux ) and the corresponding auxiliary diagram ( Iaux ). This provides high-fidelity visual feedback contingent on correct reasoning. Prompt transformations are detailed in Appendix E. 
+
+4.4 Adaptive Reward Shaping 
+
+We design a composite reward function R(o)
+
+specifically for the natural subset O:
+
+R(o) = w1racc + w2rf mt + w3rtime + w4rqual (4) 
+
+where w(·) are weighting coefficients. While racc 
+
+and rf mt align with standard GRPO protocols, we introduce rtime and rqual to optimize auxiliary con-struction efficacy: 
+
+4.4.1 Timing Reward ( rtime )
+
+This component trains the model to discern the strategic necessity of auxiliary constructions. Let 
+
+Iaux (o) be the auxiliary indicator and ∆ =
+
+EO+ [racc ] − EO− [racc ] be the utility gap. We for-mulate rtime (o) with a significance margin τ :
+
+rtime (o) = Iaux (o) ·
+
+
+
+1 if ∆ > τ 
+
+−1 if ∆ < −τ
+
+0 otherwise (5) 
+
+This restricts auxiliary construction to scenarios yielding a net performance gain. 
+
+4.4.2 Quality Reward ( rqual )
+
+Building on our pilot findings (Sec. 3.2), we posit that effective auxiliary constructions function as en-tropy reducers , mirroring the “cognitive epiphany” that manifests as reduced reasoning PPL. We establish a perplexity baseline ¯P =
+
+EO+ [PPL ] derived from the mandatory subset. The quality reward grants a bonus solely to valid, low-entropy auxiliary usage: 
+
+rqual (o) = Iaux (o) · racc (o) · I PPL (o) < ¯P + δ (6) 
+
+where δ compensates for the PPL overhead in-duced by visual re-prompting. This reward explic-itly favors confident reasoning paths that simplify the solution space. Detailed hyperparameter con-figurations are provided in Appendix F. 
+
+5 Experiments 
+
+We split our experiments into two distinct parts to rigorously validate our contributions: (1) con-ducting a systematic evaluation of popular MLLMs 6Model Think Curriculum Olympiad Total Senior Junior Senior Junior                                                                                                                               
+
+> Closed-source MLMMs
+> Gemini-2.5-Pro ✓83.91 84.75 82.28 88.24 83.16
+> Gemini-2.5-Flash ✓80.10 81.68 64.56 82.13 79.53 GPT-5 ✓71.48 84.02 79.32 88.41 80.62 GPT-4o ✗19.57 24.29 57.38 42.51 28.13 Claude-Opus-4.1 ✓60.36 52.70 58.23 58.45 55.82 Claude-Sonnet-4.5 ✓59.20 52.00 55.70 60.39 55.03 Doubao-seed-1.6 ✓62.02 61.42 72.57 86.47 65.00
+> Open-source MLLMs
+> Qwen3-VL-235B-Ins. ✗61.36 77.80 78.90 91.79 74.85
+> Qwen3-VL-235B-Thk. ✓64.68 50.36 89.45 95.17 62.25 Qwen3-VL-30B-Ins. ✗61.36 70.38 75.53 89.37 70.25 Qwen3-VL-30B-Thk. ✓55.72 49.64 83.97 93.24 58.75 Qwen2.5-VL-Ins. ✗23.05 28.81 65.82 52.17 33.25 InternVL3.5-8B ✗38.31 26.63 54.85 66.67 36.26 InternVL3-8B ✗25.87 30.02 67.93 55.56 35.17 GLM-4.1V-Thk. ✓31.67 23.57 56.12 53.14 31.76 GLM-4.5V ✗45.27 24.62 72.15 82.61 40.24 MiMo-VL-7B-SFT ✗50.41 42.13 71.73 80.68 50.87 MiMo-VL-7B-RL ✓50.75 41.65 71.73 80.68 50.70
+> United MLLMs
+> BAGEL-7B-MoT ✗7.30 7.34 34.60 38.16 12.95 BAGEL-Zebra-CoT ✗6.80 6.94 31.65 35.27 12.03 MathCanvas-7B ✗18.41 18.89 46.84 51.69 24.63
+
+Table 2: Comparison on GeoAux-Bench-Core . Best 
+
+closed and open scores are highlighted. “Ins.” and “Thk.” denote Instruct and Thinking models. 
+
+on GeoAux-Bench to establish a difficulty base-line; (2) focusing on our proposed A 2PO frame-work, with comparisons against strong RL base-lines across multiple benchmarks to verify the effi-cacy of our adaptive reward shaping. 
+
+5.1 Benchmark Results 
+
+We conduct a comprehensive evaluation on GeoAux-Bench involving various popular MLLMs, including proprietary SOTA models (Comanici et al., 2025; OpenAI, 2025; Hurst et al., 2024; An-thropic, 2025a,b; ByteDance Seed Team, 2025), open-weights baselines (Bai et al., 2025a,b; Zhu et al., 2025; Wang et al., 2025a; Hong et al., 2025a), and native unified models capable of interleaved image-text generation (Shi et al., 2025; Deng et al., 2025; Li et al., 2025a). All models are evaluated under a unified setting (see Appendix F for hyper-parameters). The performance on GeoAux-Bench-Core is reported in Table 2. Results on the GeoAux-Bench-Canvas subset are provided in Appendix B. 
+
+Analysis. The results highlight three critical observations: (1) Performance Gap & Difficulty. A substantial performance chasm exists between top-tier propri-etary models (e.g., Gemini-2.5-Pro at 83.16%) and typical open-weights baselines (e.g., InternVL3.5-8B at 36.26%). Furthermore, the benchmark proves exceptionally difficult for Native Unified MLLMs (e.g., BAGEL < 13%), which perform the worst among all paradigms. Despite being intuitively aligned with human “thinking-while-drawing,” qualitative analysis (see Appendix D.1) reveals that these models fail to execute precise geo-metric edits, leading to severe visual hallucinations that derail subsequent reasoning. (2) The Analytic Shortcut. Models frequently out-perform on Senior geometry compared to Junior geometry. Case studies in Appendix D.2 reveal that MLLMs exhibit a strong preference for Analytic Geometry (e.g., establishing coordinate systems) to bypass visual intuition. While this algebraic conversion works for high school problems, it is often inefficient or inapplicable to the pure geomet-ric logic required in Junior tasks, explaining the performance inversion. (3) Signs of Memorization. Two anomalies point to potential data contamination rather than ro-bust reasoning. First, models like Qwen3-VL-Thk achieve remarkable scores on the challeng-ing Senior Olympiad split (89.45%) yet struggle significantly on the simpler Junior Curriculum set (50.36%). Second, reasoning-enhanced “Thinking” models often underperform their instruction-tuned counterparts. We attribute this to the finite and pub-lic nature of Olympiad problems. Unlike the vast space of curriculum exercises, high-profile compe-tition questions are limited in number and widely circulated, making them highly susceptible to in-clusion in pre-training corpora. This suggests that such performance spikes likely stem from memo-rizing specific problem instances rather than gener-alized geometric reasoning. 
+
+5.2 Performance of A 2PO 
+
+We evaluate our proposed A 2PO against SFT and strong RL baselines (GRPO (Shao et al., 2024), ToRL (Li et al., 2025c), GeometryZero (Wang et al., 2025c)). Experiments use Qwen2.5-VL across three datasets: GeoAux-Bench, external bench-marks Geomverse (Kazemi et al., 2023) and Ge-ometry3k (Lu et al., 2021). Results in Table 3; training/inference configurations in Appendix F. 
+
+Analysis. The comparative results demonstrate the superiority of our policy optimization strategy: (1) Consistent Improvements. A2PO consistently outperforms all baselines across model scales. No-tably, on the 7B scale, A 2PO achieves an aver-age accuracy of 55.76%, surpassing the strong 7Method GeoAux Geomverse Geometry3k Avg. GeoAux                                                        
+
+> Acc% Acc% Acc% Acc% PPL ↓
+> Qwen2.5-VL-3B-Instruct
+> SFT 23.09 56.20 39.40 39.56 1.1389
+> GRPO 31.22 59.10 50.72 47.01 1.1550 ToRL 28.68 58.40 47.06 44.71 1.1558 GeometryZero 29.33 57.00 52.72 46.35 1.1535
+> A2PO (Ours) 33.20 58.40 53.05 48.22 1.1534
+> Qwen2.5-VL-7B-Instruct
+> SFT 37.30 63.60 46.17 49.02 1.0857
+> GRPO 39.28 67.40 55.49 54.06 1.0887 ToRL 39.77 65.50 53.50 52.92 1.0941 GeometryZero 40.18 68.30 53.72 54.07 1.0945
+> A2PO (Ours) 42.97 70.70 53.61 55.76 1.0869
+
+Table 3: Main results on GeoAux and external bench-marks. Best and Second Best results are highlighted. 
+
+GeometryZero baseline (54.07%) and standard GRPO (54.06%). This gain is most pronounced on GeoAux (+2.79% over GeometryZero), confirming that our reward shaping is particularly effective for geometric problems that heavily rely on auxiliary construction for their solution. (2) Reasoning Certainty & Efficiency. A crit-ical observation lies in Perplexity: strong base-lines like GeometryZero and ToRL improve accu-racy but see elevated PPL compared to SFT (e.g., up to +0.0169),suggesting performance gains may come at the cost of uncertain or convoluted rea-soning. In contrast, A 2PO achieves the highest accuracy while maintaining a PPL nearly match-ing SFT. This validates Section 3.2: auxiliary con-structions act as “cognitive scaffolds” reducing un-certainty. The Quality Reward guides A 2PO to-ward elegant simplifications—akin to a geometric “epiphany”—over convoluted computation. 
+
+5.3 Ablation Study 
+
+Table 4 presents a component-wise ablation on Qwen2.5-VL-7B-Instruct to validate the efficacy of each component.                                
+
+> Base Model Method LR TR QR Vis Acc%
+> Qwen2.5-7B-Instruct
+> GRPO ✓✗✗✗39.28 GRPO(w/o LR) ✗✗✗✗39.52 A2PO (w/o TR, w/o Vis) ✗✓✗✗40.18 A2PO (w/o Vis) ✗✓✓✗41.17
+> A2PO ✗✓✓✓42.97
+
+Table 4: Ablation study of A 2PO components, including Length Reward (LR), Timing Reward (TR), Quality Reward (QR), and Visual Re-prompting (Vis). Accuracy results are based on GeoAux-Bench. 
+
+Analysis. We analyze the incremental impact of our design choices: (1) Removing Length Bias (LR). Removing the standard Length Reward yields a performance gain (39.28% → 39.52%). Unlike open-ended gener-ation where length often correlates with detail, mathematical proofs prioritize conciseness . We ob-served that generic length incentives inadvertently encouraged verbose behaviors (e.g., repetitive rea-soning). Removing this constraint allows the model to focus on the logical precision of the solution rather than artificially extending the trajectory. (2) Efficacy of Reward Shaping (TR & QR). 
+
+Incorporating the Timing Reward (TR) improves accuracy to 40.18%, explicitly surpassing the ToRL baseline (39.77%). While ToRL indiscrim-inately rewards any valid auxiliary construction ,TR teaches the model the strategic distinction of 
+
+necessity —rewarding the action only when it is strictly beneficial compared to a non-auxiliary path. Further adding the Quality Reward (QR) pushes performance to 41.17%. This confirms that guid-ing the model towards lower-perplexity (i.e., more confident) constructions effectively filters out valid-but-redundant auxiliary lines—constructions that are syntactically correct but offer no strategic value to the solution. (3) Visual Synergy (Vis). The most significant jump occurs with Visual Re-prompting (+1.80%), achieving the peak accuracy of 42.97%. This em-pirical evidence strongly supports our core contri-bution: textual descriptions of auxiliary lines alone are insufficient. The model achieves optimal rea-soning only when the textual construction is explic-itly rendered and injected back as an updated visual context. This mechanism successfully simulates the cognitive advantage of “thinking with images” within a re-prompting framework. 
+
+6 Conclusion 
+
+In this work, we advance geometric problem solv-ing by shifting from static perception to active Visual-Text Interleaved reasoning . First, we in-troduce GeoAux-Bench , the first benchmark to rig-orously align textual construction instructions with corresponding visual updates, providing a precise testbed for multimodal interaction. Second, our empirical analysis reveals that visual aids function as essential entropy reducers : interleaved visual feedback significantly lowers reasoning uncertainty compared to single-modality inputs, validating the cognitive necessity of “thinking with images.” Cap-italizing on this, we propose Action Applicabil-ity Policy Optimization (A 2PO) . By employing 
+
+Adaptive Reward Shaping to strictly regulate the 8timing and quality of visual interventions, A 2PO enables models to master the strategic deployment of auxiliary lines, achieving state-of-the-art perfor-mance. Our findings demonstrate that equipping models with the agency to actively modify their visual context is a pivotal step toward autonomous, physically grounded geometric reasoning. 
+
+Limitations 
+
+The primary limitation of this work lies in the implementation of the visual update mechanism. While our A 2PO framework establishes the cog-nitive benefits of interleaved reasoning, the cur-rent execution relies on a retrieval-based injec-tion strategy—utilizing ground-truth auxiliary dia-grams—rather than native model-generated visuals. This design choice is necessitated by the capabil-ities of current Unified MLLMs. Despite recent advancements, existing models still lack the fine-grained visual actuation capability required for pre-cise geometric editing. As observed in our pilot experiments, even atomic operations (e.g., “ Con-nect points A and B ”) frequently result in structural hallucinations or pixel-level inaccuracies that can propagate errors into the reasoning chain. Further-more, the high inference latency associated with autoregressive image generation currently hinders efficient exploration during reinforcement learn-ing. Consequently, our work simulates the strategic decision-making of visual construction rather than the physical execution . We posit that realizing a fully autonomous loop—where a model generates, perceives, and refines its own diagrams—requires future advancements in multimodal pre-training. Specifically, it demands a tighter alignment be-tween high-level geometric conceptual understand-ing and low-level pixel editing skills. Only upon this foundation can true dynamic sampling and reinforcement learning for generative visual-text reasoning be achieved. 
+
+References 
+
+Anthropic. 2025a. Claude Opus 4.1 system card. Sys-tem card, Anthropic. Anthropic. 2025b. Claude Sonnet 4.5 system card. Sys-tem card, Anthropic. Shuai Bai, Yuxuan Cai, Ruizhe Chen, Keqin Chen, Xiong-Hui Chen, Zesen Cheng, Lianghao Deng, Wei Ding, Rongyao Fang, Chang Gao, Chunjiang Ge, Wenbin Ge, Zhifang Guo, Qidong Huang, Jie Huang, Fei Huang, Binyuan Hui, Shutong Jiang, Zhaohai Li, and 46 others. 2025a. Qwen3-vl technical report. Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wen-bin Ge, Sibo Song, Kai Dang, Peng Wang, Shi-jie Wang, Jun Tang, Humen Zhong, Yuanzhi Zhu, Mingkun Yang, Zhaohai Li, Jianqiang Wan, Pengfei Wang, Wei Ding, Zheren Fu, Yiheng Xu, and 8 oth-ers. 2025b. Qwen2.5-vl technical report. ArXiv ,abs/2502.13923. ByteDance Seed Team. 2025. Doubao / SEED-1.6 model series. https://seed.bytedance.com/en/ seed1_6 . Official description of SEED1.6 multi-modal AI models. Jiangjie Chen, Wenxiang Chen, Jiacheng Du, Jinyi Hu, Zhicheng Jiang, Allan Jie, Xiaoran Jin, Xing Jin, Chenggang Li, Wenlei Shi, Zhihong Wang, Mingx-uan Wang, Chenrui Wei, Shufa Wei, Huajian Xin, Fan Yang, Weihao Gao, Zheng Yuan, Tianyang Zhan, and 3 others. 2025a. Seed-prover 1.5: Mastering undergraduate-level theorem proving via learning from experience. Yunpeng Chen, Yu Gao, Lixue Gong, Meng Guo, Qiushan Guo, Zhiyao Guo, Xiaoxia Hou, Weilin Huang, Yixuan Huang, Xiaowen Jian, Huafeng Kuang, Zhichao Lai, Fanshi Li, Liang Li, Xiaochen Lian, Chao Liao, Liyang Liu, Wei Liu, Yanzuo Lu, and 30 others. 2025b. Seedream 4.0: Toward next-generation multimodal image generation. ArXiv ,abs/2509.20427. Ethan Chern, Zhulin Hu, Steffi Chern, Siqi Kou, Jiadi Su, Yan Ma, Zhijie Deng, and Pengfei Liu. 2025. Thinking with generated images. ArXiv ,abs/2505.22525. Yuri Chervonyi, Trieu H. Trinh, Miroslav Olsák, Xi-aomeng Yang, Hoang Nguyen, Marcelo Menegali, Junehyuk Jung, Vikas Verma, Quoc V. Le, and Thang Luong. 2025. Gold-medalist performance in solv-ing olympiad geometry with alphageometry2. ArXiv ,abs/2502.03544. Gheorghe Comanici, Eric Bieber, Mike Schaekermann, Ice Pasupat, Noveen Sachdeva, Inderjit Dhillon, Mar-cel Blistein, Ori Ram, Dan Zhang, Evan Rosen, Luke Marris, Sam Petulla, Colin Gaffney, Asaf Aha-roni, Nathan Lintz, Tiago Cardal Pais, Henrik Ja-cobsson, Idan Szpektor, Nan-Jiang Jiang, and 3279 others. 2025. Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long con-text, and next generation agentic capabilities. ArXiv ,abs/2507.06261. DeepSeek-AI, Daya Guo, Dejian Yang, Haowei Zhang, Jun-Mei Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi Wang, Xiaoling Bi, Xiaokang Zhang, Xingkai Yu, Yu Wu, Z. F. Wu, Zhibin Gou, Zhihong Shao, Zhuoshu Li, Ziyi Gao, and 179 oth-ers. 2025. Deepseek-r1: Incentivizing reasoning ca-pability in llms via reinforcement learning. ArXiv ,abs/2501.12948. 
+
+9Chaorui Deng, Deyao Zhu, Kunchang Li, Chenhui Gou, Feng Li, Zeyu Wang, Shu Zhong, Weihao Yu, Xiao-Ping Nie, Ziang Song, Shi Guang, and Haoqi Fan. 2025. Emerging properties in unified multimodal pretraining. ArXiv , abs/2505.14683. Rongyao Fang, Chengqi Duan, Kun Wang, Linjiang Huang, Hao Li, Shilin Yan, Hao Tian, Xingyu Zeng, Rui Zhao, Jifeng Dai, Xihui Liu, and Hongsheng Li. 2025a. Got: Unleashing reasoning capability of mul-timodal large language model for visual generation and editing. ArXiv , abs/2503.10639. Rongyao Fang, Aldrich Yu, Chengqi Duan, Linjiang Huang, Shuai Bai, Yuxuan Cai, Kun Wang, Si Liu, Xi-hui Liu, and Hongsheng Li. 2025b. Flux-reason-6m & prism-bench: A million-scale text-to-image reason-ing dataset and comprehensive benchmark. ArXiv ,abs/2509.09680. GLM-V Team Wenyi Hong, Wenmeng Yu, Xiaotao Gu, Guo Wang, Guobing Gan, Haomiao Tang, Jiale Cheng, Ji Qi, Junhui Ji, Lihang Pan, Shuaiqi Duan, Weihan Wang, Yan Wang, Yean Cheng, Zehai He, Zhe Su, Zhen Yang, Ziyang Pan, Aohan Zeng, and 58 others. 2025a. Glm-4.5v and glm-4.1v-thinking: Towards versatile multimodal reasoning with scalable reinforcement learning. Jack Hong, Chenxiao Zhao, ChengLin Zhu, Wei-heng Lu, Guohai Xu, and Xing Yu. 2025b. Deep-eyesv2: Toward agentic multimodal model. Preprint ,arXiv:2511.05271. Yushi Hu, Weijia Shi, Xingyu Fu, Dan Roth, Mari Os-tendorf, Luke S. Zettlemoyer, Noah A. Smith, and Ranjay Krishna. 2024. Visual sketchpad: Sketching as a visual chain of thought for multimodal language models. ArXiv , abs/2406.09403. OpenAI Aaron Hurst, Adam Lerer, Adam P. Goucher, Adam Perelman, Aditya Ramesh, Aidan Clark, AJ Ostrow, Akila Welihinda, Alan Hayes, Alec Rad-ford, Aleksander Mkadry, Alex Baker-Whitcomb, Alex Beutel, Alex Borzunov, Alex Carney, Alex Chow, Alexander Kirillov, Alex Nichol, Alex Paino, and 397 others. 2024. Gpt-4o system card. ArXiv ,abs/2410.21276. Mehran Kazemi, Hamidreza Alvari, Ankit Anand, Jialin Wu, Xi Chen, and Radu Soricut. 2023. Geomverse: A systematic evaluation of large models for geomet-ric reasoning. ArXiv , abs/2312.12241. Ang Li, Charles L. Wang, Kaiyu Yue, Zikui Cai, Ol-lie Liu, Deqing Fu, Peng Guo, Wang Bill Zhu, Vat-sal Sharan, Robin Jia, Willie Neiswanger, Furong Huang, Tom Goldstein, and Micah Goldblum. 2025a. Zebra-cot: A dataset for interleaved vision language reasoning. ArXiv , abs/2507.16746. Chengzu Li, Wenshan Wu, Huanyu Zhang, Yan Xia, Shaoguang Mao, Li Dong, Ivan Vuli’c, and Furu Wei. 2025b. Imagine while reasoning in space: Multimodal visualization-of-thought. ArXiv ,abs/2501.07542. Xuefeng Li, Haoyang Zou, and Pengfei Liu. 2025c. Torl: Scaling tool-integrated rl. ArXiv ,abs/2503.23383. Pan Lu, Hritik Bansal, Tony Xia, Jiacheng Liu, Chun yue Li, Hannaneh Hajishirzi, Hao Cheng, Kai-Wei Chang, Michel Galley, and Jianfeng Gao. 2023. Mathvista: Evaluating mathematical reasoning of foundation models in visual contexts. In Interna-tional Conference on Learning Representations .Pan Lu, Ran Gong, Shibiao Jiang, Liang Qiu, Siyuan Huang, Xiaodan Liang, and Song-Chun Zhu. 2021. Inter-gps: Interpretable geometry problem solving with formal language and symbolic reasoning. In 
+
+Annual Meeting of the Association for Computational Linguistics .Pan Lu, Swaroop Mishra, Tony Xia, Liang Qiu, Kai-Wei Chang, Song-Chun Zhu, Oyvind Tafjord, Peter Clark, and A. Kalyan. 2022. Learn to explain: Multimodal reasoning via thought chains for science question answering. ArXiv , abs/2209.09513. Fanqing Meng, Lingxiao Du, Zongkai Liu, Zhixiang Zhou, Quanfeng Lu, Daocheng Fu, Tiancheng Han, Botian Shi, Wenhai Wang, Junjun He, Kaipeng Zhang, Ping Luo, Yu Qiao, Qiaosheng Zhang, and Wenqi Shao. 2025. Mm-eureka: Exploring the fron-tiers of multimodal reasoning with rule-based rein-forcement learning. OpenAI. 2025. GPT-5 system card. System card, Ope-nAI. Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Jun-Mei Song, Mingchuan Zhang, Y. K. Li, Yu Wu, and Daya Guo. 2024. Deepseekmath: Pushing the limits of mathematical reasoning in open language models. 
+
+ArXiv , abs/2402.03300. Aditya Sharma, Aman Dalmia, Mehran Kazemi, Amal Zouaq, and Christopher Pal. 2024. Geocoder: Solving geometry problems by generating modu-lar code through vision-language models. ArXiv ,abs/2410.13510. Weikang Shi, Aldrich Yu, Rongyao Fang, Houxing Ren, Ke Wang, Aojun Zhou, Changyao Tian, Xinyu Fu, Yuxuan Hu, Zimu Lu, Linjiang Huang, Si Liu, Rui Liu, and Hongsheng Li. 2025. Mathcanvas: Intrinsic visual chain-of-thought for multimodal mathematical reasoning. ArXiv , abs/2510.14958. Chameleon Team, Mingda Chen, Jacob Kahn, and Shang-Wen Li. 2024. Chameleon: Mixed-modal early-fusion foundation models. ArXiv ,abs/2405.09818. Gemini Team, Rohan Anil, Sebastian Borgeaud, Jean-Baptiste Alayrac, Jiahui Yu, Radu Soricut, Johan Schalkwyk, Andrew M. Dai, Anja Hauth, Katie Millican, David Silver, Melvin Johnson, Ioannis Antonoglou, Julian Schrittwieser, Amelia Glaese, Jilin Chen, Emily Pitler, Timothy Lillicrap, Angeliki 
+
+10 Lazaridou, and 1332 others. 2025. Gemini: A fam-ily of highly capable multimodal models. Preprint ,arXiv:2312.11805. Trieu H Trinh, Yuhuai Wu, Quoc V Le, He He, and Thang Luong. 2024. Solving olympiad ge-ometry without human demonstrations. Nature ,625(7995):476–482. Ke Wang, Junting Pan, Weikang Shi, Zimu Lu, Mingjie Zhan, and Hongsheng Li. 2024. Measuring mul-timodal mathematical reasoning with math-vision dataset. ArXiv , abs/2402.14804. Weiyun Wang, Zhangwei Gao, Lixin Gu, Hengjun Pu, Long Cui, Xingguang Wei, Zhaoyang Liu, Linglin Jing, Shenglong Ye, Jie Shao, Zhaokai Wang, Zhe Chen, Hongjie Zhang, Ganlin Yang, Haomin Wang, Qi Wei, Jinhui Yin, Wenhao Li, Erfei Cui, and 44 others. 2025a. Internvl3.5: Advancing open-source multimodal models in versatility, reasoning, and effi-ciency. ArXiv , abs/2508.18265. Yikun Wang, Siyin Wang, Qinyuan Cheng, Zhaoye Fei, Liang Ding, Qipeng Guo, Dacheng Tao, and Xipeng Qiu. 2025b. Visuothink: Empowering lvlm reasoning with multimodal tree search. ArXiv ,abs/2504.09130. Yikun Wang, Yibin Wang, Dianyi Wang, Zimian Peng, Qipeng Guo, Dacheng Tao, and Jiaqi Wang. 2025c. Geometryzero: Improving geometry solving for llm with group contrastive policy optimization. ArXiv ,abs/2506.07160. Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Ed H. Chi, F. Xia, Quoc Le, and Denny Zhou. 2022. Chain of thought prompting elicits reasoning in large language models. ArXiv , abs/2201.11903. An Yang, Beichen Zhang, Binyuan Hui, Bofei Gao, Bowen Yu, Chengpeng Li, Dayiheng Liu, Jian-hong Tu, Jingren Zhou, Junyang Lin, Keming Lu, Mingfeng Xue, Runji Lin, Tianyu Liu, Xingzhang Ren, and Zhenru Zhang. 2024. Qwen2.5-math tech-nical report: Toward mathematical expert model via self-improvement. ArXiv , abs/2409.12122. Yi Yang, Xiaoxuan He, Hongkun Pan, Xiyan Jiang, Yan Deng, Xingtao Yang, Haoyu Lu, Dacheng Yin, Fengyun Rao, Minfeng Zhu, Bo Zhang, and Wei Chen. 2025. R1-onevision: Advancing generalized multimodal reasoning through cross-modal formal-ization. ArXiv , abs/2503.10615. Qiying Yu, Zheng Zhang, Ruofei Zhu, Yufeng Yuan, Xiaochen Zuo, Yu Yue, Tiantian Fan, Gaohong Liu, Lingjun Liu, Xin Liu, Haibin Lin, Zhiqi Lin, Bole Ma, Guangming Sheng, Yuxuan Tong, Chi Zhang, Mofan Zhang, Wang Zhang, Hang Zhu, and 16 oth-ers. 2025. Dapo: An open-source llm reinforcement learning system at scale. ArXiv , abs/2503.14476. Xiang Yue, Yuansheng Ni, Kai Zhang, Tianyu Zheng, Ruoqi Liu, Ge Zhang, Samuel Stevens, Dongfu Jiang, Weiming Ren, Yuxuan Sun, Cong Wei, Botao Yu, Ruibin Yuan, Renliang Sun, Ming Yin, Boyuan Zheng, Zhenzhu Yang, Yibo Liu, Wenhao Huang, and 3 others. 2023. Mmmu: A massive multi-discipline multimodal understanding and reasoning benchmark for expert agi. 2024 IEEE/CVF Conference on Com-puter Vision and Pattern Recognition (CVPR) , pages 9556–9567. Yu Yue, Yufeng Yuan, Qiying Yu, Xiaochen Zuo, Ruofei Zhu, Wenyuan Xu, Jiaze Chen, Chengyi Wang, Tiantian Fan, Zhengyin Du, Xiang Wei, Xiangyu Yu, Gaohong Liu, Juncai Liu, Lingjun Liu, Haibin Lin, Zhiqi Lin, Bole Ma, Chi Zhang, and 8 oth-ers. 2025. Vapo: Efficient and reliable reinforce-ment learning for advanced reasoning tasks. ArXiv ,abs/2504.05118. Renrui Zhang, Dongzhi Jiang, Yichi Zhang, Haokun Lin, Ziyu Guo, Pengshuo Qiu, Aojun Zhou, Pan Lu, Kai-Wei Chang, Peng Gao, and Hongsheng Li. 2024. Mathverse: Does your multi-modal llm truly see the diagrams in visual math problems? In European Conference on Computer Vision .Ziwei Zheng, Michael Yang, Jack Hong, Chenx-iao Zhao, Guohai Xu, Le Yang, Chao Shen, and Xing Yu. 2025. Deepeyes: Incentivizing "think-ing with images" via reinforcement learning. ArXiv ,abs/2505.14362. Jinguo Zhu, Weiyun Wang, Zhe Chen, Zhaoyang Liu, Shenglong Ye, Lixin Gu, Yuchen Duan, Hao Tian, Weijie Su, Jie Shao, Zhangwei Gao, Erfei Cui, Yue Cao, Yangzhou Liu, Haomin Wang, Weiye Xu, Hao Li, Jiahao Wang, Han Lv, and 29 others. 2025. In-ternvl3: Exploring advanced training and test-time recipes for open-source multimodal models. ArXiv ,abs/2504.10479. 
+
+A Qualitative Analysis of Attentional Patterns 
+
+To complement the quantitative results in Section 3.2, we present the attentional patterns of Qwen2.5-VL-7B-Instruct for two representative examples before and after visual saliency enhancement (bold red auxiliary lines). No significant attentional shift toward the red-highlighted auxiliary elements is observed across cases. However, in both examples, higher attention scores are seen for the alphabetic labels of points involved in auxiliary line construc-tion (e.g., G, M). These observations indicate that visual enhance-ment may modulate attention via textual point labels rather than the auxiliary lines themselves. However, the underlying mechanism through which a minimal set of visually enhanced samples yields such substantial accuracy gains remains to be further explored. 11 Statistic GeoAux-Core GeoAux-Canvas Total Curriculum Olympiad Subtotal                                
+
+> Senior Junior Senior Junior Problems 516 722 234 207 1,679 2,655 4,334
+> Questions 647 1,288 237 207 2,379 4,144 6,523
+> Problem Diagrams 422 1,097 207 206 1,932 1,693 3,625
+> Solution Diagrams 505 892 205 199 1,801 3,044 4,845
+
+Table 5: Detailed composition of GeoAux-Bench . The table breaks down the dataset by subset source, difficulty level, and data modality counts.     
+
+> (a) Example 1: Before en-hancement
+> (b) Example 1: After en-hancement
+> (c) Example 2: Before en-hancement
+> (d) Example 2: After en-hancement
+
+Figure 5: Attentional heatmaps of Qwen2.5-VL-7B-Instruct. Warmer colors indicate higher attention levels. 
+
+B Detailed Statistics of GeoAux-Bench 
+
+Table 5 presents the comprehensive statistical breakdown of the GeoAux-Bench dataset. The benchmark is composed of two primary subsets: 1. GeoAux-Core: This expert-curated subset (1,679 problems) is stratified by difficulty source, distinguishing between standard Cur-riculum problems and Olympiad -level com-petitions across both Senior and Junior grades. 2. GeoAux-Canvas: This subset includes 2,655 scale-augmented samples adapted from MathCanvas-Bench to enhance domain diver-sity. We report metrics across four dimensions: the num-ber of distinct Problems , total Questions (including sub-questions), original Problem Diagrams , and the generated Solution Diagrams (visual auxiliary lines). 
+
+C Results on GeoAux-Bench-Canvas 
+
+In this section, we present the supplementary evalu-ation results on the GeoAux-Bench-Canvas subset. The performance metrics for the evaluated models are directly sourced from Shi et al. (2025). De-tailed breakdowns across different geometric sub-domains are provided in Table 6. 
+
+D Case Study 
+
+D.1 Case of Visual Hallucinations 
+
+We present representative failure cases of Native Unified MLLMs (e.g., MathCanvas-7B) in Figure 6, as these models lack the pixel-level control re-quired to produce accurate diagrams. This leads to a Visual-Logic Mismatch: the generated dia-gram contains severe distortions (e.g., curved lines, missed intersections), causing the model to halluci-nate non-existent geometric properties based on the flawed visual feedback, which ultimately derails the reasoning process. 
+
+D.2 Case of the Analytic Shortcut 
+
+We present failure cases demonstrating the model’s tendency to bypass geometric intuition in favor of algebraic brute force, termed as The Analytic Shortcut . Instead of employing geometric theo-rems or auxiliary lines, the model habitually es-tablishes coordinate systems to solve problems via complex equations. As discussed in the main text, while this approach is viable for Senior high school problems, it often proves inefficient or fails to cap-ture the pure geometric logic required for Junior geometry tasks. 12 Model Think Alg. Ana. Calc. Plane Solid Stats. Trans. Trig. Total 
+
+(Algebra) (Geom.) (Vector) (Geom.) (Geom.) (Geom.) 
+
+Closed-source MLLMs 
+
+Gemini-2.5-Pro ✓ 68.0 59.2 60.2 54.8 48.7 64.5 58.5 69.9 47.9 
+
+Gemini-2.5-Flash ✓ 63.2 56.5 54.6 40.7 40.7 61.1 46.8 64.6 39.3 Gemini-2.0-Flash ✗ 39.1 32.6 38.9 31.1 25.6 51.4 28.1 38.0 21.2 GPT-4.1 ✗ 40.4 30.7 37.1 24.1 25.1 54.0 21.5 42.5 19.0 GPT-4.1-mini ✗ 35.7 30.5 36.5 22.0 22.4 24.8 19.7 30.3 14.6 GPT-4o ✗ 21.6 17.7 21.8 19.5 18.6 17.4 13.2 23.0 9.9 GPT-5 ✓ 68.7 55.5 64.2 45.6 36.1 64.5 42.7 66.5 43.5 Claude-Sonnet-4 ✓ 44.8 38.9 49.3 33.8 33.0 46.9 30.3 47.6 25.0 Seed-1.6-Thinking ✓ 67.7 57.5 55.9 52.2 45.0 65.1 56.8 60.7 44.1 Qwen3-VL-Plus ✓ 67.0 54.6 56.9 45.9 42.0 66.7 49.3 58.9 40.9 Nano-Banana ✗ 55.4 50.2 51.8 34.5 36.6 56.7 39.4 60.4 33.2 
+
+Open-source MLLMs 
+
+Qwen-2.5-VL-7B ✗ 19.5 19.0 19.2 20.6 18.7 10.7 13.9 15.0 8.9 Qwen-2.5-VL-32B ✗ 29.8 27.4 27.8 27.4 27.2 27.9 20.1 30.5 15.4 Qwen-2.5-VL-72B ✗ 30.6 19.5 36.4 34.5 33.5 23.9 33.6 48.9 21.1 Gemma-3-27b-it ✗ 31.3 28.4 34.4 25.8 21.0 40.0 21.0 26.9 15.8 InternVL3.5-8B ✗ 32.3 33.8 33.8 24.2 26.9 43.7 16.2 14.9 16.7 InternVL3.5-30B ✗ 22.2 19.9 15.1 24.9 24.3 22.1 17.4 18.4 11.7 Keye-VL-1.5-8B ✓ 33.1 28.0 26.2 27.0 23.6 29.5 20.9 26.3 17.1 
+
+United MLLMs 
+
+BAGEL-7B-MoT ✗ 18.1 13.1 17.1 20.8 23.0 10.9 19.4 13.3 8.3 BAGEL-Zebra-CoT ✗ 18.0 15.1 15.6 18.0 16.8 20.8 11.1 14.1 8.0 MathCanvas-7B ✗ 29.9 27.2 17.9 40.0 35.3 23.2 29.3 40.4 21.9 
+
+Table 6: Detailed performance breakdown on the GeoAux-Bench-Canvas subset. Results are cited from Shi et al. (2025). Best scores in closed and open categories are highlighted. 
+
+E Prompt Templates 
+
+We present the prompt templates used in Tri-Partition Sampling (Section 4.3) and evaluation. Figures 8 and 9 show the templates for the Natu-ral/Mandatory ( O/O +) and Prohibited ( O−) sub-sets, respectively. Figure 10 shows the template for visual re-prompting. Figures 11 and 12 display the prompts for the answer judge and auxiliary verifier. 
+
+F Implementation Details 
+
+F.1 Training Hyperparameters 
+
+Table 7 details the hyperparameters used during the Supervised Fine-Tuning (SFT) warm-up phase and the subsequent A 2PO training phase. We utilize 
+
+Qwen2.5-VL-7B-Instruct as the backbone. For the SFT stage, we freeze the vision tower and the multi-modal projector, updating only the language model. For the A 2PO stage, we continue to freeze the vision tower to maintain visual feature stability. 
+
+Table 7: Training Hyperparameters. Comparison between the SFT warm-up stage and the A 2PO RL stage.                               
+
+> Hyperparameter SFT (Warm-up) A2PO (RL)
+> Base Model Qwen2.5-VL-7B-Instruct Precision bfloat16 Optimizer AdamW Learning Rate 5e-5 1e-6 LR Scheduler Cosine Constant Warm-up Ratio 0.1 0.0 Global Batch Size 32 24 Gradient Accumulation 4-Max Sequence Length 8,192 8,192 Image Resolution (min/max) 262 ,144 262 ,144
+> Epochs/Steps 5 epochs 650 steps
+> GRPO Specific Settings
+> KL Coefficient ( β)-0.01 Rollout Batch Size -72 Generations per Prompt ( N)-8
+
+13 F.2 A2PO Algorithm Coefficients 
+
+Table 8 lists the specific weighting coefficients and thresholds defined in the reward shaping mecha-nism (Section 4.4). 
+
+Table 8: A2PO Reward Coefficients.               
+
+> Component Symbol Value
+> Reward Weights
+> Accuracy Weight wacc 0.70 Format Weight wf mt 0.00 Timing Weight wtime 0.15 Quality Weight wqual 0.15
+> Thresholds & Margins
+> Timing Significance τ0.15 PPL Tolerance δ0.01
+
+F.3 Inference and Sampling Configuration 
+
+Table 9 details the generation parameters. We uti-lize a strong external model as the Aux Verifier and 
+
+Judge to ensure the quality of the retrieved auxil-iary diagrams and the final answer correctness. 
+
+Table 9: Generation & Verifier Configurations. Set-tings for training rollouts, the auxiliary verifier, and final evaluation.                 
+
+> Parameter Training Rollout Evaluation
+> Temperature 1.0 0.0 (Greedy) Top-p 1.0 0.0 Repetition Penalty 1.05 1.08 Max New Tokens 8,192 8,192
+> Accuracy Reward Model
+> Verifier Model Qwen3-30B-A3B-Thinking-2507 Verifier Temperature 0.0 (Greedy) Max Tokens 24576
+> Aux Verifier
+> Verifier Model Qwen3-30B-A3B-Thinking-2507 Verifier Temperature 0.0 (Greedy) Max Tokens 8192
+
+F.4 Dataset Composition and Splits 
+
+To ensure rigorous evaluation, we strictly enforce decontamination between training and evaluation sets. Table 10 summarizes the data sources and statistics across the SFT warm-up, A 2PO training, and evaluation phases. 
+
+Training Data Construction. The SFT dataset is constructed using a multi-constraint instruction tuning strategy to initialize controllability. We aug-ment training samples by creating diverse prompt-response pairs, specifically: (1) Standard Prompts 
+
+paired with solutions containing auxiliary construc-tions, and (2) Prohibited Prompts paired with solutions strictly devoid of auxiliary lines. For the A2PO stage, we employ a marginal solvability fil-tering strategy. We perform 10 inference rollouts per problem using the base model. We retain only samples that exhibit mixed outcomes (i.e., contain-ing both correct and incorrect responses), explicitly discarding trivial (100% correct) or impossible (0% correct) instances to maximize gradient efficiency. 
+
+Evaluation Data. All evaluation results reported in the main paper are based on held-out test sets. For GeoAux-Bench , we reserve a fixed test split that is strictly excluded from all training stages. 
+
+Table 10: Data Statistics and Splits. Detailed break-down of sample counts. Note that for SFT and RL phases, we utilize subsets from the training splits of external datasets to avoid contamination.            
+
+> Stage Data Source / Subset Count
+> Phase 1: SFT Warm-up (Mixed-Prompt)
+> GeoAux-Bench (Train Split) 1,000 GeomVerse (Train Subset) 300 Geometry3k (Train Subset) 300
+> Phase 2: A 2PO Training (Solvability Filtered)
+> GeoAux-Bench (Train Split) 1,500 GeomVerse (Train Subset) 300 Geometry3k (Train Subset) 300
+> Phase 3: Evaluation (Held-out Test Sets)
+> GeoAux-Bench (Test) 1,217
+> GeomVerse (Test) 1,000 Geometry3k (Test) 901
+
+14 Figure 6: Failure Cases of MathCanvas-7B with Visual Hallucinations. 
+
+15 Figure 7: An example where the model forces a coordinate system on a geometry problem, leading to unnecessary complexity. 
+
+16 Figure 8: Standard prompt template (used for O, O+ subsets and evaluation). 
+
+Figure 9: Prompt template for the Prohibited Subset ( O−). 
+
+Figure 10: Prompt template for visual-injected re-prompting. 
+
+17 Figure 11: Prompt template for correctness judgment (used in evaluation and reward calculation). 
+
+18 Figure 12: Prompt template for auxiliary construction verification. 
+
+19
