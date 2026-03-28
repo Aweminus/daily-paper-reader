@@ -1,135 +1,8 @@
 {
-  "generated_at": "2026-03-27T20:27:06.174009+00:00",
-  "updated_date": "20260327",
+  "generated_at": "2026-03-28T19:50:15.319984+00:00",
+  "updated_date": "20260328",
   "carryover_days": 9,
   "items": [
-    {
-      "id": "2603.19708v1",
-      "title": "WorldAgents: Can Foundation Image Models be Agents for 3D World Models?",
-      "abstract": "Given the remarkable ability of 2D foundation image models to generate high-fidelity outputs, we investigate a fundamental question: do 2D foundation image models inherently possess 3D world model capabilities? To answer this, we systematically evaluate multiple state-of-the-art image generation models and Vision-Language Models (VLMs) on the task of 3D world synthesis. To harness and benchmark their potential implicit 3D capability, we propose an agentic framing to facilitate 3D world generation. Our approach employs a multi-agent architecture: a VLM-based director that formulates prompts to guide image synthesis, a generator that synthesizes new image views, and a VLM-backed two-step verifier that evaluates and selectively curates generated frames from both 2D image and 3D reconstruction space. Crucially, we demonstrate that our agentic approach provides coherent and robust 3D reconstruction, producing output scenes that can be explored by rendering novel views. Through extensive experiments across various foundation models, we demonstrate that 2D models do indeed encapsulate a grasp of 3D worlds. By exploiting this understanding, our method successfully synthesizes expansive, realistic, and 3D-consistent worlds.",
-      "authors": [
-        "Ziya Erkoç",
-        "Angela Dai",
-        "Matthias Nießner"
-      ],
-      "primary_category": "cs.CV",
-      "categories": [
-        "cs.CV"
-      ],
-      "published": "2026-03-20T07:22:41+00:00",
-      "link": "https://arxiv.org/pdf/2603.19708v1",
-      "tags": [
-        "keyword:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "VLM-based agentic framing for 3D world generation and reasoning",
-      "llm_evidence_cn": "基于VLM的智能体框架用于3D世界生成和推理",
-      "llm_evidence": "基于VLM的智能体框架用于3D世界生成和推理",
-      "canonical_evidence": "基于VLM的智能体框架用于3D世界生成和推理",
-      "llm_tldr_en": "Employs a multi-agent VLM architecture to facilitate and verify 3D world synthesis from 2D models.",
-      "llm_tldr_cn": "采用多智能体VLM架构，利用2D模型促进并验证3D世界合成。",
-      "llm_tldr": "采用多智能体VLM架构，利用2D模型促进并验证3D世界合成。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision-language model based agents",
-      "matched_requirement_id": "req-4",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.19708v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.22169v1",
-      "title": "Closed-Loop Verbal Reinforcement Learning for Task-Level Robotic Planning",
-      "abstract": "We propose a new Verbal Reinforcement Learning (VRL) framework for interpretable task-level planning in mobile robotic systems operating under execution uncertainty. The framework follows a closed-loop architecture that enables iterative policy improvement through interaction with the physical environment. In our framework, executable Behavior Trees are repeatedly refined by a Large Language Model actor using structured natural-language feedback produced by a Vision-Language Model critic that observes the physical robot and execution traces. Unlike conventional reinforcement learning, policy updates in VRL occur directly at the symbolic planning level, without gradient-based optimization. This enables transparent reasoning, explicit causal feedback, and human-interpretable policy evolution. We validate the proposed framework on a real mobile robot performing a multi-stage manipulation and navigation task under execution uncertainty. Experimental results show that the framework supports explainable policy improvements, closed-loop adaptation to execution failures, and reliable deployment on physical robotic systems.",
-      "authors": [
-        "Dmitrii Plotnikov",
-        "Iaroslav Kolomiets",
-        "Dmitrii Maliukov",
-        "Dmitrij Kosenkov",
-        "Daniia Zinniatullina",
-        "Artem Trandofilov",
-        "Georgii Gazaryan",
-        "Kirill Bogatikov",
-        "Timofei Kozlov",
-        "Igor Duchinskii",
-        "Mikhail Konenkov",
-        "Miguel Altamirano Cabrera",
-        "Dzmitry Tsetserukou"
-      ],
-      "primary_category": "cs.RO",
-      "categories": [
-        "cs.RO"
-      ],
-      "published": "2026-03-23T16:28:36+00:00",
-      "link": "https://arxiv.org/pdf/2603.22169v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "verbal reinforcement learning for task-level robotic planning",
-      "llm_evidence_cn": "用于任务级机器人规划的口头强化学习",
-      "llm_evidence": "用于任务级机器人规划的口头强化学习",
-      "canonical_evidence": "用于任务级机器人规划的口头强化学习",
-      "llm_tldr_en": "A closed-loop framework using VLM critics and LLM actors for iterative policy improvement via natural language.",
-      "llm_tldr_cn": "一种利用VLM评论家和LLM执行者通过自然语言进行迭代策略改进的闭环框架。",
-      "llm_tldr": "一种利用VLM评论家和LLM执行者通过自然语言进行迭代策略改进的闭环框架。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision language reinforcement learning for agentic reasoning",
-      "matched_requirement_id": "req-7",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.22169v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.20662v1",
-      "title": "Attention in Space: Functional Roles of VLM Heads for Spatial Reasoning",
-      "abstract": "Despite remarkable advances in large Vision-Language Models (VLMs), spatial reasoning remains a persistent challenge. In this work, we investigate how attention heads within VLMs contribute to spatial reasoning by analyzing their functional roles through a mechanistic interpretability lens. We introduce CogVSR, a dataset that decomposes complex spatial reasoning questions into step-by-step subquestions designed to simulate human-like reasoning via a chain-of-thought paradigm, with each subquestion linked to specific cognitive functions such as spatial perception or relational reasoning. Building on CogVSR, we develop a probing framework to identify and characterize attention heads specialized for these functions. Our analysis across diverse VLM families reveals that these functional heads are universally sparse, vary in number and distribution across functions. Notably, spatially specialized heads are fewer than those for other cognitive functions, highlighting their scarcity. We propose methods to activate latent spatial heads, improving spatial understanding. Intervention experiments further demonstrate their critical role in spatial reasoning: removing functional heads leads to performance degradation, while emphasizing them enhances accuracy. This study provides new interpretability driven insights into how VLMs attend to space and paves the way for enhancing complex spatial reasoning in multimodal models.",
-      "authors": [
-        "Xueqi Ma",
-        "Shuo Yang",
-        "Yanbei Jiang",
-        "Shu Liu",
-        "Zhenzhen Liu",
-        "Jiayang Ao",
-        "Xingjun Ma",
-        "Sarah Monazam Erfani",
-        "James Bailey"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI",
-        "cs.CV"
-      ],
-      "published": "2026-03-21T05:36:12+00:00",
-      "link": "https://arxiv.org/pdf/2603.20662v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "attention heads for spatial reasoning in VLMs",
-      "llm_evidence_cn": "VLM中用于空间推理的注意力头",
-      "llm_evidence": "VLM中用于空间推理的注意力头",
-      "canonical_evidence": "VLM中用于空间推理的注意力头",
-      "llm_tldr_en": "Analyzes the functional roles of attention heads in VLMs for complex spatial reasoning tasks.",
-      "llm_tldr_cn": "分析了VLM中注意力头在复杂空间推理任务中的功能作用。",
-      "llm_tldr": "分析了VLM中注意力头在复杂空间推理任务中的功能作用。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "visual reasoning and decision making",
-      "matched_requirement_id": "req-5",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.20662v1",
-      "carry_days": 1
-    },
     {
       "id": "2603.22641v1",
       "title": "Q-Tacit: Image Quality Assessment via Latent Visual Reasoning",
@@ -157,9 +30,9 @@
       "llm_evidence_cn": "利用强化学习进行图像质量评估的潜空间视觉推理",
       "llm_evidence": "利用强化学习进行图像质量评估的潜空间视觉推理",
       "canonical_evidence": "利用强化学习进行图像质量评估的潜空间视觉推理",
-      "llm_tldr_en": "Explores latent visual reasoning for image quality assessment using reinforcement learning.",
-      "llm_tldr_cn": "探索了利用强化学习进行图像质量评估的潜空间视觉推理。",
-      "llm_tldr": "探索了利用强化学习进行图像质量评估的潜空间视觉推理。",
+      "llm_tldr_en": "Q-Tacit improves image quality assessment by applying RL and latent visual reasoning beyond natural language.",
+      "llm_tldr_cn": "Q-Tacit通过强化学习和超越自然语言的潜空间视觉推理，提升了图像质量评估的效果。",
+      "llm_tldr": "Q-Tacit通过强化学习和超越自然语言的潜空间视觉推理，提升了图像质量评估的效果。",
       "llm_tags": [
         "query:vlm-rl"
       ],
@@ -168,48 +41,6 @@
       "matched_requirement_id": "req-6",
       "selection_source": "carryover_cache",
       "paper_id": "2603.22641v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.21269v1",
-      "title": "DyGeoVLN: Infusing Dynamic Geometry Foundation Model into Vision-Language Navigation",
-      "abstract": "Vision-language Navigation (VLN) requires an agent to understand visual observations and language instructions to navigate in unseen environments. Most existing approaches rely on static scene assumptions and struggle to generalize in dynamic, real-world scenarios. To address this challenge, we propose DyGeoVLN, a dynamic geometry-aware VLN framework. Our method infuses a dynamic geometry foundation model into the VLN framework through cross-branch feature fusion to enable explicit 3D spatial representation and visual-semantic reasoning. To efficiently compress historical token information in long-horizon, dynamic navigation, we further introduce a novel pose-free and adaptive-resolution token-pruning strategy. This strategy can remove spatio-temporal redundant tokens to reduce inference cost. Extensive experiments demonstrate that our approach achieves state-of-the-art performance on multiple benchmarks and exhibits strong robustness in real-world environments.",
-      "authors": [
-        "Xiangchen Liu",
-        "Hanghan Zheng",
-        "Jeil Jeong",
-        "Minsung Yoon",
-        "Lin Zhao",
-        "Zhide Zhong",
-        "Haoang Li",
-        "Sung-Eui Yoon"
-      ],
-      "primary_category": "cs.RO",
-      "categories": [
-        "cs.RO"
-      ],
-      "published": "2026-03-22T14:56:59+00:00",
-      "link": "https://arxiv.org/pdf/2603.21269v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "VLM-based agent for navigation and visual-semantic reasoning",
-      "llm_evidence_cn": "基于VLM的导航和视觉语义推理智能体",
-      "llm_evidence": "基于VLM的导航和视觉语义推理智能体",
-      "canonical_evidence": "基于VLM的导航和视觉语义推理智能体",
-      "llm_tldr_en": "Proposes a dynamic geometry-aware framework for vision-language navigation agents in real-world scenarios.",
-      "llm_tldr_cn": "提出了一种用于真实场景下视觉语言导航智能体的动态几何感知框架。",
-      "llm_tldr": "提出了一种用于真实场景下视觉语言导航智能体的动态几何感知框架。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision-language model based agents",
-      "matched_requirement_id": "req-4",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.21269v1",
       "carry_days": 1
     },
     {
@@ -247,257 +78,7 @@
       "matched_requirement_id": "req-9",
       "selection_source": "carryover_cache",
       "paper_id": "2603.24059v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.21383v1",
-      "title": "PivotRL: High Accuracy Agentic Post-Training at Low Compute Cost",
-      "abstract": "Post-training for long-horizon agentic tasks has a tension between compute efficiency and generalization. While supervised fine-tuning (SFT) is compute efficient, it often suffers from out-of-domain (OOD) degradation. Conversely, end-to-end reinforcement learning (E2E RL) preserves OOD capabilities, but incurs high compute costs due to many turns of on-policy rollout. We introduce PivotRL, a novel framework that operates on existing SFT trajectories to combine the compute efficiency of SFT with the OOD accuracy of E2E RL. PivotRL relies on two key mechanisms: first, it executes local, on-policy rollouts and filters for pivots: informative intermediate turns where sampled actions exhibit high variance in outcomes; second, it utilizes rewards for functional-equivalent actions rather than demanding strict string matching with the SFT data demonstration. We theoretically show that these mechanisms incentivize strong learning signals with high natural gradient norm, while maximally preserving policy probability ordering on actions unrelated to training tasks. In comparison to standard SFT on identical data, we demonstrate that PivotRL achieves +4.17% higher in-domain accuracy on average across four agentic domains, and +10.04% higher OOD accuracy in non-agentic tasks. Notably, on agentic coding tasks, PivotRL achieves competitive accuracy with E2E RL with 4x fewer rollout turns. PivotRL is adopted by NVIDIA's Nemotron-3-Super-120B-A12B, acting as the workhorse in production-scale agentic post-training.",
-      "authors": [
-        "Junkeun Yi",
-        "Damon Mosk-Aoyama",
-        "Baihe Huang",
-        "Ritu Gala",
-        "Charles Wang",
-        "Sugam Dipak Devare",
-        "Khushi Bhardwaj",
-        "Abhibha Gupta",
-        "Oleksii Kuchaiev",
-        "Jiantao Jiao",
-        "Jian Zhang",
-        "Venkat Srinivasan"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI"
-      ],
-      "published": "2026-03-22T19:59:48+00:00",
-      "link": "https://arxiv.org/pdf/2603.21383v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "reinforcement learning framework for high accuracy agentic post-training",
-      "llm_evidence_cn": "用于高精度智能体后训练的强化学习框架",
-      "llm_evidence": "用于高精度智能体后训练的强化学习框架",
-      "canonical_evidence": "用于高精度智能体后训练的强化学习框架",
-      "llm_tldr_en": "Introduces PivotRL, a compute-efficient RL framework for improving agentic task performance.",
-      "llm_tldr_cn": "引入 PivotRL，一种高效的强化学习框架，用于提升智能体任务表现。",
-      "llm_tldr": "引入 PivotRL，一种高效的强化学习框架，用于提升智能体任务表现。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision-language agentic reinforcement learning",
-      "matched_requirement_id": "req-1",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.21383v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.23023v1",
-      "title": "Cog3DMap: Multi-View Vision-Language Reasoning with 3D Cognitive Maps",
-      "abstract": "Precise spatial understanding from multi-view images remains a fundamental challenge for Multimodal Large Language Models (MLLMs), as their visual representations are predominantly semantic and lack explicit geometric grounding. While existing approaches augment visual tokens with geometric cues from visual geometry models, their MLLM is still required to implicitly infer the underlying 3D structure of the scene from these augmented tokens, limiting its spatial reasoning capability. To address this issue, we introduce Cog3DMap, a framework that recurrently constructs an explicit 3D memory from multi-view images, where each token is grounded in 3D space and possesses both semantic and geometric information. By feeding these tokens into the MLLM, our framework enables direct reasoning over a spatially structured 3D map, achieving state-of-the-art performance on various spatial reasoning benchmarks. Code will be made publicly available.",
-      "authors": [
-        "Chanyoung Gwak",
-        "Yoonwoo Jeong",
-        "Byungwoo Jeon",
-        "Hyunseok Lee",
-        "Jinwoo Shin",
-        "Minsu Cho"
-      ],
-      "primary_category": "cs.CV",
-      "categories": [
-        "cs.CV"
-      ],
-      "published": "2026-03-24T10:05:32+00:00",
-      "link": "https://arxiv.org/pdf/2603.23023v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "multi-view vision-language reasoning with 3D cognitive maps",
-      "llm_evidence_cn": "基于3D认知地图的多视图视觉语言推理",
-      "llm_evidence": "基于3D认知地图的多视图视觉语言推理",
-      "canonical_evidence": "基于3D认知地图的多视图视觉语言推理",
-      "llm_tldr_en": "Enhances MLLM spatial reasoning by constructing explicit 3D memories from multi-view images.",
-      "llm_tldr_cn": "通过从多视图图像构建显式3D记忆，增强多模态大模型的空间推理能力。",
-      "llm_tldr": "通过从多视图图像构建显式3D记忆，增强多模态大模型的空间推理能力。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision language models for complex reasoning tasks",
-      "matched_requirement_id": "req-10",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.23023v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.19092v1",
-      "title": "SAVeS: Steering Safety Judgments in Vision-Language Models via Semantic Cues",
-      "abstract": "Vision-language models (VLMs) are increasingly deployed in real-world and embodied settings where safety decisions depend on visual context. However, it remains unclear which visual evidence drives these judgments. We study whether multimodal safety behavior in VLMs can be steered by simple semantic cues. We introduce a semantic steering framework that applies controlled textual, visual, and cognitive interventions without changing the underlying scene content. To evaluate these effects, we propose SAVeS, a benchmark for situational safety under semantic cues, together with an evaluation protocol that separates behavioral refusal, grounded safety reasoning, and false refusals. Experiments across multiple VLMs and an additional state-of-the-art benchmark show that safety decisions are highly sensitive to semantic cues, indicating reliance on learned visual-linguistic associations rather than grounded visual understanding. We further demonstrate that automated steering pipelines can exploit these mechanisms, highlighting a potential vulnerability in multimodal safety systems.",
-      "authors": [
-        "Carlos Hinojosa",
-        "Clemens Grange",
-        "Bernard Ghanem"
-      ],
-      "primary_category": "cs.CV",
-      "categories": [
-        "cs.CV",
-        "cs.AI",
-        "cs.CL",
-        "cs.LG"
-      ],
-      "published": "2026-03-19T16:18:00+00:00",
-      "link": "https://arxiv.org/pdf/2603.19092v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "grounded safety reasoning in vision-language models",
-      "llm_evidence_cn": "视觉语言模型中的落地安全推理",
-      "llm_evidence": "视觉语言模型中的落地安全推理",
-      "canonical_evidence": "视觉语言模型中的落地安全推理",
-      "llm_tldr_en": "Proposes a framework and benchmark to evaluate and steer safety reasoning in VLMs using semantic cues.",
-      "llm_tldr_cn": "提出了一个框架和基准，通过语义提示评估和引导视觉语言模型中的安全推理。",
-      "llm_tldr": "提出了一个框架和基准，通过语义提示评估和引导视觉语言模型中的安全推理。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "reasoning in vision-language models",
-      "matched_requirement_id": "req-3",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.19092v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.21746v1",
-      "title": "Getting to the Point: Why Pointing Improves LVLMs",
-      "abstract": "Pointing increases the accuracy and explainability of Large Vision-Language Models (LVLMs) by modeling grounding and reasoning as explicit sequential steps. The model grounds the objects mentioned in the natural-language query by predicting their coordinates, and then generates an answer conditioned on these points. While pointing has been shown to increase LVLMs' accuracy, it is unclear which mechanism supports these gains and its relevance in cognitive tasks. In addition, the reliability of the intermediate points remains understudied, limiting their use as visual explanations. In this work, we study the role of pointing in a cognitive task: zero-shot counting from a visual scene. We fine-tune state-of-the-art LVLMs following two approaches: Direct Counting, where models only predict the total number of objects, and Point-then-Count, where LVLMs generate the target objects' coordinates followed by their count. The results show that Point-then-Count achieves higher out-of-distribution generalization, suggesting that coordinates help LVLMs learn skills rather than overfitting on narrow tasks. Although predicted points are accurately grounded in the image in over 89\\% of cases (as measured by F1), performance varies across image regions, revealing spatial biases. Finally, mechanistic analyses show that gains in counting arise from the spatial information encoded in the coordinates.",
-      "authors": [
-        "Simone Alghisi",
-        "Massimo Rizzoli",
-        "Seyed Mahed Mousavi",
-        "Giuseppe Riccardi"
-      ],
-      "primary_category": "cs.CV",
-      "categories": [
-        "cs.CV"
-      ],
-      "published": "2026-03-23T09:38:15+00:00",
-      "link": "https://arxiv.org/pdf/2603.21746v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "modeling grounding and reasoning as explicit sequential steps",
-      "llm_evidence_cn": "将定位和推理建模为显式的顺序步骤",
-      "llm_evidence": "将定位和推理建模为显式的顺序步骤",
-      "canonical_evidence": "将定位和推理建模为显式的顺序步骤",
-      "llm_tldr_en": "This study shows that explicit pointing improves the accuracy and explainability of LVLMs in cognitive tasks.",
-      "llm_tldr_cn": "研究表明，显式指向（Pointing）能提高大视觉语言模型在认知任务中的准确性和可解释性。",
-      "llm_tldr": "研究表明，显式指向（Pointing）能提高大视觉语言模型在认知任务中的准确性和可解释性。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "reasoning in vision-language models",
-      "matched_requirement_id": "req-3",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.21746v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.22003v1",
-      "title": "VP-VLA: Visual Prompting as an Interface for Vision-Language-Action Models",
-      "abstract": "Vision-Language-Action (VLA) models typically map visual observations and linguistic instructions directly to robotic control signals. This \"black-box\" mapping forces a single forward pass to simultaneously handle instruction interpretation, spatial grounding, and low-level control, often leading to poor spatial precision and limited robustness in out-of-distribution scenarios. To address these limitations, we propose VP-VLA, a dual-system framework that decouples high-level reasoning and low-level execution via a structured visual prompting interface. Specifically, a \"System 2 Planner\" decomposes complex instructions into sub-tasks and identifies relevant target objects and goal locations. These spatial anchors are then overlaid directly onto visual observations as structured visual prompts, such as crosshairs and bounding boxes. Guided by these prompts and enhanced by a novel auxiliary visual grounding objective during training, a \"System 1 Controller\" reliably generates precise low-level execution motions. Experiments on the Robocasa-GR1-Tabletop benchmark and SimplerEnv simulation demonstrate that VP-VLA improves success rates by 5% and 8.3%, surpassing competitive baselines including QwenOFT and GR00T-N1.6.",
-      "authors": [
-        "Zixuan Wang",
-        "Yuxin Chen",
-        "Yuqi Liu",
-        "Jinhui Ye",
-        "Pengguang Chen",
-        "Changsheng Lu",
-        "Shu Liu",
-        "Jiaya Jia"
-      ],
-      "primary_category": "cs.RO",
-      "categories": [
-        "cs.RO"
-      ],
-      "published": "2026-03-23T14:08:58+00:00",
-      "link": "https://arxiv.org/pdf/2603.22003v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "decouples high-level reasoning and low-level execution in VLA",
-      "llm_evidence_cn": "在VLA模型中解耦高层推理与底层执行",
-      "llm_evidence": "在VLA模型中解耦高层推理与底层执行",
-      "canonical_evidence": "在VLA模型中解耦高层推理与底层执行",
-      "llm_tldr_en": "VP-VLA uses visual prompting to separate planning from execution, improving spatial precision in robotic tasks.",
-      "llm_tldr_cn": "VP-VLA利用视觉提示将规划与执行分离，提高了机器人任务中的空间精度。",
-      "llm_tldr": "VP-VLA利用视觉提示将规划与执行分离，提高了机器人任务中的空间精度。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision-language model based agents",
-      "matched_requirement_id": "req-4",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.22003v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.19166v1",
-      "title": "Meanings and Measurements: Multi-Agent Probabilistic Grounding for Vision-Language Navigation",
-      "abstract": "Robots collaborating with humans must convert natural language goals into actionable, physically grounded decisions. For example, executing a command such as \"go two meters to the right of the fridge\" requires grounding semantic references, spatial relations, and metric constraints within a 3D scene. While recent vision language models (VLMs) demonstrate strong semantic grounding capabilities, they are not explicitly designed to reason about metric constraints in physically defined spaces. In this work, we empirically demonstrate that state-of-the-art VLM-based grounding approaches struggle with complex metric-semantic language queries. To address this limitation, we propose MAPG (Multi-Agent Probabilistic Grounding), an agentic framework that decomposes language queries into structured subcomponents and queries a VLM to ground each component. MAPG then probabilistically composes these grounded outputs to produce metrically consistent, actionable decisions in 3D space. We evaluate MAPG on the HM-EQA benchmark and show consistent performance improvements over strong baselines. Furthermore, we introduce a new benchmark, MAPG-Bench, specifically designed to evaluate metric-semantic goal grounding, addressing a gap in existing language grounding evaluations. We also present a real-world robot demonstration showing that MAPG transfers beyond simulation when a structured scene representation is available.",
-      "authors": [
-        "Swagat Padhan",
-        "Lakshya Jain",
-        "Bhavya Minesh Shah",
-        "Omkar Patil",
-        "Thao Nguyen",
-        "Nakul Gopalan"
-      ],
-      "primary_category": "cs.RO",
-      "categories": [
-        "cs.RO",
-        "cs.AI",
-        "cs.CL",
-        "cs.CV",
-        "cs.LG"
-      ],
-      "published": "2026-03-19T17:20:56+00:00",
-      "link": "https://arxiv.org/pdf/2603.19166v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "agentic grounding for vision-language navigation",
-      "llm_evidence_cn": "视觉语言导航中的智能体定位",
-      "llm_evidence": "视觉语言导航中的智能体定位",
-      "canonical_evidence": "视觉语言导航中的智能体定位",
-      "llm_tldr_en": "MAPG improves VLM-based grounding for robots by reasoning about metric constraints in physical spaces.",
-      "llm_tldr_cn": "MAPG通过对物理空间中的度量约束进行推理，改进了基于VLM的机器人定位能力。",
-      "llm_tldr": "MAPG通过对物理空间中的度量约束进行推理，改进了基于VLM的机器人定位能力。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision-language model based agents",
-      "matched_requirement_id": "req-4",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.19166v1",
-      "carry_days": 1
+      "carry_days": 2
     },
     {
       "id": "2603.24866v1",
@@ -539,7 +120,7 @@
       "matched_requirement_id": "req-10",
       "selection_source": "carryover_cache",
       "paper_id": "2603.24866v1",
-      "carry_days": 1
+      "carry_days": 2
     },
     {
       "id": "2603.25629v1",
@@ -563,13 +144,13 @@
         "query:VLM RL"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "latent visual structured reasoning in LMMs",
-      "llm_evidence_cn": "LMM中的潜视觉结构化推理",
-      "llm_evidence": "LMM中的潜视觉结构化推理",
-      "canonical_evidence": "LMM中的潜视觉结构化推理",
-      "llm_tldr_en": "Introduces a framework for visual reasoning directly in latent space to improve fine-grained understanding.",
-      "llm_tldr_cn": "引入了一种直接在潜空间进行视觉推理的框架，以提高细粒度理解能力。",
-      "llm_tldr": "引入了一种直接在潜空间进行视觉推理的框架，以提高细粒度理解能力。",
+      "llm_evidence_en": "Latent visual structured reasoning for large multimodal models",
+      "llm_evidence_cn": "大型多模态模型的潜空间视觉结构化推理",
+      "llm_evidence": "大型多模态模型的潜空间视觉结构化推理",
+      "canonical_evidence": "大型多模态模型的潜空间视觉结构化推理",
+      "llm_tldr_en": "LanteRn enables LMMs to perform visual reasoning directly in a compact latent space rather than pixel space.",
+      "llm_tldr_cn": "LanteRn 使多模态大模型能够直接在紧凑的潜空间而非像素空间中进行视觉推理。",
+      "llm_tldr": "LanteRn 使多模态大模型能够直接在紧凑的潜空间而非像素空间中进行视觉推理。",
       "llm_tags": [
         "query:vlm-rl"
       ],
@@ -578,297 +159,6 @@
       "matched_requirement_id": "req-10",
       "selection_source": "carryover_cache",
       "paper_id": "2603.25629v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.25411v1",
-      "title": "HiSpatial: Taming Hierarchical 3D Spatial Understanding in Vision-Language Models",
-      "abstract": "Achieving human-like spatial intelligence for vision-language models (VLMs) requires inferring 3D structures from 2D observations, recognizing object properties and relations in 3D space, and performing high-level spatial reasoning. In this paper, we propose a principled hierarchical framework that decomposes the learning of 3D spatial understanding in VLMs into four progressively complex levels, from geometric perception to abstract spatial reasoning. Guided by this framework, we construct an automated pipeline that processes approximately 5M images with over 45M objects to generate 3D spatial VQA pairs across diverse tasks and scenes for VLM supervised fine-tuning. We also develop an RGB-D VLM incorporating metric-scale point maps as auxiliary inputs to further enhance spatial understanding. Extensive experiments demonstrate that our approach achieves state-of-the-art performance on multiple spatial understanding and reasoning benchmarks, surpassing specialized spatial models and large proprietary systems such as Gemini-2.5-pro and GPT-5. Moreover, our analysis reveals clear dependencies among hierarchical task levels, offering new insights into how multi-level task design facilitates the emergence of 3D spatial intelligence.",
-      "authors": [
-        "Huizhi Liang",
-        "Yichao Shen",
-        "Yu Deng",
-        "Sicheng Xu",
-        "Zhiyuan Feng",
-        "Tong Zhang",
-        "Yaobo Liang",
-        "Jiaolong Yang"
-      ],
-      "primary_category": "cs.CV",
-      "categories": [
-        "cs.CV"
-      ],
-      "published": "2026-03-26T13:08:12+00:00",
-      "link": "https://arxiv.org/pdf/2603.25411v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "hierarchical 3D spatial reasoning in vision-language models",
-      "llm_evidence_cn": "视觉语言模型中的分层3D空间推理",
-      "llm_evidence": "视觉语言模型中的分层3D空间推理",
-      "canonical_evidence": "视觉语言模型中的分层3D空间推理",
-      "llm_tldr_en": "Introduces HiSpatial, a framework for taming hierarchical 3D spatial understanding and reasoning in VLMs.",
-      "llm_tldr_cn": "引入了HiSpatial，一个用于在视觉语言模型中实现分层3D空间理解和推理的框架。",
-      "llm_tldr": "引入了HiSpatial，一个用于在视觉语言模型中实现分层3D空间理解和推理的框架。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision language models for complex reasoning tasks",
-      "matched_requirement_id": "req-10",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.25411v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.23867v1",
-      "title": "Can VLMs Reason Robustly? A Neuro-Symbolic Investigation",
-      "abstract": "Vision-Language Models (VLMs) have been applied to a wide range of reasoning tasks, yet it remains unclear whether they can reason robustly under distribution shifts. In this paper, we study covariate shifts in which the perceptual input distribution changes while the underlying prediction rules do not. To investigate this question, we consider visual deductive reasoning tasks, where a model is required to answer a query given an image and logical rules defined over the object concepts in the image. Empirically, we find that VLMs fine-tuned through gradient-based end-to-end training can achieve high in-distribution accuracy but fail to generalize under such shifts, suggesting that fine-tuning does not reliably induce the underlying reasoning function. This motivates a neuro-symbolic perspective that decouples perception from reasoning. However, we further observe that recent neuro-symbolic approaches that rely on black-box components for reasoning can still exhibit inconsistent robustness across tasks. To address this issue, we propose VLC, a neuro-symbolic method that combines VLM-based concept recognition with circuit-based symbolic reasoning. In particular, task rules are compiled into a symbolic program, specifically a circuit, which executes the rules exactly over the object concepts recognized by the VLM. Experiments on three visual deductive reasoning tasks with distinct rule sets show that VLC consistently achieves strong performance under covariate shifts, highlighting its ability to support robust reasoning.",
-      "authors": [
-        "Weixin Chen",
-        "Antonio Vergari",
-        "Han Zhao"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "cs.AI",
-        "cs.CV"
-      ],
-      "published": "2026-03-25T02:48:42+00:00",
-      "link": "https://arxiv.org/pdf/2603.23867v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "investigation of visual deductive reasoning in VLMs",
-      "llm_evidence_cn": "对视觉语言模型视觉演绎推理的研究",
-      "llm_evidence": "对视觉语言模型视觉演绎推理的研究",
-      "canonical_evidence": "对视觉语言模型视觉演绎推理的研究",
-      "llm_tldr_en": "Investigates the robustness of VLM reasoning under distribution shifts using a neuro-symbolic approach.",
-      "llm_tldr_cn": "通过神经符号方法研究视觉语言模型在分布偏移下的推理鲁棒性。",
-      "llm_tldr": "通过神经符号方法研究视觉语言模型在分布偏移下的推理鲁棒性。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "reasoning in vision-language models",
-      "matched_requirement_id": "req-3",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.23867v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.25040v1",
-      "title": "Intern-S1-Pro: Scientific Multimodal Foundation Model at Trillion Scale",
-      "abstract": "We introduce Intern-S1-Pro, the first one-trillion-parameter scientific multimodal foundation model. Scaling to this unprecedented size, the model delivers a comprehensive enhancement across both general and scientific domains. Beyond stronger reasoning and image-text understanding capabilities, its intelligence is augmented with advanced agent capabilities. Simultaneously, its scientific expertise has been vastly expanded to master over 100 specialized tasks across critical science fields, including chemistry, materials, life sciences, and earth sciences. Achieving this massive scale is made possible by the robust infrastructure support of XTuner and LMDeploy, which facilitates highly efficient Reinforcement Learning (RL) training at the 1-trillion parameter level while ensuring strict precision consistency between training and inference. By seamlessly integrating these advancements, Intern-S1-Pro further fortifies the fusion of general and specialized intelligence, working as a Specializable Generalist, demonstrating its position in the top tier of open-source models for general capabilities, while outperforming proprietary models in the depth of specialized scientific tasks.",
-      "authors": [
-        "Yicheng Zou",
-        "Dongsheng Zhu",
-        "Lin Zhu",
-        "Tong Zhu",
-        "Yunhua Zhou",
-        "Peiheng Zhou",
-        "Xinyu Zhou",
-        "Dongzhan Zhou",
-        "Zhiwang Zhou",
-        "Yuhao Zhou",
-        "Bowen Zhou",
-        "Zhanping Zhong",
-        "Zhijie Zhong",
-        "Haiteng Zhao",
-        "Penghao Zhao",
-        "Xiaomeng Zhao",
-        "Zhiyuan Zhao",
-        "Yechen Zhang",
-        "Jin Zhang",
-        "Wenwei Zhang",
-        "Hongjie Zhang",
-        "Zhuo Zhang",
-        "Wenlong Zhang",
-        "Bo Zhang",
-        "Chao Zhang",
-        "Chen Zhang",
-        "Yuhang Zang",
-        "Fei Yuan",
-        "Jiakang Yuan",
-        "Jiashuo Yu",
-        "Jinhui Yin",
-        "Haochen Ye",
-        "Qian Yao",
-        "Bowen Yang",
-        "Danni Yang",
-        "Kaichen Yang",
-        "Ziang Yan",
-        "Jun Xu",
-        "Yicheng Xu",
-        "Wanghan Xu",
-        "Xuenan Xu",
-        "Chao Xu",
-        "Ruiliang Xu",
-        "Shuhao Xing",
-        "Long Xing",
-        "Xinchen Xie",
-        "Ling-I Wu",
-        "Zijian Wu",
-        "Zhenyu Wu",
-        "Lijun Wu",
-        "Yue Wu",
-        "Jianyu Wu",
-        "Wen Wu",
-        "Fan Wu",
-        "Xilin Wei",
-        "Qi Wei",
-        "Bingli Wang",
-        "Rui Wang",
-        "Ziyi Wang",
-        "Zun Wang",
-        "Yi Wang",
-        "Haomin Wang",
-        "Yizhou Wang",
-        "Lintao Wang",
-        "Yiheng Wang",
-        "Longjiang Wang",
-        "Bin Wang",
-        "Jian Tong",
-        "Zhongbo Tian",
-        "Huanze Tang",
-        "Chen Tang",
-        "Shixiang Tang",
-        "Yu Sun",
-        "Qiushi Sun",
-        "Xuerui Su",
-        "Qisheng Su",
-        "Chenlin Su",
-        "Demin Song",
-        "Jin Shi",
-        "Fukai Shang",
-        "Yuchen Ren",
-        "Pengli Ren",
-        "Xiaoye Qu",
-        "Yuan Qu",
-        "Jiantao Qiu",
-        "Yu Qiao",
-        "Runyu Peng",
-        "Tianshuo Peng",
-        "Jiahui Peng",
-        "Qizhi Pei",
-        "Zhuoshi Pan",
-        "Linke Ouyang",
-        "Wenchang Ning",
-        "Yichuan Ma",
-        "Zerun Ma",
-        "Ningsheng Ma",
-        "Runyuan Ma",
-        "Chengqi Lyu",
-        "Haijun Lv",
-        "Han Lv",
-        "Lindong Lu",
-        "Kuikun Liu",
-        "Jiangning Liu",
-        "Yuhong Liu",
-        "Kai Liu",
-        "Hongwei Liu",
-        "Zhoumianze Liu",
-        "Mengjie Liu",
-        "Ziyu Liu",
-        "Wenran Liu",
-        "Yang Liu",
-        "Liwei Liu",
-        "Kaiwen Liu",
-        "Junyao Lin",
-        "Junming Lin",
-        "Tianyang Lin",
-        "Dahua Lin",
-        "Jianze Liang",
-        "Linyang Li",
-        "Peiji Li",
-        "Zonglin Li",
-        "Zehao Li",
-        "Pengze Li",
-        "Guoyan Li",
-        "Lingkai Kong",
-        "Linglin Jing",
-        "Zhenjiang Jin",
-        "Feifei Jiang",
-        "Qian Jiang",
-        "Junhao Huang",
-        "Zixian Huang",
-        "Haian Huang",
-        "Zhouqi Hua",
-        "Han Hu",
-        "Linfeng Hou",
-        "Yinan He",
-        "Conghui He",
-        "Tianyao He",
-        "Xu Guo",
-        "Qipeng Guo",
-        "Aijia Guo",
-        "Yuzhe Gu",
-        "Lixin Gu",
-        "Jingyang Gong",
-        "Qiming Ge",
-        "Jiaye Ge",
-        "Songyang Gao",
-        "Jianfei Gao",
-        "Xinyu Fang",
-        "Caihua fan",
-        "Yue Fan",
-        "Yanhui Duan",
-        "Zichen Ding",
-        "Shengyuan Ding",
-        "Xuanlang Dai",
-        "Erfei Cui",
-        "Ganqu Cui",
-        "Pei Chu",
-        "Tao Chu",
-        "Guangran Cheng",
-        "Yu Cheng",
-        "Kai Chen",
-        "Yongkang Chen",
-        "Chiyu Chen",
-        "Guanzhou Chen",
-        "Qiaosheng Chen",
-        "Sitao Chen",
-        "Xin Chen",
-        "Haojiong Chen",
-        "Yicheng Chen",
-        "Weihan Cao",
-        "Yuhang Cao",
-        "Qinglong Cao",
-        "Lei Bai"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "cs.CL",
-        "cs.CV"
-      ],
-      "published": "2026-03-26T05:21:45+00:00",
-      "link": "https://arxiv.org/pdf/2603.25040v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Trillion-scale multimodal model with RL and agent capabilities",
-      "llm_evidence_cn": "具有强化学习和智能体能力的万亿级多模态模型",
-      "llm_evidence": "具有强化学习和智能体能力的万亿级多模态模型",
-      "canonical_evidence": "具有强化学习和智能体能力的万亿级多模态模型",
-      "llm_tldr_en": "A massive scientific multimodal model that uses RL to enhance reasoning and agentic capabilities across domains.",
-      "llm_tldr_cn": "一个大规模科学多模态模型，利用强化学习增强跨领域的推理和智能体能力。",
-      "llm_tldr": "一个大规模科学多模态模型，利用强化学习增强跨领域的推理和智能体能力。",
-      "llm_tags": [
-        "query:vlm-rl:composite"
-      ],
-      "matched_query_tag": "query:vlm-rl:composite",
-      "matched_query_text": "Papers central to 查找vision-language agentic rl及vision-language reasoning相关的文章，排除diffusion model、robotics、video和audio。, especially work that connects or combines: vision-language agentic reinforcement learning; multimodal reinforcement learning with vision and language; reasoning in vision-language models; vision-language model based agents; visual reasoning and decision making; multimodal reasoning for reinforcement learning; vision language reinforcement learning for agentic reasoning; advancements in vision language reasoning agents; multimodal agentic reinforcement learning without robotics; vision language models for complex reasoning tasks.",
-      "matched_requirement_id": "req-composite-vlm-rl",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.25040v1",
       "carry_days": 1
     },
     {
@@ -899,13 +189,13 @@
         "query:VLM RL"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "Multi-stage RL for scaling multimodal reward modeling",
-      "llm_evidence_cn": "用于扩展多模态奖励建模的多阶段强化学习",
-      "llm_evidence": "用于扩展多模态奖励建模的多阶段强化学习",
-      "canonical_evidence": "用于扩展多模态奖励建模的多阶段强化学习",
+      "llm_evidence_en": "multimodal reward modeling via multi-stage RL",
+      "llm_evidence_cn": "通过多阶段强化学习进行多模态奖励建模",
+      "llm_evidence": "通过多阶段强化学习进行多模态奖励建模",
+      "canonical_evidence": "通过多阶段强化学习进行多模态奖励建模",
       "llm_tldr_en": "Introduces a multi-stage RL approach to scale generative multimodal reward models with limited data.",
-      "llm_tldr_cn": "引入了一种多阶段强化学习方法，利用有限数据扩展生成式多模态奖励模型。",
-      "llm_tldr": "引入了一种多阶段强化学习方法，利用有限数据扩展生成式多模态奖励模型。",
+      "llm_tldr_cn": "提出一种多阶段强化学习方法，在有限数据下实现生成式多模态奖励模型的规模化训练。",
+      "llm_tldr": "提出一种多阶段强化学习方法，在有限数据下实现生成式多模态奖励模型的规模化训练。",
       "llm_tags": [
         "query:vlm-rl"
       ],
@@ -914,6 +204,215 @@
       "matched_requirement_id": "req-7",
       "selection_source": "carryover_cache",
       "paper_id": "2603.25108v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.25021v1",
+      "title": "VideoTIR: Accurate Understanding for Long Videos with Efficient Tool-Integrated Reasoning",
+      "abstract": "Existing Multimodal Large Language Models (MLLMs) often suffer from hallucinations in long video understanding (LVU), primarily due to the imbalance between textual and visual tokens. Observing that MLLMs handle short visual inputs well, recent LVU works alleviate hallucinations by automatically parsing the vast visual data into manageable segments that can be effectively processed by MLLMs. SFT-based tool-calling methods can serve this purpose, but they typically require vast amounts of fine-grained, high-quality data and suffer from constrained tool-calling trajectories. We propose a novel VideoTIR that leverages Reinforcement Learning (RL) to encourage proper usage of comprehensive multi-level toolkits for efficient long video understanding. VideoTIR explores both Zero-RL and SFT cold-starting to enable MLLMs to retrieve and focus on meaningful video segments/images/regions, enhancing long video understanding both accurately and efficiently. To reduce redundant tool-calling, we propose Toolkit Action Grouped Policy Optimization (TAGPO), which enhances the efficiency of the calling process through stepwise reward assignment and reuse of failed rollouts. Additionally, we develop a sandbox-based trajectory synthesis framework to generate high-quality trajectories data. Extensive experiments on three long-video QA benchmarks demonstrate the effectiveness and efficiency of our method.",
+      "authors": [
+        "Zhe Gao",
+        "Shiyu Shen",
+        "Taifeng Chai",
+        "Weinong Wang",
+        "Haotian Xu",
+        "Xing W",
+        "Wenbin Li",
+        "Qi Fan",
+        "Yang Gao",
+        "Dacheng Tao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-26T04:37:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.25021v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Reinforcement Learning for tool-integrated reasoning in MLLMs",
+      "llm_evidence_cn": "利用强化学习优化多模态大模型的工具集成推理",
+      "llm_evidence": "利用强化学习优化多模态大模型的工具集成推理",
+      "canonical_evidence": "利用强化学习优化多模态大模型的工具集成推理",
+      "llm_tldr_en": "Proposes VideoTIR, using RL to optimize tool-calling for efficient long video understanding in MLLMs.",
+      "llm_tldr_cn": "提出VideoTIR，利用强化学习优化工具调用，以实现高效的长视频理解。",
+      "llm_tldr": "提出VideoTIR，利用强化学习优化工具调用，以实现高效的长视频理解。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language agentic reinforcement learning",
+      "matched_requirement_id": "req-1",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.25021v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.25415v1",
+      "title": "Modernising Reinforcement Learning-Based Navigation for Embodied Semantic Scene Graph Generation",
+      "abstract": "Semantic world models enable embodied agents to reason about objects, relations, and spatial context beyond purely geometric representations. In Organic Computing, such models are a key enabler for objective-driven self-adaptation under uncertainty and resource constraints. The core challenge is to acquire observations maximising model quality and downstream usefulness within a limited action budget.   Semantic scene graphs (SSGs) provide a structured and compact representation for this purpose. However, constructing them within a finite action horizon requires exploration strategies that trade off information gain against navigation cost and decide when additional actions yield diminishing returns.   This work presents a modular navigation component for Embodied Semantic Scene Graph Generation and modernises its decision-making by replacing the policy-optimisation method and revisiting the discrete action formulation. We study compact and finer-grained, larger discrete motion sets and compare a single-head policy over atomic actions with a factorised multi-head policy over action components. We evaluate curriculum learning and optional depth-based collision supervision, and assess SSG completeness, execution safety, and navigation behaviour.   Results show that replacing the optimisation algorithm alone improves SSG completeness by 21\\% relative to the baseline under identical reward shaping. Depth mainly affects execution safety (collision-free motion), while completeness remains largely unchanged. Combining modern optimisation with a finer-grained, factorised action representation yields the strongest overall completeness--efficiency trade-off.",
+      "authors": [
+        "Roman Kueble",
+        "Marco Hueller",
+        "Mrunmai Phatak",
+        "Rainer Lienhart",
+        "Joerg Haehner"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.RO"
+      ],
+      "published": "2026-03-26T13:10:08+00:00",
+      "link": "https://arxiv.org/pdf/2603.25415v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "RL-based navigation for semantic scene graph reasoning",
+      "llm_evidence_cn": "基于强化学习的语义场景图推理导航",
+      "llm_evidence": "基于强化学习的语义场景图推理导航",
+      "canonical_evidence": "基于强化学习的语义场景图推理导航",
+      "llm_tldr_en": "Uses reinforcement learning to optimize exploration for building semantic scene graphs in embodied agents.",
+      "llm_tldr_cn": "利用强化学习优化具身智能体在构建语义场景图时的探索策略。",
+      "llm_tldr": "利用强化学习优化具身智能体在构建语义场景图时的探索策略。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reasoning for reinforcement learning",
+      "matched_requirement_id": "req-6",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.25415v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.24558v1",
+      "title": "LensWalk: Agentic Video Understanding by Planning How You See in Videos",
+      "abstract": "The dense, temporal nature of video presents a profound challenge for automated analysis. Despite the use of powerful Vision-Language Models, prevailing methods for video understanding are limited by the inherent disconnect between reasoning and perception: they rely on static, pre-processed information and cannot actively seek raw evidence from video as their understanding evolves. To address this, we introduce LensWalk, a flexible agentic framework that empowers a Large Language Model reasoner to control its own visual observation actively. LensWalk establishes a tight reason-plan-observe loop where the agent dynamically specifies, at each step, the temporal scope and sampling density of the video it observes. Using a suite of versatile, Vision-Language Model based tools parameterized by these specifications, the agent can perform broad scans for cues, focus on specific segments for fact extraction, and stitch evidence from multiple moments for holistic verification. This design allows for progressive, on-demand evidence gathering that directly serves the agent's evolving chain of thought. Without requiring any model fine-tuning, LensWalk delivers substantial, plug-and-play performance gains on multiple model recipes, boosting their accuracy by over 5\\% on challenging long-video benchmarks like LVBench and Video-MME. Our analysis reveals that enabling an agent to control how it sees is key to unlocking more accurate, robust, and interpretable video reasoning.",
+      "authors": [
+        "Keliang Li",
+        "Yansong Li",
+        "Hongze Shen",
+        "Mengdi Liu",
+        "Hong Chang",
+        "Shiguang Shan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-03-25T17:38:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.24558v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Agentic video understanding with a reason-plan-observe loop",
+      "llm_evidence_cn": "具有推理-计划-观察循环的智能体视频理解",
+      "llm_evidence": "具有推理-计划-观察循环的智能体视频理解",
+      "canonical_evidence": "具有推理-计划-观察循环的智能体视频理解",
+      "llm_tldr_en": "LensWalk is an agentic framework that allows LLMs to actively control visual perception for better video reasoning.",
+      "llm_tldr_cn": "LensWalk 是一个智能体框架，允许大语言模型主动控制视觉感知以实现更好的视频推理。",
+      "llm_tldr": "LensWalk 是一个智能体框架，允许大语言模型主动控制视觉感知以实现更好的视频推理。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.24558v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.22918v1",
+      "title": "EVA: Efficient Reinforcement Learning for End-to-End Video Agent",
+      "abstract": "Video understanding with multimodal large language models (MLLMs) remains challenging due to the long token sequences of videos, which contain extensive temporal dependencies and redundant frames. Existing approaches typically treat MLLMs as passive recognizers, processing entire videos or uniformly sampled frames without adaptive reasoning. Recent agent-based methods introduce external tools, yet still depend on manually designed workflows and perception-first strategies, resulting in inefficiency on long videos. We present EVA, an Efficient Reinforcement Learning framework for End-to-End Video Agent, which enables planning-before-perception through iterative summary-plan-action-reflection reasoning. EVA autonomously decides what to watch, when to watch, and how to watch, achieving query-driven and efficient video understanding. To train such agents, we design a simple yet effective three-stage learning pipeline - comprising supervised fine-tuning (SFT), Kahneman-Tversky Optimization (KTO), and Generalized Reward Policy Optimization (GRPO) - that bridges supervised imitation and reinforcement learning. We further construct high-quality datasets for each stage, supporting stable and reproducible training. We evaluate EVA on six video understanding benchmarks, demonstrating its comprehensive capabilities. Compared with existing baselines, EVA achieves a substantial improvement of 6-12% over general MLLM baselines and a further 1-3% gain over prior adaptive agent methods. Our code and model are available at https://github.com/wangruohui/EfficientVideoAgent.",
+      "authors": [
+        "Yaolun Zhang",
+        "Ruohui Wang",
+        "Jiahao Wang",
+        "Yepeng Tang",
+        "Xuanyu Zheng",
+        "Haonan Duan",
+        "Hao Lu",
+        "Hanming Deng",
+        "Lewei Lu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-03-24T08:06:29+00:00",
+      "link": "https://arxiv.org/pdf/2603.22918v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "reinforcement learning framework for end-to-end video agent with iterative reasoning",
+      "llm_evidence_cn": "具有迭代推理能力的端到端视频智能体强化学习框架",
+      "llm_evidence": "具有迭代推理能力的端到端视频智能体强化学习框架",
+      "canonical_evidence": "具有迭代推理能力的端到端视频智能体强化学习框架",
+      "llm_tldr_en": "Presents EVA, an RL framework for video agents using summary-plan-action-reflection reasoning.",
+      "llm_tldr_cn": "提出EVA，一个利用总结-计划-行动-反思推理的视频智能体强化学习框架。",
+      "llm_tldr": "提出EVA，一个利用总结-计划-行动-反思推理的视频智能体强化学习框架。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language agentic reinforcement learning",
+      "matched_requirement_id": "req-1",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.22918v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.23964v1",
+      "title": "From Pixels to Digital Agents: An Empirical Study on the Taxonomy and Technological Trends of Reinforcement Learning Environments",
+      "abstract": "The remarkable progress of reinforcement learning (RL) is intrinsically tied to the environments used to train and evaluate artificial agents. Moving beyond traditional qualitative reviews, this work presents a large-scale, data-driven empirical investigation into the evolution of RL environments. By programmatically processing a massive corpus of academic literature and rigorously distilling over 2,000 core publications, we propose a quantitative methodology to map the transition from isolated physical simulations to generalist, language-driven foundation agents. Implementing a novel, multi-dimensional taxonomy, we systematically analyze benchmarks against diverse application domains and requisite cognitive capabilities. Our automated semantic and statistical analysis reveals a profound, data-verified paradigm shift: the bifurcation of the field into a \"Semantic Prior\" ecosystem dominated by Large Language Models (LLMs) and a \"Domain-Specific Generalization\" ecosystem. Furthermore, we characterize the \"cognitive fingerprints\" of these distinct domains to uncover the underlying mechanisms of cross-task synergy, multi-domain interference, and zero-shot generalization. Ultimately, this study offers a rigorous, quantitative roadmap for designing the next generation of Embodied Semantic Simulators, bridging the gap between continuous physical control and high-level logical reasoning.",
+      "authors": [
+        "Lijing Luo",
+        "Yiben Luo",
+        "Alexey Gorbatovski",
+        "Sergey Kovalchuk",
+        "Xiaodan Liang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-25T05:56:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.23964v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "transition to language-driven foundation agents in RL",
+      "llm_evidence_cn": "强化学习向语言驱动基础智能体的转变",
+      "llm_evidence": "强化学习向语言驱动基础智能体的转变",
+      "canonical_evidence": "强化学习向语言驱动基础智能体的转变",
+      "llm_tldr_en": "A large-scale study on the evolution of RL environments toward language-driven agents.",
+      "llm_tldr_cn": "对强化学习环境向语言驱动基础智能体演进的大规模实证研究。",
+      "llm_tldr": "对强化学习环境向语言驱动基础智能体演进的大规模实证研究。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language agentic reinforcement learning",
+      "matched_requirement_id": "req-1",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.23964v1",
       "carry_days": 1
     }
   ]
