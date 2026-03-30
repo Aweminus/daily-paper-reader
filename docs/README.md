@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-29
-- 运行时间：2026-03-29 20:10:27 UTC
+- 最新运行日期：2026-03-30
+- 运行时间：2026-03-30 19:44:43 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦 17 篇前沿成果，深度探索从潜空间视觉推理到真实世界通用智能体的技术跨越。
-重点推荐 Seed1.8 与 LanteRn，它们分别在通用智能体构建与结构化视觉推理方向取得了 9.0 分的高评价突破。
-建议关注 3D 认知地图与功能性分割技术，这些进展正显著提升 AI 对复杂物理空间的理解与交互能力。
-- 详情：[/202603/29/README](/202603/29/README)
+今日聚焦 GUI 视觉智能体与多模态强化学习，深度解析 17 篇涵盖 Token 剪枝、长视频推理及奖励建模的前沿进展。
+核心突破在于通过语义、空间与时间三维视角重构历史截图处理，并利用轨迹引导强化学习显著提升多模态推理任务的准确性。
+建议关注多模态模型在复杂交互场景下的效率优化方案，这是构建高性能视觉助手的重要基石。
+- 详情：[/202603/30/README](/202603/30/README)
 
 ### 精读区论文标签
-1. [Seed1.8 Model Card: Towards Generalized Real-World Agency](/202603/29/2603.20633v1-seed18-model-card-towards-generalized-real-world-agency)  
+1. [Rethinking Token Pruning for Historical Screenshots in GUI Visual Agents: Semantic, Spatial, and Temporal Perspectives](/202603/30/2603.26041v1-rethinking-token-pruning-for-historical-screenshots-in-gui-visual-agents-semantic-spatial-and-temporal-perspectives)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：具有视觉语言性能的通用现实世界代理基础模型
-2. [LanteRn: Latent Visual Structured Reasoning](/202603/29/2603.25629v1-lantern-latent-visual-structured-reasoning)  
+   evidence：使用MLLM进行导航的非机器人GUI视觉智能体
+2. [Beyond Where to Look: Trajectory-Guided Reinforcement Learning for Multimodal RLVR](/202603/30/2603.26126v1-beyond-where-to-look-trajectory-guided-reinforcement-learning-for-multimodal-rlvr)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：多模态模型中的潜空间视觉结构化推理
-3. [The Dual Mechanisms of Spatial Reasoning in Vision-Language Models](/202603/29/2603.22278v1-the-dual-mechanisms-of-spatial-reasoning-in-vision-language-models)  
+   evidence：用于多模态推理和视觉接地的强化学习
+3. [DyGeoVLN: Infusing Dynamic Geometry Foundation Model into Vision-Language Navigation](/202603/30/2603.21269v1-dygeovln-infusing-dynamic-geometry-foundation-model-into-vision-language-navigation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型中的空间推理机制
-4. [From Pixels to Digital Agents: An Empirical Study on the Taxonomy and Technological Trends of Reinforcement Learning Environments](/202603/29/2603.23964v1-from-pixels-to-digital-agents-an-empirical-study-on-the-taxonomy-and-technological-trends-of-reinforcement-learning-environments)  
+   evidence：导航代理的视觉语义推理
+4. [VP-VLA: Visual Prompting as an Interface for Vision-Language-Action Models](/202603/30/2603.22003v1-vp-vla-visual-prompting-as-an-interface-for-vision-language-action-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：强化学习环境向语言驱动基础代理转型的分类学
-5. [AD-Reasoning: Multimodal Guideline-Guided Reasoning for Alzheimer's Disease Diagnosis](/202603/29/2603.24059v1-ad-reasoning-multimodal-guideline-guided-reasoning-for-alzheimers-disease-diagnosis)  
+   evidence：具有高层推理能力的视觉-语言-动作模型双系统框架
+5. [EVA: Efficient Reinforcement Learning for End-to-End Video Agent](/202603/30/2603.22918v2-eva-efficient-reinforcement-learning-for-end-to-end-video-agent)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：结合强化微调的多模态医疗诊断推理
-6. [How Far Are Vision-Language Models from Constructing the Real World? A Benchmark for Physical Generative Reasoning](/202603/29/2603.24866v1-how-far-are-vision-language-models-from-constructing-the-real-world-a-benchmark-for-physical-generative-reasoning)  
+   evidence：用于端到端视频智能体推理的强化学习
+6. [MedOpenClaw: Auditable Medical Imaging Agents Reasoning over Uncurated Full Studies](/202603/30/2603.24649v1-medopenclaw-auditable-medical-imaging-agents-reasoning-over-uncurated-full-studies)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型物理生成推理的基准
+   evidence：基于VLM的临床智能体，用于主动导航和决策
 
 ### 速读区论文标签
-1. [Q-Tacit: Image Quality Assessment via Latent Visual Reasoning](/202603/29/2603.22641v1-q-tacit-image-quality-assessment-via-latent-visual-reasoning)  
+1. [SCoOP: Semantic Consistent Opinion Pooling for Uncertainty Quantification in Multiple Vision-Language Model Systems](/202603/30/2603.23853v1-scoop-semantic-consistent-opinion-pooling-for-uncertainty-quantification-in-multiple-vision-language-model-systems)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：利用强化学习优化图像质量推理
-2. [Cog3DMap: Multi-View Vision-Language Reasoning with 3D Cognitive Maps](/202603/29/2603.23023v1-cog3dmap-multi-view-vision-language-reasoning-with-3d-cognitive-maps)  
+   evidence：多VLM系统中的多模态推理
+2. [VideoTIR: Accurate Understanding for Long Videos with Efficient Tool-Integrated Reasoning](/202603/30/2603.25021v1-videotir-accurate-understanding-for-long-videos-with-efficient-tool-integrated-reasoning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：基于3D地图的多视图视觉语言推理
-3. [UniFunc3D: Unified Active Spatial-Temporal Grounding for 3D Functionality Segmentation](/202603/29/2603.23478v1-unifunc3d-unified-active-spatial-temporal-grounding-for-3d-functionality-segmentation)  
+   evidence：利用强化学习增强多模态大模型的工具集成推理
+3. [MSRL: Scaling Generative Multimodal Reward Modeling via Multi-Stage Reinforcement Learning](/202603/30/2603.25108v1-msrl-scaling-generative-multimodal-reward-modeling-via-multi-stage-reinforcement-learning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于时空推理和决策的主动观察者
-4. [See, Remember, Explore: A Benchmark and Baselines for Streaming Spatial Reasoning](/202603/29/2603.23864v1-see-remember-explore-a-benchmark-and-baselines-for-streaming-spatial-reasoning)  
+   evidence：通过强化学习扩展多模态奖励建模
+4. [Reflect to Inform: Boosting Multimodal Reasoning via Information-Gain-Driven Verification](/202603/30/2603.26348v1-reflect-to-inform-boosting-multimodal-reasoning-via-information-gain-driven-verification)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：VLM的流式空间推理与主动感知
-5. [KLDrive: Fine-Grained 3D Scene Reasoning for Autonomous Driving based on Knowledge Graph](/202603/29/2603.21029v1-kldrive-fine-grained-3d-scene-reasoning-for-autonomous-driving-based-on-knowledge-graph)  
+   evidence：通过视觉内省增强多模态推理
+5. [Mirage The Illusion of Visual Understanding](/202603/30/2603.21687v1-mirage-the-illusion-of-visual-understanding)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：知识图谱增强的LLM对3D场景事实的推理
-6. [Incentivizing Generative Zero-Shot Learning via Outcome-Reward Reinforcement Learning with Visual Cues](/202603/29/2603.21138v1-incentivizing-generative-zero-shot-learning-via-outcome-reward-reinforcement-learning-with-visual-cues)  
+   evidence：视觉语言推理的底层机制
+6. [MIRAGE: The Illusion of Visual Understanding](/202603/30/2603.21687v2-mirage-the-illusion-of-visual-understanding)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：结合视觉线索的强化学习用于多模态推理
-7. [Adaptive Robust Estimator for Multi-Agent Reinforcement Learning](/202603/29/2603.21574v1-adaptive-robust-estimator-for-multi-agent-reinforcement-learning)  
+   evidence：视觉-语言推理底层机制的分析
+7. [Getting to the Point: Why Pointing Improves LVLMs](/202603/30/2603.21746v1-getting-to-the-point-why-pointing-improves-lvlms)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于大语言模型协作推理的多智能体强化学习
-8. [Mind over Space: Can Multimodal Large Language Models Mentally Navigate?](/202603/29/2603.21577v1-mind-over-space-can-multimodal-large-language-models-mentally-navigate)  
+   evidence：在大型视觉语言模型中将定位和推理建模为显式序列步骤
+8. [Demystifying Reinforcement Learning for Long-Horizon Tool-Using Agents: A Comprehensive Recipe](/202603/30/2603.21972v1-demystifying-reinforcement-learning-for-long-horizon-tool-using-agents-a-comprehensive-recipe)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：具身智能体中的多模态大模型与空间推理
-9. [Memory Over Maps: 3D Object Localization Without Reconstruction](/202603/29/2603.20530v1-memory-over-maps-3d-object-localization-without-reconstruction)  
+   evidence：针对长周期工具使用智能体的强化学习研究
+9. [CoVFT: Context-aware Visual Fine-tuning for Multimodal Large Language Models](/202603/30/2603.21077v2-covft-context-aware-visual-fine-tuning-for-multimodal-large-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：针对具身任务在二维观测上进行语义推理
-10. [When Visuals Aren't the Problem: Evaluating Vision-Language Models on Misleading Data Visualizations](/202603/29/2603.22368v1-when-visuals-arent-the-problem-evaluating-vision-language-models-on-misleading-data-visualizations)  
+   evidence：多模态大模型中的跨模态感知与推理
+10. [Learning Trajectory-Aware Multimodal Large Language Models for Video Reasoning Segmentation](/202603/30/2603.21488v1-learning-trajectory-aware-multimodal-large-language-models-for-video-reasoning-segmentation)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：评估视觉语言模型在数据可视化推理错误方面的表现
-11. [Towards Automated Community Notes Generation with Large Vision Language Models for Combating Contextual Deception](/202603/29/2603.22453v1-towards-automated-community-notes-generation-with-large-vision-language-models-for-combating-contextual-deception)  
+   evidence：用于视频推理的多模态大语言模型
+11. [Rethinking Token Reduction for Large Vision-Language Models](/202603/30/2603.21701v1-rethinking-token-reduction-for-large-vision-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于欺骗检测中复杂推理的视觉语言模型
+   evidence：多轮视觉问答中的视觉推理与标记减少
 
 
 <div class="dpr-home-promo-card">
