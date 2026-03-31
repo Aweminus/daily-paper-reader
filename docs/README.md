@@ -6,73 +6,88 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-30
-- 运行时间：2026-03-30 19:44:43 UTC
+- 最新运行日期：2026-03-31
+- 运行时间：2026-03-31 19:46:02 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：6
+- 本次总论文数：22
+- 精读区：11
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦 GUI 视觉智能体与多模态强化学习，深度解析 17 篇涵盖 Token 剪枝、长视频推理及奖励建模的前沿进展。
-核心突破在于通过语义、空间与时间三维视角重构历史截图处理，并利用轨迹引导强化学习显著提升多模态推理任务的准确性。
-建议关注多模态模型在复杂交互场景下的效率优化方案，这是构建高性能视觉助手的重要基石。
-- 详情：[/202603/30/README](/202603/30/README)
+今日深度解析 22 篇前沿成果，聚焦大视觉语言模型（LVLM）与强化学习的深度融合。
+核心突破在于通过可验证奖励优化视觉表征，并利用差异反馈实现多模态过程级监督。
+建议重点关注强化学习如何赋能多模态模型，提升其在复杂视频理解与长效任务中的逻辑推理能力。
+- 详情：[/202603/31/README](/202603/31/README)
 
 ### 精读区论文标签
-1. [Rethinking Token Pruning for Historical Screenshots in GUI Visual Agents: Semantic, Spatial, and Temporal Perspectives](/202603/30/2603.26041v1-rethinking-token-pruning-for-historical-screenshots-in-gui-visual-agents-semantic-spatial-and-temporal-perspectives)  
+1. [Bridging Visual Representation and Reinforcement Learning from Verifiable Rewards in Large Vision-Language Models](/202603/31/2603.27375v1-bridging-visual-representation-and-reinforcement-learning-from-verifiable-rewards-in-large-vision-language-models)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：大型视觉语言模型中基于可验证奖励的强化学习
+2. [Difference Feedback: Generating Multimodal Process-Level Supervision for VLM Reinforcement Learning](/202603/31/2603.27482v1-difference-feedback-generating-multimodal-process-level-supervision-for-vlm-reinforcement-learning)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：具有过程级监督的VLM强化学习用于推理
+3. [TIR-Agent: Training an Explorative and Efficient Agent for Image Restoration](/202603/31/2603.27742v1-tir-agent-training-an-explorative-and-efficient-agent-for-image-restoration)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：使用强化学习训练用于图像修复的视觉语言智能体
+4. [Seeing with You: Perception-Reasoning Coevolution for Multimodal Reasoning](/202603/31/2603.28618v1-seeing-with-you-perception-reasoning-coevolution-for-multimodal-reasoning)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：利用可验证奖励实现多模态大模型的感知-推理协同演化强化学习
+5. [Mitigating the Reasoning Tax in Vision-Language Fine-Tuning with Input-Adaptive Depth Aggregation](/202603/31/2603.26330v1-mitigating-the-reasoning-tax-in-vision-language-fine-tuning-with-input-adaptive-depth-aggregation)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：使用MLLM进行导航的非机器人GUI视觉智能体
-2. [Beyond Where to Look: Trajectory-Guided Reinforcement Learning for Multimodal RLVR](/202603/30/2603.26126v1-beyond-where-to-look-trajectory-guided-reinforcement-learning-for-multimodal-rlvr)  
+   evidence：缓解视觉语言模型中的推理性能下降
+6. [Learning to Select Visual In-Context Demonstrations](/202603/31/2603.26775v1-learning-to-select-visual-in-context-demonstrations)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于多模态推理和视觉接地的强化学习
-3. [DyGeoVLN: Infusing Dynamic Geometry Foundation Model into Vision-Language Navigation](/202603/30/2603.21269v1-dygeovln-infusing-dynamic-geometry-foundation-model-into-vision-language-navigation)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：导航代理的视觉语义推理
-4. [VP-VLA: Visual Prompting as an Interface for Vision-Language-Action Models](/202603/30/2603.22003v1-vp-vla-visual-prompting-as-an-interface-for-vision-language-action-models)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：具有高层推理能力的视觉-语言-动作模型双系统框架
-5. [EVA: Efficient Reinforcement Learning for End-to-End Video Agent](/202603/30/2603.22918v2-eva-efficient-reinforcement-learning-for-end-to-end-video-agent)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：用于端到端视频智能体推理的强化学习
-6. [MedOpenClaw: Auditable Medical Imaging Agents Reasoning over Uncurated Full Studies](/202603/30/2603.24649v1-medopenclaw-auditable-medical-imaging-agents-reasoning-over-uncurated-full-studies)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：基于VLM的临床智能体，用于主动导航和决策
+   evidence：训练强化学习智能体用于多模态大模型任务适配
+7. [Learning to Focus and Precise Cropping: A Reinforcement Learning Framework with Information Gaps and Grounding Loss for MLLMs](/202603/31/2603.27494v1-learning-to-focus-and-precise-cropping-a-reinforcement-learning-framework-with-information-gaps-and-grounding-loss-for-mllms)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：基于智能体的MLLM推理强化学习框架
+8. [LVRPO: Language-Visual Alignment with GRPO for Multimodal Understanding and Generation](/202603/31/2603.27693v1-lvrpo-language-visual-alignment-with-grpo-for-multimodal-understanding-and-generation)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：基于强化学习的多模态推理与对齐偏好优化
+9. [MuSEAgent: A Multimodal Reasoning Agent with Stateful Experiences](/202603/31/2603.27813v1-museagent-a-multimodal-reasoning-agent-with-stateful-experiences)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：用于信息检索和决策的多模态推理智能体
+10. [Navigating the Mirage: A Dual-Path Agentic Framework for Robust Misleading Chart Question Answering](/202603/31/2603.28583v1-navigating-the-mirage-a-dual-path-agentic-framework-for-robust-misleading-chart-question-answering)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：视觉语言推理的智能体框架
+11. [AMIGO: Agentic Multi-Image Grounding Oracle Benchmark](/202603/31/2603.28662v1-amigo-agentic-multi-image-grounding-oracle-benchmark)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：通过扩展交互采取行动的智能视觉语言模型
 
 ### 速读区论文标签
-1. [SCoOP: Semantic Consistent Opinion Pooling for Uncertainty Quantification in Multiple Vision-Language Model Systems](/202603/30/2603.23853v1-scoop-semantic-consistent-opinion-pooling-for-uncertainty-quantification-in-multiple-vision-language-model-systems)  
+1. [Focus, Don't Prune: Identifying Instruction-Relevant Regions for Information-Rich Image Understanding](/202603/31/2603.22815v1-focus-dont-prune-identifying-instruction-relevant-regions-for-information-rich-image-understanding)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：多VLM系统中的多模态推理
-2. [VideoTIR: Accurate Understanding for Long Videos with Efficient Tool-Integrated Reasoning](/202603/30/2603.25021v1-videotir-accurate-understanding-for-long-videos-with-efficient-tool-integrated-reasoning)  
+   evidence：识别指令相关区域以改进VLM中的推理
+2. [Memory-Augmented Vision-Language Agents for Persistent and Semantically Consistent Object Captioning](/202603/31/2603.24257v2-memory-augmented-vision-language-agents-for-persistent-and-semantically-consistent-object-captioning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：利用强化学习增强多模态大模型的工具集成推理
-3. [MSRL: Scaling Generative Multimodal Reward Modeling via Multi-Stage Reinforcement Learning](/202603/30/2603.25108v1-msrl-scaling-generative-multimodal-reward-modeling-via-multi-stage-reinforcement-learning)  
+   evidence：用于探索和推理的记忆增强视觉语言智能体
+3. [LensWalk: Agentic Video Understanding by Planning How You See in Videos](/202603/31/2603.24558v1-lenswalk-agentic-video-understanding-by-planning-how-you-see-in-videos)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：通过强化学习扩展多模态奖励建模
-4. [Reflect to Inform: Boosting Multimodal Reasoning via Information-Gain-Driven Verification](/202603/30/2603.26348v1-reflect-to-inform-boosting-multimodal-reasoning-via-information-gain-driven-verification)  
+   evidence：具有推理-计划-观察循环的视觉语言模型智能体框架
+4. [SpatialStack: Layered Geometry-Language Fusion for 3D VLM Spatial Reasoning](/202603/31/2603.27437v1-spatialstack-layered-geometry-language-fusion-for-3d-vlm-spatial-reasoning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：通过视觉内省增强多模态推理
-5. [Mirage The Illusion of Visual Understanding](/202603/30/2603.21687v1-mirage-the-illusion-of-visual-understanding)  
+   evidence：通过几何-语言融合实现VLM空间推理
+5. [GeoTikzBridge: Advancing Multimodal Code Generation for Geometric Perception and Reasoning](/202603/31/2603.22687v2-geotikzbridge-advancing-multimodal-code-generation-for-geometric-perception-and-reasoning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言推理的底层机制
-6. [MIRAGE: The Illusion of Visual Understanding](/202603/30/2603.21687v2-mirage-the-illusion-of-visual-understanding)  
+   evidence：通过几何感知的代码生成增强视觉推理
+6. [SG-VLA: Learning Spatially-Grounded Vision-Language-Action Models for Mobile Manipulation](/202603/31/2603.22760v1-sg-vla-learning-spatially-grounded-vision-language-action-models-for-mobile-manipulation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉-语言推理底层机制的分析
-7. [Getting to the Point: Why Pointing Improves LVLMs](/202603/30/2603.21746v1-getting-to-the-point-why-pointing-improves-lvlms)  
+   evidence：用于移动操作推理的视觉-语言-动作模型
+7. [PhotoAgent: A Robotic Photographer with Spatial and Aesthetic Understanding](/202603/31/2603.22796v1-photoagent-a-robotic-photographer-with-spatial-and-aesthetic-understanding)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：在大型视觉语言模型中将定位和推理建模为显式序列步骤
-8. [Demystifying Reinforcement Learning for Long-Horizon Tool-Using Agents: A Comprehensive Recipe](/202603/30/2603.21972v1-demystifying-reinforcement-learning-for-long-horizon-tool-using-agents-a-comprehensive-recipe)  
+   evidence：将大语言模型推理与具身智能体控制相结合
+8. [CATNAV: Cached Vision-Language Traversability for Efficient Zero-Shot Robot Navigation](/202603/31/2603.22800v1-catnav-cached-vision-language-traversability-for-efficient-zero-shot-robot-navigation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：针对长周期工具使用智能体的强化学习研究
-9. [CoVFT: Context-aware Visual Fine-tuning for Multimodal Large Language Models](/202603/30/2603.21077v2-covft-context-aware-visual-fine-tuning-for-multimodal-large-language-models)  
+   evidence：基于VLM的轨迹选择和视觉推理用于机器人导航
+9. [GeoTikzBridge: Advancing Multimodal Code Generation for Geometric Perception and Reasoning](/202603/31/2603.22687v1-geotikzbridge-advancing-multimodal-code-generation-for-geometric-perception-and-reasoning)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：多模态大模型中的跨模态感知与推理
-10. [Learning Trajectory-Aware Multimodal Large Language Models for Video Reasoning Segmentation](/202603/30/2603.21488v1-learning-trajectory-aware-multimodal-large-language-models-for-video-reasoning-segmentation)  
+   evidence：用于视觉推理的多模态代码生成
+10. [Attention-aware Inference Optimizations for Large Vision-Language Models with Memory-efficient Decoding](/202603/31/2603.23914v1-attention-aware-inference-optimizations-for-large-vision-language-models-with-memory-efficient-decoding)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于视频推理的多模态大语言模型
-11. [Rethinking Token Reduction for Large Vision-Language Models](/202603/30/2603.21701v1-rethinking-token-reduction-for-large-vision-language-models)  
+   evidence：优化长上下文任务中多模态推理的内存占用
+11. [Unlocking Few-Shot Capabilities in LVLMs via Prompt Conditioning and Head Selection](/202603/31/2603.24181v1-unlocking-few-shot-capabilities-in-lvlms-via-prompt-conditioning-and-head-selection)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：多轮视觉问答中的视觉推理与标记减少
+   evidence：大型视觉语言模型中的视觉-文本联合推理
 
 
 <div class="dpr-home-promo-card">

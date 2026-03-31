@@ -1,46 +1,212 @@
 {
-  "generated_at": "2026-03-30T19:42:37.635743+00:00",
-  "updated_date": "20260330",
+  "generated_at": "2026-03-31T19:41:38.991650+00:00",
+  "updated_date": "20260331",
   "carryover_days": 9,
   "items": [
     {
-      "id": "2603.26666v1",
-      "title": "VLA-OPD: Bridging Offline SFT and Online RL for Vision-Language-Action Models via On-Policy Distillation",
-      "abstract": "Although pre-trained Vision-Language-Action (VLA) models exhibit impressive generalization in robotic manipulation, post-training remains crucial to ensure reliable performance during deployment. However, standard offline Supervised Fine-Tuning (SFT) suffers from distribution shifts and catastrophic forgetting of pre-trained capabilities, while online Reinforcement Learning (RL) struggles with sparse rewards and poor sample efficiency. In this paper, we propose On-Policy VLA Distillation (VLA-OPD), a framework bridging the efficiency of SFT with the robustness of RL. Instead of relying on sparse environmental rewards, VLA-OPD leverages an expert teacher to provide dense, token-level supervision on the student's self-generated trajectories. This enables active error correction on policy-induced states while preserving pre-trained general capabilities through gentle alignment. Crucially, we formulate VLA-OPD via a Reverse-KL objective. Unlike standard Forward-KL that induces mode-covering entropy explosion, or Hard-CE that causes premature entropy collapse, our bounded mode-seeking objective ensures stable policy learning by filtering out the teacher's epistemic uncertainty while maintaining action diversity. Experiments on LIBERO and RoboTwin2.0 benchmarks demonstrate that VLA-OPD significantly improves sample efficiency over RL and robustness over SFT, while effectively mitigating catastrophic forgetting during post-training.",
+      "id": "2603.27577v1",
+      "title": "Structured Observation Language for Efficient and Generalizable Vision-Language Navigation",
+      "abstract": "Vision-Language Navigation (VLN) requires an embodied agent to navigate complex environments by following natural language instructions, which typically demands tight fusion of visual and language modalities. Existing VLN methods often convert raw images into visual tokens or implicit features, requiring large-scale visual pre-training and suffering from poor generalization under environmental variations (e.g., lighting, texture). To address these issues, we propose SOL-Nav (Structured Observation Language for Navigation), a novel framework that translates egocentric visual observations into compact structured language descriptions for efficient and generalizable navigation. Specifically, we divide RGB-D images into a N*N grid, extract representative semantic, color, and depth information for each grid cell to form structured text, and concatenate this with the language instruction as pure language input to a pre-trained language model (PLM). Experimental results on standard VLN benchmarks (R2R, RxR) and real-world deployments demonstrate that SOL-Nav significantly reduces the model size and training data dependency, fully leverages the reasoning and representation capabilities of PLMs, and achieves strong generalization to unseen environments.",
       "authors": [
-        "Zhide Zhong",
-        "Haodong Yan",
-        "Junfeng Li",
-        "Junjie He",
-        "Tianran Zhang",
-        "Haoang Li"
+        "Daojie Peng",
+        "Fulong Ma",
+        "Jun Ma"
       ],
-      "primary_category": "cs.RO",
+      "primary_category": "cs.CV",
       "categories": [
+        "cs.CV",
         "cs.RO"
       ],
-      "published": "2026-03-27T17:59:33+00:00",
-      "link": "https://arxiv.org/pdf/2603.26666v1",
+      "published": "2026-03-29T08:34:05+00:00",
+      "link": "https://arxiv.org/pdf/2603.27577v1",
       "tags": [
         "keyword:VLM RL",
         "query:VLM RL"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "bridging offline SFT and online RL for Vision-Language-Action models",
-      "llm_evidence_cn": "连接视觉-语言-动作模型的离线微调与在线强化学习",
-      "llm_evidence": "连接视觉-语言-动作模型的离线微调与在线强化学习",
-      "canonical_evidence": "连接视觉-语言-动作模型的离线微调与在线强化学习",
-      "llm_tldr_en": "Develops VLA-OPD to improve Vision-Language-Action models using on-policy reinforcement learning distillation.",
-      "llm_tldr_cn": "开发VLA-OPD框架，通过在线策略强化学习蒸馏提升视觉-语言-动作模型性能。",
-      "llm_tldr": "开发VLA-OPD框架，通过在线策略强化学习蒸馏提升视觉-语言-动作模型性能。",
+      "llm_evidence_en": "vision-language navigation agent using structured language descriptions",
+      "llm_evidence_cn": "使用结构化语言描述的视觉语言导航智能体",
+      "llm_evidence": "使用结构化语言描述的视觉语言导航智能体",
+      "canonical_evidence": "使用结构化语言描述的视觉语言导航智能体",
+      "llm_tldr_en": "Proposes SOL-Nav to translate visual observations into structured language for efficient navigation agents.",
+      "llm_tldr_cn": "提出SOL-Nav框架，将视觉观察转化为结构化语言，以实现高效且泛化性强的导航智能体。",
+      "llm_tldr": "提出SOL-Nav框架，将视觉观察转化为结构化语言，以实现高效且泛化性强的导航智能体。",
       "llm_tags": [
         "query:vlm-rl"
       ],
       "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision-language agentic reinforcement learning",
-      "matched_requirement_id": "req-1",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
       "selection_source": "carryover_cache",
-      "paper_id": "2603.26666v1",
+      "paper_id": "2603.27577v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.27558v1",
+      "title": "Learning to See through Illumination Extremes with Event Streaming in Multimodal Large Language Models",
+      "abstract": "Multimodal Large Language Models (MLLMs) perform strong vision-language reasoning under standard conditions but fail in extreme illumination, where RGB inputs lose irrevocable structure and semantics. We propose Event-MLLM, an event-enhanced model that performs all-light visual reasoning by dynamically fusing event streams with RGB frames. Two key components drive our approach: an Illumination Indicator - a learnable signal derived from a DINOv2 branch that represents exposure degradation and adaptively modulates event-RGB fusion - and an Illumination Correction Loss that aligns fused features with non-degraded (normal-light) semantics in the latent space, compensating for information lost in extreme lighting. We curate the first multi-illumination event-instruction corpus for MLLMs, with 2,241 event-RGB samples (around 6 QA pairs each) across diverse scenes and 17 brightness rates (0.05x - 20x), plus an instruct-following benchmark for reasoning, counting, and fine-grained recognition under extreme lighting. Experiments show that Event-MLLM markedly outperforms general-purpose, illumination-adaptive, and event-only baselines, setting a new state of the art in robust multimodal perception and reasoning under challenging illumination.",
+      "authors": [
+        "Baoheng Zhang",
+        "Jiahui Liu",
+        "Gui Zhao",
+        "Weizhou Zhang",
+        "Yixuan Ma",
+        "Jun Jiang",
+        "Yingxian Chen",
+        "Wilton W. T. Fok",
+        "Xiaojuan Qi",
+        "Hayden Kwok-Hay So"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-29T07:46:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.27558v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "vision-language reasoning under extreme conditions in MLLMs",
+      "llm_evidence_cn": "多模态大模型在极端条件下的视觉语言推理",
+      "llm_evidence": "多模态大模型在极端条件下的视觉语言推理",
+      "canonical_evidence": "多模态大模型在极端条件下的视觉语言推理",
+      "llm_tldr_en": "Event-MLLM enhances vision-language reasoning in extreme illumination by fusing event streams with RGB.",
+      "llm_tldr_cn": "Event-MLLM通过融合事件流和RGB，增强了极端光照下的视觉语言推理。",
+      "llm_tldr": "Event-MLLM通过融合事件流和RGB，增强了极端光照下的视觉语言推理。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.27558v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.28053v1",
+      "title": "Reducing Oracle Feedback with Vision-Language Embeddings for Preference-Based RL",
+      "abstract": "Preference-based reinforcement learning can learn effective reward functions from comparisons, but its scalability is constrained by the high cost of oracle feedback. Lightweight vision-language embedding (VLE) models provide a cheaper alternative, but their noisy outputs limit their effectiveness as standalone reward generators. To address this challenge, we propose ROVED, a hybrid framework that combines VLE-based supervision with targeted oracle feedback. Our method uses the VLE to generate segment-level preferences and defers to an oracle only for samples with high uncertainty, identified through a filtering mechanism. In addition, we introduce a parameter-efficient fine-tuning method that adapts the VLE with the obtained oracle feedback in order to improve the model over time in a synergistic fashion. This ensures the retention of the scalability of embeddings and the accuracy of oracles, while avoiding their inefficiencies. Across multiple robotic manipulation tasks, ROVED matches or surpasses prior preference-based methods while reducing oracle queries by up to 80%. Remarkably, the adapted VLE generalizes across tasks, yielding cumulative annotation savings of up to 90%, highlighting the practicality of combining scalable embeddings with precise oracle supervision for preference-based RL.",
+      "authors": [
+        "Udita Ghosh",
+        "Dripta S. Raychaudhuri",
+        "Jiachen Li",
+        "Konstantinos Karydis",
+        "Amit Roy-Chowdhury"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-30T05:33:55+00:00",
+      "link": "https://arxiv.org/pdf/2603.28053v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "vision-language embeddings for preference-based reinforcement learning",
+      "llm_evidence_cn": "视觉语言嵌入用于基于偏好的强化学习",
+      "llm_evidence": "视觉语言嵌入用于基于偏好的强化学习",
+      "canonical_evidence": "视觉语言嵌入用于基于偏好的强化学习",
+      "llm_tldr_en": "Uses vision-language embeddings to reduce oracle feedback costs in preference-based reinforcement learning.",
+      "llm_tldr_cn": "在基于偏好的强化学习中使用视觉语言嵌入来减少对专家反馈的依赖并降低成本。",
+      "llm_tldr": "在基于偏好的强化学习中使用视觉语言嵌入来减少对专家反馈的依赖并降低成本。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reinforcement learning with vision and language",
+      "matched_requirement_id": "req-2",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.28053v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.27967v1",
+      "title": "Learning Multi-View Spatial Reasoning from Cross-View Relations",
+      "abstract": "Vision-language models (VLMs) have achieved impressive results on single-view vision tasks, but lack the multi-view spatial reasoning capabilities essential for embodied AI systems to understand 3D environments and manipulate objects across different viewpoints. In this work, we introduce Cross-View Relations (XVR), a large-scale dataset designed to teach VLMs spatial reasoning across multiple views. XVR comprises 100K vision-question-answer samples derived from 18K diverse 3D scenes and 70K robotic manipulation trajectories, spanning three fundamental spatial reasoning tasks: Correspondence (matching objects across views), Verification (validating spatial relationships), and Localization (identifying object positions). VLMs fine-tuned on XVR achieve substantial improvements on established multi-view and robotic spatial reasoning benchmarks (MindCube and RoboSpatial). When integrated as backbones in Vision-Language-Action models, XVR-trained representations improve success rates on RoboCasa. Our results demonstrate that explicit training on cross-view spatial relations significantly enhances multi-view reasoning and transfers effectively to real-world robotic manipulation.",
+      "authors": [
+        "Suchae Jeong",
+        "Jaehwi Song",
+        "Haeone Lee",
+        "Hanna Kim",
+        "Jian Kim",
+        "Dongjun Lee",
+        "Dong Kyu Shin",
+        "Changyeon Kim",
+        "Dongyoon Hahm",
+        "Woogyeol Jin",
+        "Juheon Choi",
+        "Kimin Lee"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-30T02:42:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.27967v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multi-view spatial reasoning for vision-language models",
+      "llm_evidence_cn": "视觉语言模型的多视图空间推理",
+      "llm_evidence": "视觉语言模型的多视图空间推理",
+      "canonical_evidence": "视觉语言模型的多视图空间推理",
+      "llm_tldr_en": "XVR is a large-scale dataset designed to teach VLMs spatial reasoning across multiple views.",
+      "llm_tldr_cn": "XVR是一个旨在教授视觉语言模型跨多视图空间推理能力的大规模数据集。",
+      "llm_tldr": "XVR是一个旨在教授视觉语言模型跨多视图空间推理能力的大规模数据集。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.27967v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.28740v1",
+      "title": "FocusVLA: Focused Visual Utilization for Vision-Language-Action Models",
+      "abstract": "Vision-Language-Action (VLA) models improve action generation by conditioning policies on rich vision-language information. However, current auto-regressive policies are constrained by three bottlenecks: (1) architectural bias drives models to overlook visual details, (2) an excessive number of visual tokens makes attention difficult to focus on the correct regions, and (3) task-irrelevant visual information introduces substantial noise - together severely impairing the quality of action. In this paper, we investigate how to effectively utilize different visual representations for action generation. To this end, we first empirically validate the above issues and show that VLA performance is primarily limited by how visual information is utilized, rather than by the quality of visual representations. Based on these insights, we introduce FocusVLA, a novel paradigm that directs the model's attention to task-relevant visual regions to effectively bridge vision to action. Specifically, we first propose Modality Cascaded Attention to eliminate shortcut pathways, thereby compelling VLA models to rely on task-relevant visual details for action generation. Furthermore, we propose Focus Attention, which dynamically selects task-relevant visual patches to control information quantity while explicitly modulating their influence to suppress task-irrelevant noise. Extensive experiments on both simulated and real-world robotic benchmarks demonstrate that FocusVLA not only effectively leverages visual details to perform dexterous manipulations, but also substantially improves performance and accelerates convergence across a variety of tasks.",
+      "authors": [
+        "Yichi Zhang",
+        "Weihao Yuan",
+        "Yizhuo Zhang",
+        "Xidong Zhang",
+        "Jia Wan"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-30T17:50:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.28740v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "improving action generation in vision-language-action models",
+      "llm_evidence_cn": "改进视觉-语言-动作模型中的动作生成",
+      "llm_evidence": "改进视觉-语言-动作模型中的动作生成",
+      "canonical_evidence": "改进视觉-语言-动作模型中的动作生成",
+      "llm_tldr_en": "Investigates visual representation utilization to improve action generation in Vision-Language-Action (VLA) models.",
+      "llm_tldr_cn": "研究如何有效利用视觉表示，以提升视觉-语言-动作（VLA）模型的动作生成质量。",
+      "llm_tldr": "研究如何有效利用视觉表示，以提升视觉-语言-动作（VLA）模型的动作生成质量。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.28740v1",
       "carry_days": 1
     }
   ]
