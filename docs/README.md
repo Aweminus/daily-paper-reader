@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-01
-- 运行时间：2026-04-01 20:05:25 UTC
+- 最新运行日期：2026-04-02
+- 运行时间：2026-04-02 19:45:13 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析 17 篇 AI 论文，重点攻克 VLA 模型在多智能体博弈追踪与高效视频智能体强化学习中的核心挑战。
-推荐关注 CoMaTrack 结合博弈论提升追踪精度，以及 SOLE-R1 创新性地将视频语言推理作为机器人强化学习的唯一奖励。
-建议从 VLA 模型与博弈论的跨界融合入手，探索端到端视频智能体在复杂场景下的自主进化路径。
-- 详情：[/202604/01/README](/202604/01/README)
+今日深度解析17篇AI前沿进展，聚焦视觉语言模型的发散性思维激励与自然语言驱动的多智能体强化学习。
+核心研究展示了如何引导VLM实现“条条大路通罗马”的多元化思考，并证实了自然语言在复杂多智能体协作中的关键作用。
+建议关注大模型在医疗视觉定位及芯片布局等垂直领域的实战应用，探索“语言驱动”的智能体进化新范式。
+- 详情：[/202604/02/README](/202604/02/README)
 
 ### 精读区论文标签
-1. [CoMaTrack: Competitive Multi-Agent Game-Theoretic Tracking with Vision-Language-Action Models](/202604/01/2603.22846v2-comatrack-competitive-multi-agent-game-theoretic-tracking-with-vision-language-action-models)  
+1. [All Roads Lead to Rome: Incentivizing Divergent Thinking in Vision-Language Models](/202604/02/2604.00479v1-all-roads-lead-to-rome-incentivizing-divergent-thinking-in-vision-language-models)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：强化学习（GRPO）增强了视觉语言模型的推理能力
+2. [LangMARL: Natural Language Multi-Agent Reinforcement Learning](/202604/02/2604.00722v1-langmarl-natural-language-multi-agent-reinforcement-learning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：基于视觉-语言-动作模型的多智能体强化学习
-2. [EVA: Efficient Reinforcement Learning for End-to-End Video Agent](/202604/01/2603.22918v1-eva-efficient-reinforcement-learning-for-end-to-end-video-agent)  
+   evidence：非机器人领域的自然语言多智能体强化学习
+3. [ThermoAct:Thermal-Aware Vision-Language-Action Models for Robotic Perception and Decision-Making](/202604/02/2603.25044v2-thermoactthermal-aware-vision-language-action-models-for-robotic-perception-and-decision-making)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：支持迭代推理和规划的视频智能体强化学习框架
-3. [GUIDE: Resolving Domain Bias in GUI Agents through Real-Time Web Video Retrieval and Plug-and-Play Annotation](/202604/01/2603.26266v1-guide-resolving-domain-bias-in-gui-agents-through-real-time-web-video-retrieval-and-plug-and-play-annotation)  
+   evidence：VLM作为决策和推理的高层规划器
+4. [Sparse Visual Thought Circuits in Vision-Language Models](/202604/02/2603.25075v1-sparse-visual-thought-circuits-in-vision-language-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：使用视觉语言模型进行界面交互的GUI智能体
-4. [GUIDE: Resolving Domain Bias in GUI Agents through Real-Time Web Video Retrieval and Plug-and-Play Annotation](/202604/01/2603.26266v2-guide-resolving-domain-bias-in-gui-agents-through-real-time-web-video-retrieval-and-plug-and-play-annotation)  
+   evidence：解释视觉思维电路以进行视觉语言模型推理
+5. [Reasoning-Driven Anomaly Detection and Localization with Image-Level Supervision](/202604/02/2603.27179v1-reasoning-driven-anomaly-detection-and-localization-with-image-level-supervision)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：使用视觉语言模型进行界面交互的GUI智能体
-5. [Inference-Time Structural Reasoning for Compositional Vision-Language Understanding](/202604/01/2603.27349v1-inference-time-structural-reasoning-for-compositional-vision-language-understanding)  
+   evidence：推理驱动的异常检测
+6. [CARV: A Diagnostic Benchmark for Compositional Analogical Reasoning in Multimodal LLMs](/202604/02/2603.27958v1-carv-a-diagnostic-benchmark-for-compositional-analogical-reasoning-in-multimodal-llms)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：组合视觉语言理解的结构化推理
-6. [FocusVLA: Focused Visual Utilization for Vision-Language-Action Models](/202604/01/2603.28740v1-focusvla-focused-visual-utilization-for-vision-language-action-models)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：改进视觉-语言-动作模型中的动作生成
+   evidence：多模态大模型组合类比推理的诊断基准
 
 ### 速读区论文标签
-1. [Reducing Oracle Feedback with Vision-Language Embeddings for Preference-Based RL](/202604/01/2603.28053v1-reducing-oracle-feedback-with-vision-language-embeddings-for-preference-based-rl)  
+1. [MedLoc-R1: Performance-Aware Curriculum Reward Scheduling for GRPO-Based Medical Visual Grounding](/202604/02/2603.28120v1-medloc-r1-performance-aware-curriculum-reward-scheduling-for-grpo-based-medical-visual-grounding)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于基于偏好的强化学习的视觉语言嵌入
-2. [SOLE-R1: Video-Language Reasoning as the Sole Reward for On-Robot Reinforcement Learning](/202604/01/2603.28730v1-sole-r1-video-language-reasoning-as-the-sole-reward-for-on-robot-reinforcement-learning)  
+   evidence：用于医学视觉定位和多模态推理的强化学习
+2. [Dynamic Dual-Granularity Skill Bank for Agentic RL](/202604/02/2603.28716v1-dynamic-dual-granularity-skill-bank-for-agentic-rl)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：VLM推理作为强化学习奖励
-3. [LatentPilot: Scene-Aware Vision-and-Language Navigation by Dreaming Ahead with Latent Visual Reasoning](/202604/01/2603.29165v1-latentpilot-scene-aware-vision-and-language-navigation-by-dreaming-ahead-with-latent-visual-reasoning)  
+   evidence：带有技能库的智能体强化学习
+3. [See it to Place it: Evolving Macro Placements with Vision-Language Models](/202604/02/2603.28733v1-see-it-to-place-it-evolving-macro-placements-with-vision-language-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于导航决策的潜空间视觉推理
-4. [DIAL: Decoupling Intent and Action via Latent World Modeling for End-to-End VLA](/202604/01/2603.29844v1-dial-decoupling-intent-and-action-via-latent-world-modeling-for-end-to-end-vla)  
+   evidence：VLM用于芯片布局中的空间推理和决策
+4. [A Reasoning-Enabled Vision-Language Foundation Model for Chest X-ray Interpretation](/202604/02/2604.00493v1-a-reasoning-enabled-vision-language-foundation-model-for-chest-x-ray-interpretation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：基于VLM的高级决策
-5. [Gaze-Regularized Vision-Language-Action Models for Robotic Manipulation](/202604/01/2603.23202v1-gaze-regularized-vision-language-action-models-for-robotic-manipulation)  
+   evidence：具备推理能力的视觉语言模型
+5. [Knowledge-Guided Manipulation Using Multi-Task Reinforcement Learning](/202604/02/2603.24083v1-knowledge-guided-manipulation-using-multi-task-reinforcement-learning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于机器人操作的VLA模型
-6. [VISion On Request: Enhanced VLLM efficiency with sparse, dynamically selected, vision-language interactions](/202604/01/2603.23495v1-vision-on-request-enhanced-vllm-efficiency-with-sparse-dynamically-selected-vision-language-interactions)  
+   evidence：结合语言和视觉模态的多任务强化学习
+6. [Video-Only ToM: Enhancing Theory of Mind in Multimodal Large Language Models](/202604/02/2603.24484v1-video-only-tom-enhancing-theory-of-mind-in-multimodal-large-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：大型视觉语言模型细粒度推理的效率优化
-7. [Thinking with Tables: Enhancing Multi-Modal Tabular Understanding via Neuro-Symbolic Reasoning](/202604/01/2603.24004v1-thinking-with-tables-enhancing-multi-modal-tabular-understanding-via-neuro-symbolic-reasoning)  
+   evidence：多模态大模型中的理解与推理
+7. [Interpretable Zero-shot Referring Expression Comprehension with Query-driven Scene Graphs](/202604/02/2603.25004v1-interpretable-zero-shot-referring-expression-comprehension-with-query-driven-scene-graphs)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：多模态理解中的神经符号推理
-8. [3D-Mix for VLA: A Plug-and-Play Module for Integrating VGGT-based 3D Information into Vision-Language-Action Models](/202604/01/2603.24393v1-3d-mix-for-vla-a-plug-and-play-module-for-integrating-vggt-based-3d-information-into-vision-language-action-models)  
+   evidence：用于复杂物体关系和推理的视觉语言模型
+8. [HiSpatial: Taming Hierarchical 3D Spatial Understanding in Vision-Language Models](/202604/02/2603.25411v1-hispatial-taming-hierarchical-3d-spatial-understanding-in-vision-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于机器人控制的VLA模型
-9. [Describe-Then-Act: Proactive Agent Steering via Distilled Language-Action World Models](/202604/01/2603.23149v1-describe-then-act-proactive-agent-steering-via-distilled-language-action-world-models)  
+   evidence：VLM中3D空间推理的分层框架
+9. [MMTIT-Bench: A Multilingual and Multi-Scenario Benchmark with Cognition-Perception-Reasoning Guided Text-Image Machine Translation](/202604/02/2603.23896v1-mmtit-bench-a-multilingual-and-multi-scenario-benchmark-with-cognition-perception-reasoning-guided-text-image-machine-translation)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：通过语言-动作世界模型进行智能体引导以实现前瞻性预测
-10. [SABER: A Stealthy Agentic Black-Box Attack Framework for Vision-Language-Action Models](/202604/01/2603.24935v1-saber-a-stealthy-agentic-black-box-attack-framework-for-vision-language-action-models)  
+   evidence：面向视觉语言模型的推理导向数据
+10. [Experiential Reflective Learning for Self-Improving LLM Agents](/202604/02/2603.24639v2-experiential-reflective-learning-for-self-improving-llm-agents)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：针对视觉-语言-动作模型的强化学习智能体攻击框架
-11. [MoE-GRPO: Optimizing Mixture-of-Experts via Reinforcement Learning in Vision-Language Models](/202604/01/2603.24984v2-moe-grpo-optimizing-mixture-of-experts-via-reinforcement-learning-in-vision-language-models)  
+   evidence：自我改进的LLM智能体用于复杂推理
+11. [Can MLLMs Read Students' Minds? Unpacking Multimodal Error Analysis in Handwritten Math](/202604/02/2603.24961v1-can-mllms-read-students-minds-unpacking-multimodal-error-analysis-in-handwritten-math)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：利用强化学习优化VLM架构
+   evidence：多模态大模型中的多模态错误分析与视觉推理
 
 
 <div class="dpr-home-promo-card">
