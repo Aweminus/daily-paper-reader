@@ -6,76 +6,71 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-03
-- 运行时间：2026-04-03 19:20:27 UTC
+- 最新运行日期：2026-04-04
+- 运行时间：2026-04-04 19:13:06 UTC
 - 运行状态：成功
-- 本次总论文数：18
-- 精读区：7
+- 本次总论文数：17
+- 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦万亿级科学多模态大模型 Intern-S1-Pro 的突破，并深度解析了自动驾驶感知-预测-决策一体化的新范式。
-重点关注 Intern-S1-Pro 在科学理解上的规模化跃迁，以及 AutoDrive-P3 如何通过强化微调统一驾驶思维链。
-建议优先了解多模态大模型在科学研究与具身智能决策中的深度融合趋势。
-- 详情：[/202604/03/README](/202604/03/README)
+今日聚焦大模型推理与实时控制的深度融合，精选 17 篇论文涵盖快慢规划、视觉导航及 GUI 智能
+- 详情：[/202604/04/README](/202604/04/README)
 
 ### 精读区论文标签
-1. [Intern-S1-Pro: Scientific Multimodal Foundation Model at Trillion Scale](/202604/03/2603.25040v2-intern-s1-pro-scientific-multimodal-foundation-model-at-trillion-scale)  
+1. [Bridging Large-Model Reasoning and Real-Time Control via Agentic Fast-Slow Planning](/202604/04/2604.01681v1-bridging-large-model-reasoning-and-real-time-control-via-agentic-fast-slow-planning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：代理式多模态基础模型的强化学习训练
-2. [$AutoDrive\text{-}P^3$: Unified Chain of Perception-Prediction-Planning Thought via Reinforcement Fine-Tuning](/202604/03/2603.28116v1-autodrivetext-p3-unified-chain-of-perception-prediction-planning-thought-via-reinforcement-fine-tuning)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：通过强化微调实现视觉语言模型的驾驶思维链推理
-3. [Think, Act, Build: An Agentic Framework with Vision Language Models for Zero-Shot 3D Visual Grounding](/202604/03/2604.00528v1-think-act-build-an-agentic-framework-with-vision-language-models-for-zero-shot-3d-visual-grounding)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：基于视觉语言模型的智能体框架
-4. [Hidden Meanings in Plain Sight: RebusBench for Evaluating Cognitive Visual Reasoning](/202604/03/2604.01764v1-hidden-meanings-in-plain-sight-rebusbench-for-evaluating-cognitive-visual-reasoning)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉语言模型的复杂推理任务
-5. [Not All Tokens See Equally: Perception-Grounded Policy Optimization for Large Vision-Language Models](/202604/03/2604.01840v1-not-all-tokens-see-equally-perception-grounded-policy-optimization-for-large-vision-language-models)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉语言推理的强化学习
-6. [ProCeedRL: Process Critic with Exploratory Demonstration Reinforcement Learning for LLM Agentic Reasoning](/202604/03/2604.02006v1-proceedrl-process-critic-with-exploratory-demonstration-reinforcement-learning-for-llm-agentic-reasoning)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：用于LLM智能体推理的强化学习
-7. [Stop Wandering: Efficient Vision-Language Navigation via Metacognitive Reasoning](/202604/03/2604.02318v1-stop-wandering-efficient-vision-language-navigation-via-metacognitive-reasoning)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉语言导航智能体的元认知推理
+   evidence：为自主系统设计的基于VLM的代理快慢规划
+2. [Policy-Guided World Model Planning for Language-Conditioned Visual Navigation](/202604/04/2603.25981v1-policy-guided-world-model-planning-for-language-conditioned-visual-navigation)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：结合视觉和语言的多模态强化学习导航
+3. [Learning Multi-View Spatial Reasoning from Cross-View Relations](/202604/04/2603.27967v1-learning-multi-view-spatial-reasoning-from-cross-view-relations)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：具身智能与操作中的多视角空间推理
+4. [Think, Act, Build: An Agentic Framework with Vision Language Models for Zero-Shot 3D Visual Grounding](/202604/04/2604.00528v2-think-act-build-an-agentic-framework-with-vision-language-models-for-zero-shot-3d-visual-grounding)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：基于视觉语言模型的动态视觉定位智能体框架
+5. [CRIT: Graph-Based Automatic Data Synthesis to Enhance Cross-Modal Multi-Hop Reasoning](/202604/04/2604.01634v1-crit-graph-based-automatic-data-synthesis-to-enhance-cross-modal-multi-hop-reasoning)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：视觉语言模型中的跨模态多跳推理
+6. [SKILL0: In-Context Agentic Reinforcement Learning for Skill Internalization](/202604/04/2604.02268v1-skill0-in-context-agentic-reinforcement-learning-for-skill-internalization)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：用于技能内化的上下文智能体强化学习
 
 ### 速读区论文标签
-1. [ThermoAct:Thermal-Aware Vision-Language-Action Models for Robotic Perception and Decision-Making](/202604/03/2603.25044v1-thermoactthermal-aware-vision-language-action-models-for-robotic-perception-and-decision-making)  
+1. [When to ASK: Uncertainty-Gated Language Assistance for Reinforcement Learning](/202604/04/2604.02226v1-when-to-ask-uncertainty-gated-language-assistance-for-reinforcement-learning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型作为机器人决策的高层规划器
-2. [VLA-OPD: Bridging Offline SFT and Online RL for Vision-Language-Action Models via On-Policy Distillation](/202604/03/2603.26666v1-vla-opd-bridging-offline-sft-and-online-rl-for-vision-language-action-models-via-on-policy-distillation)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：连接强化学习与视觉-语言-动作模型用于机器人操作
-3. [Beyond Textual Knowledge-Leveraging Multimodal Knowledge Bases for Enhancing Vision-and-Language Navigation](/202604/03/2603.26859v1-beyond-textual-knowledge-leveraging-multimodal-knowledge-bases-for-enhancing-vision-and-language-navigation)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：使用多模态知识库的视觉语言导航智能体
-4. [Understanding and Mitigating Hallucinations in Multimodal Chain-of-Thought Models](/202604/03/2603.27201v1-understanding-and-mitigating-hallucinations-in-multimodal-chain-of-thought-models)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：多模态思维链推理中的幻觉
-5. [Modernising Reinforcement Learning-Based Navigation for Embodied Semantic Scene Graph Generation](/202604/03/2603.25415v1-modernising-reinforcement-learning-based-navigation-for-embodied-semantic-scene-graph-generation)  
+   evidence：将语言模型与强化学习策略结合，在不确定情况下进行推理
+2. [Rethinking Token Pruning for Historical Screenshots in GUI Visual Agents: Semantic, Spatial, and Temporal Perspectives](/202604/04/2603.26041v2-rethinking-token-pruning-for-historical-screenshots-in-gui-visual-agents-semantic-spatial-and-temporal-perspectives)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于具身推理和场景图生成的强化学习
-6. [HandVQA: Diagnosing and Improving Fine-Grained Spatial Reasoning about Hands in Vision-Language Models](/202604/03/2603.26362v1-handvqa-diagnosing-and-improving-fine-grained-spatial-reasoning-about-hands-in-vision-language-models)  
+   evidence：多模态大模型GUI视觉智能体的Token剪枝
+3. [Towards GUI Agents: Vision-Language Diffusion Models for GUI Grounding](/202604/04/2603.26211v1-towards-gui-agents-vision-language-diffusion-models-for-gui-grounding)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型中的空间推理
-7. [The Limits of Learning from Pictures and Text: Vision-Language Models and Embodied Scene Understanding](/202604/03/2603.26589v1-the-limits-of-learning-from-pictures-and-text-vision-language-models-and-embodied-scene-understanding)  
+   evidence：使用视觉语言模型进行定位和动作预测的GUI智能体
+4. [Vision2Web: A Hierarchical Benchmark for Visual Website Development with Agent Verification](/202604/04/2603.26648v2-vision2web-a-hierarchical-benchmark-for-visual-website-development-with-agent-verification)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：评估视觉语言模型在高层场景理解和推理方面的能力
-8. [Make Geometry Matter for Spatial Reasoning](/202604/03/2603.26639v1-make-geometry-matter-for-spatial-reasoning)  
+   evidence：针对GUI智能体的视觉网站开发基准测试
+5. [Structured Observation Language for Efficient and Generalizable Vision-Language Navigation](/202604/04/2603.27577v1-structured-observation-language-for-efficient-and-generalizable-vision-language-navigation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型中的空间推理
-9. [Label What Matters: Modality-Balanced and Difficulty-Aware Multimodal Active Learning](/202604/03/2603.25107v1-label-what-matters-modality-balanced-and-difficulty-aware-multimodal-active-learning)  
+   evidence：使用结构化语言的视觉语言导航智能体
+6. [Towards Context-Aware Image Anonymization with Multi-Agent Reasoning](/202604/04/2603.27817v1-towards-context-aware-image-anonymization-with-multi-agent-reasoning)  
+   标签：评分：7.0/10、query:vlm-rl
+   evidence：视觉语言模型在图像任务中的多智能体推理
+7. [Wan-R1: Verifiable-Reinforcement Learning for Video Reasoning](/202604/04/2603.27866v1-wan-r1-verifiable-reinforcement-learning-for-video-reasoning)  
+   标签：评分：7.0/10、query:vlm-rl
+   evidence：可验证强化学习用于视频推理与规划
+8. [JW-VL: A Vision-Language Model for Solar Physics](/202604/04/2603.28504v1-jw-vl-a-vision-language-model-for-solar-physics)  
+   标签：评分：7.0/10、query:vlm-rl
+   evidence：用于科学推理任务的视觉语言模型
+9. [Vision2Web: A Hierarchical Benchmark for Visual Website Development with Agent Verification](/202604/04/2603.26648v1-vision2web-a-hierarchical-benchmark-for-visual-website-development-with-agent-verification)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于多模态主动学习的强化学习框架
-10. [ViGoR-Bench: How Far Are Visual Generative Models From Zero-Shot Visual Reasoners?](/202604/03/2603.25823v1-vigor-bench-how-far-are-visual-generative-models-from-zero-shot-visual-reasoners)  
+   evidence：带有智能体验证的视觉网站开发
+10. [Incentivizing Temporal-Awareness in Egocentric Video Understanding Models](/202604/04/2603.27184v1-incentivizing-temporal-awareness-in-egocentric-video-understanding-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：视觉生成推理基准测试
-11. [Reinforcing Structured Chain-of-Thought for Video Understanding](/202604/03/2603.25942v1-reinforcing-structured-chain-of-thought-for-video-understanding)  
+   evidence：用于多模态大模型时间推理的强化学习
+11. [On Token's Dilemma: Dynamic MoE with Drift-Aware Token Assignment for Continual Learning of Large Vision Language Models](/202604/04/2603.27481v1-on-tokens-dilemma-dynamic-moe-with-drift-aware-token-assignment-for-continual-learning-of-large-vision-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于视频理解中多模态推理的强化学习
+   evidence：大型视觉语言模型的持续学习与指令微调
 
 
 <div class="dpr-home-promo-card">
