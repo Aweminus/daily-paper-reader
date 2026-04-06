@@ -6,64 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-05
-- 运行时间：2026-04-05 19:53:04 UTC
+- 最新运行日期：2026-04-06
+- 运行时间：2026-04-06 20:34:36 UTC
 - 运行状态：成功
-- 本次总论文数：14
-- 精读区：3
+- 本次总论文数：17
+- 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-聚焦多模态前沿，今日深度解析图表转代码与流式视觉语言动作模型等 14 项最新成果。
-重点关注 MM-ReCoder 利用强化学习与自纠错优化图表生成代码，以及 StreamingVLA 在流式动作控制上的突破。
-建议优先研读高分论文，探索多模态模型在复杂 3D 场景及极端光照环境下的落地潜力。
-- 详情：[/202604/05/README](/202604/05/README)
+今日聚焦图表理解与视觉推理，深度解析 CharTool 与 Chart-RL 等 17 篇 AI 前沿进展。
+核心结论指出，集成外部工具与强化学习策略能显著增强多模态模型在复杂图表问答中的逻辑推理能力。
+建议关注多模态 Agent 在 3D 场景交互与长程记忆管理（如 MemFactory）方面的工程化落地趋势。
+- 详情：[/202604/06/README](/202604/06/README)
 
 ### 精读区论文标签
-1. [MM-ReCoder: Advancing Chart-to-Code Generation with Reinforcement Learning and Self-Correction](/202604/05/2604.01600v1-mm-recoder-advancing-chart-to-code-generation-with-reinforcement-learning-and-self-correction)  
+1. [CharTool: Tool-Integrated Visual Reasoning for Chart Understanding](/202604/06/2604.02794v1-chartool-tool-integrated-visual-reasoning-for-chart-understanding)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：用于视觉推理的智能体强化学习
+2. [Chart-RL: Policy Optimization Reinforcement Learning for Enhanced Visual Reasoning in Chart Question Answering with Vision Language Models](/202604/06/2604.03157v1-chart-rl-policy-optimization-reinforcement-learning-for-enhanced-visual-reasoning-in-chart-question-answering-with-vision-language-models)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：策略优化强化学习增强视觉语言模型的视觉推理
+3. [ATP-Bench: Towards Agentic Tool Planning for MLLM Interleaved Generation](/202604/06/2603.29902v1-atp-bench-towards-agentic-tool-planning-for-mllm-interleaved-generation)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于图表转代码推理的多模态强化学习
-2. [StreamingVLA: Streaming Vision-Language-Action Model with Action Flow Matching and Adaptive Early Observation](/202604/05/2603.28565v1-streamingvla-streaming-vision-language-action-model-with-action-flow-matching-and-adaptive-early-observation)  
+   evidence：多模态模型的智能体工具规划
+4. [Understanding the Role of Hallucination in Reinforcement Post-Training of Multimodal Reasoning Models](/202604/06/2604.03179v1-understanding-the-role-of-hallucination-in-reinforcement-post-training-of-multimodal-reasoning-models)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：多模态推理模型的强化学习后训练
+5. [A3R: Agentic Affordance Reasoning via Cross-Dimensional Evidence in 3D Gaussian Scenes](/202604/06/2604.01882v1-a3r-agentic-affordance-reasoning-via-cross-dimensional-evidence-in-3d-gaussian-scenes)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于感知和控制的视觉-语言-动作模型
-3. [ResAdapt: Adaptive Resolution for Efficient Multimodal Reasoning](/202604/05/2603.28610v1-resadapt-adaptive-resolution-for-efficient-multimodal-reasoning)  
+   evidence：通过顺序证据获取实现的智能体功能推理
+6. [Efficient Reasoning via Thought Compression for Language Segmentation](/202604/06/2604.02040v1-efficient-reasoning-via-thought-compression-for-language-segmentation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于多模态推理效率的上下文老虎机
+   evidence：多模态模型中通过思维压缩实现高效推理
 
 ### 速读区论文标签
-1. [Chat-Scene++: Exploiting Context-Rich Object Identification for 3D LLM](/202604/05/2603.27507v1-chat-scene-exploiting-context-rich-object-identification-for-3d-llm)  
+1. [MemFactory: Unified Inference & Training Framework for Agent Memory](/202604/06/2603.29493v1-memfactory-unified-inference--training-framework-for-agent-memory)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于3D场景理解和上下文推理的MLLM框架
-2. [Learning to See through Illumination Extremes with Event Streaming in Multimodal Large Language Models](/202604/05/2603.27558v1-learning-to-see-through-illumination-extremes-with-event-streaming-in-multimodal-large-language-models)  
+   evidence：强化学习优化智能体记忆操作
+2. [SceneTeract: Agentic Functional Affordances and VLM Grounding in 3D Scenes](/202604/06/2603.29798v1-sceneteract-agentic-functional-affordances-and-vlm-grounding-in-3d-scenes)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：多模态大语言模型用于视觉推理
-3. [ResAdapt: Adaptive Resolution for Efficient Multimodal Reasoning](/202604/05/2603.28610v2-resadapt-adaptive-resolution-for-efficient-multimodal-reasoning)  
+   evidence：用于智能体功能可达性的 VLM 定位与语义推理
+3. [Asymmetric Actor-Critic for Multi-turn LLM Agents](/202604/06/2604.00304v1-asymmetric-actor-critic-for-multi-turn-llm-agents)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：将视觉预算分配建模为上下文老虎机问题以进行多模态推理
-4. [MemFactory: Unified Inference & Training Framework for Agent Memory](/202604/05/2603.29493v3-memfactory-unified-inference--training-framework-for-agent-memory)  
+   evidence：针对大语言模型智能体的不对称演员-评论家框架
+4. [STAR: Mitigating Cascading Errors in Spatial Reasoning via Turn-point Alignment and Segment-level DPO](/202604/06/2604.00558v1-star-mitigating-cascading-errors-in-spatial-reasoning-via-turn-point-alignment-and-segment-level-dpo)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：利用强化学习优化视觉语言智能体的记忆
-5. [Unify-Agent: A Unified Multimodal Agent for World-Grounded Image Synthesis](/202604/05/2603.29620v1-unify-agent-a-unified-multimodal-agent-for-world-grounded-image-synthesis)  
+   evidence：通过片段级DPO进行空间推理与决策
+5. [Learning to Learn-at-Test-Time: Language Agents with Learnable Adaptation Policies](/202604/06/2604.00830v2-learning-to-learn-at-test-time-language-agents-with-learnable-adaptation-policies)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：多模态图像合成的智能体建模
-6. [Unify-Agent: A Unified Multimodal Agent for World-Grounded Image Synthesis](/202604/05/2603.29620v2-unify-agent-a-unified-multimodal-agent-for-world-grounded-image-synthesis)  
+   evidence：具有可学习适应策略的环境中语言智能体
+6. [Bench2Drive-VL: Benchmarks for Closed-Loop Autonomous Driving with Vision-Language Models](/202604/06/2604.01259v1-bench2drive-vl-benchmarks-for-closed-loop-autonomous-driving-with-vision-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于多模态证据搜索和推理的智能体建模
-7. [SARL: Label-Free Reinforcement Learning by Rewarding Reasoning Topology](/202604/05/2603.27977v1-sarl-label-free-reinforcement-learning-by-rewarding-reasoning-topology)  
+   evidence：自动驾驶视觉语言模型的闭环评估
+7. [Hierarchical Pre-Training of Vision Encoders with Large Language Models](/202604/06/2604.00086v1-hierarchical-pre-training-of-vision-encoders-with-large-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：通过奖励推理拓扑进行强化学习
-8. [Integrating Multimodal Large Language Model Knowledge into Amodal Completion](/202604/05/2603.28333v1-integrating-multimodal-large-language-model-knowledge-into-amodal-completion)  
+   evidence：多模态预训练中的分层视觉语言对齐
+8. [Agent Q-Mix: Selecting the Right Action for LLM Multi-Agent Systems through Reinforcement Learning](/202604/06/2604.00344v1-agent-q-mix-selecting-the-right-action-for-llm-multi-agent-systems-through-reinforcement-learning)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：利用多模态大模型知识进行非全貌补全推理
-9. [VACP: Visual Analytics Context Protocol](/202604/05/2603.29322v1-vacp-visual-analytics-context-protocol)  
+   evidence：用于大语言模型多智能体系统的强化学习框架
+9. [LinguDistill: Recovering Linguistic Ability in Vision- Language Models via Selective Cross-Modal Distillation](/202604/06/2604.00829v1-lingudistill-recovering-linguistic-ability-in-vision--language-models-via-selective-cross-modal-distillation)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：视觉分析中的AI智能体框架
-10. [SeGPruner: Semantic-Geometric Visual Token Pruner for 3D Question Answering](/202604/05/2603.29437v1-segpruner-semantic-geometric-visual-token-pruner-for-3d-question-answering)  
+   evidence：恢复视觉语言模型中的语言能力
+10. [Learning to Learn-at-Test-Time: Language Agents with Learnable Adaptation Policies](/202604/06/2604.00830v1-learning-to-learn-at-test-time-language-agents-with-learnable-adaptation-policies)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于3D问答推理的视觉语言模型
-11. [A Comprehensive Information-Decomposition Analysis of Large Vision-Language Models](/202604/05/2603.29676v1-a-comprehensive-information-decomposition-analysis-of-large-vision-language-models)  
+   evidence：通过重复交互学习自适应策略的语言智能体
+11. [Policy Improvement Reinforcement Learning](/202604/06/2604.00860v1-policy-improvement-reinforcement-learning)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：分析大型视觉语言模型的内部决策过程和多模态融合
+   evidence：用于提高大语言模型推理能力的强化学习
 
 
 <div class="dpr-home-promo-card">
