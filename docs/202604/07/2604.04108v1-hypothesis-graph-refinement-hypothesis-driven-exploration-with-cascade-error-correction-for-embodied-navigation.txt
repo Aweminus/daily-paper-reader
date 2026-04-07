@@ -1,0 +1,756 @@
+Title: Hypothesis Graph Refinement: Hypothesis-Driven Exploration with Cascade Error Correction for Embodied Navigation
+
+URL Source: https://arxiv.org/pdf/2604.04108v1
+
+Published Time: Tue, 07 Apr 2026 01:02:57 GMT
+
+Number of Pages: 28
+
+Markdown Content:
+# Hypothesis Graph Refinement: Hypothesis-Driven Exploration with Cascade Error Correction for Embodied Navigation 
+
+Peixin Chen 1,2,†, Guoxi Zhang 2,†, Jianwei Ma 1,3,∗, and Qing Li 2,∗
+
+> 1
+
+Harbin Institute of Technology 2Beijing Institute for General Artificial Intelligence 3Peking University 
+
+> †
+
+Equal contribution ∗Corresponding author 
+
+Abstract. Embodied agents must explore partially observed environ-ments while maintaining reliable long-horizon memory. Existing graph-based navigation systems improve scalability, but they often treat un-explored regions as semantically unknown, leading to inefficient frontier search. Although vision-language models (VLMs) can predict frontier semantics, erroneous predictions may be embedded into memory and propagate through downstream inferences, causing structural error ac-cumulation that confidence attenuation alone cannot resolve. These ob-servations call for a framework that can leverage semantic predictions for directed exploration while systematically retracting errors once new evidence contradicts them. We propose Hypothesis Graph Refinement 
+
+(HGR), a framework that represents frontier predictions as revisable hy-pothesis nodes in a dependency-aware graph memory. HGR introduces (1) semantic hypothesis module , which estimates context-conditioned se-mantic distributions over frontiers and ranks exploration targets by goal relevance, travel cost, and uncertainty, and (2) verification-driven cas-cade correction , which compares on-site observations against predicted semantics and, upon mismatch, retracts the refuted node together with all its downstream dependents. Unlike additive map-building, this allows the graph to contract by pruning erroneous subgraphs, keeping mem-ory reliable throughout long episodes. We evaluate HGR on multimodal lifelong navigation (GOAT-Bench) and embodied question answering (A-EQA, EM-EQA). HGR achieves 72.41% success rate and 56.22% SPL on GOAT-Bench, and shows consistent improvements on both QA bench-marks. Diagnostic analysis reveals that cascade correction eliminates ap-proximately 20% of structurally redundant hypothesis nodes and reduces revisits to erroneous regions by 4.5×, with specular and transparent sur-faces accounting for 67% of corrected prediction errors. Code is available at https://github.com/chenpppx/Hypothesis_Graph_Refinement .
+
+Keywords: Embodied Navigation · Long-Horizon Exploration · Hy-pothesis Graph Refinement · Verification-Driven Cascade Correction 
+
+> arXiv:2604.04108v1 [cs.CV] 5 Apr 2026
+
+2 P. Chen et al. Observed 
+
+Nodes 
+
+Hypothesis 
+
+Node s
+
+> What is in the basket by the front door?
+> The front door observed. Ascending to verify
+> Hypothesis Node.
+> What is in the basket by the front door?
+> The front door observed. Ascending to verify
+> Hypothesis Node.
+> Accessing Observed Graph: Confirmed.
+> There is an umbrella in basket
+> The front door observed. Ascending to verify Hypothesis Node …
+> Hypothesis Node Confirmed.
+
+Fig. 1: Overview of Hypothesis Graph Refinement (HGR). The hypothesis graph separates observed nodes (purple, verified regions) from hypothesis nodes 
+
+(green, probabilistic frontier predictions), enabling a hypothesis-verification-correction cycle. (Left) Given the query “ What is inside the basket? ”, observed nodes provide confirmed scene context, while hypothesis nodes project semantic distributions onto unexplored frontiers, guiding the agent toward the most likely location of the target object. (Right) Upon arrival, the agent verifies each hypothesis against actual obser-vations. If the prediction is confirmed, the hypothesis node transitions to an observed node; if refuted, cascade correction retracts the erroneous node and all its downstream dependents, preventing error propagation through the graph. 
+
+## 1 Introduction 
+
+Embodied agents operating in partially observed environments must decide where to explore next based on incomplete information. Classical frontier-based meth-ods [1, 31] select boundaries between explored and unexplored space using geo-metric criteria, treating all frontiers as equally unknown. Recent work has be-gun leveraging vision-language models (VLMs) to predict what may lie beyond observed boundaries, enabling semantically informed frontier selection that pri-oritizes promising directions over exhaustive search [18, 25, 27]. This shift from geometry-driven to semantics-driven exploration has demonstrated clear effi-ciency gains in short-horizon navigation tasks. However, VLM-based frontier predictions are not always reliable—visually ambiguous scenes such as mirror reflections or glass partitions can produce er-roneous predictions that, once embedded in graph memory, propagate through chains of dependent hypotheses that inherit and amplify the original mistake. Existing approaches mitigate this through confidence attenuation, but the erro-neous subgraph persists and continues to influence downstream decisions, caus-ing cumulative degradation over long-horizon episodes. Hypothesis Graph Refinement 3
+
+We present Hypothesis Graph Refinement (HGR), a framework that jointly enables semantics-driven exploration and systematic error correction (Fig-ure 1). HGR maintains a hypothesis graph that separates observed nodes (verified regions) from hypothesis nodes (probabilistic frontier predictions) and records their derivation relationships in a dependency DAG. A semantic hypothesis mod-ule estimates semantic distributions over frontiers and ranks exploration targets by goal relevance, travel cost, and uncertainty. Upon visitation, a verification-driven cascade correction mechanism compares actual observations against pre-dictions; upon mismatch, it retracts the refuted node together with all down-stream dependents, allowing the graph to contract by pruning erroneous sub-graphs. Our contributions are: 
+
+– We introduce a hypothesis graph representation that distinguishes verified observations from revisable frontier predictions and tracks their dependen-cies, enabling structured hypothesis-driven exploration. 
+
+– We propose a cascade correction mechanism that, upon detecting prediction failures, retracts the entire erroneous subgraph along the dependency DAG, preventing error accumulation over long episodes. 
+
+– We demonstrate consistent improvements on GOAT-Bench [13] (+3.31% SR, +7.32% SPL over 3D-Mem [31]), A-EQA [19], and EM-EQA [19]. Ablation and diagnostic analyses confirm that both mechanisms contribute meaning-fully and that cascade correction substantially reduces error accumulation. 
+
+## 2 Related Work 
+
+Embodied Navigation and Exploration. Embodied navigation evolves from re-active policies [2, 14] to memory-augmented architectures [5, 10]. ETPNav [1] introduces topological graphs for long-horizon navigation with Monte Carlo Tree Search for frontier evaluation. FILM [21] maintains episodic memories via transformer-based aggregation. Recent work explores VLM integration for open-vocabulary navigation [18, 27], but treats unexplored regions as lacking seman-tic information. Further advances include reinforcement fine-tuning for navi-gation [24], multi-turn active exploration [34], and generative visual imagina-tion [11]. Concurrent work on commonsense-guided frontier exploration includes ESC [35], SCOPE [30], and ReVoLT [16], which also leverage semantic priors to rank and select frontiers. However, these methods treat predictions as one-time scoring signals without recording derivation dependencies among them, so erroneous predictions persist in memory and may propagate to downstream in-ferences. HGR instead embeds each frontier prediction as a revisable hypothesis node in a dependency DAG, enabling systematic verification upon visitation and cascade correction that retracts an erroneous node together with all its depen-dents (see Appendix A for a detailed comparison). 
+
+3D Scene Representations. Object-centric scene graphs [3, 8, 29] compress envi-ronments into nodes (objects) and edges (relationships). ConceptGraph [8] pio-neers open-vocabulary scene graphs via CLIP grounding. 3D-Mem [31] employs 4 P. Chen et al. 
+
+memory snapshots capturing co-visible objects with spatial context. Recent ex-tensions address contrastive pretraining [9], retrieval-augmented reasoning [32], metric-semantic graphs for embodied Q&A [26], and LLM-based semantic inte-gration [33]. These representations handle spatial reasoning well but rely on soft probabilistic updates for error correction. HGR introduces dependency tracking and cascade correction to remove erroneous subgraphs rather than attenuating confidence scores. 
+
+Error Detection and Correction in Embodied Systems. VLM prediction errors, where generated content is inconsistent with visual inputs, are studied exten-sively [15, 28]. Mitigation strategies include retrieval-augmented generation [22], uncertainty quantification [12], and self-consistency checks [20]. In recent robotics, COWS [7] uses contrastive learning and PIVOT [23] employs verification mod-ules. ReLEP [17], HEAL [4], and InterleaveVLA [6] focus on output-level refine-ment, whereas HGR tracks dependency chains and removes erroneous subgraphs via cascade correction. 
+
+## 3 Method 
+
+Frontier-based exploration faces two intertwined challenges: frontiers lack se-mantic cues to guide efficient exploration, yet VLM-based predictions risk em-bedding errors that propagate through dependent hypotheses over long hori-zons. HGR addresses both within a unified graph-based framework: the hypoth-esis graph separates verified observations from revisable frontier predictions and tracks their dependencies (Section 3.1), evolving through an incremental con-struction pipeline (Section 3.2). The semantic hypothesis module (Section 3.3) tackles the first challenge by projecting goal-relevant distributions onto fron-tiers; verification-driven cascade correction (Section 3.4) tackles the second by retracting erroneous subgraphs along the dependency DAG. Figure 2 illustrates the overall architecture. 
+
+3.1 Hypothesis Graph Representation 
+
+HGR maintains a hypothesis graph G = ( V, E, D) that serves as the agent’s persistent memory of the environment. 
+
+Node Types. The node set V = Vobs ∪ V hyp separates two categories. Observed nodes v ∈ V obs represent physically visited regions, storing verified semantic la-bels, visual features, and detected object lists from direct perception. Hypothesis nodes v ∈ V hyp represent semantic predictions projected onto unexplored fron-tiers; each carries a probability distribution P (· | H t, f ) over semantic categories and is marked as unverified. Hypothesis Graph Refinement 5
+
+Fig. 2: Architecture of HGR. (Left) Frontiers Ft detected from the occupancy map are fed to a VLM reasoner for semantic hypothesis module , which estimates categorical distributions and generates hypothesis nodes linked to observed nodes via spatial and dependency edges. Upon visitation, cascade correction compares predicted ( Ipred )and actual ( Iactual ) semantics; if ∆sem > θ , the refuted node and all its dependents are removed. (Right) Running example on a floor plan. Graph Refinement marks con-firmed hypotheses promoted to observed nodes; Graph Refinement (Shrinking) shows where cascade correction prunes erroneous subgraphs, contracting the graph. 
+
+Navigability Edges and Dependency DAG. The edge set E encodes traversable paths for navigation. The directed acyclic graph D records derivation relation-ships among nodes: an edge (vp, v c, ρ ) ∈ D indicates that hypothesis vc was derived from parent vp with confidence ρ ∈ [0 , 1] . This structure enables system-atic retraction: when a node is invalidated, all dependent descendants can be identified and removed along D.
+
+3.2 Incremental Construction and Update 
+
+The hypothesis graph evolves incrementally as the agent explores through a three-phase cycle: hypothesis generation , verification , and update . We outline each phase below; Sections 3.3 and 3.4 then detail the generation and verification mechanisms, respectively. 
+
+Phase 1: Frontier Discovery and Hypothesis Generation. At each timestep t,given observation (It, d t, pt) (RGB, depth, pose), the system identifies geometric frontiers Ft from the occupancy map. For each new frontier fj , a hypothesis node vhyp  
+
+> j
+
+is generated via the semantic hypothesis module (Section 3.3), added to Vhyp , and linked in D to its parent observed node. 
+
+Phase 2: Hypothesis Verification. When the agent reaches a hypothesis node 
+
+vhyp  
+
+> j
+
+, it obtains actual observations and computes a prediction residual (Sec-tion 3.4). Two outcomes follow: (1) Confirmation —prediction matches obser-6 P. Chen et al. Unexplored Region 
+
+> (no semantic information)
+
+Frontier ►
+
+(Geometric only) -.::..::�:::::::,r'lli,---r:=) 
+
+Traditional Frontier based Exploration 
+
+# t7
+
+Probabilistic Semantic Projection 
+
+( � "*    
+
+> o(? )
+
+## crdb_�    
+
+> cf:,
+> 0�0
+> I,
+
+# \ Jfui-1 
+
+Highest ---- Exploration Score 
+
+HGR: Hypothesis Driven Exploration 
+
+Fig. 3: Semantic Hypothesis Module. Left: Traditional frontier representation treats unexplored regions as undifferentiated boundaries. Right: HGR projects proba-bilistic semantic distributions onto frontiers as hypothesis nodes, enabling goal-directed exploration. 
+
+vation, and the node transitions to Vobs with updated labels; (2) Refutation —significant deviation triggers cascade correction, removing the node and all its dependents from D.
+
+Phase 3: Observed Node Update. When revisiting an observed node, the system updates its object list and visual features from the latest perception. Appendix C provides full construction rules and worked examples. 
+
+3.3 Semantic Hypothesis Module 
+
+Rather than treating frontiers as undifferentiated boundaries (Figure 3, left), HGR projects probabilistic semantic distributions onto each frontier, produc-ing hypothesis nodes with estimated categorical distributions that enable goal-directed exploration (Figure 3, right). 
+
+Hypothesis Node Generation. Given observation history Ht = {(Ii, d i, pi)}ti=1 
+
+and the frontier set Ft = {fj } identified in Phase 1, each frontier fj is assigned a semantic distribution over categories C = {c1, . . . , c K }:
+
+P (ck | H t, f j ) ∝ ϕVLM (ck | Ifrontier  
+
+> j
+
+, Olocal ), (1) where Ifrontier  
+
+> j
+
+is the visual observation toward frontier fj , Olocal denotes detected objects within spatial radius rcontext , and ϕVLM uses the VLM’s world knowledge to estimate semantic categories from partial visual cues and spatial context. 
+
+Exploration Scoring. To convert frontier exploration into goal-directed hypoth-esis testing, we define an exploration score for each frontier fj relative to navi-Hypothesis Graph Refinement 7
+
+Fig. 4: Cascade Correction Example. A VLM misidentifies a mirror reflection as a bedroom entrance, generating hypothesis nodes for inferred furniture. Upon reaching the mirror and detecting a prediction violation (residual > θ refute ), the system traces the dependency DAG and removes the entire erroneous subgraph, including all descendant hypothesis nodes. 
+
+gation goal g:
+
+S(fj ; g) = P (cg | H t, f j )
+
+| {z }
+
+> goal alignment
+
+− λd · d(fj , pt)
+
+| {z }
+
+> travel cost
+
++ λh · H[P (· | H t, f j )] 
+
+| {z }
+
+> uncertainty bonus
+
+, (2) where cg is the target semantic category, d(·, ·) measures geodesic distance, and 
+
+H[·] is Shannon entropy. The three terms respectively prioritize goal-matching frontiers, penalize distant ones, and encourage visiting ambiguous regions with high information gain. 
+
+3.4 Verification and Cascade Correction 
+
+When a hypothesis node is refuted in Phase 2, HGR must not only remove the er-roneous node but also retract all downstream nodes derived from it. This section details the prediction residual test that triggers refutation and the cascade cor-rection that propagates it through D. Figure 4 illustrates a representative case: a VLM misidentifies a mirror reflection as a room entrance, generating descendant hypothesis nodes for inferred furniture; upon detecting the semantic violation, cascade correction traces D and removes the entire erroneous subgraph. 
+
+Prediction Residual Test. Upon reaching a hypothesis node vhyp  
+
+> j
+
+, the agent ob-tains actual perception (Iactual  
+
+> j
+
+, Oactual  
+
+> j
+
+). The prediction residual quantifies the discrepancy between predicted and observed semantics: 
+
+∆sem (vhyp  
+
+> j
+
+) = ωc · ∆c + ωf · ∆f + ωo · ∆o, (3) 8 P. Chen et al. 
+
+Algorithm 1 Cascade Correction 
+
+1: Input: Refuted node vp, dependency DAG D
+
+2: Output: Set of removed nodes Vdel 
+
+3: Initialize queue Q ← { vp}, Vdel ← ∅ 
+
+4: while Q̸ = ∅ do 
+
+5: vcurr ← Q. dequeue () 
+
+6: Vdel ← V del ∪ { vcurr }
+
+7: for each child vc where (vcurr , v c, ρ ) ∈ D do 
+
+8: Q. enqueue (vc)
+
+9: end for 
+
+10: end while 
+
+11: Remove Vdel from G; remove corresponding edges from E and D
+
+12: return Vdel 
+
+where: 
+
+∆c = 1 − max  
+
+> k
+
+P (ck | H t, f j ) · ⊮[ck = cactual  
+
+> j
+
+], (4) 
+
+∆f = 1 − sim CLIP (Enc (Ifrontier  
+
+> j
+
+), Enc (Iactual  
+
+> j
+
+)) , (5) 
+
+∆o = 1 − |O pred  
+
+> j
+
+∩ O actual  
+
+> j
+
+||O pred  
+
+> j
+
+∪ O actual  
+
+> j
+
+| , (6) combining category mismatch ∆c, visual feature divergence ∆f via CLIP em-beddings, and object-level Jaccard dissimilarity ∆o. Weights are set to ωc =0.4, ω f = 0 .3, ω o = 0 .3 based on held-out validation; θrefute = 0 .5 (see Ap-pendix B for per-term ablation and threshold sensitivity). A hypothesis node is 
+
+refuted when ∆sem > θ refute .
+
+Cascade Correction. Upon refuting a hypothesis node vp, the system traverses the dependency DAG D to identify and remove all transitive descendants: Invalidating a single hypothesis thus removes all downstream nodes inferred from the false premise. Unlike confidence attenuation, cascade correction elim-inates erroneous subgraphs entirely, so the hypothesis graph may shrink over time—a non-monotonic property distinguishing HGR from conventional addi-tive map construction. 
+
+## 4 Experiments 
+
+We evaluate HGR on three complementary benchmarks to validate two hy-potheses: (H1) semantic hypothesis module improves exploration efficiency, and (H2) cascade correction prevents cumulative errors from degrading performance. 
+
+4.1 Experimental Setup 
+
+Benchmarks. (1) GOAT-Bench [13]: Multimodal lifelong navigation across 360 scenes requiring sequential navigation to multiple targets specified via category Hypothesis Graph Refinement 9                         
+
+> Table 1: Performance on GOAT-Bench. HGR achieves the highest success rate and path efficiency on both the full validation set (2,780 subtasks) and the evaluation subset (278 subtasks). Full Validation Set Subset Method SR ↑SPL ↑SR ↑SPL ↑
+> ConceptGraph [8] 61.2 44.3 67.8 48.1 3D-Mem w/o memory [31] 58.6 38.5 66.2 44.1 3D-Mem [31] 62.9 44.7 69.1 48.9
+> HGR (Ours) 64.14 50.1 72.41 56.22
+
+labels, language descriptions, or reference images. Episodes span 100+ steps, em-phasizing sustained autonomy. This is our primary benchmark. (2) A-EQA [19]: Active Embodied Q&A comprising 557 questions across 63 HM3D scenes. Agents must explore unknown environments to answer open-ended questions spanning object recognition, spatial understanding, and functional reasoning. (3) EM-EQA [19]: Episodic Memory Q&A with 1,600+ questions from 152 ScanNet and HM3D scenes. Given pre-explored trajectories, agents construct scene memory and answer questions without further exploration, isolating memory quality from exploration strategy. 
+
+Metrics. Success Rate (SR) measures goal achievement within distance thresh-olds ( 1.0m for navigation, answer correctness for Q&A). Success weighted by Path Length (SPL) penalizes inefficient exploration: SPL = 1
+
+> N
+
+PNi=1 Si ·  
+
+> l∗
+> i
+> max( l∗
+> i,l i)
+
+. For A-EQA, LLM-Match evaluates answer quality via GPT-4 scoring (0–100 scale). 
+
+Baselines. Comparisons include 3D-Mem [31], and ConceptGraph [8] with frontier-based exploration, Explore-EQA [25], and ablated variants. For fair comparison, all baselines are re-implemented within our framework using the same GPT-4o VLM, Habitat simulator, low-level controller, and step budget. ConceptGraph and 3D-Mem retain their original graph construction and update logic but use GPT-4o in place of their original semantic modules. See Appendix E for full re-implementation details. 
+
+4.2 Main Results: GOAT-Bench 
+
+Lifelong Navigation Performance. Table 1 presents results on GOAT-Bench. HGR achieves 72.41% SR and 56.22% SPL on the validation subset (278 sub-tasks), outperforming the strongest baseline 3D-Mem (69.1%/48.9%) by +3.31% SR and +7.32% SPL. 10 P. Chen et al.            
+
+> Table 2: Performance by Target Modality on GOAT-Bench Subset.
+> Category Language Image Method SR SPL SR SPL SR SPL ConceptGraph [8] 65.3 44.7 55.0 38.9 64.0 52.8 3D-Mem [31] 79.2 55.8 61.9 46.0 65.2 44.2
+> HGR (Ours) 80.9 60.3 69.8 54.5 68.2 61.7
+> Fig. 5: Cumulative Success Rate vs. Episode Steps. HGR reaches navigation targets earlier than baselines due to hypothesis-driven frontier selection, while 3D-Mem and ConceptGraph require more steps for exhaustive geometric search. The gap widens in later steps as cascade correction prevents error accumulation.
+
+Where Do the Gains Come From? As shown in Figure 5, HGR reaches tar-gets earlier and the advantage grows over longer episodes. Semantic hypothesis module directs exploration toward goal-aligned frontiers, improving SPL, while cascade correction eliminates revisits to erroneously predicted regions. 
+
+Modality-Specific Analysis. Table 2 decomposes performance by target modality. HGR shows consistent improvements across all three, with the largest gains on language-specified targets ( +7 .9% SR over 3D-Mem). Language descriptions benefit most from semantic context propagation, as hypothesis nodes encode relational structure that helps disambiguate spatial references. Hypothesis Graph Refinement 11                             
+
+> Table 3: Ablation Study. Component contributions on the GOAT-Bench subset and question-answering benchmarks. “Local delete only” removes the refuted node without cascade propagation along the dependency DAG. GOAT (Subset) A-EQA EM-EQA Configuration SR ↑SPL ↑LLM ↑LLM ↑
+> HGR (full system) 72.41 56.22 55.9 58.3
+> w/o Semantic hypothesis 67.71 50.02 48.4 50.5 w/o cascade correction 68.61 51.12 49.6 52.9 Local delete only 70.85 53.67 52.3 55.9 w/o both (geometry only) 63.42 45.33 43.3 45.2
+
+4.3 Component Ablations 
+
+Table 3 systematically isolates the contributions of each component across all three benchmarks. 
+
+Effect of Semantic Hypothesis Module. Disabling hypothesis projection (revert-ing to uniform frontier selection) causes consistent degradation: −4.70 % SR and 
+
+−6.20 % SPL on GOAT-Bench, −7.3 LLM-Match on A-EQA, and −7.8 on EM-EQA. This confirms hypothesis H1—semantic guidance substantially reduces exploration redundancy. 
+
+Effect of Cascade Correction. Disabling cascade correction while retaining hy-pothesis nodes reveals the impact of error accumulation: −3.80 % SR and −5.10 %SPL on GOAT-Bench as refuted nodes persist with lowered confidence, and −6.3
+
+LLM-Match on A-EQA as erroneous scene content influences answers. 
+
+Local Delete vs. Cascade Correction. The “Local delete only” variant removes the refuted node without propagating along the dependency DAG, achieving 70.85% SR and 53.67% SPL—better than no correction but −1.56% SR and 
+
+−2.55% SPL below the full system. This shows that descendants of false premises degrade performance, and that dependency-aware cascade correction provides gains beyond simple node removal. We also compare against a soft confidence decay baseline with spatial revisitation penalty in Appendix F, confirming that structural deletion outperforms score-based mitigation. 
+
+Synergistic Effects. Disabling both components ( −9.0% SR, −10 .9% SPL) yields a larger drop than the sum of individual ablations, indicating mutual reinforce-ment: directed exploration brings the agent to verifiable hypotheses that maxi-mize the correction mechanism’s benefit. 
+
+Prediction Residual Threshold. We analyze sensitivity to θrefute ∈ [0 .3, 0.7] . At 
+
+θ = 0 .3 (aggressive), the refutation rate reaches 42% but incorrectly removes approximately 180 valid nodes, degrading SR by 6.2%. At θ = 0 .7 (conservative), 12 P. Chen et al.             
+
+> Table 4: Hypothesis Prediction Methods. Trade-offs between prediction accuracy and computational cost on GOAT-Bench subset. Method Prediction Acc. Latency (s) SPL ↑
+> VLM (GPT-4o) 0.68 0.80 56.22
+> Heuristic (co-occurrence) 0.52 0.02 52.13 Hybrid (entropy-gated) 0.64 0.35 55.41
+
+only 11% of hypotheses are refuted, allowing errors to accumulate. The optimal 
+
+θ = 0 .5 balances precision (87%) and recall (74%). 
+
+Hypothesis Prediction Methods. Table 4 compares VLM-based prediction against heuristic alternatives. An entropy-gated hybrid—VLM for ambiguous frontiers, heuristics otherwise—achieves 95% of VLM-only SPL at 40% computational cost. Appendix D further evaluates HGR with open-source VLMs (LLaVA-1.5-13B, InternVL2-8B), confirming consistent gains even with weaker prediction accuracy. 
+
+4.4 Diagnostics: Hypothesis Verification and Correction 
+
+We report statistics on hypothesis lifecycle across the GOAT-Bench full valida-tion set (2,780 subtasks). 
+
+Hypothesis Lifecycle. Over the full evaluation, HGR created 4,712 hypothesis nodes, of which 3,465 (73.5%) were confirmed upon visitation and transitioned to observed nodes, while 1,247 (26.5%) were refuted and removed. Of the 1,247 refutations, 342 triggered cascade corrections that removed an average of 2.8 dependent nodes per trigger (maximum cascade depth: 4 hops), totalling ap-proximately 960 descendant removals. 
+
+Revisit Reduction. Cascade correction reduces wasteful revisits to regions based on erroneous predictions. The revisit rate to refuted regions is 4.2% for HGR, compared to 18.7% for 3D-Mem. This 4.5 × reduction directly contributes to HGR’s SPL improvement. 
+
+Error Source Taxonomy. Among the 1,247 refuted hypotheses: mirror reflections (38%), glass partitions (29%), artwork misidentification (18%), and occlusion ar-tifacts (15%). Specular and transparent surfaces account for 67% of all errors, identifying the primary challenge for VLM-based prediction in indoor environ-ments. 
+
+4.5 Secondary Results: A-EQA and EM-EQA 
+
+Active Embodied Question Answering. Table 5 presents A-EQA results. HGR achieves 55.9 LLM-Match and 45.0 LLM-Match SPL, outperforming all baselines through more efficient exploration toward question-relevant regions and error-free scene memory. Hypothesis Graph Refinement 13                                 
+
+> Table 5: Performance on A-EQA (184-question subset). HGR achieves the highest answer quality and exploration efficiency. Method LLM-Match ↑LLM-Match SPL ↑
+> Blind LLMs (no visual input)
+> GPT-4o 35.9 —
+> Question Agnostic Exploration
+> LLaVA-1.5 Frame Captions 38.1 7.0 Multi-Frame 41.8 7.5
+> VLM-Guided Exploration
+> Explore-EQA 46.9 23.4 ConceptGraph w/ Frontier 47.2 33.3
+> HGR (Ours) 55.9 45.0 Table 6: Performance on EM-EQA. HGR achieves the highest answer quality with comparable memory footprint. Method Avg. Frames LLM-Match ↑
+> Blind LLM (GPT-4) 035.5 ConceptGraph Captions 034.4 Frame Captions 038.1 Multi-Frame 3.0 48.1
+> HGR (Ours) 3.1 58.3
+> Human (Full trajectory) Full 86.8
+
+Episodic Memory Q&A. Table 6 evaluates memory quality in isolation. Given identical pre-explored trajectories, HGR achieves 58.3 LLM-Match with 3.1 av-erage snapshots. Although the exploration path is fixed, HGR still generates hypothesis nodes for visible frontiers as it processes each trajectory step, and verifies them when later steps pass through the predicted regions—so both se-mantic hypotheses and cascade correction contribute to memory construction quality rather than exploration strategy. The dependency-aware structure en-ables removal of contradictory information from memory—a capability absent in frame-based representations. 
+
+4.6 Qualitative Analysis 
+
+Figure 6 presents a representative episode searching for a “television in the living room.” At step 12, the VLM misidentifies a large mirror as an entryway to an adjacent living room, generating hypothesis nodes for a couch and TV. Upon reaching the mirror (step 15, ∆sem = 0 .72 > 0.5), cascade correction removes the false living room subgraph, redirecting exploration to the actual living room 14 P. Chen et al. Hallway Living…Room Kitchen Bathroom   
+
+> Mirror
+> TV
+> Start
+> Target…never…r eached
+> (b) 3D-Mem
+> Wandering…trajectory Revisit…to…mirror
+> Step limit exceeded (Failure)
+> Bedr oom Living…Room Kitchen Bathroom
+> Mirror
+> TV
+> Bedr oom
+> t=5
+> t=15
+> t=18
+> (a) HGR(Ours)
+> Exploration Error… …Correction Redirected…path
+> Target found (Step 22) Success
+> Hallway Hallway
+> Start
+
+Fig. 6: Qualitative Comparison: Mirror-Induced Prediction Error. Left: HGR detects the prediction violation and removes the erroneous subgraph via cascade cor-rection. Right: 3D-Mem retains erroneous nodes with lowered confidence, leading to repeated misnavigation. 
+
+(steps 16–22). In contrast, 3D-Mem retains the erroneous nodes with reduced confidence, causing repeated revisits and step-limit failure. 
+
+## 5 Conclusion 
+
+We present Hypothesis Graph Refinement (HGR), which addresses a core chal-lenge in embodied navigation: enabling semantic prediction for efficient explo-ration while preventing cumulative error accumulation. On GOAT-Bench, HGR achieves 72.41% SR and 56.22% SPL, outperforming 3D-Mem by +3.31% and +7.32% respectively, with consistent improvements on A-EQA and EM-EQA. Ablation studies confirm both mechanisms contribute meaningfully. Diagnos-tic analysis reveals that 67% of prediction errors originate from specular and transparent surfaces, identifying a concrete direction for improving VLM ro-bustness in indoor environments. Runtime and memory analysis are provided in Appendix H. The main limitation is that cascade correction inherits the accuracy of the prediction residual test: false negatives allow erroneous nodes to persist, while false positives may prune valid hypotheses. More broadly, the prediction qual-ity of HGR is bounded by the underlying VLM, which struggles with visually complex issues such as mirrors, close objects, and spatial relationships between multiple objects—the dominant error source identified in our diagnostics (Ap-pendix J provides detailed failure case analysis). Future work includes improving residual calibration to reduce both error modes and extending the dependency structure to dynamic environments where scene content changes over time. Hypothesis Graph Refinement 15 
+
+## References 
+
+1. An, D., Wang, H., Wang, W., Wang, Z., Huang, Y., He, K., Wang, L.: Etpnav: Evolving topological planning for vision-language navigation in continuous envi-ronments. IEEE Transactions on Pattern Analysis and Machine Intelligence (2024) 2. Anderson, P., Wu, Q., Teney, D., Bruce, J., Johnson, M., Sünderhauf, N., Reid, I., Gould, S., Van Den Hengel, A.: Vision-and-language navigation: Interpreting visually-grounded navigation instructions in real environments. In: Proceedings of the IEEE conference on computer vision and pattern recognition. pp. 3674–3683 (2018) 3. Armeni, I., He, Z.Y., Gwak, J., Zamir, A.R., Fischer, M., Malik, J., Savarese, S.: 3d scene graph: A structure for unified semantics, 3d space, and camera. In: Proceedings of the IEEE/CVF international conference on computer vision. pp. 5664–5673 (2019) 4. Chakraborty, T., Ghosh, U., Zhang, X., Niloy, F.F., Dong, Y., Li, J., Roy-Chowdhury, A.K., Song, C.: HEAL: An empirical study on hallucinations in em-bodied agents driven by large language models. In: Findings of the Association for Computational Linguistics: EMNLP 2025 (2025) 5. Deng, Z., Narasimhan, K., Russakovsky, O.: Evolving graphical planner: Contex-tual global planning for vision-and-language navigation. In: Advances in Neural Information Processing Systems (NeurIPS). vol. 33 (2020) 6. Fan, C., Jia, X., Sun, Y., Wang, Y., Wei, J., Gong, Z., Zhao, X., Tomizuka, M., Yang, X., Yan, J., Ding, M.: Interleave-VLA: Enhancing robot manipulation with interleaved image-text instructions. arXiv preprint arXiv:2505.02152 (2025) 7. Gadre, S.Y., Wortsman, M., Ilharco, G., Schmidt, L., Song, S.: CoWs on Pas-ture: Baselines and benchmarks for language-driven zero-shot object navigation. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) (2023) 8. Gu, Q., Kuwajerwala, A., Morin, S., Jatavallabhula, K.M., Sen, B., Agarwal, A., Rivera, C., Paul, W., Ellis, K., Chellappa, R., Gan, C., de Melo, C.M., Tenen-baum, J.B., Torralba, A., Shkurti, F., Paull, L.: ConceptGraphs: Open-vocabulary 3d scene graphs for perception and planning. In: Proceedings of the IEEE Inter-national Conference on Robotics and Automation (ICRA) (2024) 9. Heo, K., Kim, G., Kim, S., Cho, M.: Object-centric representation learning for enhanced 3d scene graph prediction. In: Advances in Neural Information Processing Systems (NeurIPS) (2025) 10. Hong, Y., Wu, Q., Qi, Y., Rodriguez-Opazo, C., Gould, S.: Vln bert: A recur-rent vision-and-language bert for navigation. In: Proceedings of the IEEE/CVF conference on Computer Vision and Pattern Recognition. pp. 1643–1653 (2021) 11. Huang, Y., Wu, M., Li, R., Tu, Z.: VISTA: Generative visual imagination for vision-and-language navigation. arXiv preprint arXiv:2505.07868 (2025) 12. Kadavath, S., Conerly, T., Askell, A., Henighan, T., Drain, D., Perez, E., Schiefer, N., Hatfield-Dodds, Z., DasSarma, N., Tran-Johnson, E., et al.: Language models (mostly) know what they know. arXiv preprint arXiv:2207.05221 (2022) 13. Khanna, M., Ramrakhya, R., Chhablani, G., Yenamandra, S., Gervet, T., Chang, M., Kira, Z., Chaplot, D.S., Batra, D., Mottaghi, R.: GOAT-Bench: A benchmark for multi-modal lifelong navigation. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). pp. 16373–16383 (2024) 14. Ku, A., Anderson, P., Patel, R., Ie, E., Baldridge, J.: Room-across-room: Multi-lingual vision-and-language navigation with dense spatiotemporal grounding. In: 16 P. Chen et al. Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP). pp. 4392–4412 (2020) 15. Li, J., Li, D., Savarese, S., Hoi, S.: Blip-2: bootstrapping language-image pre-training with frozen image encoders and large language models. In: Proceedings of the 40th International Conference on Machine Learning. ICML’23, JMLR.org (2023) 16. Liu, J., Guo, J., Meng, Z., Xue, J.: Revolt: Relational reasoning and voronoi lo-cal graph planning for target-driven navigation. arXiv preprint arXiv:2301.02382 (2023) 17. Liu, S., Du, J., Xiang, S., Wang, Z., Luo, D.: Long-horizon embodied plan-ning with implicit logical inference and hallucination mitigation. arXiv preprint arXiv:2409.15658 (2024) 18. Majumdar, A., Aggarwal, G., Devnani, B., Hoffman, J., Batra, D.: ZSON: Zero-shot object-goal navigation using multimodal goal embeddings. In: Advances in Neural Information Processing Systems (NeurIPS) (2022) 19. Majumdar, A., Ajay, A., Zhang, X., Putta, P., Yenamandra, S., Henaff, M., Silwal, S., Mcvay, P., Maksymets, O., Arnaud, S., Yadav, K., Li, Q., Newman, B., Sharma, M., Berges, V., Zhang, S., Agrawal, P., Bisk, Y., Batra, D., Kalakrishnan, M., Meier, F., Paxton, C., Sax, A., Rajeswaran, A.: OpenEQA: Embodied question answering in the era of foundation models. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). pp. 16488– 16498 (2024) 20. Manakul, P., Liusie, A., Gales, M.J.F.: SelfCheckGPT: Zero-resource black-box hallucination detection for generative large language models. In: Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing (EMNLP). pp. 9004–9017 (2023) 21. Min, S.Y., Chaplot, D.S., Ravikumar, P., Bisk, Y., Salakhutdinov, R.: Film: Following instructions in language with modular methods. arXiv preprint arXiv:2110.07342 (2021) 22. Monaci, G., de Rezende, R.S., Deffayet, R., Csurka, G., Bono, G., D’ejean, H., Clin-chant, S., Wolf, C.: Rana: Retrieval-augmented navigation. Trans. Mach. Learn. Res. 2025 (2025) 23. Nasiriany, S., Xia, F., Yu, W., Xiao, T., Liang, J., Dasgupta, I., Xie, A., Driess, D., Wahid, A., Xu, Z., Vuong, Q., Zhang, T., Lee, T.W.E., Lee, K.H., Xu, P., Kirmani, S., Zhu, Y., Zeng, A., Hausman, K., Heess, N., Finn, C., Levine, S., Ichter, B.: PIVOT: Iterative visual prompting elicits actionable knowledge for VLMs. In: Proceedings of the 41st International Conference on Machine Learning. pp. 37321– 37341. Proceedings of Machine Learning Research, PMLR (2024) 24. Qi, Z., Zhang, Z., Yu, Y., Wang, J., Zhao, H.: VLN-R1: Vision-language navigation via reinforcement fine-tuning. arXiv preprint arXiv:2506.17221 (2025) 25. Ren, A.Z., Clark, J., Dixit, A., Itkina, M., Majumdar, A., Sadigh, D.: Explore un-til confident: Efficient exploration for embodied question answering. In: Robotics: Science and Systems (RSS) (2024) 26. Saxena, S., Buchanan, B., Paxton, C., Liu, P., Chen, B., Vaskevicius, N., Palmieri, L., Francis, J., Kroemer, O.: GraphEQA: Using 3d semantic scene graphs for real-time embodied question answering. In: Proceedings of the 9th Conference on Robot Learning (CoRL) (2025) 27. Shah, D., Equi, M., Osinski, B., Xia, F., Ichter, B., Levine, S.: Navigation with large language models: Semantic guesswork as a heuristic for planning. In: Proceedings of the Conference on Robot Learning (CoRL) (2023) Hypothesis Graph Refinement 17 28. Sun, Z., Shen, S., Cao, S., Liu, H., Li, C., Shen, Y., Gan, C., Gui, L., Wang, Y.X., Yang, Y., Keutzer, K., Darrell, T.: Aligning large multimodal models with factually augmented RLHF. In: Findings of the Association for Computational Linguistics: ACL 2024. pp. 13088–13110. Association for Computational Linguistics, Bangkok, Thailand (Aug 2024) 29. Wald, J., Dhamo, H., Navab, N., Tombari, F.: Learning 3d semantic scene graphs from 3d indoor reconstructions. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). pp. 3961–3970 (2020) 30. Wang, N., Chen, W., Chen, L., Ji, H., Guo, Z., Zhang, X., Sun, H.: Expand your scope: Semantic cognition over potential-based exploration for embodied visual navigation. arXiv preprint arXiv:2511.08935 (2025) 31. Yang, Y., Yang, H., Zhou, J., Chen, P., Zhang, H., Du, Y., Gan, C.: 3D-Mem: 3d scene memory for embodied exploration and reasoning. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). pp. 17294–17303 (2025) 32. Yu, F., Deng, Q., Tang, S., Li, Y., Cheng, L.: Open-world 3d scene graph generation for retrieval-augmented reasoning. arXiv preprint arXiv:2511.05894 (2025) 33. Zemskova, T., Yudin, D.A.: 3DGraphLLM: Combining semantic graphs and large language models for 3d scene understanding. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) (2025) 34. Zhang, Z., Zhu, W., Pan, H., Wang, X., Xu, R., Sun, X., Zheng, F.: ActiveVLN: Towards active exploration via multi-turn RL in vision-and-language navigation. arXiv preprint arXiv:2509.12618 (2025) 35. Zhou, K., Zheng, K., Pryor, C., Shen, Y., Jin, H., Getoor, L., Wang, X.E.: Esc: Exploration with soft commonsense constraints for zero-shot object navigation. In: International Conference on Machine Learning. pp. 42829–42842. PMLR (2023) 18 P. Chen et al. 
+
+## A Detailed Comparison with Commonsense-Guided Exploration 
+
+Table 7 compares HGR with recent commonsense-guided exploration methods along five key dimensions. While ESC, SCOPE, and ReVoLT all leverage se-mantic priors to bias frontier selection, none explicitly models prediction de-pendencies or provides a mechanism for structural error correction. Tiny Moves proposes game-theoretic hypothesis refinement but does not maintain a persis-tent dependency graph.                            
+
+> Table 7: Comparison with commonsense-guided exploration methods.
+> Property ESC SCOPE ReVoLT Tiny Moves HGR
+> Semantic frontier scoring ✓✓✓✓✓
+> Persistent graph memory ––✓–✓
+> Dependency tracking (DAG) ––––✓
+> Cascade error correction ––––✓
+> Non-monotonic graph update ––––✓
+
+ESC applies soft commonsense constraints to weight frontiers during zero-shot object navigation; when a constraint leads to an incorrect direction, the agent must re-explore from scratch without dependency-based propagation. And SCOPE optimizes semantic scoring of candidate viewpoints for scalable open-vocabulary navigation but treats each prediction independently, so errors in one room’s context do not affect subsequent predictions. ReVoLT combines relational reasoning with Voronoi-based local planning and maintains a local graph, but does not track which predictions depend on which, preventing structural error tracing. Tiny Moves frames hypothesis refinement as a game-theoretic process with iterative perturbations, complementary to HGR’s approach but without a persistent dependency graph across exploration steps. HGR’s key distinction is the dependency DAG, which records derivation relationships among hypotheses. This enables cascade correction—when a parent hypothesis is refuted, all dependent children are automatically identified and removed, preventing downstream error propagation. 
+
+## B Prediction Residual Test Details 
+
+B.1 Verbal Re-statement of Residual Terms 
+
+The prediction residual ∆sem (Eq. 3 in the main text) aggregates three comple-mentary signals: Hypothesis Graph Refinement 19 
+
+Table 8: Per-term ablation of the prediction residual. Dropping any single term reduces refutation precision or recall, confirming that all three signals provide complementary information. Residual Configuration Precision Recall SR ↑ SPL ↑
+
+Full ( ∆c + ∆f + ∆o) 87% 74% 72.41 56.22 
+
+Drop ∆c (no category) 78% 71% 70.88 54.31 Drop ∆f (no CLIP) 83% 68% 71.22 55.07 Drop ∆o (no object IoU) 85% 66% 71.04 54.85 
+
+– Category mismatch ∆c (Eq. 4): Measures whether the predicted semantic category matches the actual observation. If the VLM’s top-predicted cate-gory for a frontier matches the ground-truth category observed upon arrival, 
+
+∆c is low; otherwise it approaches 1. 
+
+– Visual feature divergence ∆f (Eq. 5): Computes 1−sim CLIP between the frontier-facing image (captured before visiting) and the actual observation image. This captures visual discrepancies that category labels may miss (e.g., a predicted “kitchen” that is actually a laundry room shares similar objects but looks visually different). 
+
+– Object-level Jaccard dissimilarity ∆o (Eq. 6): Compares the set of pre-dicted objects Opred  
+
+> j
+
+against detected objects Oactual  
+
+> j
+
+using 1 − IoU. This detects cases where the room type is correct but the expected objects are absent. 
+
+B.2 Worked Numerical Example 
+
+Consider a frontier where the VLM predicts “kitchen” with 0.75 confidence and expects objects {stove, refrigerator, sink}. Upon arrival, the agent observes a “bathroom” containing {sink, toilet, bathtub}. 
+
+– ∆c = 1 − 0.75 · ⊮[kitchen = bathroom ] = 1 − 0 = 1 .0
+
+– ∆f = 1 − sim CLIP (Ifrontier , I actual ) = 1 − 0.42 = 0 .58 
+
+– ∆o = 1 − |{ sink }| |{ stove, refrigerator, sink, toilet, bathtub }| = 1 − 0.2 = 0 .80 
+
+∆sem = 0 .4 × 1.0 + 0 .3 × 0.58 + 0 .3 × 0.80 = 0 .40 + 0 .174 + 0 .24 = 0 .814 
+
+Since 0.814 > θ refute = 0 .5, this hypothesis is refuted and cascade correction is triggered. 
+
+B.3 Per-Term Ablation 
+
+Table 8 reports the effect of dropping each residual term, evaluated on the GOAT-Bench validation subset (278 subtasks). Dropping ∆c causes the largest precision loss (78%), as category mismatch is the strongest single indicator of prediction failure. Dropping ∆o causes the largest recall loss (66%), since object-level comparison catches subtle errors where the room type is approximately correct but the expected contents are wrong. 20 P. Chen et al.                                                  
+
+> Table 9: Threshold sensitivity for θrefute .
+> θrefute Refutation Rate Precision Recall SR ↑SPL ↑
+> 0.30 42% 68% 91% 66.2 49.8 0.35 37% 74% 88% 68.1 51.6 0.40 33% 79% 83% 70.0 53.4 0.45 29% 84% 78% 71.5 55.1
+> 0.50 24% 87% 74% 72.41 56.22
+> 0.55 20% 90% 67% 71.8 55.5 0.60 16% 92% 58% 70.6 53.9 0.65 13% 93% 49% 69.2 52.1 0.70 11% 94% 41% 67.8 50.7
+
+B.4 Threshold Sensitivity 
+
+We evaluate θrefute ∈ { 0.3, 0.35 , 0.4, 0.45 , 0.5, 0.55 , 0.6, 0.65 , 0.7} on a held-out validation split (56 subtasks from GOAT-Bench). The optimal threshold θrefute = 0 .5 balances two failure modes: (1) aggressive thresholds ( < 0.4) yield high recall but low precision, incorrectly removing valid hypotheses and degrading SR by up to 6.2%; (2) conservative thresholds ( > 0.6)maintain high precision but allow erroneous hypotheses to persist, leading to cumulative error accumulation. Performance is relatively stable in the [0 .45 , 0.55] 
+
+range, indicating moderate sensitivity. 
+
+## C Dependency DAG Construction Rules 
+
+C.1 Complete Specification 
+
+The dependency DAG D is constructed incrementally according to the following rules: 
+
+Rule 1: Frontier-to-Room Hypothesis. When the VLM generates a room-level semantic prediction for frontier fj , a hypothesis node vhyp  
+
+> j
+
+is cre-ated. The parent edge (vobs , v hyp  
+
+> j
+
+, ρ ) connects the nearest observed node vobs 
+
+to the new hypothesis, where ρ is the VLM’s reported confidence for the room prediction. 
+
+Rule 2: Room-to-Object Hypothesis. When the VLM further predicts specific objects likely to exist within a hypothesized room (e.g., “kitchen →
+
+{stove, refrigerator, countertop}”), each predicted object node vobj  
+
+> k
+
+is created as a child of the room hypothesis node: (vhyp  
+
+> j
+
+, v obj  
+
+> k
+
+, ρ k), where ρk is the conditional object probability. 
+
+Rule 3: Single-Parent Constraint. Each node has at most one parent in 
+
+D, ensuring the structure is a forest. If a hypothesis could logically depend on multiple parents (e.g., an object visible from two predicted rooms), we assign it to the parent with the highest confidence ρ. This simplifies cascade correction to a simple BFS traversal without requiring multi-parent conflict resolution. Hypothesis Graph Refinement 21 
+
+Rule 4: Observation Promotion. When a hypothesis node is confirmed (prediction matches observation), it transitions to an observed node. Its children in D are preserved but re-parented to the now-verified node, inheriting updated confidence from the observation. 
+
+Rule 5: No Cycles. Hypothesis nodes are always created at the frontier of exploration and depend on already-existing nodes. Since exploration proceeds outward, D is guaranteed to be acyclic. 
+
+C.2 Worked Example 
+
+Consider an agent exploring an apartment. Starting from a hallway (observed node vobs  
+
+> 1
+
+): 1. The agent observes a frontier fA at the end of the hallway. The VLM pre-dicts “kitchen” with ρ = 0 .82 , creating hypothesis node vhyp  
+
+> A
+
+with edge 
+
+(vobs  
+
+> 1
+
+, v hyp  
+
+> A
+
+, 0.82) .2. The VLM further predicts objects in the hypothesized kitchen: “stove” ( ρ =0.71 ), “refrigerator” ( ρ = 0 .68 ). Object hypothesis nodes vobj  
+
+> A1
+
+, v obj  
+
+> A2
+
+are created with edges (vhyp  
+
+> A
+
+, v obj  
+
+> A1
+
+, 0.71) and (vhyp  
+
+> A
+
+, v obj  
+
+> A2
+
+, 0.68) .3. Another frontier fB is detected. The VLM predicts “bedroom” with ρ = 0 .65 ,creating vhyp  
+
+> B
+
+with edge (vobs  
+
+> 1
+
+, v hyp  
+
+> B
+
+, 0.65) and child object “bed” ( ρ = 0 .74 ). 4. The agent navigates to fA and observes a laundry room instead. Since 
+
+∆sem = 0 .72 > 0.5, node vhyp  
+
+> A
+
+is refuted. Cascade correction removes vhyp  
+
+> A
+
+,
+
+vobj  
+
+> A1
+
+(stove), and vobj  
+
+> A2
+
+(refrigerator)—three nodes total. The bedroom hy-pothesis branch ( vhyp  
+
+> B
+
+and its children) is unaffected. 
+
+C.3 Cascade Breadth Analysis 
+
+In practice, dependency chains are shallow. Across the GOAT-Bench evaluation (2,780 subtasks), the distribution of cascade depths was: depth 1 (72%), depth 2 (21%), depth 3 (6%), depth 4 (1%). The average number of nodes removed per cascade event was 2.8 (including the refuted parent). This bounded cascade breadth ensures that correction operations remain computationally negligible (< 1ms per cascade on graphs with < 20 nodes). 
+
+## D Open-Source VLM Experiments 
+
+To evaluate whether HGR’s gains depend critically on GPT-4o, we replace the VLM model with two open-source alternatives (LLaVA-1.5-13B and InternVL2-8B). Table 10 reports results on the GOAT-Bench validation subset (278 sub-tasks). Key observations: 
+
+– All VLM backbones improve over the geometry-only baseline, confirming that HGR’s framework is not merely a wrapper around GPT-4o’s capabili-ties. 22 P. Chen et al.                                  
+
+> Table 10: HGR with different VLM backbones on GOAT-Bench subset. The hypothesis-cascade framework provides consistent gains even with weaker open-source VLMs. Geometry-only HGR (full) VLM Backbone Pred. Acc. SR SPL SR ↑SPL ↑
+> GPT-4o 0.68 63.42 45.33 72.41 56.22
+> InternVL2-8B 0.57 63.42 45.33 69.15 52.08 LLaVA-1.5-13B 0.51 63.42 45.33 67.82 50.41
+> Table 11: Shared vs. method-specific components across all evaluated meth-ods.
+> Component Shared Method-Specific VLM backbone (GPT-4o) ✓
+> Habitat 3.0 simulator ✓
+> Low-level controller (DD-PPO) ✓
+> Occupancy map construction ✓
+> Geodesic path planner ✓
+> Step budget (500 steps) ✓
+> Frontier detection ✓
+> Graph construction logic ✓
+> Graph update / correction ✓
+> Frontier scoring / selection ✓
+> Memory representation ✓
+
+– The improvement correlates with prediction accuracy: GPT-4o (+8.99% SR) 
+
+> InternVL2-8B (+5.73% SR) > LLaVA-1.5-13B (+4.40% SR), as expected. 
+
+– Critically, cascade correction becomes more important with weaker VLMs: the proportion of hypotheses refuted increases from 26.5% (GPT-4o) to 35.1% (LLaVA-1.5-13B), and the relative gain from cascade correction (vs. no correction) grows from +3.80% SR to +5.22% SR. This demonstrates that HGR is a general framework that benefits from stronger VLMs but does not require them. The cascade correction mechanism is especially valuable when prediction accuracy is lower, as it more aggressively prunes incorrect hypotheses. 
+
+## E Baseline Re-implementation Details 
+
+All baselines share a common infrastructure to ensure fair comparison. Table 11 details the shared and method-specific components. For ConceptGraph, we re-implement the open-vocabulary scene graph con-struction using CLIP-based object grounding. The original CLIP backbone is Hypothesis Graph Refinement 23                            
+
+> Table 12: Cascade correction vs. soft confidence decay with revisitation penalty.
+> GOAT (Subset) A-EQA EM-EQA Method SR ↑SPL ↑LLM ↑LLM ↑
+> No correction 68.61 51.12 47.5 51.8 Soft decay only 69.42 52.30 48.8 53.1 Soft decay + revisit penalty 70.17 53.05 49.6 53.9 Local delete only 70.85 53.67 52.3 55.9
+> Cascade correction (HGR) 72.41 56.22 55.9 58.3
+
+retained for object-node feature extraction, while GPT-4o replaces the original LLM for relational reasoning (edge labeling). Frontier selection uses nearest-frontier with geodesic distance. For 3D-Mem, we re-implement the 3D memory snapshot mechanism; GPT-4o replaces the original VLM for snapshot captioning and query answering, with the top-k relevance retrieval mechanism preserved. For Explore-EQA, the confidence-driven exploration strategy is preserved; GPT-4o serves as both the question-answering module and the exploration confidence estimator. For all baselines, we verified that our re-implementations match or exceed the originally reported numbers on the respective benchmarks (within 1–2% variance attributable to VLM backbone differences), confirming faithful reproduction of each method’s core logic. 
+
+## F Soft Confidence Decay + Revisitation Penalty Baseline 
+
+A natural alternative to cascade deletion is to decay the confidence of suspect hypotheses while adding a spatial revisitation penalty to discourage redundant exploration. We implement this baseline as follows: 
+
+– Soft decay : When a hypothesis node’s residual exceeds θrefute , instead of removing it, multiply its confidence by a decay factor γ = 0 .3. Dependent children have their confidence decayed by γd where d is the dependency depth. 
+
+– Revisitation penalty : Add a penalty −λr · nvisit (fj ) to the exploration score (Eq. 2), where nvisit counts prior visits to frontier fj ’s Voronoi cell and 
+
+λr = 0 .15 .Soft decay with revisitation penalty improves over no correction (+1.56% SR, +1.93% SPL) but underperforms both local delete and cascade correction. The key limitation is that decayed nodes remain in the graph and continue to influence downstream reasoning: a “kitchen” node decayed to 0.3 confidence still suggests nearby “stove” and “refrigerator” nodes exist with nonzero probabil-ity, biasing exploration toward regions that have already been determined to 24 P. Chen et al.                   
+
+> Table 13: Hyperparameters used in all experiments.
+> Symbol Description Value
+> λdTravel cost weight (Eq. 2) 0.15
+> λhUncertainty bonus weight (Eq. 2) 0.10
+> rcontext Spatial context radius for Olocal 3.0 m
+> ωcCategory mismatch weight 0.4
+> ωfFeature divergence weight 0.3
+> ωoObject IoU weight 0.3
+> θrefute Refutation threshold 0.5
+> KNumber of semantic categories 23
+
+be incorrectly predicted. Cascade correction eliminates this residual influence entirely. 
+
+## G Full Implementation Details 
+
+G.1 Hyperparameters G.2 Simulator Configuration 
+
+All experiments use Habitat 3.0 with the following settings: 
+
+– Agent step size: 0.25 m (forward), 10 ◦ (turn) 
+
+– RGB resolution: 640 × 480 ; depth resolution: 640 × 480 
+
+– Maximum episode steps: 500 (GOAT-Bench), 200 (A-EQA), N/A (EM-EQA, pre-explored) 
+
+– Collision handling: agent stops in place and receives collision flag 
+
+– Navigation mesh tolerance: 0.1 m 
+
+G.3 Frontier Detection and Discretization 
+
+Frontiers are detected from the 2D occupancy grid (resolution 0.05 m/cell) by identifying cells on the boundary between explored free space and unexplored space. Raw frontier cells are clustered via DBSCAN (eps = 0 .5 m, min_samples 
+
+= 3 ) to produce discrete frontier regions. Each cluster centroid defines a frontier point fj . On average, 4.7 frontier candidates are identified per timestep across GOAT-Bench episodes. 
+
+G.4 VLM Prompt Template 
+
+The VLM (GPT-4o by default) is prompted with the following template for frontier hypothesis generation: Hypothesis Graph Refinement 25                    
+
+> Table 14: Wall-clock time breakdown per GOAT-Bench episode (avg. over 278-subtask evaluation subset).
+> Component HGR 3D-Mem Frontier detection + occupancy map 12 ms 12 ms VLM hypothesis generation (per frontier) 0.80 s —VLM calls per episode (avg.) 18.3 12.1 Total VLM time per episode 14.6 s 9.7 s Exploration scoring 2 ms 1 ms Prediction residual test 45 ms —Cascade correction (per event) <1 ms —Total episode time 78.4 s 63.2 s
+
+You are an embodied navigation assistant. Given: - Current observation: [image] - Detected objects nearby: {obj_list} - Frontier direction: {direction} - Explored room types so far: {room_list} Predict the most likely room type beyond this frontier and list 3-5 objects expected in that room. Output format: Room: <room_type> (confidence: 0.0-1.0) Objects: <obj1> (p=...), <obj2> (p=...), ... 
+
+G.5 Evaluation Protocol – GOAT-Bench : Full validation set (2,780 subtasks across 360 scenes) and a balanced evaluation subset (278 subtasks, 10% stratified sample). Results are averaged over 3 random seeds. 
+
+– A-EQA : 184-question evaluation subset from 63 HM3D scenes, following the official split. Results averaged over 3 seeds. 
+
+– EM-EQA : 1,634 questions from 152 scenes (ScanNet + HM3D), using pro-vided pre-explored trajectories. Single run (no exploration randomness). 
+
+## H Runtime and Computational Cost Analysis 
+
+HGR adds approximately 24% wall-clock overhead compared to 3D-Mem, pri-marily from additional VLM calls for frontier hypothesis generation. The cascade correction itself is negligible ( < 1 ms per event: BFS on a graph with typically 
+
+< 20 nodes). The hybrid prediction strategy (Sec. 4.3, Table 5) reduces VLM calls by 60% while preserving 95% of performance, offering a practical latency– accuracy trade-off. 26 P. Chen et al.                 
+
+> Table 15: Average graph statistics over GOAT-Bench episodes.
+> Metric HGR 3D-Mem ConceptGraph Peak nodes per episode 34.2 41.7 38.5 Final nodes per episode 28.6 41.7 38.5 Peak edges per episode 52.1 58.3 71.2 Nodes removed (cascade) 5.6 00Memory footprint (MB) 8.2 12.4 15.7
+
+When multiple frontiers are discovered simultaneously, VLM queries are batched into a single API call with multiple image inputs, reducing per-frontier latency from 0.80 s to approximately 0.35 s for batches of 3–5 frontiers. 
+
+## I Graph Size and Memory Footprint 
+
+HGR’s non-monotonic graph evolution is evident: despite creating more hypoth-esis nodes during exploration, the final graph size is smaller than baselines due to cascade pruning. The “grow-and-prune” dynamics keep the graph compact: peak size occurs around 60% of the episode, after which cascade corrections in-creasingly prune erroneous branches while new frontier discoveries slow as the environment is increasingly explored. The memory footprint advantage (8.2 MB vs. 12.4 MB for 3D-Mem) arises because: (1) pruned nodes and their associated features are freed from memory, and (2) hypothesis nodes store only lightweight semantic distributions rather than full visual features until confirmed. 
+
+## J Failure Cases Analysis 
+
+While our proposed HGR demonstrates strong performance in 3D scene under-standing and reasoning, it still exhibits limitations in certain challenging sce-narios. Following the rigorous analysis paradigm in recent 3D embodied models, we thoroughly analyze the typical failure cases and categorize them into four main visual failure modes (as illustrated in Fig. 7), along with an analysis of exploration inefficiency. 
+
+Visual Perception and Reasoning Failures. We identify four primary types of errors during visual grounding and reasoning: 
+
+– Object Confusion (Fig. 7a): In some cases, the underlying object detector assigns incorrect labels, misleading downstream reasoning. For instance, a wall painting might be erroneously detected as a ceiling fan. The Vision-Language Model (VLM) occasionally fails to extract correct instance-level visual features (e.g., color and shape) to correct this prior error, a problem compounded by missing or inaccurate semantic annotations in the generated scene graph. Hypothesis Graph Refinement 27 
+
+– Loss of Visual Details (Fig. 7b): When the agent observes objects from a considerable distance, fine-grained visual details are easily lost. For example, when queried about the content of a painting above a couch, the VLM might capture low-level textures (e.g., animal fur) but fail to semantically identify the exact subject (e.g., horses) due to insufficient resolution or excessive observation distance. 
+
+– State Misjudgment (Fig. 7c): HGR sometimes struggles with identifying the correct operational states of objects (e.g., whether a toilet seat is open or closed). This typically stems from sub-optimal observation angles, motion blur, or the lack of explicit, state-aware instructions in the prompt (such as “carefully check the state”) to guide the VLM’s attention to subtle visual cues. 
+
+– Spatial Relationship Misunderstanding (Fig. 7d): The model occa-sionally misinterprets complex spatial predicates (e.g., “between”, “left”). For instance, it might incorrectly judge the relative position between a fruit bowl, a knife set, and a toaster. This limitation is primarily attributed to imprecise spatial coordinate mapping within the scene graph and the inherent difficulty VLMs face when grounding 3D spatial semantics from 2D projections. 
+
+Exploration Inefficiency (SPL). Beyond visual failures, our quantitative anal-ysis reveals specific cases of path inefficiency where the Success weighted by Path Length (SPL) drops significantly. These inefficiencies typically arise from inaccurate hypothesis node predictions that mislead the agent into exploring erroneous frontiers. Additionally, sub-optimal trade-offs between semantic po-tential and navigation distance can result in the agent prioritizing distant, low-value frontiers, leading to redundant backtracking. Addressing these memory and navigation trade-offs remains a key direction for future work. 28 P. Chen et al.       
+
+> (a) Object Confusion (b) Loss of Details
+> (c) State Misjudgment (d) Spatial Misunderstanding
+
+Fig. 7: Qualitative Failure Cases of HGR. We visualize four typical failure pat-terns: (a) Object confusion caused by detector errors and lack of feature extraction; (b) Loss of visual details due to long observation distances; (c) State misjudgment caused by suboptimal viewpoints or missing subtle visual cues; and (d) Misunderstanding of spatial predicates (e.g., “between”).
