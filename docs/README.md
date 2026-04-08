@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-07
-- 运行时间：2026-04-07 20:06:38 UTC
+- 最新运行日期：2026-04-08
+- 运行时间：2026-04-08 20:04:21 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦视觉推理的强化学习突破，涵盖从开源 RL 范式到可解释性对齐的 17 篇前沿成果。
-重点推荐满分论文 Vero 提供的通用视觉推理方案，以及通过显著图对齐显著提升推理忠实度的 Saliency-R1。
-建议关注智能眼镜 AI 智能体及多模态推理中的“证据坍缩”现象，探索更具鲁棒性的具身交互技术。
-- 详情：[/202604/07/README](/202604/07/README)
+今日深度解析 17 篇视觉推理前沿论文，重点攻克强化学习（RL）在多模态逻辑中的应用难题。
+满分神作 Vero 揭秘了通用视觉推理的 RL 秘籍，而视频推理则通过“强化学习+投票机制”实现了逻辑跃迁。
+建议优先研读 Vero 的开源方案，并关注如何通过减少冗余细节来换取更精准的视觉问答表现。
+- 详情：[/202604/08/README](/202604/08/README)
 
 ### 精读区论文标签
-1. [Vero: An Open RL Recipe for General Visual Reasoning](/202604/07/2604.04917v1-vero-an-open-rl-recipe-for-general-visual-reasoning)  
+1. [Vero: An Open RL Recipe for General Visual Reasoning](/202604/08/2604.04917v2-vero-an-open-rl-recipe-for-general-visual-reasoning)  
    标签：评分：10.0/10、query:vlm-rl
-   evidence：视觉语言模型通用视觉推理的开放强化学习方案
-2. [Saliency-R1: Enforcing Interpretable and Faithful Vision-language Reasoning via Saliency-map Alignment Reward](/202604/07/2604.04500v1-saliency-r1-enforcing-interpretable-and-faithful-vision-language-reasoning-via-saliency-map-alignment-reward)  
+   evidence：视觉语言模型通用视觉推理的强化学习方案
+2. [Reinforce to Learn, Elect to Reason: A Dual Paradigm for Video Reasoning](/202604/08/2604.04379v1-reinforce-to-learn-elect-to-reason-a-dual-paradigm-for-video-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于可解释且忠实视觉语言推理的强化学习框架
-3. [QuadAgent: A Responsive Agent System for Vision-Language Guided Quadrotor Agile Flight](/202604/07/2604.02786v1-quadagent-a-responsive-agent-system-for-vision-language-guided-quadrotor-agile-flight)  
+   evidence：用于多模态推理和证据对齐回答的强化学习
+3. [Learning What Matters: Dynamic Dimension Selection and Aggregation for Interpretable Vision-Language Reward Modeling](/202604/08/2604.05445v1-learning-what-matters-dynamic-dimension-selection-and-aggregation-for-interpretable-vision-language-reward-modeling)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：用于强化学习的可解释视觉语言奖励建模
+4. [Don't Act Blindly: Robust GUI Automation via Action-Effect Verification and Self-Correction](/202604/08/2604.05477v1-dont-act-blindly-robust-gui-automation-via-action-effect-verification-and-self-correction)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：基于视觉语言模型的GUI智能体，不涉及机器人
+5. [TableVision: A Large-Scale Benchmark for Spatially Grounded Reasoning over Complex Hierarchical Tables](/202604/08/2604.03660v1-tablevision-a-large-scale-benchmark-for-spatially-grounded-reasoning-over-complex-hierarchical-tables)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言引导飞行推理的智能体系统
-4. [V-Reflection: Transforming MLLMs from Passive Observers to Active Interrogators](/202604/07/2604.03307v1-v-reflection-transforming-mllms-from-passive-observers-to-active-interrogators)  
+   evidence：复杂分层表格的空间定位推理
+6. [Firebolt-VL: Efficient Vision-Language Understanding with Cross-Modality Modulation](/202604/08/2604.04579v1-firebolt-vl-efficient-vision-language-understanding-with-cross-modality-modulation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于视觉反思的主动询问智能体
-5. [SASAV: Self-Directed Agent for Scientific Analysis and Visualization](/202604/07/2604.03406v1-sasav-self-directed-agent-for-scientific-analysis-and-visualization)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：用于视觉推理的自主智能体
-6. [Discovering Failure Modes in Vision-Language Models using RL](/202604/07/2604.04733v1-discovering-failure-modes-in-vision-language-models-using-rl)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：基于强化学习的框架，用于发现视觉语言推理中的失效模式
+   evidence：用于细粒度推理任务的视觉语言模型
 
 ### 速读区论文标签
-1. [VisionClaw: Always-On AI Agents through Smart Glasses](/202604/07/2604.03486v1-visionclaw-always-on-ai-agents-through-smart-glasses)  
+1. [EgoMind: Activating Spatial Cognition through Linguistic Reasoning in MLLMs](/202604/08/2604.03318v1-egomind-activating-spatial-cognition-through-linguistic-reasoning-in-mllms)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：具有智能体任务执行能力的穿戴式AI
-2. [Hypothesis Graph Refinement: Hypothesis-Driven Exploration with Cascade Error Correction for Embodied Navigation](/202604/07/2604.04108v1-hypothesis-graph-refinement-hypothesis-driven-exploration-with-cascade-error-correction-for-embodied-navigation)  
+   evidence：通过语言思维链在MLLM中进行空间推理
+2. [Less Detail, Better Answers: Degradation-Driven Prompting for VQA](/202604/08/2604.04838v1-less-detail-better-answers-degradation-driven-prompting-for-vqa)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：基于VLM的具身导航智能体与语义预测
-3. [Don't Blink: Evidence Collapse during Multimodal Reasoning](/202604/07/2604.04207v1-dont-blink-evidence-collapse-during-multimodal-reasoning)  
+   evidence：通过提示词工程改进视觉语言模型的推理能力
+3. [WikiSeeker: Rethinking the Role of Vision-Language Models in Knowledge-Based Visual Question Answering](/202604/08/2604.05818v1-wikiseeker-rethinking-the-role-of-vision-language-models-in-knowledge-based-visual-question-answering)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型多模态推理过程中证据坍缩现象的分析
-4. [Generalizable Dense Reward for Long-Horizon Robotic Tasks](/202604/07/2604.00055v1-generalizable-dense-reward-for-long-horizon-robotic-tasks)  
+   evidence：VLM作为视觉推理的专门智能体
+4. [MemFactory: Unified Inference & Training Framework for Agent Memory](/202604/08/2603.29493v4-memfactory-unified-inference--training-framework-for-agent-memory)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：VLM用于强化学习中的任务进度识别
-5. [Semantic Richness or Geometric Reasoning? The Fragility of VLM's Visual Invariance](/202604/07/2604.01848v1-semantic-richness-or-geometric-reasoning-the-fragility-of-vlms-visual-invariance)  
+   evidence：利用强化学习优化AI智能体的记忆操作
+5. [Benchmarking Interaction, Beyond Policy: a Reproducible Benchmark for Collaborative Instance Object Navigation](/202604/08/2604.00265v1-benchmarking-interaction-beyond-policy-a-reproducible-benchmark-for-collaborative-instance-object-navigation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：研究视觉语言模型中的几何推理和视觉不变性
-6. [VLMs Need Words: Vision Language Models Ignore Visual Detail In Favor of Semantic Anchors](/202604/07/2604.02486v1-vlms-need-words-vision-language-models-ignore-visual-detail-in-favor-of-semantic-anchors)  
+   evidence：结合自然语言对话和视觉观察的具身智能体
+6. [ACT Now: Preempting LVLM Hallucinations via Adaptive Context Integration](/202604/08/2604.00983v1-act-now-preempting-lvlm-hallucinations-via-adaptive-context-integration)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型中视觉实体的推理
-7. [PaveBench: A Versatile Benchmark for Pavement Distress Perception and Interactive Vision-Language Analysis](/202604/07/2604.02804v1-pavebench-a-versatile-benchmark-for-pavement-distress-perception-and-interactive-vision-language-analysis)  
+   evidence：通过自适应上下文集成减轻LVLM中的幻觉
+7. [AURA: Multimodal Shared Autonomy for Real-World Urban Navigation](/202604/08/2604.01659v1-aura-multimodal-shared-autonomy-for-real-world-urban-navigation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：交互式视觉语言分析和基于事实的推理
-8. [Co-Evolution of Policy and Internal Reward for Language Agents](/202604/07/2604.03098v1-co-evolution-of-policy-and-internal-reward-for-language-agents)  
+   evidence：用于城市导航和共享自主的视觉语言AI智能体
+8. [PLUME: Latent Reasoning Based Universal Multimodal Embedding](/202604/08/2604.02073v1-plume-latent-reasoning-based-universal-multimodal-embedding)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：语言智能体的强化学习
-9. [OmniSch: A Multimodal PCB Schematic Benchmark For Structured Diagram Visual Reasoning](/202604/07/2604.00270v1-omnisch-a-multimodal-pcb-schematic-benchmark-for-structured-diagram-visual-reasoning)  
+   evidence：多模态嵌入的潜空间推理框架
+9. [Hallucination-aware intermediate representation edit in large vision-language models](/202604/08/2603.29405v1-hallucination-aware-intermediate-representation-edit-in-large-vision-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：PCB 原理图的结构化图表视觉推理
-10. [ContextBudget: Budget-Aware Context Management for Long-Horizon Search Agents](/202604/07/2604.01664v1-contextbudget-budget-aware-context-management-for-long-horizon-search-agents)  
+   evidence：多模态推理中的幻觉缓解
+10. [LinguDistill: Recovering Linguistic Ability in Vision- Language Models via Selective Cross-Modal Distillation](/202604/08/2604.00829v2-lingudistill-recovering-linguistic-ability-in-vision--language-models-via-selective-cross-modal-distillation)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：基于LLM的智能体通过强化学习进行长程推理
-11. [Semantic Richness or Geometric Reasoning? The Fragility of VLM's Visual Invariance](/202604/07/2604.01848v2-semantic-richness-or-geometric-reasoning-the-fragility-of-vlms-visual-invariance)  
+   evidence：恢复视觉语言模型中的语言能力
+11. [Language-Pretraining-Induced Bias: A Strong Foundation for General Vision Tasks](/202604/08/2604.01833v2-language-pretraining-induced-bias-a-strong-foundation-for-general-vision-tasks)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：研究视觉语言模型的视觉不变性和几何推理
+   evidence：将LLM参数与视觉任务对齐以进行多模态推理
 
 
 <div class="dpr-home-promo-card">
