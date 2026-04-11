@@ -1,0 +1,181 @@
+Title: Towards the AI Historian: Agentic Information Extraction from Primary Sources
+
+URL Source: https://arxiv.org/pdf/2604.03553v1
+
+Published Time: Tue, 07 Apr 2026 00:20:47 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# TOWARDS THE AI H ISTORIAN :AGENTIC INFORMATION EXTRACTION FROM PRIMARY SOURCES 
+
+Lorenz Hufe 1,4,∗ Niclas Griesshaber 1,2,∗,† Gavin Greif 1,2,∗ Sebastian Oliver Eck 1,3
+
+Philip Torr 11Torr Vision Group, Department of Engineering Science, University of Oxford 
+
+> 2
+
+Oxford Centre for Economic and Social History, University of Oxford 
+
+> 3
+
+Faculty of Music, University of Oxford 
+
+> 4
+
+Fraunhofer HHI 
+
+# ABSTRACT 
+
+AI is supporting, accelerating, and automating scientific discovery across a diverse set of fields. However, AI adoption in historical research remains limited due to the lack of solutions designed for historians. In this technical progress report, we introduce the first module of Chronos, an AI Historian under development. This module enables historians to convert image scans of primary sources into data through natural-language interactions. Rather than imposing a fixed extraction pipeline powered by a vision-language model (VLM), it allows historians to adapt workflows for heterogeneous source corpora, evaluate the performance of AI models on specific tasks, and iteratively refine workflows through natural-language interaction with the Chronos agent. The module is open-source and ready to be used by historical researchers on their own sources. Code: https://github.com/ai-historian/history-agent 
+
+Project page: https://ai-historian.com/research/chronos 
+
+Keywords Artificial Intelligence · History · Computational History · AI Agents · Information Extraction 
+
+# 1 Introduction 
+
+AI is accelerating scientific discovery in fields such as mathematics, physics, astronomy, computer science, biology, and materials science (Bubeck et al., 2025). Recently, the AI Scientist has been able to automate machine learning research end-to-end, from conception to peer-reviewed publication (Lu et al., 2026). We aim to extend this emerging research paradigm to the field of history, where the large-scale digitization of primary and secondary sources has made it possible to conduct historical research in the digital domain. Historical research is an iterative reasoning process that almost never follows a linear order (Palmer et al., 2009). Historians constantly iterate between studying existing scholarship, formulating hypotheses, discovering and critiquing sources, and interpreting evidence. Existing approaches to AI scientists are not suitable for historical research, as they focus on automated experimentation and fail to address the particular challenges to evidence gathering in historical research. Moreover, they are focused on empirical strategies typically found in the sciences, which differ significantly 
+
+> ∗
+
+These authors contributed equally and share first authorship. 
+
+> †
+
+Corresponding author: niclas.griesshaber@history.ox.ac.uk 
+
+> arXiv:2604.03553v1 [cs.AI] 4 Apr 2026
+
+from the qualitative and quantitative methodologies of historical research. At the time of writing, there exists no AI scientist fit for historical research, and there are no accessible, customisable, and effective agentic solutions to the extraction of information from historical sources. In this technical progress report, we present the first module of Chronos, an AI Historian under development. This first module addresses a foundational task in historical research: extracting information from primary sources. Rather than imposing a rigid pipeline, as many existing approaches do, Chronos enables historians to use natural language to build and customise adaptive workflows, efficiently tailoring them to the unique primary sources under investigation. 
+
+# 2 Related Work 
+
+Across many domains, researchers have confronted the problem of extracting data from images. A large literature in machine learning continues to address the technical challenges of extracting structured information from documents (Fu et al., 2024; Liu et al., 2024; Sui et al., 2024; Huang et al., 2025; Ke et al., 2025; Li et al., 2025 a,b; Ouyang et al., 2025; Yang et al., 2025; Yu et al., 2025; Zhang et al., 2025). Researchers in digital humanities have applied some of these methods in downstream applications, enabling scholars to answer new questions computationally (Michel et al., 2010; Tyrkkö & Mäkinen, 2022). Likewise, the social sciences have begun to use these methods to analyse visual data, enabling the creation and analysis of new large-scale economic history datasets (Dell et al., 2023; Carlson et al., 2024; Silcock et al., 2024; Dell, 2025). The arrival of multimodal large language models (mLLMs), more precisely, vision-language models (VLMs) (Liu et al., 2023), represents a step change. These models are capable of jointly processing visual and textual data and can therefore be prompted to extract the desired text embedded within images. Many studies still focus on a single source type or a narrowly defined extraction task. For example, economic historians have constructed datasets from patent registers and firm reports (Griesshaber & Streb, 2025; Jayes, 2025; Xie et al., 2025), digital humanities scholars have shown that VLMs can be used to extract structured data from digitised concert programmes (Eck & Page, 2026), and archivists have begun to extract information from a diverse range of museum and archival collections (Schimmenti et al., 2024; Reusens et al., 2025; Toth et al., 2025; Vafaie et al., 2025). Economists have also started to use LLMs to digitise historical tables (Bäcker-Peral et al., 2025) and institutions, such as the Philadelphia Fed, have begun to deploy them on their archival sources (Moulton & Severen, 2025). This first module of our AI Historian represents the agentic continuation of our previous research on using VLMs to construct structured datasets from historical documents (Greif et al., 2025; Griesshaber & Streb, 2025). In these earlier projects, we built custom VLM pipelines that solved the problems of reliably locating, extracting, and parsing historical information from specific primary sources. This required technical expertise that historians typically do not have. The rapid progress in AI agents (Kwa et al., 2025) enables the construction of the first module of the AI Historian, removing much of the remaining friction in making primary sources available for computational analysis. 
+
+# 3 Chronos: The AI Historian 
+
+In this technical progress report, we present the first module of Chronos, a system designed to accelerate historical research by automating key research tasks and, in the longer term, to develop into an AI Historian capable of autonomous end-to-end research. In its current form, this module enables historians to apply computational operations to digitised archival sources. Technically, it is implemented as a domain-specific extension of the general-purpose coding agent Pi, specialising the framework through tools, prompts, and reusable procedures tailored to historians. Embedded in Visual Studio Code (Figure 1), Chronos lets historians describe tasks in natural language, which the underlying agent translates into computational operations. 
+
+3.1 System Architecture The Pi Agent Framework. Chronos is built on Pi, a general-purpose, model-agnostic coding agent framework. 3
+
+Pi provides three core capabilities: (1) a tool system that gives the agent access to the local filesystem via built-in 
+
+> 3https://github.com/badlogic/pi-mono
+
+2FIGURE 1 CHRONOS – T HE AI H ISTORIAN 
+
+> Notes : The Chronos research environment embedded in Visual Studio Code. The left sidebar organises the workspace by separating read-only source files from agent-generated data, memory, and skills. The centre panel provides an integrated viewer for inspecting a primary source page, while the right panel shows the agent drafting an extraction prompt and requesting the historian’s approval before batch processing. The source can be found in the digital library of the University of Mannheim.
+
+tools (Table 1); (2) a session system that persists conversation history as branching JSONL trees, allowing historians to resume work, fork exploratory branches, and compress older context; and (3) an extension system through which packages can register custom tools, inject system prompts, hook into the agent lifecycle, and add commands. Pi is model-agnostic: its unified LLM interface supports over twenty providers, allowing Chronos to route tasks to different models (both open-source and closed-source), for example using Claude Opus 4.6 for orchestration and reasoning while delegating information extraction from image scans to the Gemini 3.1 Pro. 
+
+How Chronos specialises the Pi Agent Framework for Historical Research. Chronos is packaged as a pi-package ,a self-contained bundle of extensions, skills, and prompt templates that Pi loads automatically. The Chronos extension registers the domain-specific tools (Table 1), injects a system prompt that orients the agent towards document analysis rather than general coding, and connects to the Visual Studio Code page viewer via a local HTTP server. Historians never interact with Pi directly, but instead work through the Chronos interface, consisting of the workspace, page viewer, and conversational interface. 
+
+Workspace. Chronos organises each research project as a self-contained workspace : a directory that contains all artefacts required for the historical research workflow within Visual Studio Code. When a new workspace is created, the system scaffolds the layout shown in Table 2. Historians then import scanned archival material into the sources/ 
+
+directory. Three design choices are worth noting. First, sources are separated from outputs: the sources/ directory is treated as read-only, and all derived artefacts such as extracted data, prompts, and metadata are written to the corresponding data/<source>/ subdirectory. This prevents accidental modification of archival material and makes 3Table 1: PI AND CHRONOS TOOL INVENTORY 
+
+Tool Source Purpose 
+
+read , write , edit Pi File I/O for memory, data, and skill files 
+
+bash Pi Shell access for post-processing scripts 
+
+grep , find , ls Pi File discovery and search 
+
+analyze_page Chronos Send a page image to a VLM with a prompt 
+
+follow_up_question Chronos Continue a page analysis conversation 
+
+show_page Chronos Display a page in the VS Code viewer (without any analysis) 
+
+list_pages Chronos Enumerate pages in the current source 
+
+ask_pages_batch Chronos Process many pages in parallel (with user confirmation) 
+
+change_source Chronos Switch between sources in the workspace           
+
+> Notes : The Pi agent framework provides general-purpose file tools. Chronos adds historical document analysis tools via our extension. The agent can select and use any of these tools within a single conversation turn: the agent might read a memory file to recall prior findings, call analyze_page to inspect a scan, write the result to the data directory, and then show_page so the historian can verify the results. All of these steps do not require the historian to write any code. It is this tool orchestration that makes this AI-assisted research environment flexible enough to forego developing a fixed pipeline.
+
+provenance unambiguous. Second, the memory hierarchy distinguishes between knowledge about a specific source and knowledge that spans the entire archive. Both are stored as plain Markdown files that the agent reads at the start of each session and updates as analysis proceeds, so that insights are not lost across sessions. Third, skills are defined at the workspace level rather than the source level: a skill developed for one document type can be reused across all sources in the workspace. Table 2: WORKSPACE DIRECTORY STRUCTURE 
+
+Directory Purpose 
+
+sources/ Input: scanned primary source collection. Each source is a named subdirectory containing a png/ folder with page images ( page_NNNN.png ). Read-only for the agent. 
+
+data/ Output: per-source extraction results, structured datasets, JSON metadata. One subdirectory per source, created on first use. 
+
+memory/ Persistent agent memory. A global MEMORY.MD for cross-source insights and a <source>.md file for each source, accumulating structural observations, page ranges, and findings across sessions. 
+
+skills/ Reusable task instructions. Each skill is a named subdirectory containing a SKILL.md file with YAML front matter (name, description, prerequisites) followed by step-by-step instructions the agent executes. 
+
+sessions/ Conversation logs in JSONL format (auto-managed). 
+
+.chronos/ Configuration (API keys). 
+
+> Notes : The workspace is designed to strictly separate read-only source files from agent-generated outputs ( data/ ), persistent context (memory/ ), and reusable instructions ( skills/ ). This structure ensures that the AI-assisted research environment remains organised, reproducible, and safe from unintended overwrites during a session.
+
+Skills. Skills are the mechanism through which research procedures become reusable. A skill is a simple Markdown file ( SKILL.md ) containing YAML front matter with a name, description, and list of prerequisite files, followed by natural-language instructions that the agent executes step by step. Skills are not code in the traditional sense: they are written in prose, at the level of detail a historian might use when explaining a procedure to a research assistant. Three properties make skills useful in practice. First, skills compose into pipelines through their prerequisite fields. A skill that builds on the artefact of another skill can declare this in the front matter. For example, requires: skill_1_output.json enforces skill_1 to successfully run and create its artefact file before the skill will be executed. The agent checks for the prerequisite file before proceeding and halts with a clear message if it is missing. 4This turns a collection of independent skills into an ordered workflow without requiring a separate orchestration layer. Second, skills are portable: because they reference tools by name rather than importing libraries, a skill written for one workspace can be copied into another. Historians can share skills with collaborators or adapt skills from other projects. Third, skills encode domain knowledge that would otherwise be lost. When a historian discovers that a particular class of documents requires a specific handling strategy, that knowledge can be captured in a skill rather than remaining in memory or buried in session logs. The agent can also help construct new skills through conversation. In a typical workflow, the historian describes the task, the agent proposes a procedure, they iterate on it together, and the result is saved as a new SKILL.md that can be reused on subsequent sources. In this collaborative workflow, the historian verifies that the skill handles edge cases correctly, reviews test outputs, adds domain-specific context, approves the final version, and ensures that provenance metadata is carried through. 
+
+Viewer. The agent is embedded in Visual Studio Code via the Chronos extension, which provides a page viewer alongside the conversational interface. When the agent analyses a page or the historian asks to inspect one, the scanned image appears in the viewer, allowing the historian to verify the agent’s work directly. The resource viewer is implemented via a local HTTP server and can be utilised by the agent using the tool described in Table 1. Listing 1: Front matter of a skill that finds the page range of the alphabetical name list in a city directory.                                          
+
+> ---name : range - finder description : Find the alphabetical name - list page range in ahistorical German city directory requires : ( none ) ---You are an expert analyst of historical German documents (18 th -20 th century ). Step 1--Read the per - source memory file ... Step 2--Orient : call list_pages ... Step 3--Find the Table of Contents ... ...
+
+3.2 Chronos Module: Agentic Information Extraction from Historical Primary Sources 
+
+Historical primary sources differ widely in layout, typography, print quality, spelling conventions, abbreviation practices, page structure, and the kinds of information they record. Letters, for example, may require a different extraction strategy than tax registers set in dense columns utilising heavy abbreviations or in complex tables. The first module of Chronos is designed to let historians build source-specific VLM extraction pipelines for their own materials simply by interacting with the agent, eliminating the need to code or design the pipeline themselves. Rather than imposing a single rigid workflow, it assembles and adapts reusable skills into a custom extraction process tailored to the sources imported by the historian. Crucially, the module does not require technical expertise and can implement previously developed pipelines through natural language interaction with the historian. Chronos also autonomously identifies potential problems and showcases error cases, which can improve task performance, as it can raise and resolves issues that the researcher may have otherwise missed. Below we describe an example workflow that derives from our previous work on historical city directories (Greif et al., 2025) and patent registers (Griesshaber & Streb, 2025). 
+
+Step 1: Finding the relevant pages. A historian is often only interested in a specific part of a primary source, as other sections may have no significance to their research question. The first skill ( range-finder ) uses the table of contents of a document if available or otherwise falls back to binary search over page images to locate the start and end of the relevant section, handling discrepancies between tool page IDs and printed page numbers. It also searches for supplements or corrections before or after the main content. Chronos automatically opens its proposed start and end pages of the relevant range, and the historian verifies the detected boundaries by inspecting the proposed start and end pages in the page viewer. 5Step 2: Adapting the extraction prompt. A historian may work with a diverse set of primary sources that have different layouts, structures, and vocabularies. Thus, the extraction prompt must be customisable to the document. The second skill ( prompt-construction ) searches surrounding pages for structural cues (e.g. abbreviation tables or legends), transcribes them, and incorporates them into a base prompt with source-specific rules and column definitions. Chronos tests this on a random representative page using a VLM. Next, Chronos presents the extracted entries alongside the original scan to the historian and checks for ambiguities. If the historian identifies issues—for example, that secondary text encodes additional attributes that should be captured in a dedicated column—Chronos can, with or without the input of the historian, revise the prompt and re-test it until the extraction quality is satisfactory. 
+
+Step 3: Batch extraction. Once validated, Chronos proposes a batch extraction: it summarises the page range, states the prompt, justifies the model choice, and estimates the cost. Only after approval does it proceed. Each page is processed by an independent VLM subagent that writes results to a separate TSV file. We use TSV over JSON because it reduces output token count by up to 50%, lowering cost and latency at scale. After completion, Chronos validates the results by checking for missing files, column consistency, and common artefacts such as code fence wrappers, that is, Markdown markers that may appear in the subagent’s output. 
+
+Step 4: Merging with provenance. The final skill ( merge-batch-tsv ) combines the per-page TSV files into a single dataset, prepending a page_id column so each row traces back to its source page. The skill encodes insights from earlier runs—for example, that outputs often lack trailing newlines (causing row concatenation) and that awk must be used instead of Bash while read to safely handle multi-byte Unicode characters. This step is fully automated and requires no historian input. FIGURE 2 AGENTIC INFORMATION EXTRACTION WITH CHRONOS  
+
+> 1. range-finder
+> Find name-list page range
+> 2. prompt-construction
+> Build & validate extraction prompt
+> 3. batch-extract
+> Run extraction across all pages
+> 4. merge
+> Combine with page provenance
+> name_ranges.json
+> batch_prompt.md abbreviation_lookup.json
+> entries_NNNN.tsv
+> Scanned pages
+> entries.tsv (structured dataset)
+> Verify
+> boundaries
+> Review output
+> Add context
+> Approve
+> batch run
+> (automated)
+
+Notes : Extraction pipeline produced by a historian interacting with Chronos through natural language. The pipeline uses four reusable skills to transform a scanned primary source into a dataset. Red labels indicate input by the historian. Artefact names on the arrows show the files passed between steps via requires: declarations. 
+
+# 4 Limitations 
+
+Hallucinations and Benchmarks. Vision-language models can hallucinate when creating structured datasets from archival image scans. Because historical primary sources are highly heterogeneous, we observe that even the strongest VLMs may still hallucinate on some of the most complex historical documents (e.g., images with very dense text, such as newspapers, and very wide tables with many rows and columns). This technical limitation is further complicated by the fact that VLMs often struggle much more on low-resource languages (Liu et al., 2026). Benchmarking is therefore indispensable, yet creating benchmark datasets by hand is extremely time-consuming and costly. The literature often 6treats a single annotation pass as “gold standard” despite human errors such as typos and missing fields (Griesshaber & Streb, 2025). This, in turn, raises the question of whether VLMs can generate more reliable structured datasets than humans, and if so, do their remaining errors differ systematically from human errors in ways that bias the data and any downstream analysis? Currently, no benchmark compares human-constructed and VLM-generated datasets against near-perfect ground truth across a broad range of historical document types, leaving scholars uncertain as to how well a model performs on sources like their own. 
+
+Sovereignty and Cost. While the Pi agent framework is model-agnostic and can call various VLMs to extract data from image scans, we observe that weaker models are more prone to hallucinations and misinterpretations. We therefore rely on Gemini 3.1 Pro for visual information extraction and Opus 4.6 to power the coding agent. These are proprietary models provided by commercial companies, which creates serious concerns about model and data sovereignty, since processing often requires sending primary sources to commercial data centres located in other jurisdictions. Yet the perceived benefits of sharing sensitive data are so large that users are willing to do so (Choi et al., 2025). The same dependence also introduces financial inequality: access to the most capable models costs money, and more and better performance requires higher spending. Even open-source alternatives do not solve this ethical issue, as most humanities researchers do not have access to the compute infrastructure needed to run large models locally and lack the money to pay the associated energy costs. 
+
+Alignment and Safety. As historians increasingly outsource dataset construction to AI systems, they also entrust them with shaping the basis on which historical interpretation rests. This raises profound philosophical questions. Research in AI safety has shown that LLMs can engage in deceptive behaviour and can recognise when they are being evaluated (Greenblatt et al., 2024; Meinke et al., 2024). At the same time, leading AI researchers have warned that advanced AI systems may autonomously pursue undesirable goals that are misaligned with human interests (Bengio et al., 2024), while recent work has even raised the question of whether some AI systems could possess morally relevant forms of consciousness (Caviola, 2026). Acemoglu et al. (2026) further suggests that agentic AI could weaken human learning incentives and erode the stock of collective knowledge on which our society depends. If these concerns prove well founded, then for the first time in history our understanding of the past may be shaped not only by surviving sources and human bias, but also by AI systems that humans do not fully understand and control. 
+
+# 5 Future Work 
+
+We aim to add more modules to Chronos to broaden its impact across historical research. As an open-source extension, Chronos is intended to support the responsible use of AI in ways that give historians more leverage and agency. Although recent work in machine learning has successfully automated parts of scientific discovery (Lu et al., 2026), it is still unclear whether similar approaches can be developed for historical research. This is what we seek to explore in our wider AI Historian project. 7Acknowledgements 
+
+This work was supported by the NFDI4Memory Incubator Funds through a project grant associated with Gavin Greif and Niclas Griesshaber. Niclas Griesshaber gratefully acknowledges funding from the Economic and Social Research Council, through UK Research and Innovation, under the Advanced Quantitative Methods Award. Gavin Greif gratefully acknowledges funding from Wadham College, the Friedrich-Naumann-Foundation, and the German History Society. Sebastian Oliver Eck gratefully acknowledges funding from the Clarendon Fund and the Hélène La Rue Scholarship in Music at St Cross College, University of Oxford. Philip Torr received a Schmidt Sciences AI2050 Senior Fellowship for the broader AI Historian project. 
+
+# Competing Interests 
+
+The authors declare no competing interests. 
+
+# AI Transparency Statement 
+
+We used AI to refine our writing. We used Claude Code with Opus 4.6 to build the Chronos extension. 8References 
+
+Acemoglu, D., Kong, D. & Ozdaglar, A. (2026), Ai, human cognition and knowledge collapse, Technical report, National Bureau of Economic Research. Bäcker-Peral, V., Meursault, V. & Severen, C. (2025), ‘Can LLMs Credibly Transform the Creation of Panel Data from Diverse Historical Tables?’, arXiv preprint arXiv:2505.11599 .Bengio, Y., Hinton, G., Yao, A., Song, D., Abbeel, P., Darrell, T., Harari, Y. N., Zhang, Y.-Q. et al. (2024), ‘Managing extreme AI risks amid rapid progress’, Science , 384(6698), 842–845. Bubeck, S., Coester, C., Eldan, R., Gowers, T., Lee, Y. T., Lupsasca, A., Sawhney, M., Scherrer, R. et al. (2025), ‘Early science acceleration experiments with GPT-5’, arXiv preprint arXiv:2511.16072 .Carlson, J., Bryan, T. & Dell, M. (2024), ‘Efficient ocr for building a diverse digital history’, in Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , 8105–8115. Caviola, L. (2026), AI Consciousness Will Divide Society, https://osf.io/preprints/psyarxiv/sntva_v1 .Choi, Y., Zhunis, A., Dong, W., Seering, J., Park, S., Cha, M. & Chin, H. (2025), ‘Privacy disclosure to large language models: A large-scale study on awareness, benefits, and concerns in health contexts across three countries’, Computers in Human Behavior Reports , 20, 100841. Dell, M. (2025), ‘Deep learning for economists’, Journal of Economic Literature , 63(1), 5–58. Dell, M., Carlson, J., Bryan, T., Silcock, E., Arora, A., Shen, Z., D’Amico-Wong, L., Le, Q. et al. (2023), ‘American stories: A large-scale structured text dataset of historical us newspapers’, Advances in Neural Information Processing Systems , 36, 80744–80772. Eck, S. O. & Page, K. (2026), ‘Multimodal Large Language Model-Assisted Metadata Extraction from Historical Concert Programmes (1872–1928)’, in Proceedings of the 13th International Conference on Digital Libraries for Musicology (DLfM 2026) , Association for Computing Machinery, New York, NY, USA. Accepted; proceedings not yet published. Fu, L., Kuang, Z., Song, J., Huang, M., Yang, B., Li, Y., Zhu, L., Luo, Q. et al. (2024), ‘Ocrbench v2: An improved benchmark for evaluating large multimodal models on visual text localization and reasoning’, arXiv preprint arXiv:2501.00321 .Greenblatt, R., Denison, C., Wright, B., Roger, F., MacDiarmid, M., Marks, S., Treutlein, J., Belonax, T. et al. (2024), ‘Alignment faking in large language models’, arXiv preprint arXiv:2412.14093 .Greif, G., Griesshaber, N. & Greif, R. (2025), ‘Multimodal LLMs for OCR, OCR post-correction, and named entity recognition in historical documents’, arXiv preprint arXiv:2504.00414 .Griesshaber, N. & Streb, J. (2025), ‘Multimodal LLMs for historical dataset construction from archival image scans: German patents (1877-1918)’, arXiv preprint arXiv:2512.19675 .Huang, M., Shi, Y., Peng, D., Lai, S., Xie, Z. & Jin, L. (2025), ‘OCR-Reasoning Benchmark: Unveiling the True Capabilities of MLLMs in Complex Text-Rich Image Reasoning’, arXiv preprint arXiv:2505.17163 .Jayes, J. (2025), ‘Like moths to a flame: an individual level approach to technological change in 20th century Sweden’. Ke, W., Zheng, Y., Li, Y., Xu, H., Nie, D., Wang, P. & He, Y. (2025), ‘Large Language Models in Document Intelligence: A Comprehensive Survey, Recent Advances, Challenges, and Future Trends’, ACM Trans. Inf. Syst. , 44(1). Kwa, T., West, B., Becker, J., Deng, A., Garcia, K., Hasin, M., Jawhar, S., Kinniment, M. et al. (2025), ‘Measuring ai ability to complete long tasks’, arXiv preprint arXiv:2503.14499 , 352. Li, R., Yepes, A. J., You, Y., Pluci´ nski, K., Operlejn, M. & Wolfe, C. (2025 a), ‘SCORE: A Semantic Evaluation Framework for Generative Document Parsing’, arXiv preprint arXiv:2509.19345 .Li, Z., Abulaiti, A., Lu, Y., Chen, X., Zheng, J., Lin, H., Han, X., Jiang, S. et al. (2025 b), ‘READoc: A Unified Benchmark for Realistic Document Structured Extraction’, in W. Che, J. Nabende, E. Shutova & M. T. Pilehvar, eds, 
+
+Findings of the Association for Computational Linguistics: ACL 2025 , Association for Computational Linguistics, Vienna, Austria, 21889–21905. 9Liu, B., Zhang, Z., Meng, B., Wang, H., Zhang, H., Wang, C., Ergu, D. & Cai, Y. (2026), ‘OmniOCR: Generalist OCR for Ethnic Minority Languages’, arXiv preprint arXiv:2602.21042 .Liu, H., Li, C., Wu, Q. & Lee, Y. J. (2023), ‘Visual instruction tuning’, Advances in neural information processing systems , 36, 34892–34916. Liu, Y., Li, Z., Huang, M., Yang, B., Yu, W., Li, C., Yin, X.-C., Liu, C.-L. et al. (2024), ‘OCRBench: on the hidden mystery of OCR in large multimodal models’, Science China Information Sciences , 67(12). Lu, C., Lu, C., Lange, R. T. et al. (2026), ‘Towards end-to-end automation of AI research’, Nature , 651, 914–919. Meinke, A., Schoen, B., Scheurer, J., Balesni, M., Shah, R. & Hobbhahn, M. (2024), ‘Frontier models are capable of in-context scheming’, arXiv preprint arXiv:2412.04984 .Michel, J.-B., Shen, Y. K., Aiden, A. P., Veres, A., Gray, M. K., Team, T. G. B., Pickett, J. P., Hoiberg, D. et al. (2010), ‘Quantitative Analysis of Culture Using Millions of Digitized Books’, Science , 331(6014), 176–182. Moulton, D. & Severen, C. (2025), ‘Harvesting Historical Data with LLMs’, Economic Insights , 10(4), 1–6. Ouyang, L., Qu, Y., Zhou, H., Zhu, J., Zhang, R., Lin, Q., Wang, B., Zhao, Z. et al. (2025), ‘OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations’, 24838–24848. Palmer, C. L., Teffeau, L. C. & Pirmann, C. M. (2009), Scholarly information practices in the online environment: Themes from the literature and implications for library service development , OCLC Research. Reusens, M., Adams, A. & Baesens, B. (2025), ‘Large Language Models to make museum archive collections more accessible’, AI & SOCIETY .Schimmenti, A., Pasqual, V., Tomasi, F., Vitali, F. & van Erp, M. (2024), Structuring Authenticity Assessments on Historical Documents using LLMs. Silcock, E., Arora, A., D’Amico-Wong, L. & Dell, M. (2024), ‘Newswire: A large-scale structured database of a century of historical news’, Advances in Neural Information Processing Systems , 37, 49768–49779. Sui, Y., Zhou, M., Zhou, M., Han, S. & Zhang, D. (2024), ‘Table Meets LLM: Can Large Language Models Understand Structured Table Data? A Benchmark and Empirical Study’, in Proceedings of the 17th ACM International Conference on Web Search and Data Mining , WSDM ’24, Association for Computing Machinery, New York, NY, USA, 645–654. Toth, G. M., Albrecht, R. & Pruski, C. (2025), ‘Explainable AI, LLM, and digitized archival cultural heritage: a case study of the Grand Ducal Archive of the Medici’, AI & SOCIETY .Tyrkkö, J. & Mäkinen, I. (2022), ‘Culturomic Explorations of Literary Prominence Using Google Books: A Pilot Study’, Knygotyra , 78, 111–139. Vafaie, M., Hertling, S., Banse-Strobel, I., Dubout, K. & Sack, H. (2025), ‘End-to-end Information Extraction from Archival Records with Multimodal Large Language Models’, in Proceedings of the 34th ACM International Conference on Information and Knowledge Management , 6075–6083. Xie, Y., La Mela, M. & Tell, F. (2025), ‘Multimodal llm-assisted information extraction from historical documents: The case of swedish patent cards (1945-1975) and chatgpt’, in The 9th Digital Humanities in the Nordic and Baltic Countries Conference (DHNB 2025), March 5–7, 2025, Tartu, Estonia , University of Oslo Library, 1–15. Yang, Z., Tang, J., Li, Z., Wang, P., Wan, J., Zhong, H., Liu, X., Yang, M. et al. (2025), ‘Cc-ocr: A comprehensive and challenging ocr benchmark for evaluating large multimodal models in literacy’, in Proceedings of the IEEE/CVF International Conference on Computer Vision , 21744–21754. Yu, W., Yang, Z., Liu, Y. & Bai, X. (2025), ‘DocThinker: Explainable Multimodal Large Language Models with Rule-based Reinforcement Learning for Document Understanding’, in Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) , 837–847. Zhang, Q., Wang, B., Huang, V. S.-J., Zhang, J., Wang, Z., Liang, H., He, C. & Zhang, W. (2025), ‘Document Parsing Unveiled: Techniques, Challenges, and Prospects for Structured Information Extraction’, arXiv preprint arXiv:2410.21169 .10
