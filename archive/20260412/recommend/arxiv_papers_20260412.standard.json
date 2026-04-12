@@ -1,0 +1,564 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-12T19:59:08.628056+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 11,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2604.03647v2",
+      "title": "Stabilizing Unsupervised Self-Evolution of MLLMs via Continuous Softened Retracing reSampling",
+      "abstract": "In the unsupervised self-evolution of Multimodal Large Language Models, the quality of feedback signals during post-training is pivotal for stable and effective learning. However, existing self-evolution methods predominantly rely on majority voting to select the most frequent output as the pseudo-golden answer, which may stem from the model's intrinsic biases rather than guaranteeing the objective correctness of the reasoning paths. To counteract the degradation, we propose Continuous Softened Retracing reSampling (CSRS) in MLLM self-evolution. Specifically, we introduce a Retracing Re-inference Mechanism (RRM) that the model re-inferences from anchor points to expand the exploration of long-tail reasoning paths. Simultaneously, we propose Softened Frequency Reward (SFR), which replaces binary rewards with continuous signals, calibrating reward based on the answers' frequency across sampled reasoning sets. Furthermore, incorporated with Visual Semantic Perturbation (VSP), CSRS ensures the model prioritizes mathematical logic over visual superficiality. Experimental results demonstrate that CSRS significantly enhances the reasoning performance of Qwen2.5-VL-7B on benchmarks such as MathVision. We achieve state-of-the-art (SOTA) results in unsupervised self-evolution on geometric tasks. Our code is avaible at https://github.com/yyy195/CSRS.",
+      "authors": [
+        "Yunyao Yu",
+        "Zhengxian Wu",
+        "Zhuohong Chen",
+        "Hangrui Xu",
+        "Zirui Liao",
+        "Xiangwen Deng",
+        "Zhifang Liu",
+        "Senyuan Shi",
+        "Haoqian Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-04-04T08:52:43+00:00",
+      "link": "https://arxiv.org/pdf/2604.03647v2",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Self-evolution of Multimodal Large Language Models and reasoning paths",
+      "llm_evidence_cn": "多模态大语言模型的自我演化与推理路径",
+      "llm_evidence": "多模态大语言模型的自我演化与推理路径",
+      "canonical_evidence": "多模态大语言模型的自我演化与推理路径",
+      "llm_tldr_en": "Proposes CSRS to stabilize MLLM self-evolution by exploring long-tail reasoning paths during post-training.",
+      "llm_tldr_cn": "提出CSRS方法，通过在训练中探索长尾推理路径来稳定多模态大模型的自我演化。",
+      "llm_tldr": "提出CSRS方法，通过在训练中探索长尾推理路径来稳定多模态大模型的自我演化。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.08232v1",
+      "title": "HiRO-Nav: Hybrid ReasOning Enables Efficient Embodied Navigation",
+      "abstract": "Embodied navigation agents built upon large reasoning models (LRMs) can handle complex, multimodal environmental input and perform grounded reasoning per step to improve sequential decision-making for long-horizon tasks. However, a critical question remains: \\textit{how can the reasoning capabilities of LRMs be harnessed intelligently and efficiently for long-horizon navigation tasks?} In simple scenes, agents are expected to act reflexively, while in complex ones they should engage in deliberate reasoning before acting.To achieve this, we introduce \\textbf{H}ybr\\textbf{i}d \\textbf{R}eas\\textbf{O}ning \\textbf{Nav}igation (\\textbf{HiRO-Nav}) agent, the first kind of agent capable of adaptively determining whether to perform thinking at every step based on its own action entropy. Specifically, by examining how the agent's action entropy evolves over the navigation trajectories, we observed that only a small fraction of actions exhibit high entropy, and these actions often steer the agent toward novel scenes or critical objects. Furthermore, studying the relationship between action entropy and task completion (i.e., Q-value) reveals that improving high-entropy actions contributes more positively to task success.Hence, we propose a tailored training pipeline comprising hybrid supervised fine-tuning as a cold start, followed by online reinforcement learning with the proposed hybrid reasoning strategy to explicitly activate reasoning only for high-entropy actions, significantly reducing computational overhead while improving decision quality. Extensive experiments on the \\textsc{CHORES}-$\\mathbb{S}$ ObjectNav benchmark showcases that HiRO-Nav achieves a better trade-off between success rates and token efficiency than both dense-thinking and no-thinking baselines.",
+      "authors": [
+        "He Zhao",
+        "Yijun Yang",
+        "Zichuan Lin",
+        "Deheng Ye",
+        "Chunyan Miao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-09T13:22:24+00:00",
+      "link": "https://arxiv.org/pdf/2604.08232v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Embodied navigation agents built upon large reasoning models for sequential decision-making",
+      "llm_evidence_cn": "基于大型推理模型的具身导航智能体，用于序列决策",
+      "llm_evidence": "基于大型推理模型的具身导航智能体，用于序列决策",
+      "canonical_evidence": "基于大型推理模型的具身导航智能体，用于序列决策",
+      "llm_tldr_en": "Introduces HiRO-Nav, an agent that adaptively uses large reasoning models for efficient long-horizon navigation.",
+      "llm_tldr_cn": "引入HiRO-Nav智能体，能够根据任务复杂度自适应地调用大模型推理能力进行长程导航。",
+      "llm_tldr": "引入HiRO-Nav智能体，能够根据任务复杂度自适应地调用大模型推理能力进行长程导航。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.08355v1",
+      "title": "ASPECT:Analogical Semantic Policy Execution via Language Conditioned Transfer",
+      "abstract": "Reinforcement Learning (RL) agents often struggle to generalize knowledge to new tasks, even those structurally similar to ones they have mastered. Although recent approaches have attempted to mitigate this issue via zero-shot transfer, they are often constrained by predefined, discrete class systems, limiting their adaptability to novel or compositional task variations. We propose a significantly more generalized approach, replacing discrete latent variables with natural language conditioning via a text-conditioned Variational Autoencoder (VAE). Our core innovation utilizes a Large Language Model (LLM) as a dynamic \\textit{semantic operator} at test time. Rather than relying on rigid rules, our agent queries the LLM to semantically remap the description of the current observation to align with the source task. This source-aligned caption conditions the VAE to generate an imagined state compatible with the agent's original training, enabling direct policy reuse. By harnessing the flexible reasoning capabilities of LLMs, our approach achieves zero-shot transfer across a broad spectrum of complex and truly novel analogous tasks, moving beyond the limitations of fixed category mappings. Code and videos are available \\href{https://anonymous.4open.science/r/ASPECT-85C3/}{here}.",
+      "authors": [
+        "Ajsal Shereef Palattuparambil",
+        "Thommen George Karimpanal",
+        "Santu Rana"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-09T15:21:05+00:00",
+      "link": "https://arxiv.org/pdf/2604.08355v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM as semantic operator for reinforcement learning policy execution",
+      "llm_evidence_cn": "LLM作为强化学习策略执行的语义算子",
+      "llm_evidence": "LLM作为强化学习策略执行的语义算子",
+      "canonical_evidence": "LLM作为强化学习策略执行的语义算子",
+      "llm_tldr_en": "Uses LLMs to semantically remap policies for zero-shot transfer in reinforcement learning agents.",
+      "llm_tldr_cn": "利用大语言模型对策略进行语义重映射，实现强化学习智能体的零样本迁移。",
+      "llm_tldr": "利用大语言模型对策略进行语义重映射，实现强化学习智能体的零样本迁移。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language agentic reinforcement learning",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.07079v1",
+      "title": "MARVEL: Multimodal Adaptive Reasoning-intensiVe Expand-rerank and retrievaL",
+      "abstract": "Multimodal retrieval over text corpora remains a fundamental challenge: the best vision-language encoder achieves only 27.6 nDCG@10 on MM-BRIGHT, a reasoning-intensive multimodal retrieval benchmark, underperforming strong text-only systems. We argue that effective multimodal retrieval requires three tightly integrated capabilities that existing approaches address only in isolation: expanding the query's latent intent, retrieving with a model trained for complex reasoning, and reranking via explicit step-by-step reasoning over candidates. We introduce \\textbf{MARVEL} (\\textbf{M}ultimodal \\textbf{A}daptive \\textbf{R}easoning-intensi\\textbf{V}e \\textbf{E}xpand-rerank and retrieva\\textbf{L}), a unified pipeline that combines LLM-driven query expansion, \\textbf{MARVEL-Retriever} -- a reasoning-enhanced dense retriever fine-tuned for complex multimodal queries -- and GPT-4o-based chain-of-thought reranking with optional multi-pass reciprocal rank fusion. Evaluated on MM-BRIGHT across 29 technical domains, MARVEL achieves \\textbf{37.9} nDCG@10, surpassing the best multimodal encoder by \\textbf{+10.3 points} and outperforming all single-stage baselines in 27 of 29 domains and matching or approaching the best baseline in the remaining two highly-specialized domains (Crypto, Quantum Computing), demonstrating that reasoning-intensive multimodal retrieval is best addressed through a unified expand-retrieve-rerank framework. https://github.com/mm-bright/multimodal-reasoning-retrieval",
+      "authors": [
+        "Mahmoud SalahEldin Kasem",
+        "Mohamed Mahmoud",
+        "Mostafa Farouk Senussi",
+        "Mahmoud Abdalla",
+        "Abdelrahman Abdallah",
+        "Hyun-Soo Kang"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR"
+      ],
+      "published": "2026-04-08T13:35:09+00:00",
+      "link": "https://arxiv.org/pdf/2604.07079v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multimodal adaptive reasoning for retrieval tasks",
+      "llm_evidence_cn": "用于检索任务的多模态自适应推理",
+      "llm_evidence": "用于检索任务的多模态自适应推理",
+      "canonical_evidence": "用于检索任务的多模态自适应推理",
+      "llm_tldr_en": "Combines query expansion and step-by-step reasoning for complex multimodal retrieval.",
+      "llm_tldr_cn": "结合查询扩展和分步推理，实现复杂的多模态检索。",
+      "llm_tldr": "结合查询扩展和分步推理，实现复杂的多模态检索。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reasoning for reinforcement learning",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.03998v1",
+      "title": "VA-FastNavi-MARL: Real-Time Robot Control with Multimedia-Driven Meta-Reinforcement Learning",
+      "abstract": "Interpreting dynamic, heterogeneous multimedia commands with real-time responsiveness is critical for Human-Robot Interaction. We present VA-FastNavi-MARL, a framework that aligns asynchronous audio-visual inputs into a unified latent representation. By treating diverse instructions as a distribution of navigable goals via Meta-Reinforcement Learning, our method enables rapid adaptation to unseen directives with negligible inference overhead. Unlike approaches bottlenecked by heavy sensory processing, our modality-agnostic stream ensures seamless, low-latency control. Validation on a multi-arm workspace confirms that VA-FastNavi-MARL significantly outperforms baselines in sample efficiency and maintains robust, real-time execution even under noisy multimedia streams.",
+      "authors": [
+        "Yang Zhang",
+        "Shengxi Jing",
+        "Fengxiang Wang",
+        "Yuan Feng",
+        "Hong Wang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-04-05T07:05:49+00:00",
+      "link": "https://arxiv.org/pdf/2604.03998v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Multimedia-driven meta-reinforcement learning for robot control",
+      "llm_evidence_cn": "多媒体驱动的元强化学习用于机器人控制",
+      "llm_evidence": "多媒体驱动的元强化学习用于机器人控制",
+      "canonical_evidence": "多媒体驱动的元强化学习用于机器人控制",
+      "llm_tldr_en": "Proposes a meta-RL framework to align audio-visual inputs for real-time robot navigation and control.",
+      "llm_tldr_cn": "提出一种元强化学习框架，对齐视听输入以实现机器人的实时导航与控制。",
+      "llm_tldr": "提出一种元强化学习框架，对齐视听输入以实现机器人的实时导航与控制。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reinforcement learning with vision and language",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.07745v1",
+      "title": "The Cartesian Cut in Agentic AI",
+      "abstract": "LLMs gain competence by predicting words in human text, which often reflects how people perform tasks. Consequently, coupling an LLM to an engineered runtime turns prediction into control: outputs trigger interventions that enact goal-oriented behavior. We argue that a central design lever is where control resides in these systems. Brains embed prediction within layered feedback controllers calibrated by the consequences of action. By contrast, LLM agents implement Cartesian agency: a learned core coupled to an engineered runtime via a symbolic interface that externalizes control state and policies. The split enables bootstrapping, modularity, and governance, but can induce sensitivity and bottlenecks. We outline bounded services, Cartesian agents, and integrated agents as contrasting approaches to control that trade off autonomy, robustness, and oversight.",
+      "authors": [
+        "Tim Sainburg",
+        "Caleb Weinreb"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "q-bio.NC"
+      ],
+      "published": "2026-04-09T03:03:06+00:00",
+      "link": "https://arxiv.org/pdf/2604.07745v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "theoretical framework for agentic AI and control policies",
+      "llm_evidence_cn": "智能体AI与控制策略的理论框架",
+      "llm_evidence": "智能体AI与控制策略的理论框架",
+      "canonical_evidence": "智能体AI与控制策略的理论框架",
+      "llm_tldr_en": "Discusses the architectural design of control and prediction in agentic AI systems.",
+      "llm_tldr_cn": "探讨了智能体AI系统中控制与预测的架构设计。",
+      "llm_tldr": "探讨了智能体AI系统中控制与预测的架构设计。",
+      "llm_tags": [
+        "query:vlm-rl:composite"
+      ],
+      "matched_query_tag": "query:vlm-rl:composite",
+      "matched_query_text": "Papers central to 查找vision-language agentic rl及vision-language reasoning相关的文章，排除diffusion model、robotics、video和audio。, especially work that connects or combines: vision-language agentic reinforcement learning; multimodal reinforcement learning with vision and language; reasoning in vision-language models; vision-language model based agents; visual reasoning and decision making; multimodal reasoning for reinforcement learning; vision language reinforcement learning for agentic reasoning; advancements in vision language reasoning agents; multimodal agentic reinforcement learning without robotics; vision language models for complex reasoning tasks.",
+      "matched_requirement_id": "req-composite-vlm-rl",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.05931v1",
+      "title": "Saliency-Guided Representation with Consistency Policy Learning for Visual Unsupervised Reinforcement Learning",
+      "abstract": "Zero-shot unsupervised reinforcement learning (URL) offers a promising direction for building generalist agents capable of generalizing to unseen tasks without additional supervision. Among existing approaches, successor representations (SR) have emerged as a prominent paradigm due to their effectiveness in structured, low-dimensional settings. However, SR methods struggle to scale to high-dimensional visual environments. Through empirical analysis, we identify two key limitations of SR in visual URL: (1) SR objectives often lead to suboptimal representations that attend to dynamics-irrelevant regions, resulting in inaccurate successor measures and degraded task generalization; and (2) these flawed representations hinder SR policies from modeling multi-modal skill-conditioned action distributions and ensuring skill controllability. To address these limitations, we propose Saliency-Guided Representation with Consistency Policy Learning (SRCP), a novel framework that improves zero-shot generalization of SR methods in visual URL. SRCP decouples representation learning from successor training by introducing a saliency-guided dynamics task to capture dynamics-relevant representations, thereby improving successor measure and task generalization. Moreover, it integrates a fast-sampling consistency policy with URL-specific classifier-free guidance and tailored training objectives to improve skill-conditioned policy modeling and controllability. Extensive experiments on 16 tasks across 4 datasets from the ExORL benchmark demonstrate that SRCP achieves state-of-the-art zero-shot generalization in visual URL and is compatible with various SR methods.",
+      "authors": [
+        "Jingbo Sun",
+        "Qichao Zhang",
+        "Songjun Tu",
+        "Xing Fang",
+        "Yupeng Zheng",
+        "Haoran Li",
+        "Ke Chen",
+        "Dongbin Zhao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-04-07T14:31:32+00:00",
+      "link": "https://arxiv.org/pdf/2604.05931v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "visual unsupervised reinforcement learning for generalist agents",
+      "llm_evidence_cn": "通用智能体的视觉无监督强化学习",
+      "llm_evidence": "通用智能体的视觉无监督强化学习",
+      "canonical_evidence": "通用智能体的视觉无监督强化学习",
+      "llm_tldr_en": "Improves visual unsupervised RL by using saliency-guided representations to focus on dynamics-relevant regions.",
+      "llm_tldr_cn": "通过显著性引导的表示学习改进视觉无监督强化学习，提升通用智能体的任务泛化能力。",
+      "llm_tldr": "通过显著性引导的表示学习改进视觉无监督强化学习，提升通用智能体的任务泛化能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "visual reasoning and decision making",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.08124v1",
+      "title": "Beyond Stochastic Exploration: What Makes Training Data Valuable for Agentic Search",
+      "abstract": "Reinforcement learning (RL) has become an effective approach for advancing the reasoning capabilities of large language models (LLMs) through the strategic integration of external search engines. However, current RL-based search agents often rely on a process of stochastic exploration guided by carefully crafted outcome rewards, leading to inefficient reasoning trajectories and unstable training. To address these issues, we propose a novel framework, Hierarchical Experience (HiExp), to enhance the performance and training stability of search agents. Specifically, we extract empirical knowledge through contrastive analysis and a multi-level clustering mechanism, transforming raw reasoning trajectories into hierarchical experience knowledge. By leveraging experience-aligned training, we effectively regularize stochastic exploration, evolving it into a strategic and experience-driven search process. Extensive evaluations on multiple complex agentic search and mathematical reasoning benchmarks demonstrate that our approach not only achieves substantial performance gains but also exhibits strong cross-task and cross-algorithm generalization.",
+      "authors": [
+        "Chuzhan Hao",
+        "Wenfeng Feng",
+        "Guochao Jiang",
+        "Guofeng Quan",
+        "Guohua Liu",
+        "Yuewei Zhang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-09T11:44:44+00:00",
+      "link": "https://arxiv.org/pdf/2604.08124v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "RL-based search agents for advancing reasoning capabilities",
+      "llm_evidence_cn": "基于强化学习的搜索智能体以提升推理能力",
+      "llm_evidence": "基于强化学习的搜索智能体以提升推理能力",
+      "canonical_evidence": "基于强化学习的搜索智能体以提升推理能力",
+      "llm_tldr_en": "Enhances RL-based search agents through a hierarchical experience framework for stable reasoning training.",
+      "llm_tldr_cn": "通过分层经验框架增强基于强化学习的搜索智能体，实现稳定的推理训练。",
+      "llm_tldr": "通过分层经验框架增强基于强化学习的搜索智能体，实现稳定的推理训练。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reasoning for reinforcement learning",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.05939v1",
+      "title": "Context-Value-Action Architecture for Value-Driven Large Language Model Agents",
+      "abstract": "Large Language Models (LLMs) have shown promise in simulating human behavior, yet existing agents often exhibit behavioral rigidity, a flaw frequently masked by the self-referential bias of current \"LLM-as-a-judge\" evaluations. By evaluating against empirical ground truth, we reveal a counter-intuitive phenomenon: increasing the intensity of prompt-driven reasoning does not enhance fidelity but rather exacerbates value polarization, collapsing population diversity. To address this, we propose the Context-Value-Action (CVA) architecture, grounded in the Stimulus-Organism-Response (S-O-R) model and Schwartz's Theory of Basic Human Values. Unlike methods relying on self-verification, CVA decouples action generation from cognitive reasoning via a novel Value Verifier trained on authentic human data to explicitly model dynamic value activation. Experiments on CVABench, which comprises over 1.1 million real-world interaction traces, demonstrate that CVA significantly outperforms baselines. Our approach effectively mitigates polarization while offering superior behavioral fidelity and interpretability.",
+      "authors": [
+        "TianZe Zhang",
+        "Sirui Sun",
+        "Yuhang Xie",
+        "Xin Zhang",
+        "Zhiqiang Wu",
+        "Guojie Song"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.HC"
+      ],
+      "published": "2026-04-07T14:34:20+00:00",
+      "link": "https://arxiv.org/pdf/2604.05939v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "architecture for value-driven large language model agents",
+      "llm_evidence_cn": "价值驱动的大语言模型代理架构",
+      "llm_evidence": "价值驱动的大语言模型代理架构",
+      "canonical_evidence": "价值驱动的大语言模型代理架构",
+      "llm_tldr_en": "Proposes CVA architecture to decouple action generation from cognitive reasoning in LLM agents.",
+      "llm_tldr_cn": "提出CVA架构，将LLM代理中的动作生成与认知推理分离，以解决行为僵化问题。",
+      "llm_tldr": "提出CVA架构，将LLM代理中的动作生成与认知推理分离，以解决行为僵化问题。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.06912v1",
+      "title": "Q-Zoom: Query-Aware Adaptive Perception for Efficient Multimodal Large Language Models",
+      "abstract": "MLLMs require high-resolution visual inputs for fine-grained tasks like document understanding and dense scene perception. However, current global resolution scaling paradigms indiscriminately flood the quadratic self-attention mechanism with visually redundant tokens, severely bottlenecking inference throughput while ignoring spatial sparsity and query intent. To overcome this, we propose Q-Zoom, a query-aware adaptive high-resolution perception framework that operates in an efficient coarse-to-fine manner. First, a lightweight Dynamic Gating Network safely bypasses high-resolution processing when coarse global features suffice. Second, for queries demanding fine-grained perception, a Self-Distilled Region Proposal Network (SD-RPN) precisely localizes the task-relevant Region-of-Interest (RoI) directly from intermediate feature spaces. To optimize these modules efficiently, the gating network uses a consistency-aware generation strategy to derive deterministic routing labels, while the SD-RPN employs a fully self-supervised distillation paradigm. A continuous spatio-temporal alignment scheme and targeted fine-tuning then seamlessly fuse the dense local RoI with the coarse global layout. Extensive experiments demonstrate that Q-Zoom establishes a dominant Pareto frontier. Using Qwen2.5-VL-7B as a primary testbed, Q-Zoom accelerates inference by 2.52 times on Document & OCR benchmarks and 4.39 times in High-Resolution scenarios while matching the baseline's peak accuracy. Furthermore, when configured for maximum perceptual fidelity, Q-Zoom surpasses the baseline's peak performance by 1.1% and 8.1% on these respective benchmarks. These robust improvements transfer seamlessly to Qwen3-VL, LLaVA, and emerging RL-based thinking-with-image models. Project page is available at https://yuhengsss.github.io/Q-Zoom/.",
+      "authors": [
+        "Yuheng Shi",
+        "Xiaohuan Pei",
+        "Linfeng Wen",
+        "Minjing Dong",
+        "Chang Xu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-04-08T10:12:30+00:00",
+      "link": "https://arxiv.org/pdf/2604.06912v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "adaptive perception for multimodal large language models",
+      "llm_evidence_cn": "多模态大语言模型的自适应感知",
+      "llm_evidence": "多模态大语言模型的自适应感知",
+      "canonical_evidence": "多模态大语言模型的自适应感知",
+      "llm_tldr_en": "An efficient framework for MLLMs to perform fine-grained perception and reasoning via adaptive zooming.",
+      "llm_tldr_cn": "一种通过自适应缩放使多模态大模型高效进行细粒度感知和推理的框架。",
+      "llm_tldr": "一种通过自适应缩放使多模态大模型高效进行细粒度感知和推理的框架。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.07419v1",
+      "title": "ReAlign: Optimizing the Visual Document Retriever with Reasoning-Guided Fine-Grained Alignment",
+      "abstract": "Visual document retrieval aims to retrieve a set of document pages relevant to a query from visually rich collections. Existing methods often employ Vision-Language Models (VLMs) to encode queries and visual pages into a shared embedding space, which is then optimized via contrastive training. However, during visual document representation, localized evidence is usually scattered across complex document layouts, making it difficult for retrieval models to capture crucial cues for effective embedding learning. In this paper, we propose Reasoning-Guided Alignment (ReAlign), a method that enhances visual document retrieval by leveraging the reasoning capability of VLMs to provide fine-grained visual document descriptions as supervision signals for training. Specifically, ReAlign employs a superior VLM to identify query-related regions on a page and then generates a query-aware description grounding the cropped visual regions. The retriever is then trained using these region-focused descriptions to align the semantics between queries and visual documents by encouraging the document ranking distribution induced by the region-focused descriptions to match that induced by the original query. Experiments on diverse visually rich document retrieval benchmarks demonstrate that ReAlign consistently improves visual document retrieval performance on both in-domain and out-of-domain datasets, achieving up to 2% relative improvements. Moreover, the advantages of ReAlign generalize across different VLM backbones by guiding models to better focus their attention on critical visual cues for document representation. All code and datasets are available at https://github.com/NEUIR/ReAlign.",
+      "authors": [
+        "Hao Yang",
+        "Yifan Ji",
+        "Zhipeng Xu",
+        "Zhenghao Liu",
+        "Yukun Yan",
+        "Zulong Chen",
+        "Shuo Wang",
+        "Yu Gu",
+        "Ge Yu"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR"
+      ],
+      "published": "2026-04-08T14:47:27+00:00",
+      "link": "https://arxiv.org/pdf/2604.07419v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "leveraging reasoning capability of VLMs for document retrieval",
+      "llm_evidence_cn": "利用VLM的推理能力进行文档检索",
+      "llm_evidence": "利用VLM的推理能力进行文档检索",
+      "canonical_evidence": "利用VLM的推理能力进行文档检索",
+      "llm_tldr_en": "Uses VLM reasoning to generate fine-grained descriptions for optimizing visual document retrieval.",
+      "llm_tldr_cn": "利用VLM推理生成细粒度描述，以优化视觉文档检索。",
+      "llm_tldr": "利用VLM推理生成细粒度描述，以优化视觉文档检索。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.07487v1",
+      "title": "CLEAR: Context Augmentation from Contrastive Learning of Experience via Agentic Reflection",
+      "abstract": "Large language model agents rely on effective model context to obtain task-relevant information for decision-making. Many existing context engineering approaches primarily rely on the context generated from the past experience and retrieval mechanisms that reuse these context. However, retrieved context from past tasks must be adapted by the execution agent to fit new situations, placing additional reasoning burden on the underlying LLM. To address this limitation, we propose a generative context augmentation framework using Contrastive Learning of Experience via Agentic Reflection (CLEAR). CLEAR first employs a reflection agent to perform contrastive analysis over past execution trajectories and summarize useful context for each observed task. These summaries are then used as supervised fine-tuning data to train a context augmentation model (CAM). Then we further optimize CAM using reinforcement learning, where the reward signal is obtained by running the task execution agent. By learning to generate task-specific knowledge rather than retrieve knowledge from the past, CAM produces context that is better tailored to the current task. We conduct comprehensive evaluations on the AppWorld and WebShop benchmarks. Experimental results show that CLEAR consistently outperforms strong baselines. It improves task completion rate from 72.62% to 81.15% on AppWorld test set and averaged reward from 0.68 to 0.74 on a subset of WebShop, compared with baseline agent. Our code is publicly available at https://github.com/awslabs/CLEAR.",
+      "authors": [
+        "Linbo Liu",
+        "Guande Wu",
+        "Han Ding",
+        "Yawei Wang",
+        "Qiang Zhou",
+        "Yuzhe Lu",
+        "Zhichao Xu",
+        "Huan Song",
+        "Panpan Xu",
+        "Lin Lee Cheong"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-08T18:26:59+00:00",
+      "link": "https://arxiv.org/pdf/2604.07487v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "agentic reflection for decision-making in LLM agents",
+      "llm_evidence_cn": "LLM智能体决策中的代理反思",
+      "llm_evidence": "LLM智能体决策中的代理反思",
+      "canonical_evidence": "LLM智能体决策中的代理反思",
+      "llm_tldr_en": "A framework using agentic reflection and contrastive learning to augment context for better agent decision-making.",
+      "llm_tldr_cn": "一种利用代理反思和对比学习来增强上下文，从而提升智能体决策能力的框架。",
+      "llm_tldr": "一种利用代理反思和对比学习来增强上下文，从而提升智能体决策能力的框架。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.07897v1",
+      "title": "Visual Perceptual to Conceptual First-Order Rule Learning Networks",
+      "abstract": "Learning rules plays a crucial role in deep learning, particularly in explainable artificial intelligence and enhancing the reasoning capabilities of large language models. While existing rule learning methods are primarily designed for symbolic data, learning rules from image data without supporting image labels and automatically inventing predicates remains a challenge. In this paper, we tackle these inductive rule learning problems from images with a framework called γILP, which provides a fully differentiable pipeline from image constant substitution to rule structure induction. Extensive experiments demonstrate that γILP achieves strong performance not only on classical symbolic relational datasets but also on relational image data and pure image datasets, such as Kandinsky patterns.",
+      "authors": [
+        "Kun Gao",
+        "Davide Soldà",
+        "Thomas Eiter",
+        "Katsumi Inoue"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-04-09T07:11:49+00:00",
+      "link": "https://arxiv.org/pdf/2604.07897v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "visual perceptual to conceptual rule learning for reasoning",
+      "llm_evidence_cn": "从视觉感知到概念规则学习的推理",
+      "llm_evidence": "从视觉感知到概念规则学习的推理",
+      "canonical_evidence": "从视觉感知到概念规则学习的推理",
+      "llm_tldr_en": "A differentiable pipeline for learning first-order rules directly from image data to enhance reasoning.",
+      "llm_tldr_cn": "一种直接从图像数据学习一阶规则以增强推理能力的微分流水线。",
+      "llm_tldr": "一种直接从图像数据学习一阶规则以增强推理能力的微分流水线。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "visual reasoning and decision making",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.08212v1",
+      "title": "Vision-Language Foundation Models for Comprehensive Automated Pavement Condition Assessment",
+      "abstract": "General-purpose vision-language models demonstrate strong performance in everyday domains but struggle with specialized technical fields requiring precise terminology, structured reasoning, and adherence to engineering standards. This work addresses whether domain-specific instruction tuning can enable comprehensive pavement condition assessment through vision-language models. PaveInstruct, a dataset containing 278,889 image-instruction-response pairs spanning 32 task types, was created by unifying annotations from nine heterogeneous pavement datasets. PaveGPT, a pavement foundation model trained on this dataset, was evaluated against state-of-the-art vision-language models across perception, understanding, and reasoning tasks. Instruction tuning transformed model capabilities, achieving improvements exceeding 20% in spatial grounding, reasoning, and generation tasks while producing ASTM D6433-compliant outputs. These results enable transportation agencies to deploy unified conversational assessment tools that replace multiple specialized systems, simplifying workflows and reducing technical expertise requirements. The approach establishes a pathway for developing instruction-driven AI systems across infrastructure domains including bridge inspection, railway maintenance, and building condition assessment.",
+      "authors": [
+        "Blessing Agyei Kyem",
+        "Joshua Kofi Asamoah",
+        "Anthony Dontoh",
+        "Armstrong Aboah"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-09T13:11:30+00:00",
+      "link": "https://arxiv.org/pdf/2604.08212v1",
+      "tags": [
+        "keyword:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Vision-language models for specialized reasoning tasks",
+      "llm_evidence_cn": "用于专业推理任务的视觉语言模型",
+      "llm_evidence": "用于专业推理任务的视觉语言模型",
+      "canonical_evidence": "用于专业推理任务的视觉语言模型",
+      "llm_tldr_en": "Develops PaveGPT for pavement assessment, focusing on domain-specific visual reasoning and understanding.",
+      "llm_tldr_cn": "开发PaveGPT用于路面评估，专注于特定领域的视觉推理与理解。",
+      "llm_tldr": "开发PaveGPT用于路面评估，专注于特定领域的视觉推理与理解。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
