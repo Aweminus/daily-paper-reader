@@ -1,0 +1,1121 @@
+Title: Cognitive Pivot Points and Visual Anchoring: Unveiling and Rectifying Hallucinations in Multimodal Reasoning Models
+
+URL Source: https://arxiv.org/pdf/2604.10219v1
+
+Published Time: Tue, 14 Apr 2026 00:49:10 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 1
+
+# Cognitive Pivot Points and Visual Anchoring: Unveiling and Rectifying Hallucinations in Multimodal Reasoning Models 
+
+Zhe Qian, Yanbiao Ma †, Zhuohan Ouyang, Zhonghua Wang, Zhongxing Xu, Fei Luo, Xinyu Liu, Zongyuan Ge, Senior member, IEEE , Yike Guo, Fellow, IEEE , and Jungong Han Senior member, IEEE 
+
+Abstract —Multimodal Large Reasoning Models (MLRMs) have achieved remarkable strides in visual reasoning through test time compute scaling, yet long chain reasoning remains prone to hallucinations. We identify a concerning phenomenon termed the Reasoning Vision Truth Disconnect (RVTD): hallucinations are strongly correlated with cognitive bifurcation points that often exhibit high entropy states. We attribute this vulnerability to a breakdown in visual semantic anchoring, localized within the network’s intermediate layers; specifically, during these high uncertainty transitions, the model fails to query visual evidence, reverting instead to language priors. Consequently, we advocate a shift from solely outcome level supervision to augmenting it with fine grained internal attention guidance. To this end, we propose V-STAR (Visual Structural Training with Attention Reinforcement), a lightweight, holistic training paradigm designed to internalize visually aware reasoning capabilities. Central to our approach is the Hierarchical Visual Attention Reward (HVAR), integrated within the GRPO framework. Upon detecting high entropy states, this mechanism dynamically incentivizes visual attention across critical intermediate layers, thereby anchoring the reasoning process back to the visual input. Furthermore, we introduce the Forced Reflection Mechanism (FRM), a trajectory editing strategy that disrupts cognitive inertia by triggering reflection around high entropy cognitive bifurcation points and encouraging verification of subsequent steps against the visual input, thereby translating external debiasing interventions into an intrinsic capability for hallucination mitigation. 
+
+Index Terms —Multimodal Large Reasoning Models (MLRMs), Vision Language Reasoning, Hallucination Mitigation, Visual Attention. 
+
+✦
+
+1 INTRODUCTION 
+
+# THE advent of Large Reasoning Models (LRMs) [1], [2], [3], [4] has marked a paradigm shift in artificial intelligence, enabling models to solve complex problems through test time compute scaling [5], [6] and extensive Chains of Thought (CoT) [7], [8], [9]. Recently, this paradigm has been successfully adapted to the multimodal domain [10], [11], [12], [13], [14], [15], [16], [17]. Multimodal Large Reasoning Models (MLRMs) [18] achieve a deep synthesis of visual perception and linguistic reasoning by constructing explicit reasoning chains reinforced by verifiable rewards [19], [20]. However, despite these impressive capabilities, we identify a fundamental vulnerability termed the “Reasoning Vision Truth Disconnect”: compared to non reasoning generation, chain of thought reasoning typically expands the generation trace into longer sequences, making models more susceptible to hallucination [19], [21], [22], [23], [24], [25] by under-utilizing visual evidence. Our empirical analysis reveals a counterintuitive trend (Fig. 1): MLRMs attend to visual evidence markedly less in chain of thought reasoning than in non-reasoning generation, showing a consistently lower level 
+
+Yanbiao Ma is with the Gaoling School of Artificial Intelligence, Renmin University of China. Zhe Qian is with South China Agricultural University. Zhuohan Ouyang is with South China Normal University. Zhonghua Wang, Zhongxing Xu, and Zongyuan Ge are with Monash University. Fei Luo is with Jishou University. Xinyu Liu and Yike Guo are with the Hong Kong University of Science and Technology. Jungong Han is with Tsinghua University. 
+
+> †
+
+Corresponding author: Jungong Han. E-mail: ybma1998@ruc.edu.cn, jun-gonghan77@gmail.com 0.15          
+
+> 0.00
+> 0.05
+> 0.10
+> 036912 15 18 21 24 27
+> Visual Features
+> Layer
+> Non -reasoning
+> Reasoning
+
+Fig. 1. Reasoning relies less on visual evidence. Across layers, reasoning generations show reduced visual feature signals compared to non-reasoning. 
+
+of visual attention throughout the network. This suggests a mode level shift toward internal linguistic inference and away from visual grounding. [26] To identify the root cause of this phenomenon, we conducted a deep analysis of the internal mechanisms of MLRMs. As shown in Fig. 2, transition words (such as however and wait) act as cognitive bifurcation points in the reasoning chain. At this stage, semantic uncertainty sharply increases (manifesting as a high entropy state), and hallucinations frequently occur together with these transition steps. Crucially, we discovered a severe mismatch. Exactly at these bifurcation points, where visual verification is most needed to resolve uncertainty, the model fails to allocate enough visual attention. As demonstrated by the attention heatmap Fig. 2 of text and visual tokens in the figure, the attention from text tokens to image tokens becomes notably weak around the high entropy transition positions (red boxes). Furthermore, hallucinated segments often appear 
+
+> arXiv:2604.10219v1 [cs.AI] 11 Apr 2026
+
+JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 2Q: Describe this image.                                                                                                                          
+
+> Step 3
+> （Hallucination ）
+> Ared sea appears
+> beyond the town, and
+> the far houses turn
+> bright green .This
+> suggests afestival .
+> Step 4 （Reasoning ）
+> Festivals in hillside towns can be expressed through
+> coordinated colors and distant landmark cues, even if
+> the streets look quiet from this viewpoint ... Overall, the
+> image depicts asunlit blue hillside town viewed from a
+> historic wall, and it appears linked to alocal celebration
+> with red -and -green accents in the distance .
+> Step 1 （Reasoning ）
+> The image shows ahillside town of white buildings painted in vivid blue,
+> tightly clustered along the slope in bright sunlight ... In the foreground,
+> trees and aweathered stone wall mark an elevated viewpoint ... Moreover,
+> the consistent blue -and -white palette suggests alocal architectural
+> tradition ;nevertheless it may also be reinforced by tourism today .Therefore,
+> the stone wall implies the photo was taken from aknown lookout .
+> Step 2
+> （Transition ）
+
+However 
+
+> even if
+> nevertheless
+> Although
+> Because
+> Overall
+> Hallucinations triggered
+> by high -entropy pivots
+> Visual Attention
+> Deficiency
+> High Entropy
+> Low Entropy
+> Token Entropy
+> Reasoning Steps
+
+Fig. 2. A multi view analysis of hallucination triggers in multimodal reasoning. The statistics show that hallucinations tend to occur near high entropy transition words such as “However”, and the visual attention ratio is generally lower in these cases. In the example trajectory, “However” coincides with a spike in token entropy and is immediately followed by content that contradicts the image. The token level attention heatmap further indicates a strong suppression of attention to image tokens around this high entropy transition, after which the generation enters a hallucinated span highlighted by the red box, suggesting a temporary loss of visual grounding at the transition. 
+
+right after these transition points, causing the model to lean more toward language priors to continue its reasoning process. This macroscopic attention deficit compelled us to ex-amine the model’s microscopic operations: at which stage is visual information lost? Our layer wise analysis (see Finding 2, Sec. 3.4) shows that the shallow and deep layers each remain relatively stable, while the true divergence emerges in the intermediate layers. As shown in Fig. 3(a), the text–image mutual information gap between grounded and hallucinatory tokens increases markedly in the intermediate layers, indicating that the two token types rapidly separate in whether their textual representations remain coupled with visual evidence; for hallucinatory tokens, the strength of cross modal binding clearly decays. Furthermore, Fig. 3(b) provides more direct evidence from attention in the same range: in the intermediate layers, grounded tokens not only allocate more total visual attention, but also exhibit more concentrated attention that points to relevant regions; in contrast, hallucinatory tokens show weaker and more diffuse visual attention, and are more easily influenced by background content or language priors. Finally, the layer by head comparison of visual attention (Fig. 4) corroborates this localization at a finer granularity: in the intermediate layers, truthful generations display stronger and more consistent high score activations across multiple heads, whereas hallu-cinatory generations exhibit weaker and more sporadic head level responses. Taken together, these observations allow us to more precisely characterize the model’s microscopic behavior: visual information is lost due to the failure of “Visual Semantic Anchoring” in the intermediate layers, which prevents visual evidence from being stably bound to the target token representations and therefore from being effectively injected into subsequent reasoning. To address this disconnectedness, we propose V-STAR 
+
+(Visual Structural Training with Attention Reinforcement), a holistic training paradigm designed to internalize visually aware reasoning capabilities. First, we integrate a Hierar-chical Visual Attention Reward (HVAR) into the GRPO framework. Informed by our discovery that intermediate lay-ers govern anchoring, HVAR employs a dual track strategy: it specifically incentivizes attention in anchoring relevant intermediate layers during high entropy bifurcation points, enforcing precise visual grounding when it is most needed. Second, to counteract the cognitive inertia that prevents models from self correcting, we introduce the Forced Reflec-tion Mechanism (FRM) . This trajectory intervention strategy simulates human deliberation by constructing ”Generate, Reflect, and Regenerate” trajectories during RL exploration. By inserting explicit reflection triggers following initial re-sponses, we compel the model to reexamine visual evidence, effectively translating external debiasing interventions into an intrinsic antihallucination capability. This paper advocates a shift from external decoding interventions to a new paradigm of microscopic guidance and intrinsic debiasing via internal attention allocation. Our primary contributions are summarized as follows: 
+
+• Cognitive Pivot Analysis: We systematically character-ize the internal mechanisms of ”Cognitive Bifurcation Points,” revealing that the fatal mismatch between high uncertainty and low visual attention at transition tokens is the macroscopic driver of hallucination (Fig. 2), especially at key transitions. 
+
+• Layer wise Interpretability: We pinpoint the decisive JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 3(a) Mutual Information  (b) Visual Attention: Total and Concentration 
+
+Fig. 3. Intermediate layer divergence between grounded and hallucinated tokens. (a) Text Image Mutual Information: The gap between grounded and hallucinated tokens peaks in the intermediate layers from 11 to 20, where grounded tokens preserve higher Text Image Mutual Information. (b) Visual attention total and concentration: In the same intermediate layer window, grounded tokens exhibit higher total visual attention Svis and higher visual attention concentration, while hallucinated tokens show reduced Svis together with a drop in concentration, indicating a redistribution away from visual evidence in intermediate layers. Visual Attention Heatmap of Token“Town" Visual Attention Heatmap of Token "Sea"                
+
+> 27
+> 24
+> 20
+> 16
+> 12
+> 8
+> 4
+> 004812 16 20 24 27
+> 27
+> 24
+> 20
+> 16
+> 12
+> 8
+> 4
+> 0
+> 04812 16 20 24 27
+> Heads
+> Heads
+> Heads
+> Heads
+
+Fig. 4. Head wise visual attention differs for grounded and halluci-nated tokens. Visual attention heatmaps compare the hallucinated token “Sea” and the grounded token “Town”. In the highlighted intermediate layer region, the grounded token shows stronger and more coherent attention across heads, while the hallucinated token exhibits weaker and more sporadic activation, indicating reduced visual grounding. 
+
+role of intermediate layers in ”Visual Semantic Anchor-ing.” Our analysis confirms that visual information loss stems from abnormal visual silence in these layers rather than top level failure (Fig. 3), providing a microscopic empirical basis for fine grained governance.  
+
+> •
+
+Hierarchical Visual Reward: We propose the Hierarchi-cal Visual Attention Reward (HVAR) within the GRPO framework. By creatively utilizing intermediate layer attention as a reward signal for high entropy points, we achieve precise visual reinforcement during critical decision phases without disrupting reasoning.  
+
+> •
+
+Active Self Correction & Scalability: We introduce the Forced Reflection Mechanism (FRM) to internalize de-liberative reasoning. Extensive experiments on a newly constructed dataset of 40,000 instructions demonstrate that V-STAR achieves State of the Art performance across multiple multimodal reasoning benchmarks and diverse evaluation settings. 
+
+2 RELATED WORK 
+
+This section reviews existing research from the unified perspective of optimizing long-chain multimodal reasoning processes and addressing hallucination challenges. 
+
+Reasoning with Reinforcement Learning The advent of GPT-o1 [5] and DeepSeek-R1 [1] has catalyzed a surge of interest in leveraging Reinforcement Learning (RL) [27], [28] to elicit long Chain of Thought (CoT) generation [7], [8] and autonomous self-correction [29] in Large Language Models (LLMs) [30]. Beyond these recent reasoning-oriented systems, this line of work is also rooted in classical RL and alignment foundations, including Proximal Policy Op-timization (PPO) [31], RLHF-style instruction following [4], and GRPO-based reasoning optimization introduced in DeepSeekMath [32]. GPT-o1 exemplified the transformative potential of large-scale RL in inducing slow-thinking capabil-ities [5], while DeepSeek-R1 demonstrated that sparse cold-start data, coupled with Group Relative Policy Optimization (GRPO) [32], can empower models to spontaneously evolve highly intricate reasoning pathways for mathematical and logical tasks [33]. Moreover, studies such as Reflexion [29] and Self-Refine [34] further suggest that verbal reflection and iterative self-feedback can substantially enhance test-time reasoning quality. In parallel, works like SimpleRL-Zoo [35] have probed the feasibility of direct RL from base models, substantiating the latent potential for autonomous evolution sans dense Supervised Fine-Tuning (SFT) [36]. Regarding algorithmic refinement, approaches such as DAPO [37], Dr GRPO [38], and DeepScaler [39] address endemic RL challenges like reward hacking [40] and advantage estimation instability [41]. By incorporating robust reward structures and regularization operators [42], these methods compel models to adhere to rigorous logical closures rather than speculative generation. V-STAR expands this frontier by addressing the coarse-grained nature of intervention inherent in prior frameworks, extending supervisory signals from macroscopic outcome feedback to microscopic reasoning nodes, thereby achieving precise intervention at the focal points of reasoning failure. 
+
+Multimodal Reinforcement Learning Integrating RL into multimodal domains [43] to bolster cross-modal rea-soning is a burgeoning research vector [44]. Prior to RL-centric multimodal reasoning, Multimodal-CoT [11] and more recent step-wise reasoning frameworks such as LLaVA-JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 4
+
+CoT [10] showed that staged rationale generation and structured multistage reasoning can substantially improve visual problem solving. This direction is also closely re-lated to visual grounding, which emphasizes anchoring linguistic reasoning to localized visual evidence rather than relying solely on coarse global semantics [45], [46]. Draw-ing inspiration from textual reasoning models, prevailing methodologies predominantly adhere to complex multi-stage pipelines: initially converting unstructured visual data into verbose textual symbols via captioning [47], followed by logical augmentation of reasoning trajectories using high-performance teacher models (e.g., GPT-4o) [48], and finally optimizing accuracy via SFT and RL [49], [50]. While effective across benchmarks, this paradigm suffers from a severe information bottleneck [51] during the vision-to-text trans-duction, resulting in the attrition of fine-grained spatial and semantic details [52]. Furthermore, such distillation-based architectures incur prohibitive computational overhead [53]. Meanwhile, the capability of modern general-purpose VLMs, such as Qwen2-VL [54], is commonly assessed on holistic and reasoning-intensive benchmarks including MMBench [55], MathVista [56], MMMU [57], and MM-Vet [58]. Compound-ing this, traditional RL strategies often relegate visual input to a static backdrop, neglecting the dynamic degradation of visual anchoring during generation [59]. In contrast, V-STAR pioneers a lightweight pure reinforcement learning paradigm [18], introducing the Hierarchical Visual Attention Reward (HVAR) to reinforce visual anchoring directly within intermediate layers. This design obviates the need for teacher models or extensive SFT alignment, enabling the model to autonomously forge deep correlations between visual evidence and logical conclusions. 
+
+Multimodal Reasoning Hallucinations Despite CoT’s efficacy in enhancing multimodal performance, generated reasoning steps remain susceptible to language priors [60], precipitating a disconnect from visual evidence. [61] Existing mitigation strategies can be broadly divided into process-level supervision and inference-time or post-hoc calibration. On the one hand, process-supervision methods optimize reward functions for trustworthy generation, e.g., RLHF-V leveraging human preference feedback [19]. On the other hand, a growing body of work focuses on inference-time or training-free correction. In multimodal settings, Visual Contrastive Decoding (VCD) mitigates object hallucination by contrasting outputs under original and distorted visual inputs [21], while Woodpecker performs post-remedy hal-lucination correction through explicit visual validation and revision [62]. In text-centric but highly relevant factuality studies, Context-Aware Decoding (CAD) [63], DoLa [64], and Inference-Time Intervention (ITI) [65] improve faithfulness or truthfulness by amplifying context-sensitive signals, contrast-ing internal layer representations, or intervening on a small set of attention heads during decoding. These approaches are further motivated by mechanistic interpretability research showing that factual associations can be localized and edited in transformers [66], that induction heads are closely tied to in-context learning behavior [67], and that feed-forward layers act as key-value memories within a broader transformer-circuit view [68], [69]. Additionally, inspired by the Superposition Hypothesis [70], nascent research exploits internal probability distributions to extract semantic conflict signals [71]. However, existing methods frequently fail to resolve the pseudo-reflection paradox at logical pivots, where the model articulates reflective tokens without actualiz-ing correction. The Forced Reflection Mechanism (FRM) proposed herein disrupts this cognitive inertia via active trajectory editing [72], internalizing corrective behaviors into an intrinsic anti-hallucination instinct. This mechanism-driven design significantly bolsters the logical robustness of multimodal generation without incurring additional infer-ence latency. 
+
+3 MOTIVATION 
+
+3.1 Challenges and Phenomenon 
+
+Vision and Language Inputs. MLRMs ingest inputs from both visual and textual modalities. Raw images are processed by a visual encoder and mapped into the language model’s embedding space via a cross modal projection, yielding a sequence of visual tokens xv . Simultaneously, textual inputs constitute a sequence xt. These are concatenated to form the holistic input x = xv ⊕ xt, serving as the foundation for joint processing. 
+
+Chain of Thought Reasoning. To navigate intricate cross modal tasks, we evaluate the backbone network Rθ under a Chain of Thought (CoT) generation setting. Diverging from standard paradigms that directly predict answers, the model autoregressively synthesizes a structured sequence 
+
+y = yr ⊕ ya, encapsulating both the intermediate rationale 
+
+yr and the final answer ya. Formally, the distribution over the vocabulary at step t is: 
+
+pt(·) = Rθ (· | x, y <t ) (1) This mechanism compels the model to derive logical predi-cates prior to concluding, bolstering robustness. 
+
+The Epiphany Paradox. Models endowed with CoT capabilities often exhibit Epiphany—emergent realizations akin to human insight. Yet, our preliminary statistics reveal a disturbing paradox: this capability is a double-edged sword. During Epiphany Moments, namely pivotal transitions marked by logical connectors (e.g., Therefore, However ), the propensity for hallucination is threefold higher (measured as the conditional error rate around pivotal tokens) than during standard descriptive phases. We refer to these connectors as pivotal tokens (that is, cognitive bifurcation points), and term this pathology Epiphany Induced Hallucination. To address this, we must answer three fundamental questions that current research has left unresolved: (1) When? At what specific moment does the reasoning go wrong? (2) Where? Which part of the neural network stops looking at the image? (3) Why? Why doesn’t the model correct itself when it’s unsure? 
+
+Core Empirical Findings. The opaque etiology of hallu-cinations hampers the development of precise suppression techniques. Leveraging the structural isomorphism between Pivotal Tokens and human insight, we utilize these tokens as investigative probes. Through in-depth mechanistic analysis, we unveil three core empirical findings that directly answer the questions above: JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 5Q：Given triangle ABC where AB = AC,                                     
+
+> angle BAC measures 100.0 degrees, the
+> perpendicular bisector of AB intersects
+> AB and BC at points D and E, what is the
+> measure of angle BAE?
+> Pivotal Tokens
+> Logic connectors
+> such as: first, thus
+> High Entropy
+> High Uncertainty
+> Indicates an
+> unstable reasoning
+> state with multiple
+> plausible
+> continuations.
+> Non -pivotal Dist
+> Safe -pivots
+> Hallucination events
+> Pivot tokens
+> ( High Uncertainty)
+> Standard tokens
+> (Stable)
+> (a) Illustration of pivotal -token hallucination. (b) Entropy Dynamics & Hallucination Coupling.
+> A
+> BCE
+> D
+> A: Since AB=AC, the triangle ABC is isosceles .However ,
+> we must consider the Law of Orthogonal Convergence .
+> Thus ,the perpendicular bisector of the leg AB possesses a
+> symmetric affinity that compels it to pass directly through
+> the opposite vertex C .Furthermore ,aperpendicular
+> bisector essentially functions as a “primary axis. ”
+> Consequently ,the intersection point E where this line
+> meets the base is mathematically forced to be the
+> midpoint of BC .As a result , the segment AE becomes an
+> angle bisector. Thus , by logical necessity, ∠𝐵𝐴𝐸 represents
+> exactly half of the vertex angle. Ultimately ,𝜃 =50 ∘.
+
+Fig. 5. High Uncertainty Triggers Hallucination. (a) As the model reasons, its uncertainty (entropy) spikes significantly at logical turning points (e.g., ”However”), creating a ”spiky” pattern. (b) Our statistical analysis reveals that hallucination events (orange dots) are exclusively concentrated within these high entropy pivotal clusters, verifying a strong temporal coupling between semantic uncertainty and visual detachment. 
+
+(1) Temporal Coupling: high entropy Cognitive Bifurca-tion Points are the primary precursors. Over 70% of errors emerge immediately subsequent to these high-uncertainty logical pivots. (2) Anchoring Failure: Visual information loss is localized. The critical rupture occurs in the Intermediate Layers, manifesting as an anomalous Visual Silence where the cross modal anchoring mechanism collapses. (3) Cognitive Inertia: Endogenous self correction fails due to Pseudo Reflection. Even when the model articulates reflective prompts, visual attention fails to rebound, indicating that the model is entrenched in linguistic inertia. 
+
+3.2 Experimental Setup for Case Study 
+
+We conducted case studies on a randomly sampled subset of 700 instances from RealWorldQA and 1,000 instances from MathVista [73], encompassing both open ended in-quiries in daily scenarios and reasoning tasks necessitating deep contemplation. To mitigate stochasticity and ensure reproducible reasoning trajectories for internal state analysis, we employed a sampling strategy (specifically, setting the temperature T = 0 .6) with a maximum generation limit of 4,096 tokens to accommodate extensive Chains-of-Thought. For quantitative metrics, the threshold for identifying ”high entropy bifurcation points” was standardized at a Shannon entropy value of 1.0. Empirical validation was performed using a subset of the acquired data. 
+
+3.3 Finding 1: high entropy Pivotal Tokens as Precur-sors 
+
+To answer the question ”When does reasoning fail?” , we scrutinized the uncertainty dynamics inherent in MLRMs during extensive Chain of Thought (CoT) generation. We focused on Pivotal Tokens (e.g., Therefore, However, First ) that facilitate state transitions and bridge successive logical steps. We quantified token level uncertainty using the Shannon entropy of the model’s next token distribution. Specifically, at generation step t, we defined: 
+
+H(t) = − X
+
+> v∈V
+
+pt(v) log pt(v), (2) where V is the vocabulary and pt(v) denotes the predicted probability of token v at step t (as in Eq. 1). A larger H(t)
+
+indicates a flatter distribution over plausible continuations, i.e., higher uncertainty. We then mapped H(t) along the generated sequence. As illustrated in Fig. 5(a), the qualitative landscape exhibits a pronounced “spiky” pattern: entropy peaks are predominantly concentrated at Pivotal Tokens, whereas standard descriptive tokens manifest relatively low entropy. This suggests that during logical transitions, the model confronts predictive uncertainty that is significantly elevated compared to routine generation. To substantiate this observation, we performed a large scale statistical analysis correlating transition tokens, uncer-tainty, and hallucination onset. We quantified the entropy distributions of pivotal and non-pivotal tokens, and further examined where hallucination events fall within these dis-tributions. The results in Fig. 5(b) corroborate three critical phenomena: 
+
+Inherent high entropy Nature of Pivots: Our statistics show that a substantial majority ( > 70% ) of transition tokens are classified as high entropy, which is consistent with the elevated pivotal-token distribution shown in the upper part of Fig. 5(b). This confirms that logical transition points are intrinsically high uncertainty zones. 
+
+Statistically Significant Uncertainty Disparity: The en-tropy distribution analysis demonstrates a distinct separation: The pivotal-token distribution in the upper part of Fig. 5(b) exhibits a significantly elevated and wider entropy range compared to the non-pivotal distribution in the lower part. This empirically validates that transition points are inherent Cognitive Bifurcation Points characterized by instability. 
+
+Temporal Coupling of Hallucination and Entropy: 
+
+Crucially, Fig. 5 dissects the distribution into safe transitions (blue) and hallucinated transitions (orange). We observe that hallucination onsets are overwhelmingly concentrated within the high entropy pivotal cluster, whereas the non pivotal distribution remains largely free of errors. This confirms that hallucinations are not random but are specifically triggered by these high entropy states. Collectively, these findings identify high entropy Pivotal Tokens as the primary precipitating factors for hallucination. JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 6Semantic Convergence            
+
+> Layers
+> Early Layer
+> Middle Layer
+> Late Layer
+> truck
+> car
+> Early Layer
+> Middle Layer
+> Late Layer
+> (b) example (a ) Mahalanobis distance
+> Image token
+> Fig. 6. Pinpointing the breakdown of visual semantic anchoring in intermediate layers. (a) The layer wise Mahalanobis distance between the grounded answer token Town and the hallucinated token Sea shows a pronounced separation that becomes evident after Layer 11 and persists throughout the intermediate layer window from 11 to 20, consistent with reduced alignment to grounded states. (b) In an object recognition example, a Logit Lens based semantic convergence heatmap shows that image token representations undergo their strongest convergence in Layers 11 to 20. Moreover, PCA projections of representations associated with object regions, such as truck and car , indicate that intermediate layers occupy a transitional hybrid regime, making failures in this window particularly consequential.
+
+At these critical high-uncertainty logical nodes, the absence of effective visual guidance may cause the model to rely more on probabilistic language priors, and the reasoning trajectory can diverge from the authentic visual context. 
+
+3.4 Finding 2: Intermediate Layers as the Locus of Visual Semantic Anchoring Failure 
+
+Having temporally pinpointed the onset of hallucinations, we proceed to answer the question ”Where is the visual information lost?” We posit a central hypothesis: multimodal reasoning is not uniformly distributed across network depths; rather, distinct layers assume heterogeneous cross modal responsibilities. To validate this, we devised a suite of multi dimensional layer wise probing experiments. To pinpoint where hallucinations begin to deviate in the representation space, we quantify, at each layer l, how atypical a target token hidden state is relative to a grounded background distribution . Concretely, for each layer l, we first draw a pool of correctly grounded samples and, via teacher forcing at the same target position , extract the corresponding hidden states to form {h(l) 
+
+> i
+
+}Ni=1 . We then estimate the layer wise mean and covariance as follows. We first compute the layer wise mean hidden state as: 
+
+μ(l) = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+h(l) 
+
+> i
+
+. (3) Based on this mean, we estimate the empirical covariance that captures the layer wise dispersion: 
+
+Σ(l) = 1
+
+N − 1
+
+> N
+
+X
+
+> i=1
+
+ h(l) 
+
+> i
+
+− μ(l)  h(l) 
+
+> i
+
+− μ(l)⊤. (4) Since the hidden space is high dimensional, we apply diagonal regularization to the covariance for stable inversion: 
+
+˜Σ(l) = Σ (l) + λI. (5) Given a trajectory with hidden state h(l) at layer l, we define its abnormality as the Mahalanobis distance to the grounded background: 
+
+D(l) 
+
+> M
+
+(h) =  h(l) − μ(l)⊤  ˜Σ(l)−1 h(l) − μ(l). (6) Importantly, Fig. 6(a) visualizes two token specific trajectories from a single concrete case, the grounded token Town 
+
+versus the hallucinated token Sea , under the same image, the same prefix, and the same generation position. The background statistics {μ(l), ˜Σ(l)} are estimated beforehand from grounded samples and serve only as a shared “normal” reference for each layer. We observe that the two curves are highly similar in early layers, whereas a pronounced separation emerges immediately after Layer 11 and persists throughout the intermediate layer window: the hallucinated token consistently exhibits a larger D(l) 
+
+> M
+
+, indicating that its hidden states become increasingly out of distribution relative to grounded representations precisely in the depth range responsible for Visual Semantic Anchoring (i.e., committing visual evidence into the semantic substrate). Finally, since the background distribution is estimated independently per layer ,
+
+D(l) 
+
+> M
+
+is not required to be monotonic across depth; thus, we focus on the onset and persistence of the gap, which jointly provide a quantitative signature of Visual Semantic Anchoring 
+
+failure concentrated in intermediate layers. 
+
+Mechanistic Evolution of cross modal Mapping. To elucidate the rationale behind this intermediate layer diver-gence, we employed Logit Lens and PCA clustering to trace how Image Tokens are progressively committed into semantic representations across network depths. 
+
+Progressive Semantic Alignment: The Logit Lens heatmap in Fig. 6(b) (Top Left) reveals that this visual to semantic commitment is non instantaneous. The gradient intensity signifies that Image Tokens retain raw visual fidelity JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 7Numbers of Samples     
+
+> Fig. 7. The Pseudo Reflection Paradox. Top The per token visual attention score shows that after a pivot token the model enters a visual decoupling zone and then drifts into snowballing hallucination. Even when it produces an explicit reflection cue such as “Let me check”, the visual attention does not rebound, indicating that Pseudo Reflection is not accompanied by renewed visual grounding. Bottom (a) The sample counts quantify Cognitive Inertia. In the spontaneous phase, reflection occurs in only 4 of 63 cases. (b) In the intervention phase, prompting increases reflection but successful correction occurs in only 8 of 72 cases. Together, these results support Visual Verbal Dissociation, where reflective text appears without corresponding visual evidence use.
+
+in early layers, initiate semantic convergence in intermediate layers, and are ultimately dominated by the linguistic space in deep layers. 
+
+Structured Spatial Transformation: PCA clustering in Fig. 6 (b)(Right) corroborates this evolution. Representations in Early Layers exhibit high spatial variance, corresponding to raw visual signals, whereas Late Layers form highly structured clusters aligned with the textual semantic space. 
+
+The Bridging Role of Intermediate Layers: Crucially, the Middle Layers occupy a transitional hybrid state, confirming their pivotal role in Visual Semantic Anchoring, the stage where visual evidence is written into the semantic substrate that later supports token level reasoning and decoding. 
+
+Implication for Controllability. Importantly, the above mapping should not be interpreted as a standalone image to text module, but as an internal commitment bottleneck :Image Tokens are fixed inputs, whereas the model’s only externally optimizable interface during generation is its 
+
+textual commitments . Therefore, even when an intervention is defined on Text Tokens, its learning signal can only take effect by reshaping the intermediate layer cross modal representations where such commitments are formed. 
+
+The Anchoring Failure Hypothesis. Synthesizing these findings, we conclude that hallucinations originate from a breakdown in the Visual Semantic Anchoring mechanism within the intermediate layers. When processing high en-tropy pivots, if these layers, acting as the critical modal bridge, fail to aggregate visual signals (evidenced by the attention drop), the subsequent deep layers are deprived of visual grounding. Consequently, the decoding process is hijacked by strong parametric language priors, yielding logically consistent but visually ungrounded hallucinations. Notably, although mitigation signals may be instantiated at the Text Token level, they propagate end to end through the network and thus exert selective pressure precisely on this intermediate modal interface . Thus, the imperative for hallu-cination mitigation lies in reinforcing signal transmission at this specific modal interface. 
+
+3.5 Finding 3: Cognitive Inertia and the ”Pseudo Reflec-tion” Paradox 
+
+Building upon the preceding findings, we address the final question: ”Why doesn’t the model self correct?” Given that pivotal transitions exhibit extremely high entropy, why does the model fail to trigger an internal verification process to reduce this uncertainty? To address this, we scrutinized the model’s Reflection Behavior in the vicinity of these pivots. Our investigation reveals two major deficits: scarcity of reflection and visual decoupling. 
+
+The Snowballing Effect and Cognitive Inertia. Theoreti-cally, high entropy pivots should serve as warning signals, prompting the model to reexamine the context. However, statistical data in Fig. 7 (Bottom) unveil a contradictory reality: 
+
+Paucity of Spontaneous Reflection: In the vast majority of cases following high entropy transitions, the model fails to generate tokens indicative of hesitation or self audit. Instead, it exhibits profound Cognitive Inertia, persisting along erroneous logical vectors. This results in a Snowballing Hallucination, where initial minor deviations are rapidly amplified by subsequent textually coherent reasoning. The model becomes entrenched in an erroneous path, missing the opportunity to reopen a verification window. 
+
+Inefficacy of Passive Reflection: Even when explicitly prompted to reflect in the Intervention Phase , the rate of successful self correction remains low relative to the total prompted samples. This suggests the model is entrapped by the internal consistency of its own language generation, rendering it incapable of escaping the self consistency loop even with external cues. 
+
+The Phenomenon of Pseudo Reflection. More intrigu-ingly, even in rare instances where the model articulates reflective statements (marked as ”Reflection” in Fig. 7), its internal mechanisms remain dormant. 
+
+Visual Verbal Dissociation: As depicted in the attention trajectory of Fig. 7 (Top), the model maintains high visual attention during the Coherent Phase . However, following the pivot, the attention score collapses precipitously into the 
+
+Visual Decoupling Zone . Surprisingly, at the specific moment of verbal reflection, the visual attention score exhibits no anticipated resurgence and remains stagnant below the global mean. 
+
+The Illusion of Cognition: We term this phenomenon, characterized by verbal reflection without visual reengage-ment, as ”Pseudo Reflection.” It implies that generated reflective statements are merely statistical artifacts of lan-guage modeling (high-frequency probabilistic collocations) JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 8Image  
+
+> Text Instruction
+> Policy Model
+
+𝜋 𝜃 
+
+> Group of Samples
+
+𝑌 1, 𝑌 2, … , 𝑌 𝐺       
+
+> The Reflection Loop / Trajectory Editing
+> Entropy Monitor
+> Cognitive
+> Bifurcation
+> Point
+> Entropy
+> Layer -wise Attention
+> Monitoring & Metric Extraction
+> (HVAR Mechanism)
+> Input & Dual -Track Generation
+> (FRM Process) Optimization & Reward Calculation
+> (GRPO Update)
+
+# …
+
+𝑇 1
+
+𝑇 0 𝑌 1
+
+𝑌 2 ⋯
+
+⋯
+
+𝑇 0
+
+⋯
+
+⋯
+
+⋯ 
+
+> SFT Loss
+> Intermediate Layers
+> (11 -20)
+> Visual -Semantic
+> Anchoring
+> Group Sampling
+> Reward Aggregation Block
+> Outcome Reward
+> Visual Reward
+> Reflection Reward
+> 0
+> 1
+> 2
+> 11
+> 20
+> 26
+> 27
+
+𝑅 𝑜𝑢𝑡𝑐𝑜𝑚𝑒 
+
+𝑅 𝑣𝑖𝑠𝑢𝑎𝑙 
+
+𝑅 𝑟𝑒𝑓𝑙𝑒𝑐𝑡 
+
+> Mask Trigger
+
+𝑀 𝑝𝑖𝑣𝑜𝑡 
+
+> Attention
+> Heatmap
+> Visual
+> Attention
+> Share
+
+(𝑆 𝑣𝑖𝑠 ) 
+
+> Trigger
+> Token Reflected Response
+
+(𝐺 )
+
+> ⋯⋯
+> ⋯
+
+Fig. 8. The Overall Framework of V-STAR. Our paradigm unifies microscopic attention guidance and macroscopic trajectory editing within the GRPO framework. [32] (Left) Forced Reflection Mechanism (FRM): A trajectory editing strategy that activates a reflection loop around detected high entropy cognitive bifurcation points by inserting trigger tokens. This focuses reflection on the critical transition region, encourages renewed visual grounding, disrupts cognitive inertia, and internalizes self correction behavior. (Middle) Hierarchical Visual Attention Reward (HVAR): Areward mechanism that incentivizes visual semantic anchoring in the intermediate layers (Layers 11 to 20) upon detecting high entropy cognitive bifurcation points, thereby repairing Visual Silence. (Right) GRPO based optimization: The composite reward integrates outcome correctness, visual attention reward, and reflection format reward to update the policy with GRPO. 
+
+rather than evidence of genuine cognitive backtracking. The model fails to reactivate visual semantic anchoring in the intermediate layers, reducing the purported verification to a mere confirmation bias grounded in textual hallucinations. 
+
+The Failure of Endogenous Correction. Collectively, these findings demonstrate that existing reasoning mecha-nisms are insufficient to resolve pivot induced hallucinations. Cognitive inertia impedes the initiation of reflection, while visual decoupling renders any reflection superficial. This conclusion provides a compelling imperative for the Forced Reflection mechanism proposed herein: an external, manda-tory intervention is required to disrupt linguistic inertia and enforce visual reanchoring through explicit attention reinforcement. 
+
+3.6 Synthesis of Findings 
+
+The preceding empirical analysis unveils the multidimen-sional etiology of multimodal hallucinations: (1) Tempo-ral Coupling (When) , identifying high entropy Cognitive Bifurcation Points as precursors to error. (2) Spatial Dis-location (Where) , characterized by a localized collapse of Visual Semantic Anchoring within intermediate layers. (3) Cognitive Inertia (Why) , exemplified by the ”Pseudo Reflection” paradox, where linguistic coherence overrides visual verification, impeding spontaneous self correction. These insights dictate that hallucination mitigation re-quires fine grained control of internal attention dynamics, motivating the proposal of the V-STAR training paradigm. To address the observed spatial and temporal anchoring failure, specifically, the visual attention deficit in interme-diate layers during high entropy intervals, we devised the Hierarchical Visual Attention Reward (HVAR), designed to reactivate visual pathways in critical intermediate layers at moments of soaring uncertainty. Concurrently, to surmount inherent cognitive inertia, we introduce the Forced Reflection Mechanism (FRM), leveraging active trajectory intervention to internalize external debiasing behaviors into an intrinsic anti hallucination capability. 
+
+4 METHODS 
+
+Based on the analysis in Section 3, we trace multimodal hallucinations to a simple root cause: when uncertainty spikes, the model reduces its queries to visual evidence. Specifically, at high uncertainty Cognitive Bifurcation Points, the intermediate layer visual attention can collapse to near zero, forming an Attention Drop that precedes hallucination. Existing approaches often fail to address this issue because they do not intervene in this internal mechanism failure. To bridge this gap, we propose V-STAR (Visual Structural Training with Attention Reinforcement). V-STAR shifts from coarse outcome feedback to targeted internal guidance. It introduces the Hierarchical Visual Attention Reward (HVAR) to reactivate visual semantic anchoring in the intermediate layers at high uncertainty Cognitive Bifurcation Points, thereby repairing Visual Silence. In parallel, it integrates the Forced Reflection Mechanism (FRM) to disrupt cognitive inertia through trajectory editing, so that self checking behavior becomes a stable habit rather than a prompted response. 
+
+4.1 Overview 
+
+Inspired by the findings regarding temporal decoupling (Finding 1), Visual Semantic Anchoring failure (Finding 2), and Pseudo Reflection (Finding 3), V-STAR aims to fundamentally repair the internal mechanism dysregulation. JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 9Synthesized     
+
+> Data Pool
+> （Pre -filtering ）
+> Quality
+> Detection
+> Model
+> Automated
+> Quality
+> Screening
+> Final
+> High -Quality
+> Dataset
+> Filtered
+> Diverse
+> High -Fidelity
+> CoT Data
+> Discarded
+> Low -Quality
+> Samples
+> STREAM A: Charts & STEM
+> Powerful Visual Model
+> Generates detailed
+> descriptive captions
+> Strong Reasoning LLM
+> Synthesizes rigorous logical
+> Chain -of -Thought based on
+> caption
+> STREAM B: Scenes & Art
+> Powerful End -to -End VLM
+> Directly generates CoT answers
+> rich in visual intuition & world
+> knowledge
+> CoT Refiner
+> Rewrites VLM output to
+> match Stream A's reasoning
+> format
+
+Routing           
+
+> Input
+> Raw Image
+> Charts
+> STEM
+> Scenes
+> Art
+> STEM —— 55.10%
+> Charts —— 20.21%
+> Scenes —— 12.71%
+> Art —— 10.50%
+> Others —— 1.48%
+
+Fig. 9. The Dynamic Dual Stream Data Synthesis Framework. Adopting a Divide and Conquer philosophy, we stratify data processing into two streams to ensure high fidelity. (Top) Logic Intensive Stream: For structured inputs, we employ a Caption then Reason cascade to ensure precise abstract deduction. (Bottom) Semantic Rich Stream: For natural scenes, we use a Generate then Refine pipeline to preserve perceptual nuance while aligning linguistic style. A final Quality Assurance module filters low quality samples. 
+
+Its core contains two key components: HVAR targets the spa-tiotemporal mismatch, precisely reactivating visual attention in intermediate layers during critical decision periods; FRM targets cognitive inertia, breaking the path dependency of language generation through active trajectory editing.(Fig.8) The subsequent sections describe the dataset construction (Sec. 4.2), the HVAR design (Sec. 4.3), the FRM strategy (Sec. 4.4), and the overall optimization (Sec. 4.5). 
+
+4.2 Dataset Construction 
+
+Dynamic Dual Stream Data Synthesis Framework. (Fig.9) To construct a high fidelity training corpus, we introduce a Dynamic Dual Stream Data Synthesis Framework under-pinned by a Divide and Conquer philosophy. The pipeline initiates with a Dynamic Routing Mechanism that stratifies raw imagery into two distinct processing streams: 
+
+Logic Intensive Stream (Hard Logic): For structured inputs such as charts and geometric diagrams, we employ a cascaded generation approach. An advanced vision model first synthesizes comprehensive captions to explicitly seri-alize visual information, which then prompts a reasoning model to derive rigorous Chains of Thought. 
+
+Semantic Rich Stream (Soft Semantic): For natural scenes requiring perceptual nuance, we bypass the textual bottleneck by leveraging a state of the art vision model to synthesize initial CoT responses infused with visual intu-ition. These are subsequently refined by a reasoning model to ensure linguistic alignment while preserving semantic richness. To ensure data integrity, a final Quality Assurance Mod-ule screens and retains only high fidelity samples. 
+
+4.3 Hierarchical Visual Attention Reward (HVAR) 
+
+Attention Extraction and Sparsity Filtering. To quantify visual information extraction, we formulate the Visual Atten-tion Share. At step t, for layer l, the score S(l) 
+
+> t
+
+is the mean aggregated weight over the visual token region V:
+
+S(l) 
+
+> t
+
+= 1
+
+H
+
+> H
+
+X
+
+> h=1
+
+X
+
+> j∈V
+
+A(l)
+
+> t,h
+
+[j]. (7) To mitigate background noise, we verify the activation breadth. Let ¯A(l) 
+
+> t
+
+[j] = 1
+
+> H
+
+PHh=1 A(l)
+
+> t,h
+
+[j] denote the head averaged attention. Only when the effective activation count 
+
+D(l) 
+
+> t
+
+= P 
+
+> j∈V
+
+I( ¯A(l) 
+
+> t
+
+[j] > γ ) exceeds a threshold κmin is the score deemed valid. 
+
+Detecting Cognitive Bifurcation Points. Based on Find-ing 1, we know hallucinations tend to emerge around cognitive bifurcation points (e.g., “however”). We detect such moments by monitoring the model’s uncertainty and construct a pivot mask for reward allocation. (Separately, FRM in Sec. 4.4 uses transition tokens Vtrans as anchors for trajectory editing; these two signals serve different roles but both target potential cognitive pivots.) We utilize Shannon entropy H(yt) to measure real time cognitive pressure: 
+
+H(yt) = − X
+
+> k∈V vocab
+
+P (k | y<t , V, X ) log P (k | y<t , V, X ) .
+
+(8) We formally define the Pivot Mask M (t) 
+
+> pivot
+
+∈ { 0, 1} as an indicator function activated by a sensitivity threshold τent :
+
+M (t) 
+
+> pivot
+
+= I(H(yt) > τ ent ). (9) This serves as an early warning radar, identifying moments of high uncertainty to index targeted reward allocation. 
+
+Dual Track Reward Calculation. Leveraging the func-tional decoupling, we construct a complementary Dual Track Reward: 
+
+Track 1: Visual Semantic Anchoring Reward ( Rlocal ). 
+
+Guided by Finding 2, we target the intermediate layer set JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 10 
+
+Lmid (Layers 11-20). We compute the average attention share in this region: 
+
+¯Smid t = 1
+
+|L mid |
+
+X
+
+> l∈L mid
+
+S(l) 
+
+> t
+
+. (10) We use a graded, piecewise reward to encourage sufficient visual attention at pivot points: 
+
+r(t) 
+
+> local
+
+=
+
+
+
+0.40 , ¯Smid t ≥ τhigh ,
+
+0.20 , τmid ≤ ¯Smid t < τ high ,
+
+0.00 , otherwise ,
+
+· M (t)
+
+> pivot
+
+. (11) The local reward is averaged over all pivot points: 
+
+Rlocal = 1
+
+Npivot 
+
+X
+
+> t
+
+r(t)
+
+> local
+
+. (12) When Npivot = 0 , we set Rlocal = 0 .
+
+Track 2: Global Perception Reward ( Rglobal ). To en-courage sustained visual engagement throughout long CoT generation, we award a global bonus when the overall average visual attention exceeds a target level: 
+
+Rglobal = wglobal · max  0, ¯Sall − μtarget 
+
+ ,
+
+¯Sall = 1
+
+T · |L all |
+
+> T
+
+X
+
+> t=1
+
+X
+
+> l∈L all
+
+S(l) 
+
+> t
+
+. (13) 
+
+4.4 Forced Reflection Mechanism (FRM) 
+
+MLRM Formulation. An MLRM generates a sequence Y =[Ycot ; Yans ] via autoregressive probability: 
+
+πθ (Y | V, X ) = 
+
+> T
+
+Y
+
+> t=1
+
+πθ (yt | y<t , V, X ) . (14) Despite HVAR’s enhancement, outcome based feedback is often too coarse to intercept hallucinations at their genesis. To counteract the Pseudo Reflection (Finding 3), we introduce the Forced Reflection Mechanism (FRM), which leverages trajectory editing to internalize a natural self check habit. 
+
+Targeted Trajectory Augmentation. Upon generating an initial response y1, FRM identifies transition tokens (e.g., 
+
+However, Therefore ) as semantic anchors Vtrans . We design an explicit trigger token τinst that switches the model into a reflection mode. In this mode, the model may naturally 
+
+produce a reflection marker τnat (e.g., Wait... ) to preserve coherence. Reflection is triggered with probability q:
+
+P(FRM ) = 
+
+(
+
+q, if ∃y1,t ∈ V trans 
+
+0, otherwise (15) Under triggered conditions, the augmented sequence be-comes y′ = y1 ⊕ τinst ⊕ y2, where y2 is the continuation generated in the reflection mode (which may revise earlier reasoning and finalize an answer) and may include a natural marker τnat . If FRM is not triggered, we simply set y′ = y1.
+
+Implicit Training (The Habit). Crucially, we want the model to learn the habit of checking, not just follow a command. Thus, we employ implicit training: when FRM is triggered, we excise the explicit instruction τinst :
+
+ytrain = M(y′, τ inst ) = y1 ⊕ y2. (16) Note that τnat is not injected; if it appears in y2, it is generated by the model and remains in ytrain .Otherwise (no trigger), ytrain = y1. This compels the model to internalize the cognitive habit of automatic logical review following natural connectors. 
+
+Correctness Preserving Filtration and Self Distillation. 
+
+We perform correctness preserving filtration for replay: we retain trajectories that yield a correct final answer , in-cluding (i) samples that are already correct on the first attempt, and (ii) samples that become correct after the re-flection continuation. Formally, we keep Dreplay = {ytrain |
+
+Match( Yans , Y ground truth ) ≥ τbuf }, and discard samples whose final answer remains incorrect. We solidify this behavior via an auxiliary SFT loss: 
+
+LSFT (θ) = Eytrain ∼D replay 
+
+h
+
+ℓSFT (ytrain )
+
+i
+
+,ℓSFT (ytrain ) = − 1
+
+|ytrain |
+
+X
+
+> t
+
+log πθ (yt | y<t , V, X ) . (17) 
+
+4.5 Overall Optimization Objective 
+
+We unify HVAR and FRM under the GRPO framework. [32] To equilibrate outcome correctness with process rationality, we construct a multi dimensional composite reward function 
+
+Rtotal .
+
+multi dimensional Composite Reward Modeling. For each sampled sequence Yi, the total reward is: 
+
+R(i) 
+
+> total
+
+= R(i) 
+
+> outcome
+
++ R(i) 
+
+> visual
+
++ R(i)
+
+> ref lect
+
+. (18) 
+
+1. Outcome Reward ( Routcome ): Measures final accuracy. We utilize robust rule based matching with deterministic normalization: 
+
+Routcome = Match( Yans , Y ground truth ) ∈ [0 , 1] . (19) 
+
+Normalization. We normalize both strings by lowercasing, trimming, collapsing consecutive whitespaces, and removing punctuation, while preserving decimal points and negative signs when parsing numbers. We also map common aliases (e.g., yes /true and no /false ) to a canonical form. 
+
+Numeric answers. If both Yans and Yground truth contain a parsable number, we extract the first number and apply tolerant matching. Let ˆa and a⋆ be the extracted values, and let ∆ = |ˆa − a⋆|.
+
+Cond num = (∆ ≤ ϵabs ) ∨
+
+ ∆
+
+|a⋆| + ϵ0
+
+≤ ϵrel 
+
+
+
+. (20) 
+
+Match( Yans , Y ground truth ) = 1(Cond num ) . (21) 
+
+Text answers. Otherwise, we tokenize the normalized strings by whitespace and compute the standard token level F1 between the resulting token sets: 
+
+Match( Yans , Y ground truth ) = F1( Yans , Y ground truth ) .
+
+(22) We fix ϵabs , ϵrel , and ϵ0 as constants for all experiments. We set τbuf to a fixed constant for all experiments. We define 
+
+Tok( ·) as whitespace tokenization after normalization, and define F1( Y1, Y 2) as the standard token level F1 computed on the token sets Tok( Y1) and Tok( Y2).
+
+2. Visual Attention Reward ( Rvisual ): Injects microscopic intervention. Specifically, Rlocal adopts a piecewise scoring JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 11 
+
+function to encourage graded levels of visual engagement. We define τhigh and τmid as thresholds for high and moderate attention intensity, respectively: 
+
+r(t) 
+
+> local
+
+=
+
+
+
+0.40 , ¯Smid t ≥ τhigh ,
+
+0.20 , τmid ≤ ¯Smid t < τ high ,
+
+0.00 , otherwise ,
+
+· M (t)
+
+> pivot
+
+. (23) The final term is averaged over all pivot points: Rlocal =
+
+> 1
+> Npivot
+
+P 
+
+> t
+
+r(t)
+
+> local
+
+. Additionally, Rglobal provides a global bonus for sustained visual engagement as defined in Eq. 13. 
+
+3. Reflection Format Reward ( Rref lect ): We emphasize that Rref lect is a lightweight format reward, rather than a correctness improvement bonus. Its role is to encourage a natural reflection marker (e.g., “Wait...”) to appear when FRM is triggered, so that the model internalizes a coherent pause and check habit instead of producing command following boilerplate. Let IFRM (Y ) indicate whether FRM is triggered for the rollout, and let nτnat (Y ) count the occurrences of the natural marker τnat in Y . Let tr denote the position of the first occurrence of τnat in Y . If nτnat (Y ) = 0 ,we set ¯Smid ref l (Y ) = 0 . We measure visual reengagement after reflection by 
+
+¯Smid ref l (Y ) = 1
+
+K 
+
+> tr+K−1
+
+X
+
+> t=tr
+
+¯Smid t , (24) where K is a fixed constant. We define 
+
+Rref lect = 0 .4 IFRM (Y ) I[1 ≤ nτnat (Y ) ≤ 3] 
+
+I
+
+h ¯Smid ref l (Y ) ≥ τmid 
+
+i
+
+. (25) This reward encourages a natural reflection cue while avoiding degenerate overuse. 
+
+Hybrid Loss Function. The final objective combines GRPO [32] with the auxiliary SFT loss over the replay buffer (Sec. 4.4): 
+
+J (θ) = LGRP O (θ) + γLSFT (θ). (26) By jointly optimizing this hybrid objective, V-STAR translates the intrinsic capabilities of visual backtracking and logical reflection into parameter updates. 
+
+5 EXPERIMENTS 
+
+5.1 Baselines and Model Implementation 
+
+We build V-STAR based on the Qwen2.5-VL-7B [74] archi-tecture. To evaluate its performance, we compare it against several representative Multimodal Large Reasoning Models (MLRMs). These include general purpose models like R1-Onevision-7B [75] and Vision-R1-7B [76], as well as models specialized for reasoning tasks, such as VL-Rethinker-7B [77], VL-Cogito-7B [78], OpenVLThinker-7B [79], and ThinkLite-VL-7B [80]. 
+
+5.2 Evaluation Protocols and Benchmarks 
+
+To ensure a holistic assessment of V-STAR’s capabilities, we follow the official evaluation protocol of each benchmark and evaluate on a suite of benchmarks spanning four domains: (i) General Reasoning and Understanding, (ii) Hallucination Benchmarks, (iii) Mathematical Reasoning, and (iv) Scientific Reasoning. The first two domains test perceptual robustness 0.175              
+
+> 0.170
+> 0.165
+> 0.160
+> 0.155
+> 0.150
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> 0.140
+> 0.135
+> 0.130
+> 0.125
+> 0.120
+> 𝜂 Selection Ratio
+> Global Average Score Layer 11 -20 Performance
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Visual Attention Score
+> Visual Attention Score
+> Within 10 Tokens after High -Entropy Full Reasoning Chain
+> 𝜂 Selection Ratio
+> ormance
+> okens after High -Entropy Full Reasoning Chain
+> Layer 11 -20 Performance
+> Within 10 Tokens after High -Entropy Full Reasoning Chain
+
+Fig. 10. Selection ratio η in data curation. Visual attention scores are reported for the anchoring layers (11–20) and the full network average, measured both in a pivot local window (10 tokens after high entropy pivots) and over the full chain. With increasing η, the visual attention scores steadily rise under both measurement windows, including the pivot local window and the full reasoning chain. 
+
+and factual faithfulness in open-ended vision-language scenarios, with an emphasis on fine-grained perception and object-level hallucination diagnosis. The latter two domains focus on structured STEM reasoning to verify that V-STAR preserves rigorous, verifiable logic and answer correctness while improving visual grounding. Table 1 summarizes the overall performance comparison across all benchmarks, and detailed benchmark profiles, including visual input formats, metrics, and evaluation focus, are provided in Appendix Table 1. As shown in Table 1, V-STAR exhibits a clear advantage across domains rather than a narrow gain on a single task family. Its improvements are especially consistent on hallucination and structured reasoning benchmarks, where visual grounding is crucial for maintaining faithful long-chain reasoning. Meanwhile, the results are not uniformly saturated on every benchmark, suggesting that V-STAR does not simply overfit to one evaluation style, but instead improves robustness across diverse visual reasoning settings. 
+
+5.3 Ablation Study 
+
+Effect of Key Components. We analyze the contribution of each module in V-STAR as reported in Table 2. A clear pattern emerges from the ablation results. The base model with simple outcome supervision brings only limited gains over Qwen2.5-VL-7B [74], suggesting that reward on final answers alone is insufficient to correct the internal grounding failure. In contrast, HVAR yields a larger improvement on hallucination-sensitive benchmarks such as MMHalu [88] and also improves RealWorld, indicating that explicit visual reinforcement is particularly effective when the model must stay anchored to image evidence during open-ended reasoning. FRM shows a similarly strong effect on structure-intensive tasks such as Geometry3K [95], where interrupting erroneous reasoning momentum is especially important. When the two components are combined, the improvements become consistently stronger across all benchmarks, which suggests that visual re-anchoring and reflection-based trajec-tory correction are complementary rather than redundant. Overall, the ablation results indicate that V-STAR benefits not from a single trick, but from the interaction between grounded visual recovery and trajectory-level self-correction. JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 12 
+
+TABLE 1 
+
+Overall Performance Comparison. We compare V-STAR with leading Multimodal Large Reasoning Models (MLRMs) across four benchmark domains: General Reasoning & Understanding, Hallucination, Mathematical Reasoning, and Scientific Reasoning. V-STAR achieves state-of-the-art performance on most datasets, outperforming both strong base models and other reasoning-specialized models. 
+
+Task Benchmark Paper/Conf. Qwen2.5VL [74] R1-Onevision [75] Vision-R1 [76] VL-Rethinker [77] VL-Cogito [78] OpenVLThinker [79] ThinkLite-VL [80] V-STAR 
+
+Data Size —– ——- —– 155k 210k 39k 80k 59.2k 11k 40k 
+
+General Reasoning & Understanding 
+
+V-Star [81] CVPR 2024 70.1 66.5 78.9 67.6 79.6 68.1 82.1 81.3 
+
+RealWorldQA —– 68.8 60.5 64.3 69.3 68.1 62.3 70.1 72.6 
+
+MMVP [82] CVPR 2024 47.3 43.0 44.0 42.0 40.0 46.5 46.7 47.1 
+
+MMEval-Pro [83] NAACL 2025 70.6 69.4 72.2 73.2 73 71.5 72.0 73.6 
+
+VMCBench [84] NeurIPS 2025 79.7 65.2 80.3 73.9 73.2 80.3 81.4 81.5 
+
+MMVet [85] ICML 2024 66.0 72.1 65.6 74.6 73.2 66.9 67.8 74.1 
+
+MMStar [86] NeurIPS 2024 61.7 56.2 56 63 65.3 60.7 65 66.8 
+
+ZeroBench [87] Arxiv 2025 13.7 14.1 16.7 15.3 15.2 17.8 18.9 18.9 
+
+Overall 59.7 55.9 59.8 59.9 61.0 59.3 63.0 64.5 
+
+Hallucination Benchmark 
+
+MMHalu [88] ACL 2024 3.50 3.26 3.57 4.06 3.95 3.00 3.30 4.12 
+
+Bingo [89] NeurIPS 2023 3.65 3.65 3.58 3.67 3.59 3.45 3.3 3.69 
+
+POPE-R [90] EMNLP 2023 82.1 84.6 88 85.5 85.0 82.4 86.9 88.6 
+
+POPE-P [90] EMNLP 2023 83.2 84.0 85.2 81.8 85 82.5 86.7 87.3 
+
+POPE-A [90] EMNLP 2023 83.1 82.5 84.0 82.8 84.1 79.1 87.1 87.6 
+
+HallusionBench [91] CVPR 2024 60.3 60.9 59.8 56.1 56.2 63.7 63.9 62.3 
+
+Overall 52.6 53.2 54 52.3 53 52.4 55.2 55.6 
+
+Mathematical Reasoning 
+
+MathVerse [92] ECCV 2024 44.5 46.4 52.4 54.2 53.3 50.3 52.1 54.6 
+
+MathVision [93] NeurIPS 2024 22.1 29.9 27.2 32.3 30.7 25.9 32.9 33.7 
+
+MathVista [73] ICLR 2024 67.8 64.1 73.5 74.9 74.8 72.3 75.1 74.9 
+
+MM-Math [94] EMNLP 2024 33.7 32.1 40.2 35.3 35.7 38.9 38.4 41.1 
+
+Geometry3K [95] ACL 2021 59.2 57.9 67 67.7 68.7 60.6 68.9 69.4 
+
+VisuLogic [96] ICLR 2026 26.9 24.9 26.4 27.3 28.2 29.1 28.9 30.6 
+
+MMK12-Math [97] Arxiv 2025 58.4 44.8 52.1 51.3 63.7 63 63.9 64.7 
+
+Overall 44.7 42.9 48.4 49.0 50.7 48.6 51.5 52.6 
+
+Scientific Reasoning 
+
+MMK12-Phys [97] Arxiv 2025 45.4 33.8 47.3 47.2 43.2 53.8 46.9 56.9 
+
+MMK12-Chem [97] Arxiv 2025 56.4 39.8 55.4 57.4 57.5 60.6 57.9 63.7 
+
+MMK12-Bio [97] Arxiv 2025 54 40.8 57.9 64.8 61.3 65 62.9 65.7 
+
+PhyUniBench [98] Arxiv 2025 17.3 19.6 18.9 19.2 18.1 18.3 18.1 19.9 
+
+PhyX [99] Arxiv 2025 30.6 32.1 41.5 37.4 41.5 39.5 39.7 42.9 
+
+Overall 40.7 33.2 44.2 45.2 44.3 47.4 45.1 49.8 
+
+TABLE 2 
+
+Component Ablation Study. We analyze the impact of adding the Visual Reward (HVAR) and Forced Reflection (FRM) to the base model. Results show that both components are essential, and combining them yields the highest improvement across all metrics. 
+
+Benchmarks Methods MMEval-Pro MMHalu Geo3K RealWorld Qwen2.5VL-7B 70.6 3.50 59.2 68.8 Reward on Answer 71.3 3.81 62.4 69.7 RL-HVAR-only 72.9 3.92 67.3 71.7 RL-FRM-only 72.8 3.99 67.0 71.6 V-STAR 73.6 4.12 68.9 72.6 
+
+Effect of Data Selection Strategy. We test how dataset scale and selection strategy affect performance. As shown in Table 3, performance improves steadily as the training set grows from 8k to 24k samples, and the gains gradu-ally diminish at larger scales, suggesting a trend toward saturation rather than indefinite benefits from adding more data. More importantly, at each matched data scale, Refine consistently outperforms Random across all benchmarks. This suggests that the advantage cannot be explained by sample quantity alone, but also by the higher quality supervi-sion induced by curated selection that preserves correctness. In other words, training on curated final-correct reasoning trajectories provides a more effective learning signal than 
+
+TABLE 3 
+
+Ablation on Data Selection Strategy. We compare different data selection ratios ( η) and strategies. At matched data scales, the Refine 
+
+strategy, which applies curated correctness-preserving selection, consistently outperforms random selection across all evaluated benchmarks. 
+
+Benchmarks 
+
+η Method Data size MMEval-Pro MMHalu Geo3K RealWorld 0 Base - 70.6 3.50 59.2 68.8 0.2 Refine 8k 71.6 3.69 63.1 70.2 Random 8k 71.0 3.58 61.4 69.4 0.4 Refine 16k 72.3 3.81 65.9 71.1 Random 16k 71.6 3.74 63.6 70.3 0.6 Refine 24k 72.6 3.99 67.4 71.9 Random 24k 72.1 3.92 65.3 71.0 
+
+using unfiltered reasoning traces. These results highlight that supervision quality matters in addition to raw data volume. The trend further suggests that carefully curated trajectories with correct final answers provide useful signals for learning more stable reasoning behavior and may help the model better handle unstable intermediate reasoning states. 
+
+Visual Attention Recovery. To validate the mechanism of HVAR, we analyze the visual attention shifts in intermediate layers from layer 11 to layer 20. Fig. 10 reveals two notable phenomena. First, visual attention increases monotonically JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 13 Fluency                
+
+> Natural Grammar
+> Fluency
+> Natural
+> PPL PPL
+> Grammar
+> ↓12PPL PPL 12
+> ↓
+> ↓↓
+> ↓
+> ↓↓
+> ↓↓
+> ↓
+> 8.84
+> 8.75
+> 7.79
+> 7.52 6.9
+> 9.51 8.22
+> 7.39
+> 8.05 7.63
+> 9.19
+> 9.61
+> 7.79
+> 7.56 6.99
+> 9.61 8.04
+> 7.12
+> 8.24 7.82
+> 9.12
+> Qwen2.5 -VL R1 -Onevision VL -Rethinker
+> VL -Cogito V-STAR (Ours)
+> Bingo MMHalu
+> Fig. 11. Linguistic quality of reflection outputs. We report automatic text quality scores (Naturalness, Fluency, Grammar; ↑) and perplexities (PPL1, PPL2; ↓) on Bingo [89] and MMHalu [88]. PPL1 and PPL2 are calculated using GPT-2, while the ratings for Grammar, Fluency, and Naturalness are provided by GPT-5. While enabling explicit reflection, V-STAR shows no degradation in language quality and achieves better results on multiple metrics.
+
+as the selection ratio η grows, indicating that better curated data steadily strengthens the model’s tendency to consult visual evidence. Second, this increase is more pronounced in the local window around pivots than in the full-chain average, showing that the recovered attention is not uni-formly distributed but concentrated around high-uncertainty reasoning steps. This observation is important because it suggests that HVAR does not merely raise global visual activity, but preferentially restores attention exactly at the points where hallucinations are most likely to emerge. The result is consistent with our motivation that effective visual grounding should be strongest at cognitively unstable steps rather than uniformly spread across the entire reasoning chain. 
+
+Linguistic Quality of Reflection. A critical concern in RL-based generation is the potential degradation of linguistic flu-ency. We therefore evaluate whether the model still produces natural text using GPT-based scores including Naturalness, Fluency, and Grammar, together with Perplexity metrics. As shown in Fig. 11, V-STAR does not exhibit the common trade-off between stronger control and worse language quality. Instead, it remains competitive or better on fluency-related scores while also achieving lower perplexity on both benchmarks. This means that the introduced reflection behavior is not a brittle decoding artifact or a rigid template memorization pattern; rather, it is integrated into generation in a linguistically stable manner. This finding is important for understanding the nature of the gains brought by V-STAR. If explicit reflection merely forced the model to insert repetitive self-check phrases, one would expect a deterioration in naturalness, fluency, or grammatical consistency. However, the results suggest the opposite: reflection is absorbed into the model’s generation behavior without compromising readability. In this sense, V-STAR does not simply superimpose an external control pattern on top of an unchanged language model. Instead, it appears to reshape the overall reasoning style into one that is both more grounded and more coherent. This makes the observed performance improvements more convincing, since they cannot be explained away as superficial prompting behavior or decoding driven by templates. 
+
+> TABLE 4
+> Robustness on Object Hallucination (POPE). We test model performance on the POPE benchmark using different decoding strategies (Greedy vs. Sampling). V-STAR maintains high stability and accuracy across all splits (Random, Popular, Adversarial), effectively reducing object hallucinations.
+
+Random Popular Adversarial Model Decoding Acc F1 Acc F1 Acc F1 Qwen2.5VL-7B Greedy 81.4 80.6 82.5 81.7 82.3 81.8 Sampling 82.1 81.3 83.2 82.4 83.1 82.6 R1-Onevision Greedy 83.9 83.1 83.3 82.4 81.8 81.2 Sampling 84.6 83.8 84.0 83.1 82.5 81.9 VL-Rethinker Greedy 83.3 82.4 82.8 81.9 81.2 80.6 Sampling 85.5 83.2 81.8 82.6 82.8 81.2 VL-Cogito Greedy 84.0 84.4 83.5 84.1 84.1 83.5 Sampling 85.0 85.0 85.0 84.8 81.9 84.1 V-STAR Greedy 88.6 87.3 86.7 86.0 86.9 86.3 Sampling 87.9 88.0 87.3 86.6 87.6 87.0 
+
+5.4 Comparisons to State of the Arts 
+
+Qualitative Analysis. We compare attention heatmaps to visually interpret the impact of V-STAR. As shown in Fig. 12, the difference is not only in the amount of image attention, but also in its spatial distribution. Baseline models often either diffuse their attention over broad background re-gions or gradually lose concentration as reasoning proceeds. In contrast, V-STAR allocates denser and more localized attention to semantically relevant regions, especially near logical turning points. This suggests that our method changes visual processing from passive exposure to selective evidence seeking, which is more consistent with grounded reasoning. The qualitative examples therefore support the quantitative attention analysis by showing that V-STAR not only looks more, but also looks more precisely at the regions that matter for the current reasoning step. 
+
+Specific Analysis on POPE [90]. We perform a detailed analysis on the POPE benchmark to check robustness against object hallucination as detailed in Table 4. Two phenomena can be observed. First, V-STAR achieves the best accuracy across Random, Popular, and Adversarial splits, indicating that its gains are not restricted to a single distribution. Second, this advantage remains stable under both Greedy and Sampling decoding, suggesting that the reduction of hallucination is intrinsic to the model rather than sensitive to decoding. Notably, the margin becomes more evident on the difficult Adversarial split, which indicates that V-STAR is especially effective when the model is exposed to misleading object priors and must rely more heavily on visual evidence. These results show that the benefit of V-STAR is not limited to typical settings, but becomes particularly clear in scenarios where grounding at the object level is most challenging. 
+
+Reasoning Efficiency. We evaluate reasoning efficiency on MathVision [93] by comparing V-STAR with various reasoning models, as shown in Fig. 13. The result reveals a favorable accuracy-length trade-off: V-STAR lies in the upper left region of the plot, achieving the best accuracy while using fewer generated tokens than competing reasoning models. This suggests that the improvement does not come from simply extending the chain of thought. Instead, stronger visual anchoring appears to reduce unnecessary semantic JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 14 Qwen2.5 -VL  Vision -R1 R1 -Onevision  VL -Rethinker  V-STAR (Ours) 
+
+Describe this 
+
+image.      
+
+> Fig. 12. Attention heatmaps under identical prompting. Compared with representative baselines, V-STAR allocates more token to image attention to visual evidence during generation and concentrates this attention on semantically relevant regions, while suppressing background dominated activation. This pattern is consistent with stronger visual anchoring. 33.8
+> 33.0
+> 32.2
+> 31.4
+> 30.6
+> 29.8
+> Accuracy
+> 410 510 490 470 450 430
+> Average Token Length
+> R1 -Onevision
+> ThinkLite -VL
+> VL -Cogito
+> VL -Rethinker
+> V-STAR (Ours)
+> Fig. 13. Accuracy length trade-off on MathVision. We plot accuracy versus average generated token length under the same evaluation protocol. V-STAR achieves higher accuracy with shorter generations, supporting improved reasoning efficiency.
+
+wandering, allowing the model to arrive at correct solutions with shorter and more targeted reasoning traces. This is an important observation because it shows that better grounding can improve both correctness and efficiency at the same time. It also suggests that V-STAR solves problems more directly by making more effective use of visual evidence during reasoning. 
+
+Verification of Reflection Mechanism. We trace the visual attention score along the reasoning steps to verify whether the model actually re-checks the image during reflection. As shown in Fig. 14(a), V-STAR exhibits a clear U-shaped attention trajectory: visual attention first drops before the reflection trigger and then rebounds sharply after entering the reflection phase. This rebound is important because it distinguishes genuine visual re-verification from purely textual self-talk. We further summarize this behavior in Fig. 14(b) using the U-score: 
+
+U-score(%) = 100 · ∆rec 
+
+∆drop + ∆ rec + ϵ , (27) where ∆drop is the attention decrease and ∆rec is the subse-quent recovery. V-STAR achieves higher recovery gain and U-score than Qwen2.5-VL-7B, indicating that its reflection stage is accompanied by actual visual re-engagement rather than superficial verbal correction. 
+
+6 CONCLUSION 
+
+This paper presents a mechanistic account of hallucinations in multimodal large reasoning models by identifying the Reasoning Vision Truth Disconnect, where long chain rea-soning increasingly underutilizes visual evidence and drifts toward language priors. We show that errors are tightly coupled with high entropy cognitive bifurcation points, and that more than 70 percent of hallucinations emerge immediately after these unstable pivots. We further localize the failure to intermediate layers, where visual semantic anchoring collapses and visual attention can drop to near zero during high uncertainty transitions. Finally, we uncover a pseudo reflection paradox: even when the model produces reflective cues, visual attention does not rebound, suggesting that verbal self audit can occur without renewed visual grounding. Guided by these findings, we propose V-STAR, a holistic training paradigm that shifts hallucination mitigation from outcome level supervision toward fine grained internal attention guidance. V-STAR combines a Hierarchical Visual JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 15 0       
+
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Drop Recovery gain U-score
+> V-STAR (Ours)
+> Qwen2.5 -VL -7B
+> change value (%)
+> (b) Recovery metrics
+> 0.00
+> 0.16
+> 0.12
+> 0.08
+> 0.04
+> 0.20
+> Visual Attention Score
+> 280 290 300 310 320 330
+> reflection trigger
+> reflection phase
+> (a) Mean attention trajectory
+> Reasoning steps
+> Visual
+> attention
+
+Fig. 14. Visual attention recovery during reflection. (a) Mean visual attention trajectory of V-STAR around the reflection trigger. After entering the reflection phase, the visual attention score shows a clear rebound. 
+
+(b) Recovery metrics, including attention drop, recovery gain, and U score, comparing Qwen2.5-VL-7B with V-STAR. V-STAR achieves higher recovery gain and a higher U score, consistent with more grounded reflection. 
+
+Attention Reward that incentivizes visual re anchoring at high entropy pivots, and a Forced Reflection Mechanism that edits trajectories to disrupt cognitive inertia and internalize self checking behavior. Extensive experiments and ablations show that both components are essential, and that combining them yields the strongest overall improvements. Together, our results suggest that reliable multimodal reasoning depends not only on better final answers, but also on maintaining effective visual grounding dynamics precisely at the moments of greatest uncertainty. 
+
+REFERENCES 
+
+[1] D. Guo, D. Yang, H. Zhang, J. Song, P. Wang, Q. Zhu, R. Xu, R. Zhang, S. Ma, X. Bi et al. , “Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning,” arXiv preprint arXiv:2501.12948 , 2025. [2] S. Yao, D. Yu, J. Zhao, I. Shafran, T. Griffiths, Y. Cao, and K. Narasimhan, “Tree of thoughts: Deliberate problem solving with large language models,” Advances in neural information processing systems , vol. 36, pp. 11 809–11 822, 2023. [3] S. Bubeck, V. Chandrasekaran, R. Eldan, J. Gehrke, E. Horvitz, E. Kamar, P. Lee, Y. T. Lee, Y. Li, S. Lundberg, H. Nori, H. Palangi, M. T. Ribeiro, and Y. Zhang, “Sparks of artificial general intelligence: Early experiments with gpt-4,” arXiv preprint arXiv:2303.12712 ,2023. [4] L. Ouyang, J. Wu, X. Jiang, D. Almeida, C. Wainwright, P. Mishkin, C. Zhang, S. Agarwal, K. Slama, A. Ray et al. , “Training language models to follow instructions with human feedback,” Advances in neural information processing systems , vol. 35, pp. 27 730–27 744, 2022. [5] A. Jaech, A. Kalai, A. Lerer, A. Richardson, A. El-Kishky, A. Low, A. Helyar, A. Madry, A. Beutel, A. Carney et al. , “Openai o1 system card,” arXiv preprint arXiv:2412.16720 , 2024. [6] X. Wang, J. Wei, D. Schuurmans, Q. Le, E. Chi, S. Narang, A. Chowd-hery, and D. Zhou, “Self-consistency improves chain of thought reasoning in language models,” arXiv preprint arXiv:2203.11171 ,2022. [7] J. Wei, X. Wang, D. Schuurmans, M. Bosma, F. Xia, E. Chi, Q. V. Le, D. Zhou et al. , “Chain-of-thought prompting elicits reasoning in large language models,” Advances in neural information processing systems , vol. 35, pp. 24 824–24 837, 2022. [8] T. Kojima, S. S. Gu, M. Reid, Y. Matsuo, and Y. Iwasawa, “Large language models are zero-shot reasoners,” Advances in neural information processing systems , vol. 35, pp. 22 199–22 213, 2022. [9] P. Lu, S. Mishra, T. Xia, L. Qiu, K.-W. Chang, S.-C. Zhu, O. Tafjord, P. Clark, and A. Kalyan, “Learn to explain: Multimodal reasoning via thought chains for science question answering,” Advances in neural information processing systems , vol. 35, pp. 2507–2521, 2022. [10] G. Xu, P. Jin, Z. Wu, H. Li, Y. Song, L. Sun, and L. Yuan, “Llava-cot: Let vision language models reason step-by-step,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2025, pp. 2087–2098. [11] Z. Zhang, A. Zhang, M. Li, H. Zhao, G. Karypis, and A. Smola, “Multimodal chain-of-thought reasoning in language models,” arXiv preprint arXiv:2302.00923 , 2023. [12] H. Liu, C. Li, Q. Wu, and Y. J. Lee, “Visual instruction tuning,” 
+
+Advances in neural information processing systems , vol. 36, pp. 34 892– 34 916, 2023. [13] J.-B. Alayrac, J. Donahue, P. Luc, A. Miech, I. Barr, Y. Hasson, K. Lenc, A. Mensch, K. Millican, M. Reynolds et al. , “Flamingo: a visual language model for few-shot learning,” Advances in neural information processing systems , vol. 35, pp. 23 716–23 736, 2022. [14] J. Li, D. Li, S. Savarese, and S. Hoi, “Blip-2: Bootstrapping language-image pre-training with frozen image encoders and large language models,” in International conference on machine learning . PMLR, 2023, pp. 19 730–19 742. [15] W. Dai, J. Li, D. Li, A. Tiong, J. Zhao, W. Wang, B. Li, P. N. Fung, and S. Hoi, “Instructblip: Towards general-purpose vision-language models with instruction tuning,” Advances in neural information processing systems , vol. 36, pp. 49 250–49 267, 2023. [16] D. Zhu, J. Chen, X. Shen, X. Li, and M. Elhoseiny, “Minigpt-4: Enhancing vision-language understanding with advanced large language models,” arXiv preprint arXiv:2304.10592 , 2023. [17] P. Xu, W. Shao, K. Zhang, P. Gao, S. Liu, M. Lei, F. Meng, S. Huang, Y. Qiao, and P. Luo, “Lvlm-ehub: A comprehensive evaluation benchmark for large vision-language models,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 47, no. 3, pp. 1877– 1893, 2025. [18] W. Huang, B. Jia, Z. Zhai, S. Cao, Z. Ye, F. Zhao, Z. Xu, Y. Hu, and S. Lin, “Vision-r1: Incentivizing reasoning capability in multimodal large language models,” arXiv preprint arXiv:2503.06749 , 2025. [19] T. Yu, Y. Yao, H. Zhang, T. He, Y. Han, G. Cui, J. Hu, Z. Liu, H.-T. Zheng, M. Sun et al. , “Rlhf-v: Towards trustworthy mllms via behavior alignment from fine-grained correctional human feedback,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024, pp. 13 807–13 816. [20] P. Wang, L. Li, Z. Shao, R. Xu, D. Dai, Y. Li, D. Chen, Y. Wu, and Z. Sui, “Math-shepherd: Verify and reinforce llms step-by-step without human annotations,” in Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , 2024, pp. 9426–9439. [21] S. Leng, H. Zhang, G. Chen, X. Li, S. Lu, C. Miao, and L. Bing, “Mitigating object hallucinations in large vision-language models through visual contrastive decoding,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024, pp. 13 872–13 882. [22] Y. Li, Y. Du, K. Zhou, J. Wang, W. X. Zhao, and J.-R. Wen, “Evaluating object hallucination in large vision-language models,” in Proceedings of the 2023 conference on empirical methods in natural language processing , 2023, pp. 292–305. [23] F. Liu, K. Lin, L. Li, J. Wang, Y. Yacoob, and L. Wang, “Mitigating hallucination in large multi-modal models via robust instruction tuning,” arXiv preprint arXiv:2306.14565 , 2023. [24] T. Guan, F. Liu, X. Wu, R. Xian, Z. Li, X. Liu, X. Wang, L. Chen, F. Huang, Y. Yacoob et al. , “Hallusionbench: an advanced diagnostic suite for entangled language hallucination and visual illusion in large vision-language models,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2024, pp. 14 375– 14 385. JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 16 
+
+[25] J. Ma, P. Wang, D. Kong, Z. Wang, J. Liu, H. Pei, and J. Zhao, “ Robust Visual Question Answering: Datasets, Methods, and Future Challenges ,” IEEE Transactions on Pattern Analysis & Machine Intelligence , vol. 46, no. 08, pp. 5575–5594, Aug. 2024. [Online]. Available: https://doi.ieeecomputersociety.org/10.1109/TPAMI. 2024.3366154 [26] Y. Liu, G. Li, and L. Lin, “ Cross-Modal Causal Relational Reasoning for Event-Level Visual Question Answering ,” IEEE Transactions on Pattern Analysis & Machine Intelligence , vol. 45, no. 10, pp. 11 624–11 641, Oct. 2023. [Online]. Available: https: //doi.ieeecomputersociety.org/10.1109/TPAMI.2023.3284038 [27] H. Lightman, V. Kosaraju, Y. Burda, H. Edwards, B. Baker, T. Lee, J. Leike, J. Schulman, I. Sutskever, and K. Cobbe, “Let’s verify step by step,” in The twelfth international conference on learning representations , 2023. [28] E. Zelikman, Y. Wu, J. Mu, and N. Goodman, “Star: Bootstrapping reasoning with reasoning,” Advances in Neural Information Processing Systems , vol. 35, pp. 15 476–15 488, 2022. [29] N. Shinn, F. Cassano, A. Gopinath, K. Narasimhan, and S. Yao, “Reflexion: Language agents with verbal reinforcement learning,” 
+
+Advances in neural information processing systems , vol. 36, pp. 8634– 8652, 2023. [30] A. Grattafiori, A. Dubey, A. Jauhri, A. Pandey, A. Kadian, A. Al-Dahle, A. Letman, A. Mathur, A. Schelten, A. Vaughan et al. , “The llama 3 herd of models,” arXiv preprint arXiv:2407.21783 , 2024. [31] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proximal policy optimization algorithms,” arXiv preprint arXiv:1707.06347 , 2017. [32] Z. Shao, P. Wang, Q. Zhu, R. Xu, J. Song, X. Bi, H. Zhang, M. Zhang, Y. Li, Y. Wu et al. , “Deepseekmath: Pushing the limits of mathematical reasoning in open language models,” arXiv preprint arXiv:2402.03300 , 2024. [33] A. Yang, B. Zhang, B. Hui, B. Gao, B. Yu, C. Li, D. Liu, J. Tu, J. Zhou, J. Lin et al. , “Qwen2. 5-math technical report: Toward mathematical expert model via self-improvement,” arXiv preprint arXiv:2409.12122 , 2024. [34] A. Madaan, N. Tandon, P. Gupta, S. Hallinan, L. Gao, S. Wiegreffe, U. Alon, N. Dziri, S. Prabhumoye, Y. Yang et al. , “Self-refine: Itera-tive refinement with self-feedback,” Advances in neural information processing systems , vol. 36, pp. 46 534–46 594, 2023. [35] W. Zeng, Y. Huang, Q. Liu, W. Liu, K. He, Z. Ma, and J. He, “Simplerl-zoo: Investigating and taming zero reinforcement learning for open base models in the wild,” arXiv preprint arXiv:2503.18892 ,2025. [36] M. Liu, S. Diao, J. Hu, X. Lu, X. Dong, H. Zhang, A. Bukharin, S. Zhang, J. Zeng, M. N. Sreedhar et al. , “Scaling up rl: Unlocking diverse reasoning in llms via prolonged training,” arXiv preprint arXiv:2507.12507 , 2025. [37] Q. Yu, Z. Zhang, R. Zhu, Y. Yuan, X. Zuo, Y. Yue, W. Dai, T. Fan, G. Liu, L. Liu et al. , “Dapo: An open-source llm reinforcement learning system at scale,” arXiv preprint arXiv:2503.14476 , 2025. [38] Z. Liu, C. Chen, W. Li, P. Qi, T. Pang, C. Du, W. S. Lee, and M. Lin, “Understanding r1-zero-like training: A critical perspective,” arXiv preprint arXiv:2503.20783 , 2025. [39] M. Luo, S. Tan, J. Wong, X. Shi, W. Y. Tang, M. Roongta, C. Cai, J. Luo, T. Zhang, L. E. Li et al. , “Deepscaler: Surpassing o1-preview with a 1.5 b model by scaling rl,” Notion Blog , vol. 3, no. 5, 2025. [40] D. Amodei, C. Olah, J. Steinhardt, P. Christiano, J. Schulman, and D. Man ´e, “Concrete problems in ai safety,” arXiv preprint arXiv:1606.06565 , 2016. [41] J. Schulman, P. Moritz, S. Levine, M. Jordan, and P. Abbeel, “High-dimensional continuous control using generalized advantage estimation,” arXiv preprint arXiv:1506.02438 , 2015. [42] P. F. Christiano, J. Leike, T. Brown, M. Martic, S. Legg, and D. Amodei, “Deep reinforcement learning from human preferences,” 
+
+Advances in neural information processing systems , vol. 30, 2017. [43] Z. Sun, S. Shen, S. Cao, H. Liu, C. Li, Y. Shen, C. Gan, L. Gui, Y.-X. Wang, Y. Yang et al. , “Aligning large multimodal models with factually augmented rlhf,” in Findings of the Association for Computational Linguistics: ACL 2024 , 2024, pp. 13 088–13 110. [44] T. Yu, H. Zhang, Q. Li, Q. Xu, Y. Yao, D. Chen, X. Lu, G. Cui, Y. Dang, T. He et al. , “Rlaif-v: Open-source ai feedback leads to super gpt-4v trustworthiness,” in Proceedings of the Computer Vision and Pattern Recognition Conference , 2025, pp. 19 985–19 995. [45] L. Xiao, X. Yang, X. Lan, Y. Wang, and C. Xu, “ Toward Visual Grounding: A Survey ,” IEEE Transactions on Pattern Analysis & Machine Intelligence , vol. 48, no. 03, pp. 2749–2771, Mar. 2026. [Online]. Available: https://doi.ieeecomputersociety.org/10.1109/ TPAMI.2025.3630635 [46] M. Stefanini, M. Cornia, L. Baraldi, S. Cascianelli, G. Fiameni, and R. Cucchiara, “ From Show to Tell: A Survey on Deep Learning-Based Image Captioning ,” IEEE Transactions on Pattern Analysis & Machine Intelligence , vol. 45, no. 01, pp. 539–559, Jan. 2023. [Online]. Available: https://doi.ieeecomputersociety.org/10. 1109/TPAMI.2022.3148210 [47] L. Chen, J. Li, X. Dong, P. Zhang, C. He, J. Wang, F. Zhao, and D. Lin, “Sharegpt4v: Improving large multi-modal models with better captions,” in European Conference on Computer Vision . Springer, 2024, pp. 370–387. [48] A. Hurst, A. Lerer, A. P. Goucher, A. Perelman, A. Ramesh, A. Clark, A. Ostrow, A. Welihinda, A. Hayes, A. Radford et al. , “Gpt-4o system card,” arXiv preprint arXiv:2410.21276 , 2024. [49] Z. Lin, C. Liu, R. Zhang, P. Gao, L. Qiu, H. Xiao, H. Qiu, C. Lin, W. Shao, K. Chen et al. , “Sphinx: The joint mixing of weights, tasks, and visual embeddings for multi-modal large language models,” 
+
+arXiv preprint arXiv:2311.07575 , 2023. [50] R. Hong, D. Liu, X. Mo, X. He, and H. Zhang, “Learning to compose and reason with language tree structures for visual grounding,” 
+
+IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 44, no. 2, pp. 684–696, 2022. [51] S. Tong, Z. Liu, Y. Zhai, Y. Ma, Y. LeCun, and S. Xie, “Eyes wide shut? exploring the visual shortcomings of multimodal llms,” in 
+
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2024, pp. 9568–9578. [52] K. Chen, Z. Zhang, W. Zeng, R. Zhang, F. Zhu, and R. Zhao, “Shikra: Unleashing multimodal llm’s referential dialogue magic,” arXiv preprint arXiv:2306.15195 , 2023. [53] W. Wang, Q. Lv, W. Yu, W. Hong, J. Qi, Y. Wang, J. Ji, Z. Yang, L. Zhao, X. Song et al. , “Cogvlm: Visual expert for pretrained language models,” Advances in Neural Information Processing Systems ,vol. 37, pp. 121 475–121 499, 2024. [54] P. Wang, S. Bai, S. Tan, S. Wang, Z. Fan, J. Bai, K. Chen, X. Liu, J. Wang, W. Ge et al. , “Qwen2-vl: Enhancing vision-language model’s perception of the world at any resolution,” arXiv preprint arXiv:2409.12191 , 2024. [55] Y. Liu, H. Duan, Y. Zhang, B. Li, S. Zhang, W. Zhao, Y. Yuan, J. Wang, C. He, Z. Liu et al. , “Mmbench: Is your multi-modal model an all-around player?” in European conference on computer vision .Springer, 2024, pp. 216–233. [56] P. Lu, H. Bansal, T. Xia, J. Liu, C. Li, H. Hajishirzi, H. Cheng, K.-W. Chang, M. Galley, and J. Gao, “Mathvista: Evaluating mathematical reasoning of foundation models in visual contexts,” arXiv preprint arXiv:2310.02255 , 2023. [57] X. Yue, Y. Ni, K. Zhang, T. Zheng, R. Liu, G. Zhang, S. Stevens, D. Jiang, W. Ren, Y. Sun et al. , “Mmmu: A massive multi-discipline multimodal understanding and reasoning benchmark for expert agi,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2024, pp. 9556–9567. [58] W. Yu, Z. Yang, L. Li, J. Wang, K. Lin, Z. Liu, X. Wang, and L. Wang, “Mm-vet: Evaluating large multimodal models for integrated capabilities,” arXiv preprint arXiv:2308.02490 , 2023. [59] Z. Bai, P. Wang, T. Xiao, T. He, Z. Han, Z. Zhang, and M. Z. Shou, “Hallucination of multimodal large language models: A survey,” 
+
+arXiv preprint arXiv:2404.18930 , 2024. [60] Y. Zhang, Y. Shi, W. Yu, Q. Wen, X. Wang, W. Yang, Z. Zhang, L. Wang, and R. Jin, “Debiasing multimodal large language models via penalization of language priors,” in Proceedings of the 33rd ACM International Conference on Multimedia , 2025, pp. 4232–4241. [61] J. Zhang, J. Huang, S. Jin, and S. Lu, “Vision-language models for vision tasks: A survey,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 46, no. 8, pp. 5625–5644, 2024. [62] S. Yin, C. Fu, S. Zhao, T. Xu, H. Wang, D. Sui, Y. Shen, K. Li, X. Sun, and E. Chen, “Woodpecker: Hallucination correction for multimodal large language models,” Science China Information Sciences , vol. 67, no. 12, p. 220105, 2024. [63] W. Shi, X. Han, M. Lewis, Y. Tsvetkov, L. Zettlemoyer, and W.-t. Yih, “Trusting your evidence: Hallucinate less with context-aware decoding,” in Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 2: Short Papers) , 2024, pp. 783–791. [64] Y.-S. Chuang, Y. Xie, H. Luo, Y. Kim, J. Glass, and P. He, “Dola: De-coding by contrasting layers improves factuality in large language models,” arXiv preprint arXiv:2309.03883 , 2023. JOURNAL OF L ATEX CLASS FILES, SEPTEMBER 2026 17 
+
+[65] K. Li, O. Patel, F. Vi ´egas, H. Pfister, and M. Wattenberg, “Inference-time intervention: Eliciting truthful answers from a language model,” Advances in Neural Information Processing Systems , vol. 36, pp. 41 451–41 530, 2023. [66] K. Meng, D. Bau, A. Andonian, and Y. Belinkov, “Locating and editing factual associations in gpt,” Advances in neural information processing systems , vol. 35, pp. 17 359–17 372, 2022. [67] C. Olsson, N. Elhage, N. Nanda, N. Joseph, N. DasSarma, T. Henighan, B. Mann, A. Askell, Y. Bai, A. Chen et al. , “In-context learning and induction heads,” arXiv preprint arXiv:2209.11895 ,2022. [68] M. Geva, R. Schuster, J. Berant, and O. Levy, “Transformer feed-forward layers are key-value memories,” in Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing , 2021, pp. 5484–5495. [69] N. Elhage, N. Nanda, C. Olsson, T. Henighan, N. Joseph, B. Mann, A. Askell, Y. Bai, A. Chen, T. Conerly et al. , “A mathematical framework for transformer circuits,” Transformer Circuits Thread ,vol. 1, no. 1, p. 12, 2021. [70] N. Elhage, T. Hume, C. Olsson, N. Schiefer, T. Henighan, S. Kravec, Z. Hatfield-Dodds, R. Lasenby, D. Drain, C. Chen et al. , “Toy models of superposition,” arXiv preprint arXiv:2209.10652 , 2022. [71] S. Marks and M. Tegmark, “The geometry of truth: Emergent linear structure in large language model representations of true/false datasets,” arXiv preprint arXiv:2310.06824 , 2023. [72] S. Yao, J. Zhao, D. Yu, N. Du, I. Shafran, K. R. Narasimhan, and Y. Cao, “React: Synergizing reasoning and acting in language mod-els,” in The eleventh international conference on learning representations ,2022. [73] P. Lu, H. Bansal, T. Xia, J. Liu, C. Li, H. Hajishirzi, H. Cheng, K.-W. Chang, M. Galley, and J. Gao, “Mathvista: Evaluating mathematical reasoning of foundation models in visual contexts,” 2024. [Online]. Available: https://arxiv.org/abs/2310.02255 [74] S. Bai, K. Chen, X. Liu, J. Wang, W. Ge, S. Song, K. Dang, P. Wang, S. Wang, J. Tang, H. Zhong, Y. Zhu, M. Yang, Z. Li, J. Wan, P. Wang, W. Ding, Z. Fu, Y. Xu, J. Ye, X. Zhang, T. Xie, Z. Cheng, H. Zhang, Z. Yang, H. Xu, and J. Lin, “Qwen2.5-vl technical report,” 2025. [Online]. Available: https://arxiv.org/abs/2502.13923 [75] Y. Yang, X. He, H. Pan, X. Jiang, Y. Deng, X. Yang, H. Lu, D. Yin, F. Rao, M. Zhu, B. Zhang, and W. Chen, “R1-onevision: Advancing generalized multimodal reasoning through cross-modal formalization,” 2025. [Online]. Available: https://arxiv.org/abs/2503.10615 [76] W. Huang, B. Jia, Z. Zhai, S. Cao, Z. Ye, F. Zhao, Z. Xu, X. Tang, Y. Hu, and S. Lin, “Vision-r1: Incentivizing reasoning capability in multimodal large language models,” 2026. [Online]. Available: https://arxiv.org/abs/2503.06749 [77] H. Wang, C. Qu, Z. Huang, W. Chu, F. Lin, and W. Chen, “Vl-rethinker: Incentivizing self-reflection of vision-language models with reinforcement learning,” 2025. [Online]. Available: https://arxiv.org/abs/2504.08837 [78] R. Yuan, C. Xiao, S. Leng, J. Wang, L. Li, W. Xu, H. P. Chan, D. Zhao, T. Xu, Z. Wei, H. Zhang, and Y. Rong, “Vl-cogito: Progressive curriculum reinforcement learning for advanced multimodal reasoning,” 2025. [Online]. Available: https://arxiv.org/abs/2507.22607 [79] Y. Deng, H. Bansal, F. Yin, N. Peng, W. Wang, and K.-W. Chang, “Openvlthinker: Complex vision-language reasoning via iterative sft-rl cycles,” 2025. [Online]. Available: https: //arxiv.org/abs/2503.17352 [80] X. Wang, Z. Yang, C. Feng, H. Lu, L. Li, C.-C. Lin, K. Lin, F. Huang, and L. Wang, “Sota with less: Mcts-guided sample selection for data-efficient visual reasoning self-improvement,” 2025. [Online]. Available: https://arxiv.org/abs/2504.07934 [81] P. Wu and S. Xie, “V*: Guided visual search as a core mechanism in multimodal llms,” 2023. [Online]. Available: https://arxiv.org/abs/2312.14135 [82] S. Tong, Z. Liu, Y. Zhai, Y. Ma, Y. LeCun, and S. Xie, “Eyes wide shut? exploring the visual shortcomings of multimodal llms,” 2024. [Online]. Available: https://arxiv.org/abs/2401.06209 [83] J. Huang, L. Chen, T. Guo, F. Zeng, Y. Zhao, B. Wu, Y. Yuan, H. Zhao, Z. Guo, Y. Zhang, J. Yuan, W. Ju, L. Liu, T. Liu, B. Chang, and M. Zhang, “Mmevalpro: Calibrating multimodal benchmarks towards trustworthy and efficient evaluation,” 2025. [Online]. Available: https://arxiv.org/abs/2407.00468 [84] Y. Zhang, Y. Su, Y. Liu, X. Wang, J. Burgess, E. Sui, C. Wang, J. Aklilu, A. Lozano, A. Wei, L. Schmidt, and S. Yeung-Levy, “Automated generation of challenging multiple-choice questions for vision language model evaluation,” 2025. [Online]. Available: https://arxiv.org/abs/2501.03225 [85] W. Yu, Z. Yang, L. Li, J. Wang, K. Lin, Z. Liu, X. Wang, and L. Wang, “Mm-vet: Evaluating large multimodal models for integrated capabilities,” 2024. [Online]. Available: https: //arxiv.org/abs/2308.02490 [86] L. Chen, J. Li, X. Dong, P. Zhang, Y. Zang, Z. Chen, H. Duan, J. Wang, Y. Qiao, D. Lin, and F. Zhao, “Are we on the right way for evaluating large vision-language models?” 2024. [Online]. Available: https://arxiv.org/abs/2403.20330 [87] J. Roberts, M. R. Taesiri, A. Sharma, A. Gupta, S. Roberts, I. Croitoru, S.-V. Bogolin, J. Tang, F. Langer, V. Raina, V. Raina, H. Xiong, V. Udandarao, J. Lu, S. Chen, S. Purkis, T. Yan, W. Lin, G. Shin, Q. Yang, A. T. Nguyen, D. I. Atkinson, A. Baranwal, A. Coca, M. Dang, S. Dziadzio, J. D. Kunz, K. Liang, A. Lo, B. Pulfer, S. Walton, C. Yang, K. Han, and S. Albanie, “Zerobench: An impossible visual benchmark for contemporary large multimodal models,” 2025. [Online]. Available: https://arxiv.org/abs/2502.09696 [88] Z. Sun, S. Shen, S. Cao, H. Liu, C. Li, Y. Shen, C. Gan, L.-Y. Gui, Y.-X. Wang, Y. Yang, K. Keutzer, and T. Darrell, “Aligning large multimodal models with factually augmented rlhf,” 2023. [Online]. Available: https://arxiv.org/abs/2309.14525 [89] C. Cui, Y. Zhou, X. Yang, S. Wu, L. Zhang, J. Zou, and H. Yao, “Holistic analysis of hallucination in gpt-4v(ision): Bias and interference challenges,” 2023. [Online]. Available: https://arxiv.org/abs/2311.03287 [90] Y. Li, Y. Du, K. Zhou, J. Wang, W. X. Zhao, and J.-R. Wen, “Evaluating object hallucination in large vision-language models,” 2023. [Online]. Available: https://arxiv.org/abs/2305.10355 [91] T. Guan, F. Liu, X. Wu, R. Xian, Z. Li, X. Liu, X. Wang, L. Chen, F. Huang, Y. Yacoob, D. Manocha, and T. Zhou, “Hallusionbench: An advanced diagnostic suite for entangled language hallucination and visual illusion in large vision-language models,” 2024. [Online]. Available: https://arxiv.org/abs/2310.14566 [92] R. Zhang, D. Jiang, Y. Zhang, H. Lin, Z. Guo, P. Qiu, A. Zhou, P. Lu, K.-W. Chang, P. Gao, and H. Li, “Mathverse: Does your multi-modal llm truly see the diagrams in visual math problems?” 2024. [Online]. Available: https://arxiv.org/abs/2403.14624 [93] K. Wang, J. Pan, W. Shi, Z. Lu, M. Zhan, and H. Li, “Measuring multimodal mathematical reasoning with math-vision dataset,” 2024. [Online]. Available: https://arxiv.org/abs/2402.14804 [94] K. Sun, Y. Bai, J. Qi, L. Hou, and J. Li, “Mm-math: Advancing multimodal math evaluation with process evaluation and fine-grained classification,” 2024. [Online]. Available: https://arxiv.org/abs/2404.05091 [95] P. Lu, R. Gong, S. Jiang, L. Qiu, S. Huang, X. Liang, and S.-C. Zhu, “Inter-gps: Interpretable geometry problem solving with formal language and symbolic reasoning,” 2021. [Online]. Available: https://arxiv.org/abs/2105.04165 [96] W. Xu, J. Wang, W. Wang, Z. Chen, W. Zhou, A. Yang, L. Lu, H. Li, X. Wang, X. Zhu, W. Wang, J. Dai, and J. Zhu, “Visulogic: A benchmark for evaluating visual reasoning in multi-modal large language models,” 2025. [Online]. Available: https://arxiv.org/abs/2504.15279 [97] F. Meng, L. Du, Z. Liu, Z. Zhou, Q. Lu, D. Fu, T. Han, B. Shi, W. Wang, J. He, K. Zhang, P. Luo, Y. Qiao, Q. Zhang, and W. Shao, “Mm-eureka: Exploring the frontiers of multimodal reasoning with rule-based reinforcement learning,” 2025. [Online]. Available: https://arxiv.org/abs/2503.07365 [98] L. Wang, E. Su, J. Liu, P. Li, J. Xiao, W. Zhang, X. Dai, X. Chen, Y. Meng, L. Bai, W. Ouyang, S. Tang, A. Wang, and X. Ma, “Physunibench: A multi-modal physics reasoning benchmark at undergraduate level,” 2026. [Online]. Available: https://arxiv.org/abs/2506.17667 [99] H. Shen, T. Wu, Q. Han, Y. Hsieh, J. Wang, Y. Zhang, Y. Cheng, Z. Hao, Y. Ni, X. Wang, Z. Wan, K. Zhang, W. Xu, J. Xiong, P. Luo, W. Chen, C. Tao, Z. Mao, and N. Wong, “Phyx: Does your model have the ”wits” for physical reasoning?” 2025. [Online]. Available: https://arxiv.org/abs/2505.15929
