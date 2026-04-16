@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-14
-- 运行时间：2026-04-14 20:33:15 UTC
+- 最新运行日期：2026-04-16
+- 运行时间：2026-04-16 20:47:29 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析 17 篇 AI 前沿进展，重点攻克智能体工具调用数据合成与多模态推理幻觉两大难题。
-推荐关注如何通过可验证数据驱动 Agent 强化学习，以及利用视觉锚点纠正多模态模型在复杂逻辑下的“一本正经胡说八道”。
-建议读者了解测试时缩放（Test-time Scaling）对感知能力的提升，并关注多智能体协作在剧本杀等非完全信息推理场景的妙用。
-- 详情：[/202604/14/README](/202604/14/README)
+今日聚焦长文档视觉问答与多模态智能体，深度解析 MM-Doc-R1 等 17 篇前沿成果。
+重点推荐 MM-Doc-R1 与 Doc-V*，展示了强化学习与粗细粒度推理在处理超长、多页复杂文档中的卓越性能。
+建议关注智能体在医疗及工业场景的落地应用，并同步防范针对计算机使用智能体的安全攻击。
+- 详情：[/202604/16/README](/202604/16/README)
 
 ### 精读区论文标签
-1. [Controllable and Verifiable Tool-Use Data Synthesis for Agentic Reinforcement Learning](/202604/14/2604.09813v1-controllable-and-verifiable-tool-use-data-synthesis-for-agentic-reinforcement-learning)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：用于工具使用智能强化学习的数据合成
-2. [Cognitive Pivot Points and Visual Anchoring: Unveiling and Rectifying Hallucinations in Multimodal Reasoning Models](/202604/14/2604.10219v1-cognitive-pivot-points-and-visual-anchoring-unveiling-and-rectifying-hallucinations-in-multimodal-reasoning-models)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：纠正多模态推理模型中的幻觉
-3. [SVSR: A Self-Verification and Self-Rectification Paradigm for Multimodal Reasoning](/202604/14/2604.10228v1-svsr-a-self-verification-and-self-rectification-paradigm-for-multimodal-reasoning)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：将自我验证和自我纠正集成到多模态推理流水线中
-4. [Visual Enhanced Depth Scaling for Multimodal Latent Reasoning](/202604/14/2604.10500v1-visual-enhanced-depth-scaling-for-multimodal-latent-reasoning)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型中的多模态潜空间推理
-5. [A Progressive Training Strategy for Vision-Language Models to Counteract Spatio-Temporal Hallucinations in Embodied Reasoning](/202604/14/2604.10506v1-a-progressive-training-strategy-for-vision-language-models-to-counteract-spatio-temporal-hallucinations-in-embodied-reasoning)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：用于视觉语言模型时空推理的思维链数据集
-6. [Relax: An Asynchronous Reinforcement Learning Engine for Omni-Modal Post-Training at Scale](/202604/14/2604.11554v1-relax-an-asynchronous-reinforcement-learning-engine-for-omni-modal-post-training-at-scale)  
-   标签：评分：8.0/10、query:vlm-rl
+1. [MM-Doc-R1: Training Agents for Long Document Visual Question Answering through Multi-turn Reinforcement Learning](/202604/16/2604.13579v1-mm-doc-r1-training-agents-for-long-document-visual-question-answering-through-multi-turn-reinforcement-learning)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：使用多轮强化学习处理长文档视觉问答的智能体视觉感知工作流
+2. [Doc-V*:Coarse-to-Fine Interactive Visual Reasoning for Multi-Page Document VQA](/202604/16/2604.13731v1-doc-vcoarse-to-fine-interactive-visual-reasoning-for-multi-page-document-vqa)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：通过强化学习优化的视觉推理智能体框架
+3. [Relax: An Asynchronous Reinforcement Learning Engine for Omni-Modal Post-Training at Scale](/202604/16/2604.11554v2-relax-an-asynchronous-reinforcement-learning-engine-for-omni-modal-post-training-at-scale)  
+   标签：评分：9.0/10、query:vlm-rl
    evidence：用于全模态智能体工作流的强化学习引擎
+4. [Jump-Start Reinforcement Learning with Vision-Language-Action Regularization](/202604/16/2604.13733v1-jump-start-reinforcement-learning-with-vision-language-action-regularization)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：结合视觉-语言-动作正则化的强化学习
+5. [Reward Design for Physical Reasoning in Vision-Language Models](/202604/16/2604.13993v1-reward-design-for-physical-reasoning-in-vision-language-models)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：使用GRPO为VLM物理推理设计奖励
+6. [POINTS-Seeker: Towards Training a Multimodal Agentic Search Model from Scratch](/202604/16/2604.14029v1-points-seeker-towards-training-a-multimodal-agentic-search-model-from-scratch)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：从零训练的多模态代理搜索模型，可与外部环境交互
 
 ### 速读区论文标签
-1. [CSPO: Alleviating Reward Ambiguity for Structured Table-to-LaTeX Generation](/202604/14/2604.10918v1-cspo-alleviating-reward-ambiguity-for-structured-table-to-latex-generation)  
+1. [Preference Redirection via Attention Concentration: An Attack on Computer Use Agents](/202604/16/2604.08005v1-preference-redirection-via-attention-concentration-an-attack-on-computer-use-agents)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：多模态大语言模型的强化学习后训练
-2. [Test-time Scaling over Perception: Resolving the Grounding Paradox in Thinking with Images](/202604/14/2604.11025v1-test-time-scaling-over-perception-resolving-the-grounding-paradox-in-thinking-with-images)  
+   evidence：用于计算机操作代理的多模态基础模型
+2. [MedLVR: Latent Visual Reasoning for Reliable Medical Visual Question Answering](/202604/16/2604.09757v1-medlvr-latent-visual-reasoning-for-reliable-medical-visual-question-answering)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于细粒度视觉推理和感知的测试时缩放
-3. [Collaborative Multi-Agent Scripts Generation for Enhancing Imperfect-Information Reasoning in Murder Mystery Games](/202604/14/2604.11741v1-collaborative-multi-agent-scripts-generation-for-enhancing-imperfect-information-reasoning-in-murder-mystery-games)  
+   evidence：用于复杂医学视觉问答的潜视觉推理框架
+3. [Text-Guided 6D Object Pose Rearrangement via Closed-Loop VLM Agents](/202604/16/2604.09781v1-text-guided-6d-object-pose-rearrangement-via-closed-loop-vlm-agents)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：非机器人环境下的不完全信息博弈多智能体推理
-4. [ROSClaw: A Hierarchical Semantic-Physical Framework for Heterogeneous Multi-Agent Collaboration](/202604/14/2604.04664v1-rosclaw-a-hierarchical-semantic-physical-framework-for-heterogeneous-multi-agent-collaboration)  
+   evidence：用于迭代推理的闭环VLM智能体
+4. [Spatial Atlas: Compute-Grounded Reasoning for Spatial-Aware Research Agent Benchmarks](/202604/16/2604.12102v2-spatial-atlas-compute-grounded-reasoning-for-spatial-aware-research-agent-benchmarks)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：空间感知多模态研究智能体的计算驱动推理
+5. [Vision-Language Navigation for Aerial Robots: Towards the Era of Large Language Models](/202604/16/2604.07705v1-vision-language-navigation-for-aerial-robots-towards-the-era-of-large-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于具身智能体的视觉-语言-动作 (VLA) 系统
-5. [SEARL: Joint Optimization of Policy and Tool Graph Memory for Self-Evolving Agents](/202604/14/2604.07791v2-searl-joint-optimization-of-policy-and-tool-graph-memory-for-self-evolving-agents)  
+   evidence：视觉语言模型在自主导航智能体中的综述
+6. [LAST: Leveraging Tools as Hints to Enhance Spatial Reasoning for Multimodal Large Language Models](/202604/16/2604.09712v1-last-leveraging-tools-as-hints-to-enhance-spatial-reasoning-for-multimodal-large-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于自我进化智能体推理的强化学习
-6. [VisionFoundry: Teaching VLMs Visual Perception with Synthetic Images](/202604/14/2604.09531v1-visionfoundry-teaching-vlms-visual-perception-with-synthetic-images)  
+   evidence：利用工具增强多模态大模型的空间推理能力
+7. [Counting to Four is still a Chore for VLMs](/202604/16/2604.10039v1-counting-to-four-is-still-a-chore-for-vlms)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：使用合成数据教导VLM进行视觉感知和空间理解
-7. [Grid2Matrix: Revealing Digital Agnosia in Vision-Language Models](/202604/14/2604.09687v1-grid2matrix-revealing-digital-agnosia-in-vision-language-models)  
+   evidence：VLM推理的机械论分析
+8. [STRONG-VLA: Decoupled Robustness Learning for Vision-Language-Action Models under Multimodal Perturbations](/202604/16/2604.10055v2-strong-vla-decoupled-robustness-learning-for-vision-language-action-models-under-multimodal-perturbations)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型多模态推理和视觉复杂性的基准测试
-8. [Multi-Granularity Reasoning for Image Quality Assessment via Attribute-Aware Reinforcement Learning to Rank](/202604/14/2604.09704v1-multi-granularity-reasoning-for-image-quality-assessment-via-attribute-aware-reinforcement-learning-to-rank)  
-   标签：评分：7.0/10、query:vlm-rl
-   evidence：使用排序强化学习训练视觉语言模型进行多粒度推理
-9. [CoEnv: Driving Embodied Multi-Agent Collaboration via Compositional Environment](/202604/14/2604.05484v1-coenv-driving-embodied-multi-agent-collaboration-via-compositional-environment)  
+   evidence：用于具身任务的视觉-语言-动作 (VLA) 模型
+9. [Reason in Chains, Learn in Trees: Self-Rectification and Grafting for Multi-turn Agent Policy Optimization](/202604/16/2604.07165v2-reason-in-chains-learn-in-trees-self-rectification-and-grafting-for-multi-turn-agent-policy-optimization)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：具身多智能体协作与时序推理
-10. [HIVE: Query, Hypothesize, Verify An LLM Framework for Multimodal Reasoning-Intensive Retrieval](/202604/14/2604.07220v1-hive-query-hypothesize-verify-an-llm-framework-for-multimodal-reasoning-intensive-retrieval)  
+   evidence：大语言模型智能体在多步推理中的强化学习
+10. [ViVa: A Video-Generative Value Model for Robot Reinforcement Learning](/202604/16/2604.08168v1-viva-a-video-generative-value-model-for-robot-reinforcement-learning)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于多模态检索的显式视觉文本推理
-11. [LMGenDrive: Bridging Multimodal Understanding and Generative World Modeling for End-to-End Driving](/202604/14/2604.08719v1-lmgendrive-bridging-multimodal-understanding-and-generative-world-modeling-for-end-to-end-driving)  
+   evidence：VLA模型与强化学习价值函数
+11. [InstAP: Instance-Aware Vision-Language Pre-Train for Spatial-Temporal Understanding](/202604/16/2604.08337v1-instap-instance-aware-vision-language-pre-train-for-spatial-temporal-understanding)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于驾驶智能体视觉语言理解与推理的VLM
+   evidence：用于实例级推理的视觉语言预训练
 
 
 <div class="dpr-home-promo-card">

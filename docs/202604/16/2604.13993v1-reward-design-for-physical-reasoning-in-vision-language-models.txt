@@ -1,0 +1,571 @@
+Title: Reward Design for Physical Reasoning in Vision-Language Models
+
+URL Source: https://arxiv.org/pdf/2604.13993v1
+
+Published Time: Thu, 16 Apr 2026 01:08:05 GMT
+
+Number of Pages: 21
+
+Markdown Content:
+Preprint. Under review. 
+
+# Reward Design for Physical Reasoning in Vision-Language Models 
+
+Derek Lilienthal, Manisha Mukherjee, & Sameera Horawalavithana 
+
+Pacific Northwest National Laboratory Richland, WA 99352, USA 
+
+{derek.lilienthal,manisha.mukherjee,yasanka.horawalavithana }@pnnl.gov 
+
+## Abstract 
+
+Physical reasoning over visual inputs demands tight integration of visual perception, domain knowledge, and multi-step symbolic inference. Yet even state-of-the-art Vision Language Models (VLMs) fall far short of hu-man performance on physics benchmarks. While post-training algorithms such as Supervised Fine-Tuning (SFT) and Group Relative Policy Opti-mization (GRPO) have demonstrated strong reasoning gains in language models, how reward design shapes VLM physical reasoning behavior re-mains poorly understood. We present a systematic reward ablation study for GRPO-based VLM training on physical reasoning. We compare four reward signals of increasing semantic richness: format compliance, answer accuracy, a composite rubric reward (answer correctness, physics principle identification, and unit consistency), and a novel internal reward derived from model attention weights over input image regions. We evaluate on PhyX, a 3,000-problem benchmark spanning six physics domains and six reasoning types across multiple-choice and open-ended formats, using IBM Granite Vision 3.3 (2B). Across both formats, GRPO with accuracy-based rewards outperforms SFT on most domains, though gains vary substan-tially by reward type and domain. Reward design does not uniformly improve performance. Instead, it induces domain-specific reasoning behav-iors. Accuracy-based rewards provide the strongest overall gains. Rubric rewards improve structured reasoning quality without consistent accu-racy improvements. Attention-based rewards enhance spatial reasoning while degrading performance in symbolic domains. Our internal attention-weight reward requires no spatial annotations and improves spatial relation accuracy from 0.27 to 0.50, suggesting that supervising where the model attends during generation is a promising direction for visually grounded physical reasoning. 
+
+## 1 Introduction 
+
+Physical reasoning requires more than pattern recognition or factual recall. To solve a physics problem from an image, a model must decode implicit visual conditions, identify the governing physical laws, apply symbolic reasoning across multiple steps, and produce answers in correct units. This integration of perception and inference is fundamentally harder than mathematical reasoning or science knowledge retrieval (Shen et al., 2025b). Current Vision Language Models (VLMs) reflect this difficulty. Even the strongest mod-els achieve barely half the accuracy of human physics experts on rigorous multimodal benchmarks (Shen et al., 2025b; Lu et al., 2022). Supervised fine-tuning (SFT) has long been the standard post-training method for transforming base language models into assistants that produce helpful, structured responses. However, SFT maximizes the likelihood of a fixed reference output, which inherently rewards surface-level imitation rather than robust reasoning. Prior work confirms this training signal is effective for tasks dominated by memo-rization (Chu et al., 2025), but it struggles to balance multiple objectives simultaneously and generalizes poorly to out-of-domain problems (Ouyang et al., 2022). Reinforcement learning has recently emerged as a powerful post-training paradigm for improving reasoning in 1
+
+> arXiv:2604.13993v1 [cs.AI] 15 Apr 2026
+
+Preprint. Under review. 
+
+Figure 1: Reward design spectrum for GRPO-based VLM training on physical reasoning. 
+
+Given a PhyX image-question pair, the model generates structured outputs and is trained with GRPO. We compare four rewards: (R1) format, (R2) accuracy, (R3) rubric (correctness, principle, unit), and (R4) attention-based visual grounding. language models. Group Relative Policy Optimization (GRPO) (Guo et al., 2025) has driven large gains by training models to maximize scalar reward signals without requiring a value network. While there have been GRPO - based post -training experiments on vision - language mod-els (Shen et al., 2025a; Wang et al., 2025), they remain under-explored for scientific models, particularly when it comes to exploring the reward - design space. Hence, in this study, we ask; What reward signals actually work for VLM physical reasoning, and how do different designs shape the reasoning behavior that emerges? Prior work on process reward models (PRMs) (Lightman et al., 2023) and rubric-based feedback (Bi et al., 2025) has explored structured reward design for language tasks. These ideas have not been systematically studied in the multimodal physical reasoning setting. We address this gap through a controlled reward ablation study for GRPO-based VLM training on physical reasoning. We train IBM Gran-ite Vision 3.3 (2B) on PhyX (Shen et al., 2025b), a 3,000-problem benchmark spanning six physics domains and six reasoning types across multiple-choice and open-ended formats. We evaluate five training conditions: a SFT baseline and four GRPO variants with rewards of increasing semantic richness. These range from a lightweight format compliance reward through an answer accuracy reward, a composite rubric reward scoring answer correctness, physics principle identification, and unit consistency, and a novel internal reward derived from the model’s own attention weights over the input image. Together, these conditions isolate the contribution of each reward component and compare external output-based supervision against internal grounding-based supervision. Our main contributions are: • A systematic reward ablation study for VLM physical reasoning under GRPO, covering format, accuracy, rubric, and attention-based reward signals across five training conditions. • Empirical analysis across six physics domains and six reasoning types, revealing how reward design shapes reasoning quality and structured output behavior. 
+
+## 2 Related Work 
+
+2.1 Vision-Language Models for Scientific Reasoning 
+
+General-purpose VLMs such as LLaVA (Liu et al., 2023), InternVL (Chen et al., 2024), and Qwen-VL (Wang et al., 2024) have demonstrated strong performance on broad multimodal benchmarks but struggle on tasks requiring deep scientific understanding and reasoning (Horawalavithana et al., 2023). Science-focused benchmarks such as ScienceQA (Lu et al., 2022) and MMMU (Yue et al., 2024) have pushed VLMs toward disciplinary knowledge, yet these benchmarks largely test recall and shallow inference rather than multi-step physical reasoning grounded in realistic visual scenarios. Existing physics benchmarks such as 2Preprint. Under review. PHYBench (Qiu et al., 2025) and OlympiadBench (He et al., 2024) focus primarily on text-based or schematically simple problems, limiting assessment of multimodal reasoning. PhyX (Shen et al., 2025b) addresses these gaps with 3,000 visually-grounded problems spanning six physics domains and six reasoning types, in both multiple-choice and open-ended formats. Each image carries non-redundant information essential for solving the problem. We use PhyX as our training and evaluation benchmark, following its standard evaluation protocol of exact match for Multiple Choice Questions (MCQ) and LLM-as-judge for Open-Ended (OE) responses. 
+
+2.2 Reinforcement Learning for Multimodal Reasoning 
+
+Reinforcement learning from human feedback (RLHF) (Ouyang et al., 2022) established reward-driven post-training as a powerful alignment tool. Subsequent work has adapted it specifically to improve reasoning. DeepSeek-R1 (Guo et al., 2025) introduced GRPO, which replaces the value network with group-relative advantage estimation. This yields strong gains on mathematical reasoning without the instability of PPO. Extensions to VLMs are emerging (Shen et al., 2025a; Wang et al., 2025), but systematic study of how reward design affects VLM reasoning in scientific domains remains limited. Our work directly addresses this by isolating the effect of five distinct reward configurations on physical reasoning behavior. Recent work has encouraged VLMs to reason more with images using Intersection-over-Union (IoU) rewards (Liu et al., 2025). In that approach, the VLM predicts object locations in text, which are then compared against ground-truth pixel labels through a differentiable IoU score. This requires bounding-box annotations and supervises the model’s output space. In our work, we directly leverage the VLM’s internal attention weights during token generation as a reward signal, with no spatial annotations required. Rather than supervising what the model says about image locations, we supervise where the model attends while generating its response. 
+
+## 3 Method 
+
+3.1 Problem Formulation 
+
+We formulate physical reasoning as a conditional generation task. Given an image v and a question q, the model generates a structured response y = ( c, a, u, p) comprising a chain-of-thought c, a final answer a, a physical unit u, and an identified physical principle p. We train using GRPO (Guo et al., 2025), which optimizes the policy πθ by sampling a group of 
+
+G completions per prompt and computing advantages relative to the group mean reward, without requiring a separate value network. The training objective is: 
+
+LGRPO (θ) = −E
+
+" G
+
+# ∑
+
+> i=1
+
+ˆAi log πθ (yi | v, q)
+
+#
+
++ β DKL (πθ ∥πref ) (1) where ˆAi = ( ri − ¯r)/σr is the normalized group advantage and β controls the KL penalty against the reference policy πref .
+
+3.2 Dataset 
+
+We train and evaluate on a subset of PhyX (Shen et al., 2025b), a large-scale multimodal physics benchmark comprising problems across six domains: Mechanics, Electromagnetism, Thermodynamics, Wave/Acoustics, Optics, and Modern Physics. Each problem pairs a real-istic image with either a multiple-choice question (MCQ) or an open-ended (OE) question, split evenly across formats. Problems are additionally categorized into six reasoning types: Physical Model Grounding, Spatial Relation, Multi-Formula, Implicit Condition, Numerical, and Predictive Reasoning. We use 3,000 problems for training and evaluate on the PhyX testmini subset of 1,000 problems. Each training example provides the question text, image, ground-truth answer, 3Preprint. Under review. its corresponding physics domain, and physics subfield label. In addition, we supplement the dataset with physics principle labels and ground-truth unit labels to enrich the model’s physical reasoning capabilities. We describe our process for enriching the data in the following sections. 
+
+3.3 Reward Signal Designs 
+
+All reward functions share a common structure: per-sample scalar rewards are computed over a group of G = 8 completions per prompt, then normalized by subtracting the group mean to form advantages. The model is prompted to produce outputs structured with four tags: <think> , <answer> , <unit> , and <principle> , enabling targeted extraction of each response component. We define four reward configurations of increasing semantic richness. 
+
+R1: Format Reward. The format reward r f supervises output structure only, independent of content correctness. Each of the four required tag pairs contributes equally: 
+
+r f = 14 ∑
+
+> t∈{ think ,answer ,unit ,principle }
+
+1[tag t present ] (2) This provides a reliable extraction scaffold for richer reward variants. 
+
+R2: Accuracy Reward. The accuracy reward ra supervises answer correctness only. For MCQ, the content of the <answer> tag is matched case-insensitively against the ground-truth option letter (A/B/C/D). For open-ended questions, answer correctness is assessed using a 3-judge jury where each judge scores correctness on a 0/1/2 scale (incorrect, partially correct, fully correct), and scores are averaged across judges. This differs from the binary PhyX evaluation protocol and allows partial credit for approximately correct answers. 
+
+R3: Rubric Reward. The rubric reward rrub extends accuracy supervision with three additional physics-grounded components: principle identification, unit consistency, and reasoning quality. Because MCQ and open-ended questions differ fundamentally in how outputs can be evaluated, we implement the rubric differently for each question type while preserving a shared weighted combination. 
+
+R3.A: MCQ rubric. For multiple-choice questions, all rubric dimensions are evaluated via rule-based matching against the MCQ answer, principle identification and units (described in the next section). 
+
+Principle identification (MCQ). Ground-truth principle labels are provided directly in the PhyX dataset, which includes metadata identifying the governing physics principle for each problem (e.g., “Laws of Thermodynamics”). We display the principle categories in section A in the Appendix. The principle reward checks for meaningful word overlap between the predicted principle ˆ p (extracted from <principle> ) and the canonical label p∗, requiring at least two non-stopword tokens in common: 
+
+rp = 1[|(words ( ˆp) ∩ words (p∗)) \ S| ≥ 2] (3) where S is a set of common stopwords. This is more robust than substring matching for principle labels, which can vary substantially in phrasing. 
+
+Unit consistency (MCQ). Ground-truth unit labels are not available directly in PhyX. There-fore, we construct them via a multi-stage LLM-driven pipeline with human oversight. We omit the details of generating labels to the Appendix in Section A. The unit reward applies bidirectional substring matching between the predicted unit ˆu (extracted from <unit> ) and the ground-truth unit string u∗, with exact matching enforced for short tokens (length ≤ 2) to prevent spurious hits: 
+
+ru = 1[ ˆu ⊆ u∗ or u∗ ⊆ ˆu] (4) This handles equivalent representations such as “m/s” and “meters per second”. 
+
+R3.B: OE rubric. For open-ended questions, we avoid rule-based matching due to variability in scientific notation, unit prefixes, numerical precision, and natural-language explanations. 4Preprint. Under review. Instead, we combine the R1 format reward r f , and replace rule-based components with a structured LLM judge call that jointly evaluates all rubric dimensions. Specifically, we query a judge model K = 3 times per completion and aggregate scores by averaging continuous dimensions (Correctness and Reasoning) and taking a majority vote for the binary dimensions (Units and Principle), which are either completely correct or incorrect. The judge is prompted to evaluate four dimensions: (1) Correctness ∈ { 0, 1, 2 }: fully correct (correct reasoning and answer), partially correct, or incorrect. Scaled to [0, 1 ] as ra =
+
+correctness/ 2. (2) Principle ∈ { 0, 1 }: whether the correct physics law was applied. (3) 
+
+Unit ∈ { 0, 1 }: whether the stated unit is correct. (4) Reasoning ∈ { 0, 1, 2 }: valid step-by-step derivation, partial reasoning, or none. Scaled as rreason = reasoning/ 2. The judge is instructed not to award full correctness credit if the reasoning is invalid, preventing the model from receiving reward for correct answers obtained by spurious means. 
+
+Combined rubric reward. Both MCQ and OE use the same weighted combination, with an additional reasoning term for OE: 
+
+rrub = 0.50 · ra + 0.15 · rp + 0.10 · ru + 0.15 · rreason + 0.1 · r f (5) where rreason = 0 for MCQ (reasoning quality is not independently scored). A soft penalty is applied when reasoning is absent ( rreason = 0), multiplying the total by 0.6 to discourage cor-rect answers unsupported by valid derivations. A small length penalty min (|y|/ 4000, 0.05 )
+
+discourages unnecessarily verbose outputs. All rewards are clipped to [0, 1 ].
+
+R4: Attention-Weight Reward. The attention-weight reward rattn is an internal reward derived from the model’s own attention distribution over image tokens, requiring no addi-tional annotation or external model. Unlike the previous reward signals which supervise model outputs, this reward operates on model internals, encouraging the model to visually ground its reasoning in the foreground content of the input image. 
+
+Attention extraction. We register forward hooks on the query and key projection layers ( WQ,
+
+WK) of the final transformer layer and the rotary embedding module. We then manually reconstruct the full attention matrix from captured projections: 
+
+A = softmax 
+
+
+
+Qrope K⊤ 
+
+> rope
+
+· α · Mcausal 
+
+
+
+(6) where α is Granite’s attention scaling factor and Mcausal is the causal mask. Grouped-query attention heads are expanded via repeat-interleave before the dot product. The resulting attention tensor is averaged across all heads, and the final token’s attention row is extracted, yielding a per-token attention vector over the full input sequence for each rollout. This reconstruction approach avoids quadratic memory growth from storing raw attention weights during the forward pass. 
+
+Image attention map. Image attention map. Attention over image tokens is reshaped into a 2D grid ( Himg  
+
+> p
+
+× Wimg  
+
+> p
+
+), then normalized and resized to the original image resolution. 
+
+Foreground grounding score. The reward is the fraction of attention mass on non-white foreground pixels. A binary mask F is constructed by thresholding pixels (RGB channels 
+
+≥ 230 = background): 
+
+rattn = ∑i,j ˆAij · Fij 
+
+∑i,j Fij 
+
+(7) where ˆA is the resized, normalized attention map. This yields a reward in [0, 1 ] that is high when the model attends to meaningful image content and low when attention is diffuse or on whitespace. To obtain a single scalar over the full generated sequence, we average Equation 7 across all T generated tokens and define the result as the Attention Score Mask (ASM) . This averaged score serves as the reward signal during GRPO training. See Algorithm 1 in the Appendix for implementation details. ASM = 1
+
+T
+
+> T
+
+# ∑
+
+> t=1
+
+r(t) 
+
+> attn
+
+(8) 5Preprint. Under review. 
+
+## 4 Experiments 
+
+4.1 Experimental Setup Model. We use IBM Granite Vision 3.3 (2B) (Granite Team, 2024) as our base model throughout all experiments. We apply GRPO directly from the base model without SFT warmup, as the Granite model is already an instruction-tuned model. Training uses a global batch size of 128 and generating G = 8 completions per prompt. All runs use bfloat16 
+
+precision and maximum completion length of 512 tokens. Other hyperparameters are reported in the Section 6. 
+
+Data. We train on 3,000 problems from PhyX for each answer format, MCQ and OE. Although both splits contain 3,000 problems, they comprise distinct sets of questions and answers. All conditions are evaluated on the same standard PhyX testmini subset of 1,000 problems, which provides labels for both MCQ and OE answer formats. 
+
+Training. All GRPO runs use G = 8 rollout generations, a batch size of 128, a learning rate of 10 −5, train for 1 epoch, and maximum completion length 512 tokens. We trained all runs using a cluster size of 4 × 80GB A100 GPUs. The judge model used during the open-ended evaluations (GPT-oss 120B) (Agarwal et al., 2025) was deployed using a vllm (Kwon et al., 2023) on a dedicated server of 4 A100 80GPUs for all runs. 
+
+Evaluation. For MCQ questions, we extract the text from the <answer> , <unit> , and 
+
+<principle> tags. The predicted answer letter is evaluated via exact match, while the extracted unit and principle are evaluated via regex matching against the corresponding ground-truth labels. For open-ended questions, we additionally extract the <think> tag to quantify the model’s reasoning process. The extracted answer, unit, and principle are evalu-ated using GPT-oss 120b as an LLM-as-judge that determines semantic equivalence between the predictions and the ground-truth answers. We report overall accuracy, per-domain accuracy across the six PhyX physics domains. 
+
+Conditions. We compare seven training conditions: Baseline , Granite 3.3 2B model with no additional fine-tuning; SFT , a supervised fine-tuning baseline with no RL; GRPO (Fmt) ,using r f for format reward only; GRPO (Fmt+Acc) , using r f + ra for format and accuracy re-wards; GRPO (Rubric) , using rrub to combine accuracy, principle, unit, and format rewards; 
+
+GRPO (ASM) , using rattn for foreground attention grounding; and GRPO (Fmt+Acc+ASM) ,using r f + ra + rattn to combine format, accuracy, and foreground attention grounding. 
+
+4.2 Main Results MCQ - Overall Best Condition. Across multiple-choice questions (MCQ), GRPO (Fmt + Acc + ASM) emerges as the strongest overall configuration (0.462 overall), also posting second in three other physics domains (e.g., 0.506 in Mechanics, 0.491 in Electromagnetism, 0.491 in Thermodynamics). It achieved up to a 6% increase over the SFT model’s overall scores. GRPO (Rubric) is a close contender and actually surpasses it in select categories, notably Thermodynamics (0.442) and Wave/Acoustics (0.624), but is less consistent across the board. It achieved only a 1.6% increase overall compared to the SFT model. 
+
+OE - Overall Best Condition. OE absolute scores are low across all conditions. Across open-ended (OE) questions, GRPO (Fmt + Acc) emerges as the strongest overall config-uration, achieving the highest overall score (0.027) and top scores in Mechanics (0.024), Electromagnetism (0.071), and Thermodynamics (0.024), as well as the second-highest scores in Optics (0.012) and Modern Physics (0.024). GRPO (Fmt + Acc + ASM) performs a close second, scoring 0.022 overall, tying for first in Thermodynamics (0.024), and placing second in Electromagnetism (0.059) and Wave/Acoustics (0.012). It achieved a 2 × improvement (100%) in scores over the SFT model overall. GRPO (Rubric) achieved the highest scores in Optics (0.018) and Modern Physics (0.036) and tied for second in Wave/Acoustics (0.012), scoring a 63.6% improvement over the SFT scores. 6Preprint. Under review.                                                                                                                                       
+
+> Task Method Overall Mech. E&M Thermo. Wave/Ac. Optics Mod. Phys.
+> MCQ Baseline 0.217 0.200 0.355 0.200 0.103 0.157 0.285 SFT 0.433 0.320 0.371 0.337 0.529 0.524 0.519
+> GRPO (Fmt) 0.304 0.341 0.337 0.255 0.273 0.307 0.309 GRPO (Fmt + Acc) 0.460 0.382 0.533 0.382 0.618 0.343 0.503 GRPO (Rubric) 0.440 0.306 0.385 0.442 0.624 0.380 0.509 GRPO (ASM) 0.352 0.571 0.260 0.139 0.164 0.542 0.430 GRPO (Fmt + Acc + ASM) 0.462 0.506 0.491 0.412 0.461 0.416 0.485 GRPO (Fmt + Acc + ASM) vs SFT +6.7% +58.1% +32.3% +22.3% -12.9% -20.6% -6.6% GRPO (Rubric) vs SFT +1.6% -4.4% +3.8% +31.2% +18.0% -27.5% -1.9% OE Baseline 0.012 0.018 0.018 0.006 0.006 0.012 0.012 SFT 0.011 0.014 0.020 0.006 0.008 0.010 0.008 GRPO (Fmt) 0.017 0.024 0.024 0.012 0.018 0.006 0.018 GRPO (Fmt + Acc) 0.027 0.024 0.071 0.024 0.006 0.012 0.024 GRPO (Rubric) 0.018 0.012 0.018 0.012 0.012 0.018 0.036
+> GRPO (ASM) 0.014 0.006 0.024 0.006 0.012 0.012 0.024 GRPO (Fmt + Acc + ASM) 0.022 0.012 0.059 0.024 0.012 0.006 0.018 GRPO (Fmt + Acc + ASM) vs SFT +100.0% -14.3% +195.0% +300.0% +50.0% -40.0% +125.0% GRPO (Rubric) vs SFT +63.6% -14.3% -10.0% +100.0% +50.0% +80.0% +350.0%
+
+Table 1: Best single-run accuracy on PhyX testmini for Open-Ended (OE) and Multiple-Choice Question (MCQ) tasks across six physics domains and overall. All GRPO conditions use Granite Vision 3.3 (2B) trained directly from the base checkpoint. Bold indicates the best result per domain and objective per section; underline indicates second-best. 
+
+## 5 Discussion 
+
+In this section, we discuss the performance of the GRPO-trained models under different reward configurations. All conclusions regarding open-ended (OE) results should be inter-preted cautiously, as absolute scores are low and differences between methods are small relative to their standard deviations (Table 1). 
+
+Does the attention reward contribute to visual reasoning tasks? To answer this question, we analyzed MCQ results from two angles. We first examined whether introducing the attention reward increases performance on problems requiring spatial visual reasoning. We then measured the overall distribution of attention weights during generation, quantified by the average cumulative attention entropy of each image attention map. Details of this metric are given in Appendix B.1. Figure 2a shows that the ASM reward contributes to solving tasks that involve spatial rea-soning. Adding ASM on top of the format reward increases accuracy on Spatial Relationship Reasoning problems from 0.27 to 0.50. This is the largest reward gain observed across all reasoning types in our study. However, the same reward degrades performance in sym-bolic domains such as Thermodynamics (0.139) and Wave/Acoustics (0.164), which require multi-step formula application rather than visual grounding. While the attention-based supervision improves perception-heavy tasks, it may conflict with the model’s ability to allocate representational capacity to symbolic reasoning chains. Figure 4 presents two complementary metrics that validate this finding: the attention mask score and the attention entropy. The model trained with the ASM reward achieves the highest mask score (0.0531), indicating that its attention activations concentrate more strongly on semantically meaningful, non-white regions of the image. It also achieves the lowest entropy (0.8912) among all non-SFT models, indicating that these activations are tightly focused rather than diffusely spread. Together, these results suggest that the ASM reward successfully guides the model to attend more precisely to relevant visual content. However, focused visual attention is not always beneficial. In domains where the solution depends on recalling and chaining physical formulas, attending closely to the image may come at the cost of the symbolic reasoning capacity needed to apply those formulas correctly. Additional supporting figures are provided in Appendix D. 7Preprint. Under review. 
+
+> (a) Accuracy by Reasoning Type Across GRPO Training Configurations.
+> (b) Attention activation patterns across post-training methods.
+
+Figure 2: (a) Comparison of reasoning accuracy across GRPO configurations. (b) Attention activation patterns across post-training methods. Attention scores are normalized over the full generation process, with red indicating lower scores and green indicating higher scores. 
+
+Does the rubric’s principle and unit components contribute beyond accuracy alone? 
+
+To answer this question, we compare open-ended evaluations between rubric-based and format+accuracy reward methods by examining reward training dynamics. The Rubric method shows an 11.8% accuracy decrease relative to Fmt+Acc (Figure 3a, right). We interpret this not as a failure of the rubric components, but as a consequence of optimizing a multi-objective reward in a small model. When the reward signal simultaneously scores answer correctness, principle identification, unit consistency, and reasoning quality, the gradient updates reflect a weighted combination of these objectives. For a 2B parameter model, this increased signal variance may destabilize GRPO optimization, causing the policy to improve on secondary dimensions (principle, unit) at the expense of the primary accuracy objective. This hypothesis is consistent with prior work showing that reward complexity can hurt optimization stability in smaller models (Chu et al., 2025). Examining reward dynamics in Figure 3b supports this interpretation. Neither the Rubric Correctness reward nor the Fmt+Acc LLM Judge Accuracy reward increased linearly with training steps. However, the Rubric method’s Principle, Unit, and Reasoning component rewards did increase over time, confirming that the model was successfully optimizing the rubric’s secondary objectives even as overall accuracy stagnated. Figure 3d compares thinking token lengths. Fmt+Acc initially generates fewer tokens before the count increases, while Rubric shows the inverse pattern. Token count alone does not indicate better reasoning. Applying the same reasoning LLM-as-judge to logged rollouts (Figure 3c, left) shows that Rubric’s reasoning quality consistently improves (R 2 = 0.617). By contrast, Fmt+Acc, which lacks an explicit reasoning reward, begins producing generations that do not support its own answers as training progresses. The Rubric approach trades some accuracy for coherent reasoning chains, while the Fmt+Acc approach maximizes accuracy but at the cost of reasoning integrity. 
+
+## 6 Conclusion 
+
+We study how reward design shapes physical reasoning in vision-language models (VLMs) under GRPO. We compare five training conditions of increasing semantic richness on the PhyX benchmark using Granite Vision 3.3 (2B). Our reward ablation spans format compliance, answer accuracy, a composite rubric reward supervising answer correctness, physics principle identification, and unit consistency, and an attention-based reward for visual grounding. Our analysis reveals three key findings. First, the composite rubric reward does not consistently outperform simpler reward configurations despite providing richer supervision. We attribute this to optimization instability caused by high signal variance when multiple objectives are combined in a small model. Second, attention-based rewards exhibit mixed effects. The ASM reward improves spatial reasoning accuracy substantially (0.27 to 0.50) but degrades performance in symbolic domains such as Thermodynamics and 8Preprint. Under review. 
+
+> (a) Heatmap Pairwise Comparison: Relative Per-formance Across GRPO Reward Configurations and SFT Baseline Difference in Overall Accuracy for MCQA and OE Tasks
+> (b) Reward comparison between Rubric and For-mat + Accuracy Reward for Open Ended (OE) Evaluations. Format reward is omitted in the top figure, as it was identical to the bottom.
+> (c) Best Format Reward vs Rubric Reward: Rea-soning LLM-judge scores generated over training steps.
+> (d) Best Format Reward vs Rubric Reward: Num-ber of thinking tokens generated over training steps.
+
+Figure 3: Overview of reward configurations and training dynamics. (a) Pairwise heatmap of GRPO reward configurations vs. SFT baseline. (b) Reward comparison between Rubric and Format + Accuracy rewards for OE evaluations. (c) LLM-judge reasoning scores over training steps. (d) Thinking token counts over training steps. Wave/Acoustics. This suggests that visual grounding supervision and symbolic reasoning capacity compete for representational resources at the 2B scale. Third, reasoning quality degrades in the absence of an explicit reward that evaluates the correctness of the model’s reasoning chain. The Fmt+Acc model produces answers increasingly unsupported by its own reasoning as training progresses, while the Rubric model maintains coherent reasoning chains despite lower accuracy. Reward design shapes not just what the model gets right, but how it reasons. We hypothesize that as reward complexity increases, so does the variance of the training signal. This variance can destabilize GRPO optimization in smaller models. These findings are specific to a 2B parameter model and a single architecture. Whether they generalize to larger VLMs or different model families remains an open question for future work. Our results suggest that reward design should be viewed not only as an optimization tool but as a mechanism for controlling the nature of reasoning in multimodal models. For practitioners, the choice of reward signal should be guided by what matters most in deployment: raw accuracy, interpretable reasoning chains, or visual grounding. No single reward configuration dominates across all physics domains or reasoning types. Matching the reward to the target behavior is as important as the training algorithm itself. 9Preprint. Under review. 
+
+## 7 Acknowledgments 
+
+This work was supported by the U.S. Department of Energy, Advanced Scientific Computing Research program and Pacific Northwest National Laboratory (PNNL), which is operated by Battelle Memorial Institute for the U.S. Department of Energy under Contract DE-AC05–76RLO1830. This research used resources of the National Energy Research Scientific Computing Center (NERSC), a Department of Energy User Facility using NERSC award ASCR-ERCAP0038273. 
+
+## References 
+
+Sandhini Agarwal, Lama Ahmad, Jason Ai, Sam Altman, Andy Applebaum, Edwin Arbus, Rahul K Arora, Yu Bai, Bowen Baker, Haiming Bao, et al. gpt-oss-120b & gpt-oss-20b model card. arXiv preprint arXiv:2508.10925 , 2025. Baolong Bi, Shenghua Liu, Yiwei Wang, Siqian Tong, Lingrui Mei, Yuyao Ge, Yilong Xu, Jiafeng Guo, and Xueqi Cheng. Reward and guidance through rubrics: Promoting exploration to improve multi-domain reasoning. arXiv preprint arXiv:2511.12344 , 2025. Zhe Chen, Jiannan Wu, Wenhai Wang, Weijie Su, Guo Chen, Sen Xing, Muyan Zhong, Qinglong Zhang, Xizhou Zhu, Lewei Lu, et al. Internvl: Scaling up vision foundation models and aligning for generic visual-linguistic tasks. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pp. 24185–24198, 2024. Tianzhe Chu, Yuexiang Zhai, Jihan Yang, Shengbang Tong, Saining Xie, Dale Schuurmans, Quoc V Le, Sergey Levine, and Yi Ma. Sft memorizes, rl generalizes: A comparative study of foundation model post-training. arXiv preprint arXiv:2501.17161 , 2025. IBM Granite Team. Granite 3.0 language models. URL: https://github. com/ibm-granite/granite-3.0-language-models , 2024. Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Peiyi Wang, Qihao Zhu, Runxin Xu, Ruoyu Zhang, Shirong Ma, Xiao Bi, et al. Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning. arXiv preprint arXiv:2501.12948 , 2025. Chaoqun He, Renjie Luo, Yuzhuo Bai, Shengding Hu, Zhen Thai, Junhao Shen, Jinyi Hu, Xu Han, Yujie Huang, Yuxiang Zhang, et al. Olympiadbench: A challenging benchmark for promoting agi with olympiad-level bilingual multimodal scientific problems. In 
+
+Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pp. 3828–3850, 2024. Sameera Horawalavithana, Sai Munikoti, Ian Stewart, and Henry Kvinge. Scitune: Align-ing large language models with scientific multimodal instructions. arXiv preprint arXiv:2307.01139 , 2023. Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao Yu, Joseph E. Gonzalez, Hao Zhang, and Ion Stoica. Efficient memory management for large language model serving with pagedattention. In Proceedings of the ACM SIGOPS 29th Symposium on Operating Systems Principles , 2023. Hunter Lightman, Vineet Kosaraju, Yuri Burda, Harrison Edwards, Bowen Baker, Teddy Lee, Jan Leike, John Schulman, Ilya Sutskever, and Karl Cobbe. Let’s verify step by step. In The twelfth international conference on learning representations , 2023. Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. Visual instruction tuning. 36:34892–34916, 2023. URL https://proceedings.neurips.cc/paper files/paper/2023/ file/6dcf277ea32ce3288914faf369fe6de0-Paper-Conference.pdf .Ziyu Liu, Zeyi Sun, Yuhang Zang, Xiaoyi Dong, Yuhang Cao, Haodong Duan, Dahua Lin, and Jiaqi Wang. Visual-rft: Visual reinforcement fine-tuning. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pp. 2034–2044, 2025. 10 Preprint. Under review. Pan Lu, Swaroop Mishra, Tanglin Xia, Liang Qiu, Kai-Wei Chang, Song-Chun Zhu, Oyvind Tafjord, Peter Clark, and Ashwin Kalyan. Learn to explain: Multi-modal reasoning via thought chains for science question answering. 35:2507– 2521, 2022. URL https://proceedings.neurips.cc/paper files/paper/2022/file/ 11332b6b6cf4485b84afadb1352d3a9a-Paper-Conference.pdf .Long Ouyang, Jeffrey Wu, Xu Jiang, Diogo Almeida, Carroll Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, John Schulman, Jacob Hilton, Fraser Kelton, Luke Miller, Maddie Simens, Amanda Askell, Peter Welinder, Paul F Chris-tiano, Jan Leike, and Ryan Lowe. Training language models to follow instructions with human feedback. 35:27730–27744, 2022. URL https://proceedings.neurips.cc/paper files/paper/2022/file/b1efde53be364a73914f58805a001731-Paper-Conference.pdf .Shi Qiu, Shaoyang Guo, Zhuo-Yang Song, Yunbo Sun, Zeyu Cai, Jiashen Wei, Tianyu Luo, Yixuan Yin, Zhang Haoxu, Yi Hu, Chenyang Wang, Chencheng Tang, Haoling Chang, Qi Liu, Ziheng Zhou, Tianyu Zhang, Jingtian Zhang, Zhangyi Liu, Minghao Li, Yuku Zhang, Boxuan Jing, Xianqi Yin, Yutong Ren, Zizhuo Fu, Jiaming Ji, Weike Wang, Xudong Tian, Anqi Lv, Laifu Man, Jianxiang Li, Feiyu Tao, Qihua Sun, Zhou Liang, Yushu Mu, Zhongxuan Li, Jing-Jun Zhang, Shutao Zhang, Xiaotian Li, Xingqi Xia, Jiawei Lin, Zheyu Shen, Jiahang Chen, Qiuhao Xiong, Binran Wang, Fengyuan Wang, Niziyang, Bohan Zhang, Fan Cui, shaochangkun, Qing-Hong Cao, Ming xing Luo, Muhan Zhang, and Hua Xing Zhu. PHYBench: Holistic evaluation of physical perception and reasoning in large language models. In The Thirty-ninth Annual Conference on Neural Information Processing Systems Datasets and Benchmarks Track , 2025. URL https: //openreview.net/forum?id=brG8FPq1cf .Haozhan Shen, Peng Liu, Jingcheng Li, Chunxin Fang, Yibo Ma, Jiajia Liao, Qiaoli Shen, Zilun Zhang, Kangjia Zhao, Qianqian Zhang, et al. Vlm-r1: A stable and generalizable r1-style large vision-language model. arXiv preprint arXiv:2504.07615 , 2025a. Hui Shen, Taiqiang Wu, Qi Han, Yunta Hsieh, Jizhou Wang, Yuyue Zhang, Yuxin Cheng, Zijian Hao, Yuansheng Ni, Xin Wang, Zhongwei Wan, Kai Zhang, Wendong Xu, Jing Xiong, Ping Luo, Wenhu Chen, Chaofan Tao, Zhuoqing Mao, and Ngai Wong. Phyx: Does your model have the ”wits” for physical reasoning? 2025b. URL https://arxiv.org/ abs/2505.15929 .Haozhe Wang, Chao Qu, Zuming Huang, Wei Chu, Fangzhen Lin, and Wenhu Chen. Vl-rethinker: Incentivizing self-reflection of vision-language models with reinforcement learning. arXiv preprint arXiv:2504.08837 , 2025. Peng Wang, Shuai Bai, Sinan Tan, Shijie Wang, Zhihao Fan, Jinze Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, et al. Qwen2-vl: Enhancing vision-language model’s perception of the world at any resolution. arXiv preprint arXiv:2409.12191 , 2024. Xiang Yue, Yuansheng Ni, Kai Zhang, Tianyu Zheng, Ruoqi Liu, Ge Zhang, Samuel Stevens, Dongfu Jiang, Weiming Ren, Yuxuan Sun, et al. Mmmu: A massive multi-discipline multimodal understanding and reasoning benchmark for expert agi. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pp. 9556–9567, 2024. 
+
+## A Additional Results 
+
+Table 2 reports mean and standard deviation across the top-5 runs for each method, revealing GRPO’s inherent variability. Under MCQ, SFT exhibits the least run-to-run variance and greatest stability. However, this variability suggests multiple GRPO runs may be needed to surpass SFT on MCQ scores. 11 Preprint. Under review. Electromagnetism Mechanics Modern Physics Optics Thermodynamics Waves/Acoustics Train 550 550 400 500 500 500 Test 169 170 165 166 165 165 Table 3: PhyX Dataset Categories 
+
+Task Method Overall Mech. E&M Thermo. Wave/Ac. Optics Mod. Phys. 
+
+MCQ Baseline 0.217 ±0.016 0.200 ±0.033 0.355 ±0.026 0.200 ±0.049 0.103 ±0.014 0.157 ±0.012 0.285 ±0.012 
+
+SFT 0.433 ±0.017 0.320 ±0.033 0.371 ±0.027 0.337 ±0.049 0.529 ±0.014 0.524 ±0.012 0.519 ±0.013 
+
+GRPO (Fmt) 0.281 ±0.019 0.388 ±0.042 0.429 ±0.051 0.331 ±0.052 0.122 ±0.089 0.167 ±0.079 0.244 ±0.057 
+
+GRPO (Fmt + Acc) 0.390 ±0.042 0.260 ±0.081 0.443 ±0.084 0.395 ±0.056 0.554 ±0.098 0.283 ±0.088 0.411 ±0.055 
+
+GRPO (Rubric) 0.417 ±0.030 0.326 ±0.059 0.463 ±0.063 0.427 ±0.032 0.507 ±0.086 0.328 ±0.079 0.452 ±0.053 
+
+GRPO (ASM) 0.289 ±0.065 0.295 ±0.243 0.273 ±0.027 0.235 ±0.088 0.293 ±0.217 0.315 ±0.200 0.319 ±0.119 
+
+GRPO (Fmt + Acc + ASM) 0.426 ±0.025 0.478 ±0.066 0.450 ±0.035 0.376 ±0.037 0.415 ±0.070 0.403 ±0.022 0.433 ±0.054 
+
+OE Baseline 0.012 ±0.002 0.018 ±0.006 0.018 ±0.003 0.006 ±0.006 0.006 ±0.003 0.012 ±0.003 0.012 ±0.003 
+
+SFT 0.011 ±0.002 0.014 ±0.007 0.020 ±0.003 0.006 ±0.006 0.008 ±0.003 0.010 ±0.003 0.008 ±0.003 
+
+GRPO (Fmt) 0.014 ±0.003 0.016 ±0.005 0.020 ±0.007 0.016 ±0.005 0.006 ±0.007 0.010 ±0.007 0.018 ±0.009 
+
+GRPO (Fmt + Acc) 0.023 ±0.002 0.019 ±0.005 0.057 ±0.011 0.022 ±0.005 0.006 ±0.004 0.011 ±0.007 0.022 ±0.009 
+
+GRPO (Rubric) 0.023 ±0.002 0.018 ±0.006 0.052 ±0.016 0.018 ±0.007 0.011 ±0.010 0.013 ±0.005 0.023 ±0.015 
+
+GRPO (ASM) 0.010 ±0.004 0.004 ±0.003 0.017 ±0.010 0.012 ±0.008 0.007 ±0.003 0.007 ±0.005 0.011 ±0.008 
+
+GRPO (Fmt + Acc + ASM) 0.018 ±0.002 0.013 ±0.003 0.045 ±0.015 0.012 ±0.008 0.008 ±0.007 0.012 ±0.006 0.019 ±0.009 
+
+Table 2: Top-5 mean ± std dev accuracy on PhyX testmini for MCQ and OE tasks across six physics domains and overall. All GRPO conditions use Granite Vision 3.3 (2B) trained directly from the base checkpoint. Bold indicates the best mean per column per section; underline indicates second-best. 
+
+## B Dataset Statistics 
+
+Table 3 shows the distribution of categories in the PhyX dataset. 
+
+B.1 PhyX Unit Consistency Label Creation 
+
+The process for creating the unit consistency labels are as follows: In the first stage, we task an LLM (GPT-5) to extract the answer unit type from each training problem, using its answer options, subfield, and associated image in a zero-shot manner. Second, the resulting raw unit labels are batched and clustered into a coherent ontology, followed by deduplication to consolidate overlapping categories. Finally, each raw unit label is normalized against the merged ontology to produce a final standardized unit assignment per problem. After each step, random samples are checked for consistency, and the prompt is adjusted accordingly. Table 5 contains the labels and their respective counts. 
+
+## C Additional Implementation Details 
+
+C.1 Filling whitespace in training images 
+
+Many images exhibited unoccupied whitespace between the boarders of the focus-points in the the images. Due to this, we extend the image masking process to include these areas. Figure 4 describes the distribution of total mask area before and after allowing for whitespace. 
+
+C.2 Attention entropy score. 
+
+In Figure 2 and it’s corresponding figures in Appendix section D below contains a score called “Avg Entropy”, which is explained below: While Attention Score Mask quantifies foreground grounding, it does not capture how 
+
+concentrated the model’s attention is across the image. We therefore introduce a complemen-tary entropy-based reward. First, we aggregate the per-token attention maps across all T
+
+12 Preprint. Under review. 
+
+Subfield Count 
+
+Geometrical Optics 397 Laws of Thermodynamics 279 Wave Properties 273 Electrostatics 226 Quantum Phenomena 201 Dynamics 188 Relativity 162 Electric Circuits 145 Temperature and Heat Transfer 137 Resonance and Harmonics 129 Kinematics 127 Wave Optics 104 Electromagnetic Induction 88 Work and Energy 83 Statics 78 Magnetism 75 Sound 72 Rotational Motion 72 Ideal Gases and Kinetic Theory 57 Momentum and Collisions 29 Nuclear Physics 24 Electromagnetic Waves 16 Optical Instruments 15 Specific Heat and Calorimetry 12 Particle Physics 9Fluid Mechanics 1Geometry 1Table 4: PhyX Subfield Frequencies 
+
+Figure 4: Attention Score Masking Whitespace Filling to Increase Mask Area. Distribution change when filling the whitespace between figures generated tokens into a single cumulative map: 
+
+Sij =
+
+> T
+
+# ∑
+
+> t=1
+
+ˆA(t) 
+
+> ij
+
+(9) We then apply min–max normalization to S and ℓ1-normalize the result to obtain a valid probability distribution a over all P spatial positions, flattening the spatial indices (i, j) into a single patch index p:˜Sp = Sp − Smin 
+
+Smax − Smin 
+
+, ap = ˜SpP
+
+# ∑ 
+
+> p′=1
+
+˜Sp′
+
+(10) 13 Preprint. Under review. Table 5: Unit Labels 
+
+# Cluster Count 
+
+1 Length / Distance 759 2 Speed / Velocity 200 3 Time 117 4 Energy 305 5 Force 208 6 Frequency / Angular Frequency 149 7 Angle 151 8 Acceleration 33 9 Pressure 53 10 Mass / Momentum 79 11 Voltage / Electric Potential 91 12 Electric Field / Flux 71 13 Electric Current 53 14 Resistance 19 15 Power / Intensity (W) 85 16 Temperature 62 17 Magnetic Field / Flux 46 18 Electric Charge / Charge Density 53 19 Capacitance / Inductance 19 20 Torque / Rotational Mechanics 17 21 Dimensionless / Ratios / Counts 226 22 Thermodynamics / Heat / Entropy 65 23 Optics (wavelength, magnification, refractive index) 85 24 Sound / Decibel / Acoustic Intensity 20 25 Nuclear & Particle Physics 30 26 Quantum Mechanics / Action 10 where Smin and Smax denote the minimum and maximum entries of S, respectively. Finally, we compute the Shannon entropy of this distribution: 
+
+Hattn = −
+
+> P
+
+# ∑
+
+> p=1
+
+ap log ap (11) 
+
+Hattn ∈ [0, log P]: it is minimized when the model’s cumulative attention concentrates on a small number of patches and maximized when attention spreads uniformly across the image. Because the aggregation in Equation 9 already pools information over the full generated sequence, Hattn yields a single scalar reward without requiring a separate per-token average. 
+
+C.2.1 ASM Algorithm 
+
+We present the ASM score implementation algorithm below. This approach is distribution-agnostic (FSDP, DeepSpeed) provided model parameters are gathered before rollout gen-eration. To reduce memory overhead, we reconstruct attention weights from generated responses using the Granite implementation rather than storing them, as storing weights during rollouts increases memory quadratically. While requiring two forward passes per rollout, this proves more efficient than single-pass storage. 14 Preprint. Under review. 
+
+Algorithm 1 Attention-Mask Score Reward 
+
+Require: Image I ∈ RH×W×3, model M with L transformer layers, tokenized prompt 
+
+x = ( x1, . . . , xT ), white threshold τw
+
+Ensure: Reward r ∈ [0, 1 ]
+
+— Phase 1: Attention Extraction —  
+
+> 1:
+
+Register forward hooks on WQ, WK of the last transformer layer ℓ = L and on the rotary embedding module  
+
+> 2:
+
+Perform a forward pass of M on x (with image tokens from I) 
+
+> 3:
+
+Capture Q ∈ RT×dmodel from WQ hook  
+
+> 4:
+
+Capture K ∈ RT×dkv from WK hook  
+
+> 5:
+
+Capture (cos Θ, sin Θ) from the rotary embedding hook 
+
+▷ Reshape for multi-head attention  
+
+> 6:
+
+Q ← Reshape (Q) ∈ Rnh ×T×dh 
+
+> 7:
+
+K ← Reshape (K) ∈ Rnkv ×T×dh
+
+▷ Apply Rotary Position Embeddings  
+
+> 8:
+
+Q, K ← RoPE (Q, K, cos Θ, sin Θ)
+
+▷ Expand K for Grouped-Query Attention  
+
+> 9:
+
+if nkv < nh then  
+
+> 10:
+
+K ← RepeatInterleave (K, nh/nkv , dim = 1) 
+
+> 11:
+
+end if 
+
+▷ Compute attention weights  
+
+> 12:
+
+A ← Softmax  CausalMask (α · QK ⊤) ∈ Rnh ×T×T
+
+where α is the model-specific attention multiplier 
+
+▷ Extract image-patch attention from last token  
+
+> 13:
+
+Let Simg ⊂ { 1, . . . , T} be the set of image token positions  
+
+> 14:
+
+aimg ← 1 
+
+> nh
+
+∑nh 
+
+> h=1
+
+A[h, T, Simg ] 
+
+> 15:
+
+Matt ← Reshape (aimg ) ∈ RG×G
+
+where G = image size / patch size 
+
+▷ Normalize and upsample  
+
+> 16:
+
+Matt ← (Matt − min (Matt )) / (max (Matt ) − min (Matt ))  
+
+> 17:
+
+Matt ← NearestResize (Matt , W, H) ∈ RH×W
+
+— Phase 2: Foreground Mask Construction —  
+
+> 18:
+
+for each pixel (i, j) do  
+
+> 19:
+
+if I[i, j, c] ≥ τw for all c ∈ { R, G, B} then  
+
+> 20:
+
+F[i, j] ← 0 ▷ White background  
+
+> 21:
+
+else  
+
+> 22:
+
+F[i, j] ← 1 ▷ Non-white foreground  
+
+> 23:
+
+end if  
+
+> 24:
+
+end for — Phase 3: Reward Computation —  
+
+> 25:
+
+if ∑i,j F[i, j] > 0 then  
+
+> 26:
+
+r ← ∑i,j Matt [i, j] · F[i, j]  ∑i,j F[i, j] 
+
+> 27:
+
+else  
+
+> 28:
+
+r ← 0 
+
+> 29:
+
+end if  
+
+> 30:
+
+return r
+
+C.3 Training Setup for Experiments 
+
+Table 6 contains more details of our training runs. 15 Preprint. Under review. 
+
+Component Configuration 
+
+Model 
+
+Base Model IBM Granite Vision 3.3 (2B) (Granite Team, 2024) Warmup No SFT warmup (trained directly from pretrained checkpoint) 
+
+Data 
+
+Training Set Size 6,000 problems from PhyX (Shen et al., 2025b) Training Splits 3,000 (MCQ), 3,000 (Open-Ended) Evaluation Set PhyX testmini (1,000 problems) 
+
+Training Hyperparameters 
+
+Rollout Generations G = 8 per prompt Per-Device Batch Size 8Global Batch Size 128 Gradient Accumulation Steps 2Learning Rate 10 −5
+
+Training Epochs 1Precision bfloat16 Max Completion Length 512 tokens Max Prompt Length No limit 
+
+Infrastructure 
+
+Framework DeepSpeed (ZeRo 3 configuration) Hardware 4 nodes (64 Cores) each with 4 Nvidia 80GB A100 GPUs 
+
+SFT Baseline Training 
+
+Global Batch Size 64 Learning Rate 10 −5
+
+Training Epochs 1Precision bfloat16 Table 6: Training Setup for GRPO Experiments 
+
+## D System Prompts 
+
+Rubric - Multiple Choice Question Answering (MCQA) System Prompt 
+
+You are a physics expert . Solve step by step . Format your response exactly as : < think > step -by - step reasoning </ think > < answer >A or B or C or D </ answer > <unit > physical unit of the answer , or ' dimensionless ' if none </ unit > < principle > the governing physics principle or law applied </ principle > 
+
+Rubric - Open Ended (OE) System Prompt 
+
+You are a physics expert . Solve step by step . Format your response exactly as : < think > step -by - step reasoning </ think > < answer > your numerical or descriptive answer </ answer > <unit > physical unit of the answer , or ' dimensionless ' if none </ unit > < principle > the governing physics principle or law applied </ principle > 
+
+Open-Ended (OE) System Prompt 
+
+A conversation between User and Assistant . The user asks a question , and the Assistant solves it . The assistant first thinks about the reasoning process in the mind and then provides the user with the answer . The reasoning process and answer are enclosed within < think > </ think > and < answer > </ answer > tags , respectively , i.e., < think > reasoning process here </ think >< answer > answer here </ answer > 
+
+16 Preprint. Under review. Multiple Choice Question Answering (MCQA) System Prompt 
+
+A conversation between User and Assistant . The user asks a question , and the Assistant solves it . The assistant first thinks about the reasoning process in the mind and then provides the user with the answer . The reasoning process and answer are enclosed within < think > </ think > and < answer > </ answer > tags , respectively , i.e., < think > reasoning process here </ think >< answer > answer here </ answer > The answer should be one of the provided options . You should only output the final answer as A , B , C , or D enclosed within < answer > </ answer > tags and after the < think > </ think > tags . 
+
+Mapping Principle System Prompt 
+
+You are a physics expert . Map the following physics principle description to ONE category . Categories : { CATEGORIES } Rules : - Choose the closest matching concept - Ignore wording differences - Be strict : output must be one of the categories - If invalid or unclear -> return none Input : { raw } Subfield : { subfield } Return ONLY the category name . 
+
+Creating Ontology System Prompt 
+
+You are a physics expert building a clean ontology . Below is a list of raw physics principle descriptions . They contain redundancy and variation . Your task : Cluster them into canonical physics principles . Rules : - Merge similar concepts (e.g. Snell 's law , law of refraction ) - Keep categories general but meaningful - Aim for 15 -25 total categories - Use short snake_case names - Assign every item to ONE category - Ignore invalid or refusal responses (e.g., I cannot assist ) Input : { batch } Return ONLY JSON : {{ category_name : [ item1 , item2 ] }} 
+
+Creating Principle System Prompt 
+
+You are a physics expert . 
+
+17 Preprint. Under review. 
+
+Given a physics problem , identify : 1. The main physical principle used 2. The type of the final answer ( unit type ) Be concise but accurate . Subfield : { subfield } Question : { question } Options : { options } Return ONLY JSON : {{ principle : ... , unit_type : ... }} 
+
+MCQA GPT-oss 120b LLM Judge System Prompt 
+
+You are an expert judge tasked with determining if two answers convey the same meaning or information , even if they use different wording . Compare the LLM Response with the Ground Truth Answer and determine if they are equivalent in meaning . Guidelines : - Focus on the core content and meaning , not exact wording - Consider abbreviations , shortened forms , and partial matches as potentially equivalent - If the LLM Response contains the key information from the Ground Truth Answer , consider them equivalent - If the LLM Response contradicts or provides different information than the Ground Truth Answer , they are not equivalent - The LLM Response may contain lengthy explanations , reasoning , or additional context - this is acceptable - Look for the final answer or conclusion , which may appear at the end of a longer response - Extract the key answer from within explanatory text , preambles , or step -by - step reasoning Examples : - LLM : Point C | Ground Truth : Point C is positioned farthest -> True - LLM : D | Ground Truth : Point B -> False - LLM : Increases | Ground Truth : The value increases over time -> True - LLM : After analyzing the graph and considering all data points , I can conclude that the answer is Point C | Ground Truth : Point C -> True - LLM : Let me think through this step by step . First , we examine the positions ... Second , we compare the distances ... Therefore , the answer must be Point C. | Ground Truth : Point C is positioned farthest -> True - LLM : This is a complex question . While Point B seems close , and Point Dhas merit , upon careful consideration the correct answer is actually Point C , which is positioned farthest from the origin . | Ground Truth : Point C -> True - LLM : The answer is Point A because it is the closest . | Ground Truth : Point D is the nearest -> False - LLM : C | Ground Truth : The correct answer is C: ... -> True Respond with only True if the answers are equivalent in meaning , or False if they are not 
+
+18 Preprint. Under review. 
+
+## E Additional Attention Score Mask Figures and Forground Masks 
+
+Figure 5: Attention Forground Masks Images on Phyx Training Dataset 19 Preprint. Under review. 
+
+Figure 6: Mean Attention Map Layered over images on Phyx Training Dataset 20 Preprint. Under review. 
+
+Figure 7: Mean Attention Map Layered over images on Phyx Training Dataset 21

@@ -1,6 +1,214 @@
 {
-  "generated_at": "2026-04-14T20:31:09.813614+00:00",
-  "updated_date": "20260414",
+  "generated_at": "2026-04-16T20:45:21.095045+00:00",
+  "updated_date": "20260416",
   "carryover_days": 9,
-  "items": []
+  "items": [
+    {
+      "id": "2604.12762v1",
+      "title": "ARGOS: Who, Where, and When in Agentic Multi-Camera Person Search",
+      "abstract": "We introduce ARGOS, the first benchmark and framework that reformulates multi-camera person search as an interactive reasoning problem requiring an agent to plan, question, and eliminate candidates under information asymmetry. An ARGOS agent receives a vague witness statement and must decide what to ask, when to invoke spatial or temporal tools, and how to interpret ambiguous responses, all within a limited turn budget. Reasoning is grounded in a Spatio-Temporal Topology Graph (STTG) encoding camera connectivity and empirically validated transition times. The benchmark comprises 2,691 tasks across 14 real-world scenarios in three progressive tracks: semantic perception (Who), spatial reasoning (Where), and temporal reasoning (When). Experiments with four LLM backbones show the benchmark is far from solved (best TWS: 0.383 on Track 2, 0.590 on Track 3), and ablations confirm that removing domain-specific tools drops accuracy by up to 49.6 percentage points.",
+      "authors": [
+        "Myungchul Kim",
+        "Kwanyong Park",
+        "Junmo Kim",
+        "In So Kweon"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.MA"
+      ],
+      "published": "2026-04-14T14:06:19+00:00",
+      "link": "https://arxiv.org/pdf/2604.12762v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "agentic framework for interactive reasoning and person search",
+      "llm_evidence_cn": "用于交互式推理和行人搜索的智能体框架",
+      "llm_evidence": "用于交互式推理和行人搜索的智能体框架",
+      "canonical_evidence": "用于交互式推理和行人搜索的智能体框架",
+      "llm_tldr_en": "Reformulates person search as an agentic interactive reasoning problem involving planning and tool use.",
+      "llm_tldr_cn": "将多摄像头行人搜索重新定义为需要规划和工具调用的智能体交互式推理问题。",
+      "llm_tldr": "将多摄像头行人搜索重新定义为需要规划和工具调用的智能体交互式推理问题。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "advancements in vision language reasoning agents",
+      "matched_requirement_id": "req-8",
+      "selection_source": "carryover_cache",
+      "paper_id": "2604.12762v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2604.14041v1",
+      "title": "Seek-and-Solve: Benchmarking MLLMs for Visual Clue-Driven Reasoning in Daily Scenarios",
+      "abstract": "Daily scenarios are characterized by visual richness, requiring Multimodal Large Language Models (MLLMs) to filter noise and identify decisive visual clues for accurate reasoning. Yet, current benchmarks predominantly aim at evaluating MLLMs' pre-existing knowledge or perceptual understanding, often neglecting the critical capability of reasoning. To bridge this gap, we introduce DailyClue, a benchmark designed for visual clue-driven reasoning in daily scenarios. Our construction is guided by two core principles: (1) strict grounding in authentic daily activities, and (2) challenging query design that necessitates more than surface-level perception. Instead of simple recognition, our questions compel MLLMs to actively explore suitable visual clues and leverage them for subsequent reasoning. To this end, we curate a comprehensive dataset spanning four major daily domains and 16 distinct subtasks. Comprehensive evaluation across MLLMs and agentic models underscores the formidable challenge posed by our benchmark. Our analysis reveals several critical insights, emphasizing that the accurate identification of visual clues is essential for robust reasoning.",
+      "authors": [
+        "Xiaomin Li",
+        "Tala Wang",
+        "Zichen Zhong",
+        "Ying Zhang",
+        "Zirui Zheng",
+        "Takashi Isobe",
+        "Dezhuang Li",
+        "Huchuan Lu",
+        "You He",
+        "Xu Jia"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-15T16:22:10+00:00",
+      "link": "https://arxiv.org/pdf/2604.14041v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "visual clue-driven reasoning in daily scenarios",
+      "llm_evidence_cn": "日常场景中视觉线索驱动的推理",
+      "llm_evidence": "日常场景中视觉线索驱动的推理",
+      "canonical_evidence": "日常场景中视觉线索驱动的推理",
+      "llm_tldr_en": "Benchmarks MLLMs on their ability to identify and reason with decisive visual clues in complex daily tasks.",
+      "llm_tldr_cn": "评估多模态大模型在复杂日常任务中识别关键视觉线索并进行推理的能力。",
+      "llm_tldr": "评估多模态大模型在复杂日常任务中识别关键视觉线索并进行推理的能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "carryover_cache",
+      "paper_id": "2604.14041v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2604.12890v1",
+      "title": "Towards Long-horizon Agentic Multimodal Search",
+      "abstract": "Multimodal deep search agents have shown great potential in solving complex tasks by iteratively collecting textual and visual evidence. However, managing the heterogeneous information and high token costs associated with multimodal inputs over long horizons remains a critical challenge, as existing methods often suffer from context explosion or the loss of crucial visual signals. To address this, we propose a novel Long-horizon MultiModal deep search framework, named LMM-Searcher, centered on a file-based visual representation mechanism. By offloading visual assets to an external file system and mapping them to lightweight textual identifiers (UIDs), our approach mitigates context overhead while preserving multimodal information for future access. We equip the agent with a tailored fetch-image tool, enabling a progressive, on-demand visual loading strategy for active perception. Furthermore, we introduce a data synthesis pipeline designed to generate queries requiring complex cross-modal multi-hop reasoning. Using this pipeline, we distill 12K high-quality trajectories to fine-tune Qwen3-VL-Thinking-30A3B into a specialized multimodal deep search agent. Extensive experiments across four benchmarks demonstrate that our method successfully scales to 100-turn search horizons, achieving state-of-the-art performance among open-source models on challenging long-horizon benchmarks like MM-BrowseComp and MMSearch-Plus, while also exhibiting strong generalizability across different base models. Our code will be released in https://github.com/RUCAIBox/LMM-Searcher.",
+      "authors": [
+        "Yifan Du",
+        "Zikang Liu",
+        "Jinbiao Peng",
+        "Jie Wu",
+        "Junyi Li",
+        "Jinyang Li",
+        "Wayne Xin Zhao",
+        "Ji-Rong Wen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-04-14T15:40:28+00:00",
+      "link": "https://arxiv.org/pdf/2604.12890v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "long-horizon agentic multimodal search",
+      "llm_evidence_cn": "长程代理式多模态搜索",
+      "llm_evidence": "长程代理式多模态搜索",
+      "canonical_evidence": "长程代理式多模态搜索",
+      "llm_tldr_en": "Develops a multimodal search agent framework to handle long-horizon tasks and context overhead.",
+      "llm_tldr_cn": "开发了一个多模态搜索代理框架，用于处理长程任务和上下文开销。",
+      "llm_tldr": "开发了一个多模态搜索代理框架，用于处理长程任务和上下文开销。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2604.12890v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2604.12119v1",
+      "title": "Beyond Perception Errors: Semantic Fixation in Large Vision-Language Models",
+      "abstract": "Large vision-language models (VLMs) often rely on familiar semantic priors, but existing evaluations do not cleanly separate perception failures from rule-mapping failures. We study this behavior as semantic fixation: preserving a default interpretation even when the prompt specifies an alternative, equally valid mapping. To isolate this effect, we introduce VLM-Fix, a controlled benchmark over four abstract strategy games that evaluates identical terminal board states under paired standard and inverse rule formulations. Across 14 open and closed VLMs, accuracy consistently favors standard rules, revealing a robust semantic-fixation gap. Prompt interventions support this mechanism: neutral alias prompts substantially narrow the inverse-rule gap, while semantically loaded aliases reopen it. Post-training is strongly rule-aligned: training on one rule improves same-rule transfer but hurts opposite-rule transfer, while joint-rule training improves broader transfer. To test external validity beyond synthetic games, we evaluate analogous defamiliarization interventions on VLMBias and observe the same qualitative pattern. Finally, late-layer activation steering partially recovers degraded performance, indicating that semantic-fixation errors are at least partly editable in late representations. Project page, code, and dataset available at https://maveryn.github.io/vlm-fix/.",
+      "authors": [
+        "Md Tanvirul Alam"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-04-13T22:53:39+00:00",
+      "link": "https://arxiv.org/pdf/2604.12119v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "evaluating reasoning and rule-mapping in vision-language models",
+      "llm_evidence_cn": "评估视觉语言模型中的推理与规则映射能力",
+      "llm_evidence": "评估视觉语言模型中的推理与规则映射能力",
+      "canonical_evidence": "评估视觉语言模型中的推理与规则映射能力",
+      "llm_tldr_en": "Investigates semantic fixation in VLMs, revealing failures in mapping alternative rules despite correct perception.",
+      "llm_tldr_cn": "研究VLM中的语义固着现象，揭示其在规则映射推理方面的局限性。",
+      "llm_tldr": "研究VLM中的语义固着现象，揭示其在规则映射推理方面的局限性。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2604.12119v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2604.12284v1",
+      "title": "WebAgentGuard: A Reasoning-Driven Guard Model for Detecting Prompt Injection Attacks in Web Agents",
+      "abstract": "Web agents powered by vision-language models (VLMs) enable autonomous interaction with web environments by perceiving and acting on both visual and textual webpage content to accomplish user-specified tasks. However, they are highly vulnerable to prompt injection attacks, where adversarial instructions embedded in HTML or rendered screenshots can manipulate agent behavior and lead to harmful outcomes such as information leakage. Existing defenses, including system prompt defenses and direct fine-tuning of agents, have shown limited effectiveness. To address this issue, we propose a defense framework in which a web agent operates in parallel with a dedicated guard agent, decoupling prompt injection detection from the agent's own reasoning. Building on this framework, we introduce WebAgentGuard, a reasoning-driven, multimodal guard model for prompt injection detection. We construct a synthetic multimodal dataset using GPT-5 spanning 164 topics and 230 visual and UI design styles, and train the model via reasoning-intensive supervised fine-tuning followed by reinforcement learning. Experiments across multiple benchmarks show that WebAgentGuard consistently outperforms strong baselines while preserving agent utility, without introducing additional latency.",
+      "authors": [
+        "Yulin Chen",
+        "Tri Cao",
+        "Haoran Li",
+        "Yue Liu",
+        "Yibo Li",
+        "Yufei He",
+        "Le Minh Khoi",
+        "Yangqiu Song",
+        "Shuicheng Yan",
+        "Bryan Hooi"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-14T04:50:35+00:00",
+      "link": "https://arxiv.org/pdf/2604.12284v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "web agents powered by vision-language models",
+      "llm_evidence_cn": "由视觉语言模型驱动的网页智能体",
+      "llm_evidence": "由视觉语言模型驱动的网页智能体",
+      "canonical_evidence": "由视觉语言模型驱动的网页智能体",
+      "llm_tldr_en": "Proposes a reasoning-driven guard model to detect prompt injection attacks in VLM-based web agents.",
+      "llm_tldr_cn": "提出一种推理驱动的防御模型，用于检测基于VLM的网页智能体中的提示注入攻击。",
+      "llm_tldr": "提出一种推理驱动的防御模型，用于检测基于VLM的网页智能体中的提示注入攻击。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2604.12284v1",
+      "carry_days": 1
+    }
+  ]
 }
