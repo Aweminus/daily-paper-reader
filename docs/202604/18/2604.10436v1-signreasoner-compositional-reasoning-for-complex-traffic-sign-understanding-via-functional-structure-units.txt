@@ -1,0 +1,742 @@
+Title: SignReasoner: Compositional Reasoning for Complex Traffic Sign Understanding via Functional Structure Units
+
+URL Source: https://arxiv.org/pdf/2604.10436v1
+
+Published Time: Tue, 14 Apr 2026 00:59:47 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+## SignReasoner: Compositional Reasoning for Complex Traffic Sign Understanding via Functional Structure Units 
+
+Ruibin Wang Zhenyu Lin Xinhai Zhao Huawei Noah’s Ark Lab   
+
+> {wangruibin4, linzhenyu2, zhaoxinhai1 }@huawei.com
+
+Abstract 
+
+Accurate semantic understanding of complex traffic signs—including those with intricate layouts, multi-lingual text, and composite symbols—is critical for autonomous driving safety. Current models, both specialized small ones and large Vision Language Models (VLMs), suffer from a significant bottleneck: a lack of compositional generaliza-tion, leading to failure when encountering novel sign con-figurations. To overcome this, we propose SignReasoner, a novel paradigm that transforms general VLMs into expert traffic sign reasoners. Our core innovation is Functional Structure Unit (FSU), which shifts from common “instance-based” modeling to flexible “function-based” decomposi-tion. By breaking down complex signs into minimal, core functional blocks (e.g., Direction, Notice, Lane), our model learns the underlying “structural grammar”, enabling ro-bust generalization to unseen compositions. We define this decomposition as the FSU-Reasoning task and introduce a two-stage VLM post-training pipeline to maximize perfor-mance: Iterative Caption-FSU Distillation that enhances the model’s accuracy in both FSU-reasoning and cap-tion generation; FSU-GRPO that uses Tree Edit Distance (TED) to compute FSU differences as the rewards in GRPO algorithm, boosting reasoning abilities. Experiments on the newly proposed FSU-Reasoning benchmark, Traffic-SignEval, show that SignReasoner achieves new SOTA with remarkable data efficiency and no architectural modifica-tion, significantly improving the traffic sign understanding in various VLMs. 
+
+1. Introduction 
+
+Traffic signs serve as the most direct and codified source of regulatory information in the driving environment. Accu-rate localization of signs and understanding semantic mean-ing is essential for an autonomous vehicle to execute safe decision-making and path planning [7, 14, 38]. Owing to the rapid advancements in robust object detection frame-works (e.g., Faster R-CNN [6, 23], YOLO [5, 22], and DETR [39, 43]), traffic sign detection has achieved notable success and high efficacy [28, 41, 44]. The research focus is shifting from simply “seeing” the traffic sign to fully un-derstanding its semantics [3, 11, 33]. Despite the success in classifying the single simple signs, like ”stop” or ”speed limit 60”, fully and accurately reason-ing of complex traffic signs—those featuring intricate lay-outs, multi-lingual text, composite symbols (as illustrated in Fig. 1)—remains a critical bottleneck. We summarize these challenges into two categories. 1. Arbitrary Open-World Text & Symbol Recognition : complex traffic signs incor-porate extensive content in various languages (e.g., Chinese, English), numerical information (e.g., street id, distance) and long-tail symbols which mandates models capable of not only precise OCR but robust symbol classification. 2. Semantic Reasoning of Text-Symbol Composites : com-plex signs have a vast number of the composite integra-tion of multiple symbols and supplementary text (e.g., “No Trucks” coupled with a “Ahead 500 Meters” advisory). The development of models capable of robustly and efficiently generalizing compositional relationships among constituent elements remains a significant open research challenge. To tackle these difficulties, current research efforts can be broadly categorized into two major approaches: small specialized models and Large VLMs. The first category decomposes the complex traffic sign understanding tasks (including component detection, content reasoning, and se-mantic description) and design multi-module networks tai-lored to solve each sub-tasks. Although promising pro-gresses have been made [11, 33], small models intrinsically lack reasoning and generalization capabilities and are still prone to hard failures when encountering unfamiliar sym-bol and compositions. Recently, the academic community have witnessed the rise of VLM in powerful reasoning and generalization capabilities, which, along with their rich pre-training traffic knowledge, makes them suitable tools for the complex sign understanding. However, there have cur-rently been only a very small number of attempts utilizing 
+
+> arXiv:2604.10436v1 [cs.CV] 12 Apr 2026
+
+HUAWEI CONFIDENTIAL 内部资料 注意保密            
+
+> Qwen2.5VL-72B: The sign face features multiple arrows indicating the direction of travel for different lanes: the leftmost arrow indicates a left turn, the two arrows in the middle
+> indicate straight ahead, and the three arrows on the right indicate right turns .Beneath the right-turn arrows, there is a red circle with a diagonal slash over a U-shaped arrow pattern, which indicates No U-Turn (prohibited U-turn). The bottom of the sign features white Chinese characters " 前方中山北路口 ".
+> InternVL3-78B: The sign is composed of six white arrow patterns, each indicating the direction of travel for a specific lane. From left to right, the lanes are designated as: Left Turn, Straight, Straight, Left Turn, Right Turn, and Right Turn . A "No U-Turn" symbol is included in the middle section , alerting drivers that U-turns are prohibited at this intersection. The Chinese text at the bottom reads " 前方中山北路口 ," specifying the applicable location of the sign.
+> Gemini2.5-Pro: This image shows a blue rectangular traffic sign providing detailed lane guidance for an upcoming intersection. The main blue field features five distinct white arrows representing five lanes : two left-turn arrows on the left, followed by two straight-through arrows, and one right-turn arrow on the far right. Within the fourth lane (the second from the right, which is a straight-through lane ), a small circular prohibition sign is overlaid, indicating No U-Turn (a red circle with a slash over a U-turn arrow). Below the blue field, a white strip contains Chinese characters " 前方中山北路口 ,".
+> SignReasoner (Pangu-MM-7B): The sign displays six lanes arranged sequentially from left to right , each with a directional indicator : First Lane is Left Turn, Second Lane is Straight, Third Lane is Straight, Fourth Lane is Left Turn, Fifth Lane is Right Turn, and Sixth Lane is Right Turn , with the crucial detail that the fourth lane contains a No U-Turn sign. The sign‘s color is blue, and its shape is rectangular, featuring arrows for straight, left-turn, and right-turn movements arranged sequentially from left to right. The relational structure is that each lane has a directional indicator, and the No U-Turn symbol is positioned within the fourth lane .These lane indicators instruct drivers for corresponding maneuvers—Left-Turn Lanes instruct vehicles to turn left, Straight Lanes instruct vehicles to proceed straight, Right-Turn Lanes instruct vehicles to turn right, and the No U-Turn Lane specifically reminds drivers that U-turns are prohibited—while the text “ 前方中山北路口 ” informs the driver of the name of the intersection ahead.
+
+Figure 1. Visualizations of complex traffic sign understanding of VLMs. Existing VLMs, including Qwen2.5-VL-72B [2], InternVL3-78B [42], and Gemini 2.5-Pro, demonstrate a significant inability to correctly comprehend traffic signs. Their failures primarily stem from misidentifying the number or type of directional arrows, or failing to accurately associate the U-Turn prohibition symbol with the correct lane. In contrast, our proposed SignReasoner bases on models with only 7B parameters, achieving fully accurate understanding 
+
+VLMs for complex traffic sign reasoning, which either sim-ply treats the task as a form of VLM’s captioning [34] or just borrows the VLM’s encoder structure for traditional multi-tasks processing [3]. A method tailored for traffic sign com-prehension and readily applicable to current VLMs has not yet been introduced. In this paper, we introduce SignReasoner, the first frame-work designed to convert existing VLMs into experts for complex traffic sign understanding without any alteration to VLM’s architecture. SignReasoner achieves this by repurposing and orchestrating VLM’s inherent capabili-ties—specifically its symbol recognition, OCR, and reason-ing abilities—through a novel traffic sign modeling method and a highly data-efficient training pipeline. Specifically, we first propose the concept of Functional Structure Unit (FSU) for traffic sign modeling. FSU de-composes a sign into its minimal, core functional building blocks, which fundamentally shift from modeling a sign from an instance-based manner to a flexible function-based way. Four essential functional types are defined: Direction, Notice, Lane, and Construction, with each function incor-porating specific attributes and stored in a VLM-friendly dictionary format. Consequently, any complex traffic sign can be naturally decomposed into a combination of the four basic FSUs. The complex traffic sign understanding task can thus be converted to the task of reasoning to identify FSUs, which we define as FSU-Reasoning. Next, to repur-pose the inherent capabilities of VLM to maximize FSU-Reasoning performance, a two-stage post-training pipeline is adopted. In the first stage, we propose the Caption-FSU Iterative Distillation, which constructs the SFT samples in a “Caption-FSU” format and iteratively refine the caption through distillation, converging to optimal FSU-Reasoning performance. The second stage adopts the GRPO algorithm [24] to boost VLMs reasoning ability on hard samples. A unique Tree Edited Distance (TED) is adopted as the rule-based rewards in GRPO to hierarchically measure FSU dif-ferences of ground truth and prediction. Experimentally, we established the first FSU-reasoning benchmark, TrafficSignEval, to rigorously evaluate VLM’s comprehension of various traffic sign contents. Zero-shot evaluation on open-source VLMs, including Qwen [2] and InternVL [42] revealed existing model deficiencies. Our framework, SignReasoner, using only 726 training samples and without any architectural modifications, significantly boosting the FSU-Reasoning capabilities of various VLMs. Ablation studies validate the effectiveness of the proposed FSU traffic sign modeling and the two-stage post-training. In summary, our contributions are: • We propose SignReasoner, a novel traffic sign modeling paradigm centered on the FSU concept, and develop a two-stage post-training process featuring a novel Iterative Caption-Structure Distillation and FSU-GRPO to maxi-mize FSU-Reasoning performance. • We establish the TrafficSignEval benchmark to rigor-ously evaluate VLMs on complex traffic sign understand-ing. Experiments confirm that SignReasoner significantly boosts various VLMs for complex sign understanding. • Extensive ablations are conducted to verify each design in SignReasoner. Visualization is provided to more clearly demonstrate the improvement brought by SignReasoner. 
+
+2. Related Work 
+
+2.1. Complex Traffic Sign Reasoning 
+
+Current research efforts for complex traffic sign reason-ing can be broadly categorized into two major approaches: small specialized models and large VLMs. 
+
+Small Specialized Models. This category focuses on de-signing lightweight and highly efficient multi-module net-work architectures. For example, [9, 11] introduce a frame-work, integrating component detection, content reasoning, and semantic description generation and achieves remark-able performance through joint optimization. [10] extends the framework so as to be applied to traffic scene images. [33] further improves the symbol recognition within differ-ent traffic panels and interprets the sign as natural language. However, these small models inherently lacking generaliza-tion and reasoning, rely on exhaustive datasets and suffer failures when facing novel or non-standard sign composi-tions. 
+
+Large Vision-Language Models. Recently, VLMs [4, 13, 20, 29] have demonstrated formidable generaliza-tion and inherent reasoning capabilities in various domains. However, reasoning complex traffic signs using VLMs has seen only limited exploration. [34] treats the complex sign reasoning as a form of visual captioning and construct SFT data in a instance-based caption templates. However, this captioning approach results in unstructured natural lan-guage output with hallucination. [3] borrows the vision and language encoders from VLM and combine other designed modules to separately perform OCR, elements clustering, content understanding, which is essentially a multi-stage methodology, sacrificing the VLM’s inherent end-to-end reasoning by introducing cumulative errors in each stage. We also employ VLMs for complex traffic sign reason-ing. Differently, our method designs a more generalized modeling approach that simultaneously supports both un-structured and structured outputs. More critically, our spe-cially designed post-training scheme enables end-to-end, accurate and generalized sign reasoning without any modi-fications to the base model architecture. 
+
+2.2. Post-Training on VLM 
+
+Post-training is a crucial stage for tailoring generic pre-trained VLMs to achieve superior performance in specific downstream tasks. While various post-training methods ex-ist [15], we primarily focus on those relevant to our paper: CoT Fine-Tune, Distillation and GRPO Training. 
+
+CoT Fine-Tune. CoT fine-tuning utilizes supervised reasoning annotations to train models to output step-by-step reasoning traces instead of just final answers. This process fundamentally improves both interpretability and accuracy on complex tasks and has been widely adapted from prompting [30, 31] to full fine-tuning across language [1, 8, 27] and multi-modal domains [26, 32]. Our methods firstly introduce this CoT fine-tune into the complex traf-fic sign understanding and propose the “Caption-FSU” out-put format, aiming to help the model achieve more accurate comprehension. 
+
+Distillation. This technique transfers the refined ca-pabilities of the main model to smaller architectures. DeepSeek-R1 [8], serves as a teacher to smaller architec-tures (e.g., Qwen [1] or Llama [27]), allowing the smaller models to inherit advanced reasoning capabilities. Unlike these methods, we focus on distilling the model’s caption-ing ability specifically within the traffic sign domain. We propose a novel algorithm that distills the same models from different optimization stages and improve this targeted abil-ity to an optimum with acceptable distillation steps. 
+
+GRPO Training. Following DeepSeek-R1’s successful use of GRPO [24] to significantly boost model reasoning, an increasing number of researchers are adopting this rule-based reward algorithm, focusing on optimizing the ob-jective function [17, 37] and extend it to the multi-modal domain [12, 19, 36]. Besides, various rule-based rewards are defined under GRPO, successfully improving the down-stream perception tasks, such as grounding [12, 18] and seg-mentation [16]. In this work, we design a novel TED based reward for measuring FSU differences and combine with GRPO algorithm to boost the reasoning and generalization ability in the Caption and FSU outputs. 
+
+3. SignReasoner 
+
+SignReasoner aims to enhance the existing VLMs in inter-pretation of complex traffic signs. Our approach focuses on two key innovations. Firstly, we introduce a novel modeling approach centered on the Functional Structure Unit (FSU), which fundamentally improves the generalization of traffic signs modeling, notably, gives rise to the FSU-Reasoning task for achieving VLM end-to-end traffic sign understand-ing (Sect.3.1). Secondly, we devise a two-stage train-ing pipeline including Iterative Caption-FSU Distillation (Sect.3.2), which systematically fine-tunes VLMs for col-laborative enhancement of captioning and FSU-Reasoning, and FSU-GRPO Training (Sect.3.3) that boosts the reason-ing and generalization in hard traffic signs. 
+
+3.1. Functional Structural Unit 
+
+For the first time, we propose the concept of Functional Structural Unit, a function-based traffic sign modeling ap-proach. FSU is fundamentally a highly formatted dictionary that can be represented as: FSU = {(kj : vj )}Nj=1 (1) where (kj : vj ) refer to the j-th attribute of the FSU rep-resented in a key-value pair, and N is the total number of key-value pairs in one FSU. We provide several examples, as illustrated in Fig. 2 for better understanding the FSU. 
+
+Function-Based Modeling Logic. Unlike the Instance-Based logic that focus on modeling specific sign, we de-fine four kinds of functions that frequently appear in a traf-fic sign and model the corresponding region as one FSU. Four kinds of functions are defined, including Direction that specifies route guidance and destination information, Lane 
+
+that delineates road organization, turn restrictions, and lane-specific instructions, Notice that conveys general regulatory, warning, or informational text and symbols, and Construc-tion that alerts drivers to temporary road work, hazards, or HUAWEI CONFIDENTIAL 内部资料 注意保密 Page 11 
+
+Notice-FSU Vehicle Type:                  
+
+> No Medium/Heavy Trucks
+> Scope: Left Lane
+> Site: Yanggao South Road (Gaoke West Road~ [blurry])
+> Detour: Road Construction Please Re-route
+> Other: Caution hazard
+> Speed Limit: 80
+> Scope: Left Lane
+> Speed Limit: 70
+> Scope: Right Lane
+> Turn: Left Turn Turn: Straight or Left Turn Turn: Straight Turn: Straight or Right Turn Turn: Right Turn
+
+Sign-1 Sign-2 Sign-3 Direction-FSU Direction: Right Turn     
+
+> Via: Chang'an Middle Road
+> Destination: Yanta West Road
+> Direction: Go Straight
+> Via: Chang'an Middle Road
+> Destination:
+> [Cuihua Road, Shaanxi History Museum]
+
+Lane-FSU Construction-FSU 
+
+⋯Figure 2. Illustration of Functional Structure Units (FSUs) for modeling traffic signs. Four kinds of FSUs are shown, including Notice, Direction, Construction and Lane. Notably, a traffic sign can either be decomposed into multiple FSUs with same or different functions. 
+
+diversions. The four categories are designed to be highly orthogonal in function and can be viewed in Fig. 2. 
+
+Hierarchical Key-Value Schema. Based on the basic building block of FSU, we introduce a novel Hierarchical Key Schema which decompose a traffic sign into multiple levels for more fine-grained expression: 
+
+A = {(kg : vg )}Gg=1 ∪
+
+n
+
+(FSU i : {(kij : vij )}Nj=1 )
+
+oMi=1 
+
+,
+
+(2) where A refers to the FSU decomposition of a traffic sign. It contains the top level key-value pairs {(kg : vg )}Gg=1 that capture G global visual attributes (e.g., Obscured, Blurring, Truncation, etc.) and the second key-value pairs (FSU i :
+
+{(kij : vij )}Nj=1 )Mi=1 that detail the information in M FSUs. Essentially, Eq.2 defines the decomposition of a single traf-fic sign image into a set of global attributes and a collection of M FSUs. A illustration of these top and second levels can be referred to Fig.3. 
+
+Hybrid Value Semantics. The FSU schema adopts a hy-brid strategy for populating key values. This approach clas-sifies value types based on their content nature: closed-set values are applied to the binary global attributes (e.g., “Is-Blurry”, “IsObscured”) and enumerable function-specific elements (e.g., “Turn” in Lane-FSU), . Conversely, open-set values are reserved for adaptive content (such as “Des-tination” in Direction-FSU) that must be extracted directly from the sign. This hybrid strategy effectively frames the closed-set values as straightforward classification and sim-plifies the open-set component to specialized OCR, mitigat-ing overall modeling complexity. 
+
+FSU-Reasoning. Based on the proposed FSU, we in-troduce FSU-Reasoning, a novel, end-to-end task for traffic sign modeling. Given a single sign image I and correspond-ing prompt Preason , FSU-Reasoning requires the VLMs M
+
+to generate correct FSU decomposition (Eq. 2) as: 
+
+A ← M (I, P reason ). (3) Essentially, VLM should perform comprehensive reason-ing to predict the key-value pairs defined in the FSU. FSU-Reasoning is a novel VLM task that firstly frame the com-plex traffic sign understanding as an straightforward end-to-end task, eliminating the conventional multi-round pipeline (e.g., symbol detection, text recognition, relationship rea-soning, etc). The task necessitates beyond the traffic domain knowledge but general vision-language capabilities includ-ing element recognition and counting, OCR, layout anal-ysis, semantic reasoning. Consequently, FSU-Reasoning serves as an ideal task for evaluating model performance in both general vision and autonomous driving domains. We release a benchmark named TrafficSignEval and associated evaluation codes. The detailed information about the bench-mark and evaluation protocol can be referred in Sect.4.1. Under TrafficSignEval, we test the zero-shot perfor-mance of existing VLMs for FSU-Reasoning. As results shown in Tab. 1, the tested VLMs generally has unsatis-factory performance, whether prompted to generate under-standing captions or FSU decomposition. To this end, we introduce a novel two-stage training pipeline which consists of a Iterative Caption-FSU Distillation and a FSU-GRPO Training, to improve VLM’s FSU-Reasoning capabilities. 
+
+3.2. Iterative Caption-FSU Distillation 
+
+This stage utilizes a “Caption-FSU” format to organize the initial SFT samples, and designs an Iterative Distillation algorithm to continually refine and update the caption in the SFT samples. Ultimately, this algorithm yields samples HUAWEI CONFIDENTIAL 内部资料 注意保密 Page 12      
+
+> IsTrafficSign: Yes
+> IsElectronic :No
+> IsObscured : No
+> IsTruncated: No
+> IsBlurry: No
+> Function: Notice
+> Notice Count: 3
+> Top-Level key-value
+
+Sign-1 Second-Level key-value Sign-3           
+
+> Notice-FSU1: Vehicle Type: No Heavy Trucks
+> Scope: Left Lane
+> Notice-FSU2: Speed Limit: 70
+> Scope: Right Lane
+> Notice-FSU3: Speed Limit: 80
+> Scope: Left Lane
+> IsTrafficSign: Yes
+> IsElectronic :No
+> IsObscured :No
+> IsTruncated: No
+> IsBlurry: Yes Function: Const.
+> Notice Count: 1
+> Top-Level key-value
+
+Sign-2 Second-Level key-value                    
+
+> Construction-FSU1: Site: Yanggao South Road (Gaoke West Road~ [blurry])
+> Detour: Road Construction Please Re-route
+> Other:
+> Caution hazard
+> IsTrafficSign: Yes
+> IsElectronic :Yes IsObscured :No
+> IsTruncated: No
+> IsBlurry: Yes
+> Function: Direction, Lane Direction Count: 3
+> Lane Count: 5
+> Top-Level key-value Second-Level key-value
+> Direction-FSU1: Direction: Go Straight
+> Via: Chang'an Middle Road
+> Destination: [Cuihua Road, Shaanxi History Museum]
+> Direction-FSU2: Direction: Right Turn
+> Via: Chang'an Middle Road
+> Destination: Yanta West Road
+> Direction-FSU3:
+> ⋯ ⋯
+> Lane-FSU1: Turn: Left Turn
+> Lane-FSU2: Turn: Straight or Left Turn
+> Lane-FSU3: Turn: Straight
+> Lane-FSU4: Turn: Straight or Right Turn
+> Lane-FSU5: Turn: Right Turn
+
+Figure 3. Illustration of the Hierarchical Key-Value Schema .The “Sign-1,2,3” tags correspond to images in Fig. 2 for reference. 
+
+with the highest caption quality, training VLMs to excel in both captioning and FSU-Reasoning. 
+
+Caption-FSU Format. Inspired by the Chain-of-Thought (CoT) technique [31], which significantly en-hances complex reasoning by requiring models to generate intermediate steps before the final answer, we organize our training data in the “Caption-FSU” format. Namely, before generating the FSU answer, we enforce the model to de-scribe the layout and elements of the traffic sign within a caption. The caption can be viewed as the think process, guiding model generating the correct FSU decomposition. Formally, the SFT data D is organized as: 
+
+D = [ C | A]= <caption >C</ caption >< FSU >A</ FSU >, (4) where C refers to sign captions which are concatenated with FSU decomposition (Eq.2) via the special separator. In practice, to reuse the VLM’s captioning ability, we lever-age their originally generated captions without any modifi-cations as C. By captioning before FSU-Reasoning, we es-sentially make a tight connection between these two tasks, which forces the model learning better captioning ability so as to derive the more correct FSU outputs. Eventually, the caption-FSU data, which labeled only on FSUs, brings the models simultaneous improvements in captioning and FSU-Reasoning. We term this phenomenon the Synergistic Effect, and leverage it to propose the Iterative Distillation algorithm that further enhances model performance. 
+
+Iterative Distillation. The core idea of iterative distilla-tion is straightforward: since training with the “Caption-FSU” data leads to an improved captioning ability, and high-quality captions result in better FSU decomposition, 
+
+Algorithm 1 Iterative Caption-FSU Distillation 
+
+Require: Traffic sign image I, FSU-based annotations A
+
+and model parameters from t-th iteration Mθ(t) , num-ber of iterations T , prompts for captioning Pcaption and FSU-Reasoning Preason 
+
+1: for t = 0 to T do 
+
+2: Distill the caption C(t) from model Mθ(t) :
+
+3: C(t) ← Mθ(t) (I, P caption ).
+
+4: Update caption-FSU training data: 
+
+5: D(t) ← [C(t)|A].
+
+6: SFT the model parameters via training data D:
+
+7: Mθ(t+1) ← SF T (Mθ , D, P reason ).
+
+8: end for 
+
+Output Mθ(T )
+
+we iterate this process until reaching the optimal perfor-mance. The complete algorithm is detailed in Alg. 1, where 
+
+C(t) refers to the caption distilled in t iteration, and D(t) is the updated SFT data, which would be used to train the base VLM Mθ , generating the caption-enhanced VLM Mθ(t+1) 
+
+for next round distillation. Details about the captioning and reasoning prompts are provided in the supplementary. 
+
+3.3. FSU-GRPO Training 
+
+Recent research [8, 17] at the intersection of RL and VLMs has yielded significant conclusions regarding the effective-ness of GRPO [24] and rule-based rewards in facilitating complex reasoning. Following these established findings, we propose the FSU-GRPO training to further boost Sign-Reasoner reasoning ability to solve hard samples. We reuse the GRPO algorithm and focus on designing mixed rule-based rewards. Three kinds of rewards are used. 
+
+Caption-FSU Reward. Similar to the general think-answer reward, the Caption-FSU reward RC-FSU encourages model outputting in the caption-FSU format as in Eq.4. It is set to 1 if the output format follows, and 0 otherwise. 
+
+FSU Format Reward. This reward RFSU encourages the FSU being a parsable dictionary as in Eq.2. It is set to 1 if the output is parsable, and 0 otherwise. 
+
+Tree Edited Distance Reward. To quantify the differ-ence between the predicted and ground truth FSU decom-position we define the tree edited distance reward RTED as: 
+
+RTED = fAct (TED (TPred , T GT )) ,fAct (x) = 1 − (σ1 · tanh( xσ2
+
+) + σ3), (5) where TPred and TGT refer to trees converted from FSU dic-tionaries. TED (·) is the function computing tree edited dis-tance [21, 40]. fAct (·) refers to the activation function that projects the distance into [0, 1]. σ1,2,3 are hyper-parameters re-weight the TED to precisely measure the difference. HUAWEI CONFIDENTIAL 内部资料 注意保密 
+
+# 本发明技术方案      
+
+> Page 10
+> Caption Distilling
+> <FSU> 2. Iterative Caption-FSU Distillation 1. FSU Modeling 3. FSU-GRPO Training Computed Rewards Sample Responses
+> Mixed Reward
+> Page 10
+> <caption> ……<\caption> <FSU> ……<\FSU> Caption-FSU Reward {#Top Level Key-Value Pairs …... …… #Second Level Key-Value Pairs {……} {……} }FSU Format Reward TED Reward Base VLM
+> iterative ൈ 𝒏
+> Distilled Model
+> GRPO-based Policy Optimization Vehicle Type:
+> No Medium/Heavy Trucks
+> Scope: Left Lane ⋯ ⋯
+> This composite sign provides lane-specific regulations. it indicates that the left lane is restricted …
+> <caption>
+
+Figure 4. Illustration of the SignReasoner overall pipeline. The FSU Modeling (Sect. 3.1) decomposes the traffic sign multiple into FSUs, which would be concatenated with captions generated from base VLMs for Iterative Caption-FSU Distillation (Sect. 3.2). Finally, the distilled models would go through the FSU-GRPO Training (Sect. 3.3) to further boost reasoning capacity. 
+
+Comparing with string similarity, TED offers two key advantages. Firstly, it more precisely measures the differ-ences across the FSU’s hierarchy (i.e., the top- and second-level nodes). Secondly, TED enables a flexible permutation. For the Direction, Notice and Construction FSUs where no specific order exist, we use Hungary Algorithm for nodes matching, thus computing TED in an permutation-invariant manner. As for the Lane FSUs which should be organized in a left-to-right order, we employ ordered tree structure to compute the TED in a permutation-variant way. 
+
+Mixed Reward. Finally, since the TED can only be meaningful when the output follows the “caption-FSU” for-mat and is parsable, (i.e., RC-FSU = 1 , RFSU = 1 ), we mul-tiply the three individual rewards to obtain the final Mixed Reward RMixed , as defined below: 
+
+RMixed = RC-FSU · RFSU · RTED (6) The overall pipeline of SignReasoner is illustrated in Fig. 4. 
+
+4. Experiments 
+
+4.1. Experiment Setup 
+
+Benchmarks. To evaluate VLMs for FSU-Reasoning, we have newly established TrafficSignEval benchmark, which comprises a total of 195 complex signs encountered in real-world scenarios . Different from previous datasets [11, 25, 35, 44], TrafficSignEval presents significant composite rea-soning difficulty for VLM, covering four categories of No-tice, Construction, Direction, and Lane. Datasets are man-ually annotated into FSUs decomposition. Details of the datasets are provided in our supplements. 
+
+Models. We employ and compare our approach against several open-source VLMs, including Qwen-VL-7B/72B [2], InternVL-8B/78B [42], and Pangu-MM-7B. We report the zero-shot prompting capabilities of these models. More-over, we adopt the SignReasoner pipeline under Qwen-VL-7B and Pangu-MM-7B, yielding the enhanced traffic sign understanding models SignReasoner (Qwen-VL-7B) and SignReasoner (Pangu-MM-7B) and report the performance under the same benchmarks. We provide the post-training details of different VLMs and the Compute Reporting Form in our supplements. 
+
+Evaluations. For the TrafficSignEval benchmark, we design two distinct evaluation protocols respectively for manual and automatic evaluations: (1) TrafficSignEval-
+
+Caption Protocol . Models are directly prompted to output a dense caption describing and reasoning the traffic sign con-tents. A strict human judgment is used to mark the cor-rect answer only if all elements of the traffic sign are accu-rately described and the functions of sign are presented. (2) TrafficSignEval-Structure Protocol . Models are prompted to generate the FSU decomposition. Given the highly struc-tured nature of the output, we designed an automated eval-uation script that sequentially assesses all key-value pairs. For the open-set values, the prediction is marked correct only if its similarity with the GT exceeds a threshold of 0.8. Besides, the answer is marked as incorrect if it is un-parsable. Details about our automatic evaluation can be found in our supplementary. 
+
+4.2. Zero-Shot Prompting Baseline 
+
+Existing VLMs claim superior performance in visual recog-nition, counting, and relational reasoning, etc. However, these results are typically derived from tests conducted in general domains. To the best of our knowledge, a dedicated capability analysis focused specifically on traffic sign com-prehension has yet to be performed. Therefore, we system-atically test different VLMs under TrafficSignEval-Caption and Structure Protocols as baselines. The results for zero-shot prompting are shown in Tab.1. The evaluation across both caption and structure proto-cols reveals critical limitations in current Vision-Language Models (VLMs). In the Caption Protocol, perfor-mance showed a positive correlation with model size (e.g., InternVL3-78B and Qwen2.5-VL-72B surpassing InternVL3-8B and Qwen2.5-VL-7B), but even the top model, InternVL3-78B, achieved only 68.0% accuracy, falling far short of practical deployment needs. The Struc-Model TrafficSignEval-Caption TrafficSignEval-Structure DirectionNotice Lane Const. Avg. DirectionNotice Lane Const. Avg. 
+
+Zero-Shot Performance 
+
+InternVL3-8B 55.88 57.14 53.40 50.00 54.07 51.43 63.64 54.84 57.14 55.38 InternVL3-78B 55.88 61.90 74.76 57.14 68.02 68.57 63.64 61.29 71.43 63.59 
+
+Qwen2.5-VL-7B 47.06 66.67 42.72 64.29 48.26 28.57 45.45 36.29 64.29 37.95 Qwen2.5-VL-72B 64.71 71.43 63.11 71.43 65.12 40.00 68.18 50.81 71.43 52.31 Pangu-MM-7B 55.88 52.38 53.40 57.14 54.07 41.18 33.33 46.60 35.71 43.02 
+
+Caption SFT Performance 
+
+Qwen2.5-VL-7B 58.82 61.90 56.31 64.29 58.14 (+9 .88) 28.57 45.45 36.29 64.29 37.95 Pangu-MM-7B 70.59 61.90 71.84 78.57 70.93 (+16 .86) 41.18 33.33 46.60 35.71 43.02 
+
+Caption-FSU Distillation Performance 
+
+SignReasoner (Qwen2.5-VL-7B) 70.59 66.67 76.70 57.14 72.67 (+24 .41) 74.19 66.67 85.50 94.44 83.08 (+45 .13) 
+
+SignReasoner (Pangu-MM-7B) 79.41 66.67 83.50 64.29 79.07 (+25 .00) 83.87 85.71 83.21 84.21 83.59 (+40 .57) 
+
+FSU-GRPO Training Performance 
+
+SignReasoner (Qwen2.5-VL-7B) 71.00 67.31 76.90 57.67 73.24 (+24 .98) 74.19 73.33 86.26 94.44 84.10 (+46 .15) 
+
+SignReasoner (Pangu-MM-7B) 80.01 67.76 83.98 64.90 79.98 (+25 .91) 80.65 80.00 84.73 88.89 84.10 (+41 .08) 
+
+> Table 1. Comparing caption and structure protocols under TrafficSignEval.
+
+ture Protocol proved significantly more challenging due to output formatting, yielding invariably lower performance. 
+
+4.3. Comparison with Post-Training Methods 
+
+In this section, we contrast two post-training strategies. The first is simply SFT the model with annotated captions, noted as “Caption SFT” in the table. We manually annotated 5K traffic sign captions for training. The second strategy is SignReasoner, that bases on FSU decomposition for Cap-FSU Iterative Distillation and FSU-GRPO training. Due to a higher complexity of FSU annotation, we sample 726 di-verse images from the 5K traffic signs, covering the four FSU categories for training. The final comparative results are presented in the Tab.1. Several critical conclusions can be derived from the experimental results: 
+
+Limitations of Caption SFT. We first observe that the standard Caption SFT method yields a noticeable perfor-mance improvement over the zero-shot baselines of Qwen (+9.88%) and Pangu (+16.86%), with Pangu demonstrat-ing a more significant gains because the annotated captions are initially generated by Pangu model and then through manual inspection. However, we found that training ex-clusively on caption data does not yield any gains for the Structure Protocol evaluation; instead, it often results in a performance decline. 
+
+Synergistic Effect of Cap-FSU Distillation. The Cap-FSU Iterative Distillation in the SignReasoner pipeline brings substantial simultaneous improvement under both the Caption (+25.00%) and Structure (+40.57%) evaluation protocols. Notably, the gain in Caption performance is sig-nificantly greater than that achieved by the direct Caption SFT method (+16.86%), which corroborates our hypothesis FSU Design SignReasoner Hierar. Open Closed Qwen2.5-VL-7B Pangu-MM-7B 
+
+✓ ✓ 80.27 79.48 
+
+✓ ✓ 82.89 82.14 
+
+✓ ✓ ✓ 83.59 83.08 
+
+> Table 2. Ablation on FSU Design.
+
+regarding the synergistic enhancement between the caption-ing and FSU-Reasoning. 
+
+Effectiveness of FSU-GRPO Training. The FSU-GRPO training of the SignReasoner pipeline improves both Qwen (+46.15%) and Pangu (+41.08%) on hard samples as visualized in Fig.5. Importantly, the TED-reward that encourages a more accurate FSU decomposition brings improvements to the captioning, which may confirm that GRPO successfully boosts reasoning in captions. 
+
+Data Efficiency and Superiority. Finally, it is worth to note that, in contrast to simply using annotated captions for SFT, the SignReasoner training pipeline achieves a signif-icant enhancement in both the Caption and Structure eval-uation dimensions while utilizing only 726 annotated FSU samples. This demonstrates both the effectiveness and the data-efficiency of SignReasoner solution. 
+
+4.4. Ablation Study 
+
+In this section, we conduct ablation study to verify the effec-tiveness of designs adopted in SignReasoner. The reported results adopt structure protocol for comparison. 
+
+FSU Design. Firstly, we validate FSU configurations, including the hierarchical key-value and the hybrid value HUAWEI CONFIDENTIAL 内部资料 注意保密 
+
+# 本发明有益效果 
+
+Page 18 
+
+Qwen2.5-VL-7B Caption: The traffic sign is circular with a red border, containing a black truck pattern that is crossed by a red diagonal line, indicating No Truck Entry. Below, there is white background text displaying the prohibition time periods and restrictions. FSU :{'IsTrafficSign': 'Yes', ' IsElectronic': 'No', ' IsObscured': 'No', ' IsTruncated': 'No', ' IsBlurry': 'No', ' Function': 'Notice', ' Notice Count': '1', ‘Notice-FSU1': {'Time': '6:00-22:00', 'Date': '22:00-Next Day 6:00', 'Road Scope': 'Zhongshan Road', 'Vehicle Type': 'Above 1.5t (Including 1.5t)'}} 
+
+SignReasoner(Qwen2.5-VL-7B) Caption: This is an image of a traffic notice sign. The sign is rectangular with a white background. At the top, there is a red circle with a red diagonal line covering a small truck pattern, indicating No Truck Entry. The bottom section features black text specifying the exact prohibition times and restricted vehicle weight information. The restricted area is Zhongshan Road. The sign stipulates that no trucks are allowed during the period from 06:00 to 22:00. Furthermore, during the period from 22:00 to 06:00 the next day, trucks weighing 1.5 tons and above (including 1.5 tons) are prohibited from passing. FSU: :{'IsTrafficSign': 'Yes', ' IsElectronic': 'No', ' IsObscured': 'No', ' IsTruncated': 'No', ' IsBlurry': 'No', 'Function': 'Notice', 'Global Other Info': 'Zhongshan Road', 'Notice Count': '2', 'Notice Info 1': {'Vehicle Type': 'No Truck Entry', 'Time': '06:00-22:00'}, 'Notice Info 2': {'Vehicle Type': 'No Truck Entry', 'Time': '22:00-Next Day 06:00', 'Weight': 'Above 1.5t (Including 1.5t)’}}0 
+
+Pangu-MM-7B Caption: This image shows a blue traffic guidance sign with a blue background and white text and patterns. The sign is rectangular with a white border. There are multiple white arrow patterns on the sign, pointing in different directions to indicate the purpose of different lanes. The left side has a left-turn arrow next to the text " 小型车专用 "(Small Vehicle Only), indicating that this lane is for small vehicles only. The central part has multiple straight-through arrows, indicating these lanes are for all vehicles to proceed straight. The right side has two arrows: one pointing upwards, indicating a Bus Only Lane, and another pointing to the right, indicating a bus only lane is open between 7:00-10:00 and 16:00-19:00. These signs are designed to guide different types of vehicles to drive in the designated lanes, ensuring traffic order and safety. 
+
+FSU: {'TrafficSign': 'Yes', 'Electronic': 'No', 'Obscured': 'No', 'Blurry': 'No', 'Truncated': 'No’} {'Global Other Info': 'Bus Only 7-10 16-19’} {'Function Type': 'Direction’} 
+
+{'Function Count': '2’} {'Detailed Explanation': {'Direction': 'Upward' , 'Route': 'None', 'Destination': 'None', 'Traffic Status': 'None', 'Distance': 'None', 'Other Info': 'None'}, {'Direction': 'Upward', 'Route': 'None', 'Destination': 'None', 'Traffic Status': 'None', 'Distance': 'None', 'Other Info': 'None'}} SignReasoner(Pangu-MM-7B) Caption: This traffic sign sequentially displays six lanes from left to right, each with different uses and restrictions. The traffic sign has a blue background and white lane dividers. 1. First Lane: Small Vehicle Only. This lane is restricted to small vehicles, and a U-turn arrow below the lane symbol indicates that vehicles may perform a U-turn. 2. Second Lane: Straight. No special restrictions; vehicles may proceed straight. 3. Third Lane: Straight. No special restrictions; vehicles may proceed straight. 4. Fourth Lane: Straight. No special restrictions; vehicles may proceed straight. 5. Fifth Lane: Bus Only. This lane is restricted to buses, with a time restriction of 07:00-10:00 and 16:00-19:00. 6. Sixth Lane: No special restrictions; vehicles may proceed straight and right turn. FSU: {'IsTrafficSign': 'Yes', ' IsElectronic': 'No', ' IsObscured': 'No', ' IsTruncated': 'No', ' IsBlurry': 'No' , 'Function Type': 'Lane ', 'Lane Count': '6 ', 'Lane Info 1': {'Direction': 'U-turn', 'Special Lane ': 'Small Vehicle Only '}, 'Lane Info 2': {'Direction': 'Straight'}, 'Lane Info 3': {'Direction': 'Straight'}, 'Lane Info 4': {'Direction': 'Straight'}, 'Lane Info 5': {'Special Lane': 'Bus Only', 'Time': '[07:00-10:00,16:00-19:00]'}, 'Lane Info 6': {'Direction': 'Straight Right Turn'}} Figure 5. Visual comparison between SignReasoner and base VLMs. 
+
+Caption-FSU Iterative SignReasoner Format Step Qwen2.5-VL-7B Pangu-MM-7B 0 74.87 78.26 
+
+✓ 1 77.95 81.03 
+
+✓ 2 83.08 83.59 
+
+✓ 3 82.37 83.06 
+
+Table 3. Ablation on Caption-FSU Iterative Distillation. 
+
+Mixed Rewards SignReasoner 
+
+RC-FSU RFSU RTED Qwen2.5-VL-7B Pangu-MM-7B 
+
+✓ 83.14 83.67 
+
+✓ 83.08 83.59 
+
+✓ ✓ 83.65 83.82 
+
+✓ ✓ 83.96 84.02 
+
+✓ ✓ ✓ 84.10 84.10 
+
+Table 4. Ablation on Mixed Rewards Design. 
+
+semantics. The results are reported in Tab.2. The hierarchi-cal key-value design brings about 3.32% and 3.60% gains respectively for Pangu and Qwen. Besides, using a pure open-set value semantic results in performance decline. 
+
+Caption-FSU Iterative Distillation. Next, we investi-gate the Synergistic Effect brought about by the “caption-FSU” output format and determine the optimal iteration steps for the caption distillation. The results are presented in Tab.3. As can be seen, the “caption-FSU” brings con-siderable improvements for both Pangu (3.12%) and Qwen (2.77%). Furthermore, the iterative distillation algorithm reach the optimal performance at the second iteration step. 
+
+Mixed Rewards Design. Finally, we validated the im-provements brought about by various reward functions. Ex-perimental results are reported in Tab.4. We find that the single format reward ( RC-FSU or RFSU ) brings minor im-provements. Combining the TED reward ( RTED ) with other rewards brings the larger performance gains. 
+
+4.5. Discussions of Limitations and Society Impact 
+
+The current SignReasoner still has some limitations, includ-ing its reliance on cropped images (rather than full-scene understanding) and its restriction to Chinese traffic signs. However, by defining a formal, parsable FSU output, this work offers a standardized representation for VLM’s traffic sign understanding which may hold promise for future Au-tonomous Driving VLMs, potentially leading to safer, more reliable, and more explainable driving decisions. 
+
+5. Conclusion 
+
+We propose SignReasoner to transform general VLMs into traffic sign experts, specifically addressing the lack of compositional generalization. Our innovations includ-ing the Functional Structure Unit (FSU), which enables function-based decomposition to learn the underlying gram-mar of complex signs and a two-stage VLM post-training pipeline involving Iterative Caption-FSU Distillation and FSU-GRPO , to boost the complex traffic sign reasoning. Experiments on TrafficSignEval show that SignReasoner reaches SOTA with remarkable data efficiency, improving sign understanding without any architectural modification. 
+
+References 
+
+[1] Jinze Bai, Shuai Bai, Yunfei Chu, Zeyu Cui, Kai Dang, Xiaodong Deng, Yang Fan, Wenbin Ge, Yu Han, Fei Huang, et al. Qwen technical report. arXiv preprint arXiv:2309.16609 , 2023. 3 [2] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, et al. Qwen2. 5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. 2, 6 [3] Xinyuan Chang, Maixuan Xue, Xinran Liu, Zheng Pan, and Xing Wei. Driving by the rules: A benchmark for integrating traffic sign regulations into vectorized hd map. In Proceed-ings of the Computer Vision and Pattern Recognition Con-ference , pages 6823–6833, 2025. 1, 2, 3 [4] Zhe Chen, Jiannan Wu, Wenhai Wang, Weijie Su, Guo Chen, Sen Xing, Muyan Zhong, Qinglong Zhang, Xizhou Zhu, Lewei Lu, et al. Internvl: Scaling up vision foundation mod-els and aligning for generic visual-linguistic tasks. In Pro-ceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 24185–24198, 2024. 3 [5] Tianheng Cheng, Lin Song, Yixiao Ge, Wenyu Liu, Xing-gang Wang, and Ying Shan. Yolo-world: Real-time open-vocabulary object detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 16901–16911, 2024. 1 [6] Ross Girshick. Fast r-cnn. In Proceedings of the IEEE inter-national conference on computer vision , pages 1440–1448, 2015. 1 [7] Sorin Grigorescu, Bogdan Trasnea, Tiberiu Cocias, and Gigel Macesanu. A survey of deep learning techniques for autonomous driving. Journal of Field Robotics , 37(3):362– 386, 2020. 1 [8] Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi Wang, Xiao Bi, et al. Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning. arXiv preprint arXiv:2501.12948 , 2025. 3, 5 [9] Yunfei Guo, Wei Feng, Fei Yin, Tao Xue, Shuqi Mei, and Cheng-Lin Liu. Learning to understand traffic signs. In Pro-ceedings of the 29th ACM International Conference on Mul-timedia , pages 2076–2084, 2021. 2 [10] Yunfei Guo, Fei Yin, Xiao-hui Li, Xudong Yan, Tao Xue, Shuqi Mei, and Cheng-Lin Liu. Visual traffic knowledge graph generation from scene images. In Proceedings of the IEEE/CVF International Conference on Computer Vision ,pages 21604–21613, 2023. 2 [11] Yunfei Guo, Wei Feng, Fei Yin, and Cheng-Lin Liu. Sign-parser: An end-to-end framework for traffic sign understand-ing. International Journal of Computer Vision , 132(3):805– 821, 2024. 1, 2, 6 [12] Wenxuan Huang, Bohan Jia, Zijie Zhai, Shaosheng Cao, Zheyu Ye, Fei Zhao, Zhe Xu, Yao Hu, and Shaohui Lin. Vision-r1: Incentivizing reasoning capability in multimodal large language models. arXiv preprint arXiv:2503.06749 ,2025. 3 [13] Zilin Huang, Zihao Sheng, Yansong Qu, Junwei You, and Sikai Chen. Vlm-rl: A unified vision language models and reinforcement learning framework for safe autonomous driv-ing. arXiv preprint arXiv:2412.15544 , 2024. 3 [14] B Ravi Kiran, Ibrahim Sobh, Victor Talpaert, Patrick Man-nion, Ahmad A. Al Sallab, Senthil Yogamani, and Patrick P´ erez. Deep reinforcement learning for autonomous driving: A survey. IEEE Transactions on Intelligent Transportation Systems , 23(6):4909–4926, 2022. 1 [15] Komal Kumar, Tajamul Ashraf, Omkar Thawakar, Rao Muhammad Anwer, Hisham Cholakkal, Mubarak Shah, Ming-Hsuan Yang, Phillip HS Torr, Fahad Shahbaz Khan, and Salman Khan. Llm post-training: A deep dive into reasoning large language models. arXiv preprint arXiv:2502.21321 , 2025. 3 [16] Yuqi Liu, Bohao Peng, Zhisheng Zhong, Zihao Yue, Fanbin Lu, Bei Yu, and Jiaya Jia. Seg-zero: Reasoning-chain guided segmentation via cognitive reinforcement. arXiv preprint arXiv:2503.06520 , 2025. 3 [17] Zichen Liu, Changyu Chen, Wenjun Li, Penghui Qi, Tianyu Pang, Chao Du, Wee Sun Lee, and Min Lin. Understanding r1-zero-like training: A critical perspective. arXiv preprint arXiv:2503.20783 , 2025. 3, 5 [18] Ziyu Liu, Zeyi Sun, Yuhang Zang, Xiaoyi Dong, Yuhang Cao, Haodong Duan, Dahua Lin, and Jiaqi Wang. Visual-rft: Visual reinforcement fine-tuning. arXiv preprint arXiv:2503.01785 , 2025. 3 [19] Fanqing Meng, Lingxiao Du, Zongkai Liu, Zhixiang Zhou, Quanfeng Lu, Daocheng Fu, Tiancheng Han, Botian Shi, Wenhai Wang, Junjun He, et al. Mm-eureka: Exploring the frontiers of multimodal reasoning with rule-based reinforce-ment learning. arXiv preprint arXiv:2503.07365 , 2025. 3 [20] Jiazhen Pan, Che Liu, Junde Wu, Fenglin Liu, Jiayuan Zhu, Hongwei Bran Li, Chen Chen, Cheng Ouyang, and Daniel Rueckert. Medvlm-r1: Incentivizing medical reasoning ca-pability of vision-language models (vlms) via reinforcement learning. In International Conference on Medical Image Computing and Computer-Assisted Intervention , pages 337– 347. Springer, 2025. 3 [21] Mateusz Pawlik and Nikolaus Augsten. Efficient computa-tion of the tree edit distance. ACM Transactions on Database Systems (TODS) , 40(1):1–40, 2015. 5 [22] Joseph Redmon, Santosh Divvala, Ross Girshick, and Ali Farhadi. You only look once: Unified, real-time object de-tection. In Proceedings of the IEEE conference on computer vision and pattern recognition , pages 779–788, 2016. 1 [23] Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun. Faster r-cnn: Towards real-time object detection with region proposal networks. IEEE transactions on pattern analysis and machine intelligence , 39(6):1137–1149, 2016. 1 [24] Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei Zhang, Mingchuan Zhang, YK Li, Yang Wu, et al. Deepseekmath: Pushing the limits of math-ematical reasoning in open language models. arXiv preprint arXiv:2402.03300 , 2024. 2, 3, 5 [25] Johannes Stallkamp, Marc Schlipsing, Jan Salmen, and Christian Igel. Man vs. computer: Benchmarking machine learning algorithms for traffic sign recognition. Neural net-works , 32:323–332, 2012. 6 [26] Omkar Thawakar, Dinura Dissanayake, Ketan Pravin More, Ritesh Thawkar, Ahmed Heakl, Noor Ahsan, Yuhao Li, Il-muz Zaman Mohammed Zumri, Jean Lahoud, Rao Muham-mad Anwer, et al. Llamav-o1: Rethinking step-by-step vi-sual reasoning in llms. In Findings of the Association for Computational Linguistics: ACL 2025 , pages 24290–24315, 2025. 3 [27] Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timoth´ ee Lacroix, Baptiste Rozi` ere, Naman Goyal, Eric Hambro, Faisal Azhar, et al. Llama: Open and efficient foundation language models. 
+
+arXiv preprint arXiv:2302.13971 , 2023. 3 [28] Junfan Wang, Yi Chen, Zhekang Dong, and Mingyu Gao. Improved yolov5 network for real-time multi-scale traffic sign detection. Neural Computing and Applications , 35(10): 7853–7865, 2023. 1 [29] Peng Wang, Shuai Bai, Sinan Tan, Shijie Wang, Zhihao Fan, Jinze Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, et al. Qwen2-vl: Enhancing vision-language model’s perception of the world at any resolution. arXiv preprint arXiv:2409.12191 , 2024. 3 [30] Xuezhi Wang, Jason Wei, Dale Schuurmans, Quoc Le, Ed Chi, Sharan Narang, Aakanksha Chowdhery, and Denny Zhou. Self-consistency improves chain of thought reason-ing in language models. arXiv preprint arXiv:2203.11171 ,2022. 3 [31] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, et al. Chain-of-thought prompting elicits reasoning in large lan-guage models. Advances in neural information processing systems , 35:24824–24837, 2022. 3, 5 [32] Guowei Xu, Peng Jin, Ziang Wu, Hao Li, Yibing Song, Lichao Sun, and Li Yuan. Llava-cot: Let vision language models reason step-by-step. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 2087– 2098, 2025. 3 [33] Chuang Yang, Kai Zhuang, Mulin Chen, Haozhao Ma, Xu Han, Tao Han, Changxing Guo, Han Han, Bingxuan Zhao, and Qi Wang. Traffic sign interpretation via natural language description. IEEE Transactions on Intelligent Transportation Systems , 2024. 1, 3 [34] Chuang Yang, Xu Han, Tao Han, Yuejiao Su, Junyu Gao, Hongyuan Zhang, Yi Wang, and Lap-Pui Chau. Signeye: Traffic sign interpretation from vehicle first-person view. 
+
+IEEE Transactions on Intelligent Transportation Systems ,2025. 2, 3 [35] Yi Yang, Hengliang Luo, Huarong Xu, and Fuchao Wu. Towards real-time traffic sign detection and classification. 
+
+IEEE Transactions on Intelligent transportation systems , 17 (7):2022–2031, 2015. 6 [36] Yi Yang, Xiaoxuan He, Hongkun Pan, Xiyan Jiang, Yan Deng, Xingtao Yang, Haoyu Lu, Dacheng Yin, Fengyun Rao, Minfeng Zhu, et al. R1-onevision: Advancing gen-eralized multimodal reasoning through cross-modal formal-ization. arXiv preprint arXiv:2503.10615 , 2025. 3 [37] Qiying Yu, Zheng Zhang, Ruofei Zhu, Yufeng Yuan, Xi-aochen Zuo, Yu Yue, Tiantian Fan, Gaohong Liu, Lingjun Liu, Xin Liu, et al. Dapo: An open-source llm reinforce-ment learning system at scale, 2025. URL https://arxiv. org/abs/2503.14476 , 2025. 3 [38] Ekim Yurtsever, Jacob Lambert, Alexander Carballo, and Kazuya Takeda. A survey of autonomous driving: Com-mon practices and emerging technologies. IEEE Access , 8: 58443–58469, 2020. 1 [39] Hao Zhang, Feng Li, Shilong Liu, Lei Zhang, Hang Su, Jun Zhu, Lionel M Ni, and Heung-Yeung Shum. Dino: Detr with improved denoising anchor boxes for end-to-end object detection. arXiv preprint arXiv:2203.03605 , 2022. 1 [40] Kaizhong Zhang and Dennis Shasha. Simple fast algorithms for the editing distance between trees and related problems. 
+
+SIAM journal on computing , 18(6):1245–1262, 1989. 5 [41] Lili Zhang, Kang Yang, Yucheng Han, Jing Li, Wei Wei, Hongxin Tan, Pei Yu, Ke Zhang, and Xudong Yang. Tsd-detr: A lightweight real-time detection transformer of traffic sign detection for long-range perception of autonomous driv-ing. Engineering Applications of Artificial Intelligence , 139: 109536, 2025. 1 [42] Jinguo Zhu, Weiyun Wang, Zhe Chen, Zhaoyang Liu, Shen-glong Ye, Lixin Gu, Hao Tian, Yuchen Duan, Weijie Su, Jie Shao, et al. Internvl3: Exploring advanced training and test-time recipes for open-source multimodal models. arXiv preprint arXiv:2504.10479 , 2025. 2, 6 [43] Xizhou Zhu, Weijie Su, Lewei Lu, Bin Li, Xiaogang Wang, and Jifeng Dai. Deformable detr: Deformable trans-formers for end-to-end object detection. arXiv preprint arXiv:2010.04159 , 2020. 1 [44] Zhe Zhu, Dun Liang, Songhai Zhang, Xiaolei Huang, Baoli Li, and Shimin Hu. Traffic-sign detection and classifica-tion in the wild. In Proceedings of the IEEE conference on computer vision and pattern recognition , pages 2110–2118, 2016. 1, 6 SignReasoner: Compositional Reasoning for Complex Traffic Sign Understanding via Functional Structure Units 
+
+## Supplementary Material 
+
+6. SignReasoner Implementations 
+
+We elaborate on several implementation details of SignRea-soner in this section, including the uniquely designed keys for each FSU (Sect.6.1), the specific prompt and response format employed to instruct the VLM for both Captioning and FSU-Reasoning (Sect.6.2), and the algorithmic imple-mentation of Tree Edited Distance (Sect.6.3) . 
+
+6.1. Keys in FSUs 
+
+We present the reserved keys for the four Functional Se-mantic Unit (FSU) categories in Tab. 5. 
+
+> Table 5. Summary of possible keys in each kind of FSU.
+
+Functions Possible Keys Lane Turn, Location, Special Lane, Time, Date, Speed, Weight, Height, Other Information 
+
+Direction Direction, Via, Destination, Traffic Status, Distance, Other Information 
+
+Construction Construction Site, Detour Information, Other Information 
+
+Notice Direction, License Plate, Vehicle Type, Time, Date, Road Range, Speed, Weight, Height, Other Information 
+
+6.2. Prompts and Responses 
+
+Three kinds of Prompts are adopted in our training data, in-cluding Captioning prompt Pcaption , FSU-Reasoning prompt 
+
+Preason and the Caption-FSU prompt Pcap-FSU , with each cor-responding to a unique response format. 
+
+Captioning. The captioning prompt ( Pcaption ) is de-signed to instruct VLMs to execute a comprehensive anal-ysis, which entails vividly describing the visual content within traffic sign images, inferring the underlying relations among the sign’s various elements, and ultimately articulat-ing the traffic sign’s significance and providing actionable driver guidance. 
+
+FSU-Reasoning. In contrast, the prompt for FSU-Reasoning ( Preason ) is primarily structured by providing the model with the predefined FSU categories and correspond-ing keys, subsequently instructing the model to perform the task of FSU decomposition. 
+
+Caption-FSU. Finally, the combined caption-FSU prompt ( Pcap-FSU ) is formulated by integrating the two prior prompt types. The model initially generates a descrip-tive caption following the instruction of the captioning prompt, and subsequently leverages this intermediate out-put to guide the FSU-Reasoning task. The details of these three prompts followed by represen-tative examples of the VLM’s generated responses are pre-sented in Tab.6 and Tab.7. 
+
+6.3. Tree Edited Distance 
+
+This algorithm calculates the Tree Edit Distance (TED), which determines the minimum cost required to transform one tree structure into another using a set of editing oper-ations (insertions, deletions, and modifications). We adopt this algorithm for measuring differences between predicted and ground truth FSU trees. Formally, the detail implemen-tations are illustrated in alg.2. It operates recursively in a bottom-up fashion. For internal nodes, the primary chal-lenge is matching their unordered children. This is solved by constructing a cost matrix based on the recursive dis-tances between all pairs of children and finding the optimal assignment (minimum weight matching) using the Linear Sum Assignment method (i.e., Hungarian Algorithm). For the ordered TED calculation, the assignment process is can-celed. The total distance is the sum of the current node’s modification cost, the minimum cost of the optimal child assignment, and the costs for handling any unmatched (in-serted or deleted) subtrees. 
+
+7. Training and Evaluation 
+
+This section details the specifics of the training and evaluation datasets (Sect.7.1), the training particulars (Sect.7.2)—including data construction, hyper-parameters, and hardware—and the comprehensive evaluation method-ology on the Structure protocols (Sect.7.3). 
+
+7.1. Datasets 
+
+Training Data. We primarily utilize two types of training data. The first type is the data designated for Caption Super-vised Fine-Tuning (SFT). This dataset consists of 5K clear traffic sign images acquired from on-board cameras. We employ the Pangu-MM-38B model for initial annotation, obtaining raw captions which are then subjected to manual Table 6. Example Prompts and Corresponding Model Responses for SignReasoner. 
+
+ID Prompt ( P ) / Model Responses Captioning Pcaption : Please analyze this cropped traffic sign image in detail and generate a detailed caption describing the colors, shapes, and patterns of the signs, and explain their meanings. This part of the answer should be placed between the <caption > < /caption > tags. 
+
+Responses: <caption >This traffic sign is blue in color and has the standard shape of a traffic direction sign, with a white crossroad pattern in the center. The sign displays the names and directions of three roads: 1. Fulong Road (Fulong Rd) is located at the top of the sign, indicating a straight-ahead direction. 2. Mingle Road (Mingle Rd) is on the left side of the sign, indicating a left turn. 3. Yangtaishan Road (Yangtaishan Rd) is on the right side of the sign, indicating a right turn. The color and shape of the traffic sign are designed to be simple and clear, using the white crossroad pattern to clearly indicate the options for going straight ahead or turning left or right. The road names are written in white font, creating a sharp contrast with the blue background, making the information easy to recognize and read. The primary purpose of the traffic sign is to help drivers choose the correct road direction, ensuring safe and efficient travel. </caption >
+
+FSU-Reasoning PCap-FSU : Please provide the information on the traffic sign in a structured format as follows: 1. Provide the global attribute information of the traffic sign. The output key values include {Traffic Sign, Elec-tronic Sign, Obstruction, Blur, Truncation }, with answers chosen from {Yes, No }. Provide the {Other Global Information } of the traffic sign, with answers selected from the traffic sign itself. 2. Provide the functional category of the traffic sign. The answer should be chosen from {Lane, Direction, Notice, Construction }. 3. Provide the number of functional information items on the sign (for lane informa-tion, this refers to the number of lanes). 4. List detailed explanations for each functional information item. For lane information, the output key values include {Electronic Sign, Turn, Location, Special Lane, Time, Date, Speed, Weight, Height, Other Information }. For direction information, the output key values include {Direction, Route, Destination, Traffic Status, Distance, Other Information }. For construction information, the output key values include {Construction Site, Detour Information, Other Information }.For notice information, the output key values include {Direction, License Plate, Vehicle Type, Time, Date, Road Range, Speed, Weight, Height, Other Information }. Only provide answers based on the text and symbols on the traffic sign, without adding any extra explanatory text. Place the structured response within the <FSU > < /FSU > tags. 
+
+Responses: <FSU >{“Traffic Sign”: “Yes”, “Electronic Sign”: “No”, “Obstruction”: “Yes”, “Trunca-tion”: “No”, “Blurriness”: “No”, “Function Type”: “Direction”, “Number of Direction Information”: “2”, “Direction Information 1”: {“Direction”: “Go Straight”, “Via”: “Li Yang Road”, “Destination”: “ [The Bund, Haining Road] ” }, “Direction Information 2”: {“Direction”: “Turn Right”, “Via”: “Li Yang Road”, “Destination”: “Obstruction” }} </FSU >
+
+quality assurance. The process involved correcting errors in the raw captions and augmenting them with the traffic sign’s significance and corresponding driver guidance. The sec-ond data type is curated by selecting 726 images from the initial 5K set, ensuring maximum data diversity. This sub-set was then subjected to a more granular annotation process using the FSU decomposition. Notably, for the first type of data, we mainly adopt it for caption-based SFT, thus all the 5K data are organized in the Captioning prompt formats for training. For the second type of data, due to the synergistic effect as noted in Sect.3.2, we use both the FSU-Reasoning and Caption-FSU formats to generate the training data, re-sulting in total of 1452 (i.e., 726 × 2) samples. 
+
+TrafficSignEval Benchmark. For evaluation purposes, we establish the first FSU-Reasoning benchmark Traffic-SignEval, which comprises 195 distinct traffic sign im-ages, all mutually exclusive from the training data, and is designed to reflect the VLM’s understanding performance across each category. Specifically, the benchmark includes 34 Direction signs, 21 Notice signs, 50 Lane signs, and 14 Construction signs. Each traffic sign within the bench-mark is also accompanied by the FSU decomposition an-notation to facilitate subsequent automated evaluation. All the training and evaluation data are traffic signs cropped from the driving scene images, with the average resolution of 265 × 225 .Table 7. Example Prompts and Corresponding Model Responses for SignReasoner. 
+
+ID Prompt ( P ) / Model Responses Caption-FSU PFSU-Reason : Please provide the information on the traffic sign in a structured format as follows: 1. Please analyze this cropped image of the traffic sign in detail and generate a detailed caption describing the colors, shapes, and patterns of the signs, and explain their meanings. This part of the answer should be placed between the <caption > < /caption > tags. 2. Based on the caption description, provide the global attribute information of the traffic sign. The output key values include {Traffic Sign, Electronic Sign, Obstruction, Blur, Truncation }, with answers chosen from {Yes, No }. Also, provide the {Other Global Information } of the traffic sign, with the answer selected from the traffic sign options. 3. Based on the caption description, determine the functional category of the traffic sign. The answer should be chosen from {Lane, Direction, Notice, Construction }. 4. Based on the caption description, indicate the number of functional information items on the sign (for lane information, this refers to the number of lanes). 5. Based on the caption de-scription, list detailed explanations for each functional information item. For lane information, the output key values include {Electronic Sign, Turn, Location, Special Lane, Time, Date, Speed, Weight, Height, Other Information }. For direction information, the output key values include {Direction, Route, Desti-nation, Traffic Status, Distance, Other Information }. For construction information, the output key values include {Construction Site, Detour Information, Other Information }. For notice information, the output key values include {Direction, License Plate, Vehicle Type, Time, Date, Road Range, Speed, Weight, Height, Other Information }. Only provide the corresponding answers based on the text and symbols on the traffic sign, without adding any extra explanatory text. The structured answers for sections 2-5 should be placed between the <FSU > < /FSU > tags. 
+
+Responses: <caption >This traffic sign is blue in color and has a standard traffic sign shape with a white crossroad pattern in the center. The sign displays the names and directions of three roads: 1. Fulong Road (Fulong Rd) is located at the top of the sign, indicating a straight ahead direction. 2. Mingle Road (Mingle Rd) is on the left side of the sign, indicating a left turn. 3. Yangtaishan Road (Yangtaishan Rd) is on the right side of the sign, indicating a right turn. The color and shape of the traffic sign are designed to be simple and clear, using the white crossroad pattern to clearly indicate the options for going straight ahead or turning left or right. The road names are written in white font, creating a sharp contrast with the blue background, making the information easy to recognize and read. The primary purpose of the traffic sign is to help drivers choose the correct road direction, ensuring safe and efficient driving. </caption >< FSU >“Traffic Sign”: “Yes”, “Electronic Sign”: “No”, “Blocked”: “No”, “Truncated”: “No”, “Blurred”: “No”, “Function Type”: “Direction”, “Number of Direction Information”: “3”, “Direction Information 1”: “Direction”: “Straight Ahead”, “Destination”: “ [Fulong Road, Fulong Rd] ”, “Direction Information 2”: “Direction”: “Left Turn”, “Destination”: “ [Mingle Road, Mingle Rd] ”, “Direction Information 3”: “Direction”: “Right Turn”, “Destination”: “ [Yangtaishan Road, Yangtaishan Rd] ” </FSU >
+
+7.2. Training Details 
+
+There are mainly two training stages in SignReasoner, the Caption-FSU Distillation and the FSU-GRPO. In the first stage, we SFT the full parameters of base VLM (i.e., Qwen2.5-VL-7B and Pangu-MM-7B) via the Caption-FSU and FSU-Reasoning formatted SFT data. Both VLMs are trained 20 epochs with the learning rates set to 2 × 10 −5. The min learning rate is set to 2 × 10 −6 under cosine decay. The training is implemented on eight 8-GPU nodes with global batch size set to 64. The max encoder se-quence length is set to 4096. We follow the ablation results to set the iterative steps as 2 for the best performance. For the second stage, we adopt the GRPO algorithm for RL training on VLM’s full parameters via the Caption-FSU formatted data on eight 8-GPU nodes. The GRPO training uses 1000 iters with learning rate set to 1 × 10 −6 and global batch size set to 32. The roll-out number is set to 8, with the roll-out batch size set to 32. For the GRPO hyperpa-rameters, we set gamma to 1.0, lambda to 0.95 and KL co-efficient to 0.05. All three rewards are adopted to form the mixed rewards RMixed as in Eq.6. The TED algorithm is il-lustrated in Sect. 6.3. We set σ1 = 0 .5, σ 2 = 5 , σ 3 = 0 .5 to stably transform the TED reward into the range [0,1]. The max encoder sequence length is set to 4096. All the training is implemented under the Ascend 910B3 GPU with PyTorch framework. Details about the GPU have been illustrated in the Compute Reporting Form. HUAWEI CONFIDENTIAL 内部资料 注意保密 
+
+Caption: 这张交通牌展示了六个交通标志，排列成三行两列，下方有一个黄色的矩形区域，内含“严管路”三个字。每个 交通标志的颜色、形状、图案和空间排布如下： \n\n1. 左上角的标志：限速 50 ，圆形红色边框，白色背景，黑色数字。 \n2. 
+
+右上角的标志：禁止停车，圆形红色边框，蓝色背景，红色禁止停车标志。 \n3. 左中部的标志：禁止鸣笛，圆形红色边框 ，白色背景，黑色禁止鸣笛标志。 \n4. 右中部的标志：非机动车靠右，圆形蓝色边框，白色背景，黑色非机动车图案。 \n5. 
+
+左下部的标志：机动车靠左，圆形蓝色边框，白色背景，黑色机动车图案。 \n6. 右下部的标志：行人靠右，圆形蓝色边框 ，白色背景，黑色行人图案。 
+
+FSU: {' 交通牌 ': '是', '电子牌 ': '否', '遮挡 ': '否', '截断 ': '否', '模糊 ': '否', '功能类型 ': '告示 ', '
+
+全局其他信息 ': '严管路 ', '告示信息数量 ': '6', '告示信息 1': {' 速度 ': '限速 50'}, '告示信息 2': {' 其他信息 
+
+': '禁止停车 '}, '告示信息 3': {' 其他信息 ': '禁止鸣笛 '}, '告示信息 4': {' 其他信息 ': '非机动车靠右 '}, '告示 信息 5': {' 其他信息 ': '机动车靠左 '}, '告示信息 6': {' 其他信息 ': '[ 行人 ,非机动车 ]'}} 
+
+Caption: 这张交通牌的背景颜色为蓝色，牌下方有一个公交车和一辆多成员车辆（ 2+ ）的图案。牌上左侧有一个限 速60 的标志，下方是牌的主要文字内容。文字内容为：公交 +多乘员专用车道，工作日（除法定节假日外） 07:00-09:00 。牌的整体形状为长方形，元素的空间排布从上到下依次是限速标志和车道使用时间说明。车道使用时间说 明位于牌的下部。牌的整体设计简洁明了，主要目的是告知驾驶员公交车和多成员车辆在特定时间段内可以使用的 车道，同时提醒驾驶员注意限速。 
+
+FSU: {' 交通牌 ': '是', '电子牌 ': '否', '遮挡 ': '否', '截断 ': '否', '模糊 ': '否', '功能类型 ': '车道', '车道信息数量 ': '1', '车道信息 1': {' 特殊车道 ': '[ 公交 ,多乘员 ,专用车道 ,2+]', '时间 ': '07:00 ‐
+
+09:00', '日期 ': '工作日（除法定节假日外） ', '速度 ': '最高限速 60', '其他信息 ': '[ 公交车 ,多成员机动 车]'}} 
+
+Caption: This traffic sign displays six individual traffic signs arranged in three rows and two columns, with a rectangular yellow area at the bottom containing the Chinese characters " 严管路 " (Strictly Controlled Road). The color, shape, pattern, and spatial arrangement of each traffic sign are as follows: 1. Top-Left Sign: Speed Limit 50, circular with a red border, white background, and black numerals. 2. Top-Right Sign: No Stopping, circular with a red border, blue background, and a red no stopping symbol. 3. Middle-Left Sign: No Honking, circular with a red border, white background, and a black no honking symbol. 4. Middle-Right Sign: Non-motorized Vehicles Keep Right, circular with a blue border, white background, and a black non-motorized vehicle pattern. 5. Bottom-Left Sign: Motorized Vehicles Keep Left, circular with a blue border, white background, and a black motorized vehicle pattern. 6. Bottom-Right Sign: Pedestrians Keep Right, circular with a blue border, white background, and a black pedestrian pattern. 
+
+FSU: {'TrafficSign': 'Yes', 'Electronic': 'No', 'Obscured': 'No', 'Truncated': 'No', 'Blurry': 'No', 'Function Type': 'Notice', 'Global Other Info': 'Strictly Controlled Road', 'Notice Count': '6', 'Notice Info 1': {'Speed': 'Speed Limit 50'}, 'Notice Info 2': {'Other Info': 'No Stopping'}, 'Notice Info 3': {'Other Info': 'No Honking'}, 'Notice Info 4': {'Other Info': 'Non-motorized Vehicles Keep Right'}, 'Notice Info 5': {'Other Info': 'Motorized Vehicles Keep Left'}, 'Notice Info 6': {'Other Info': '[Pedestrians,Non-motorized Vehicles]'}} 
+
+Caption: This traffic sign has a blue background, with a bus and a High-Occupancy Vehicle (2+) pattern at the bottom. The upper left side of the sign features a Speed Limit 60 symbol, below which is the main text content. The text reads: Bus + High-Occupancy Vehicle Only Lane, Weekdays (excluding statutory holidays) 07:00-09:00. The overall shape of the sign is rectangular, and the elements are spatially arranged from top to bottom, including the speed limit sign and the lane usage time details. The speed limit sign is located on the upper left side of the sign, and the lane usage time details are at the bottom. The overall design of the sign is concise and clear, with the main purpose of informing drivers about the lane designated for buses and multi-occupant vehicles during specific time periods, while also reminding drivers of the speed limit. 
+
+FSU: {'TrafficSign': 'Yes', 'Electronic': 'No', 'Obscured': 'No', 'Truncated': 'No', 'Blurry': 'No', 'Function Type': 'Lane', 'Lane Count': '1', 'Lane Info 1': {'Special Lane': '[Bus, High-Occupancy, Only Lane, 2+]', 'Time': '07:00-09:00', 'Date': 'Weekdays (excluding statutory holidays)', 'Speed': 'Maximum Speed Limit 60', 'Other Info': '[Bus, High-Occupancy Vehicle]'}} Figure 6. Visualizations of Traffic Sign Understanding in SignReasoner (Pangu-MM-7B). HUAWEI CONFIDENTIAL 内部资料 注意保密 
+
+Caption: 这张交通牌是黄色的，分为左右两部分。左侧包含限速 40 和施工的交通标志 。右侧是前方右转东海道的道路信息，包括道南段（深盐路口 -中港三路）封闭施工，车 辆需提前择道行驶。 \n\n 左侧限速 40 的标志是圆形的，红色边框，白色背景，下方有一 个施工标志，施工标志是三角形的，黑色背景，白色施工图案。右侧道路信息是文字描 述，无其他图案。 \n\n 交通牌的空间排布是左侧限速和施工信息，右侧道路信息。限速 和施工信息提醒驾驶员注意前方道路施工，最高速度 40 。道路信息告知驾驶员前方右转 东海道，具体路段封闭施工，车辆需提前择道行驶。 
+
+FSU: {' 交通牌 ': '是', '电子牌 ': '否', '遮挡 ': '否', '截断 ': '否', '模糊 ': 
+
+'否', '功能类型 ': '施工 ', '施工信息数量 ': '1', '施工信息 1': {' 施工地点 ': 
+
+'[ 前方右转东海 ,道南段（深盐路口 ‐中,港三路 ]', '绕行信息 ': '辆提前择道行驶。 
+
+', '其他信息 ': '[ 最高速度 40, 施工 ,封闭施工 ]'} 
+
+Caption: 这张交通牌是道路指示牌，主要颜色为蓝色和绿色，牌下方有一条灰色的道路名 称带。牌的形状是长方形，牌的中心有一个白色的十字路口图案。牌上显示了三条道路： 
+
+\n\n1. 前方直行：前方直行前方是 S3 省道和津滨高速，距离 12km 。\n2. 左转：左转前方是 梅州道和 MEIZHOU Rd ，距离 0.6km 。\n3. 右转：右转前方是随州道和 SUIZHOU Rd ，距离 
+
+0.9km 。\n\n 牌下方有三个方向指示：南、天池路、北。 \n\n 交通牌的主要用途是帮助驾驶 员选择行驶方向和距离，通过道路名称和距离信息，使驾驶员能够快速做出行驶决策。牌上 的道路名称和方向指示可以帮助驾驶员更好地了解前方路况和选择适合的行驶路线。 
+
+FSU: {' 交通牌 ': '是', '电子牌 ': '否', '遮挡 ': '否', '截断 ': '否', '模糊 ': '
+
+否', '功能类型 ': '指路 ', '全局其他信息 ': '[ 南,天池路 ,北]', '指路信息数量 ': 
+
+'3', '指路信息 1': {' 方向 ': '直行 ', '目的地 ': '[S3 省道 ,津滨高速 ]', '距离 ': 
+
+'12km'}, '指路信息 2': {' 方向 ': '左转 ', '目的地 ': '[ 梅州道 ,MEIZHOURd]', '距离': '0.6km'}, '指路信息 3': {' 方向 ': '右转 ', '目的地 ': '[ 随州道 
+
+,SUIZHOURd]', '距离 ': '0.9km'}} 
+
+Caption: This traffic sign is yellow and is divided into left and right sections. The left section contains a Speed Limit 40 sign and a Construction sign. The right section provides road information: Donghai Road to the right ahead, including the text: South Section (Shenyan Road Intersection - Zhonggang 3rd Road) is closed for construction; vehicles must choose an alternative route in advance. The Speed Limit 40 sign on the left is circular with a red border and a white background. Below it is a construction sign, which is triangular with a black background and a white construction pattern. The road information on the right is a text description with no other patterns. The spatial arrangement of the sign is construction and speed limit information on the left, and road information on the right. The speed limit and construction information reminds the driver to be aware of the road construction ahead and the maximum speed of 40 km/h. The road information informs the driver that Donghai Road is to the right ahead, that a specific section is closed for construction, and that vehicles must choose an alternative route in advance. 
+
+FSU : {'TrafficSign': 'Yes', 'Electronic': 'No', 'Obscured': 'No', 'Truncated': 'No', 'Blurry': 'No', 'Function Type': 'Construction', 'Construction Count': '1', 'Construction Info 1': {'Location': '[Donghai Road South Section to the Right Ahead (Shenyan Road Intersection - Zhonggang 3rd Road)]', 'Detour Info': 'Vehicles must choose an alternative route in advance.', 'Other Info': '[Maximum Speed 40, Construction, Closed for Construction]'}} 
+
+Caption: This traffic sign is a road guidance sign, with primary colors of blue and green, and a gray road name strip at the bottom. The sign is rectangular and features a white crossroads pattern at its center. The sign displays three road options: 1. Straight Ahead: Straight ahead leads to S3 Provincial Road and Jinbin Expressway, with a distance of 12km. 2. Left Turn: Turning left leads to Meizhou Road and MEIZHOU Rd, with a distance of 0.6km. 3. Right Turn: Turning right leads to Suizhou Road and SUIZHOU Rd, with a distance of 0.9km. The bottom of the sign indicates three directions: South ( 南), Tianchi Road ( 天池路 ), and North ( 北). The main purpose of the sign is to assist drivers in choosing their direction and route, and to help them quickly make driving decisions using the road names and distance information. The road names and directional indicators on the sign help drivers better understand the road conditions ahead and select the appropriate route. 
+
+FSU: {'TrafficSign': 'Yes', 'Electronic': 'No', 'Obscured': 'No', 'Truncated': 'No', 'Blurry': 'No', 'Function Type': 'Direction', 'Global Other Info': '[South, Tianchi Road, North]', 'Direction Count': '3', 'Direction Info 1': {'Direction': 'Straight', 'Destination': '[S3 Provincial Road, Jinbin Expressway]', 'Distance': '12km'}, 'Direction Info 2': {'Direction': 'Left Turn', 'Destination': '[Meizhou Road, MEIZHOU Rd]', 'Distance': '0.6km'}, 'Direction Info 3': {'Direction': 'Right Turn', 'Destination': '[Suizhou Road, SUIZHOU Rd]', 'Distance': '0.9km'}} 
+
+Figure 7. Visualizations of Traffic Sign Understanding in SignReasoner (Pangu-MM-7B). 
+
+7.3. Evaluation Details 
+
+The specific process of automated evaluation in the TrafficSignEval-Structure protocol is illustrated in Fig.8. The input consists of the Predicted and True FSU Dictio-naries. First, the matching score, Score 1, for the top-level keys is computed. This score is a weighted sum where pg is the binary match indicator for the g-th top-level key ( pg = 1 
+
+for a match, and pg = 0 otherwise). For top-level keys, a match is counted only if their respective values are strictly identical. wg denotes the weight assigned to each key, with greater weight assigned to critical keys (e.g., Function 
+
+and FSU Count , etc.). Score 1 is then compared against a threshold ϵ1(0 .8) : if the score falls below the threshold, the sample is classified as incorrect; otherwise, the evalu-ation proceeds to the Second-Level Key Score calculation. In this stage, the matching score si, for each FSU is firstly calculated. Here, pij indicates whether the j-th key (out of a total N keys) within the i-th FSU matches. String sim-ilarity (with a threshold of 0.5) is employed to determine the match, where pij = 1 for a match and pij = 0 other-wise. Finally, the scores ( si) of all M FSUs are averaged to yield the Second-Level Key Score 2. If Score 2 falls be-low the threshold ϵ2(0 .5) , the sample is judged as incorrect; otherwise, it is classified as a correct sample. HUAWEI CONFIDENTIAL 内部资料 注意保密 
+
+Start 
+
+Input: Prediction and True FSU Dictionary 
+
+Calculate Top-Level Key Score :
+
+𝑆𝑐𝑜𝑟𝑒 ଵ ൌ ∑ 𝑤 ௚ ∗ 𝑝 ௚ீ ௚ୀ଴ ∑ 𝑤 ௚ீ ௚ୀ଴ 
+
+Is 𝑆𝑐𝑜𝑟𝑒 ଵ ൑ 𝜖 ଵ?
+
+Calculate Second-Level Key Score :
+
+𝑠 ௜ ൌ ∑ ௣ ೔ೕಿ ೕసబ ே ; 𝑆𝑐𝑜𝑟𝑒 ଶ ൌ ∑ ௌ ೔ಾ೔సబ ெ
+
+Is 𝑆𝑐𝑜𝑟𝑒 ଶ ൑ 𝜖 ଶ?
+
+Output: 
+
+Prediction Correct 
+
+Output: 
+
+Prediction Wrong 
+
+Yes Yes No No Figure 8. Flowchart of automatic evaluation algorithm. 
+
+8. More Visualizations 
+
+In this section, we provide more comprehensive visualized results (Fig.6-7) in both Chinese and English to demonstrate the powerful capabilities of SignReasoner. Algorithm 2 Tree Edit Distance 
+
+Require: Tree nodes n1, n2
+
+Ensure: Minimum edit cost  
+
+> 1:
+
+Function HELPER (n1, n 2):  
+
+> 2:
+
+cost ← 0 
+
+> 3:
+
+if ISLEAF (n1) and ISLEAF (n2) then  
+
+> 4:
+
+# Case 1: Both are leaf nodes  
+
+> 5:
+
+if n1.name = n2.name then  
+
+> 6:
+
+if n1.value ̸ = n2.value then  
+
+> 7:
+
+cost ← cost + 1 # Same name, different value  
+
+> 8:
+
+end if  
+
+> 9:
+
+else  
+
+> 10:
+
+cost ← cost + 2 # Different name: replace cost  
+
+> 11:
+
+end if  
+
+> 12:
+
+else if ISLEAF (n1) then  
+
+> 13:
+
+# Case 2: Only n1 is leaf  
+
+> 14:
+
+cost ← cost + n2.size + 1 # Insert subtree n2 
+
+> 15:
+
+else if ISLEAF (n2) then  
+
+> 16:
+
+# Case 3: Only n2 is leaf  
+
+> 17:
+
+cost ← cost + n1.size + 1 # Delete subtree n1 
+
+> 18:
+
+else  
+
+> 19:
+
+# Case 4: Both are internal nodes  
+
+> 20:
+
+if n1.name ̸ = n2.name then  
+
+> 21:
+
+cost ← cost + 1 # Modify current node name  
+
+> 22:
+
+end if  
+
+> 23:
+
+C1 ← n1.children, C2 ← n2.children  
+
+> 24:
+
+M ← | C1|, N ← | C2| 
+
+> 25:
+
+Initialize cost matrix D of size M × N 
+
+> 26:
+
+for i = 0 to M − 1 do  
+
+> 27:
+
+for j = 0 to N − 1 do  
+
+> 28:
+
+Di,j ← HELPER (C1[i], C 2[j]) # Recursive calculation  
+
+> 29:
+
+end for  
+
+> 30:
+
+end for  
+
+> 31:
+
+(min sum, pairs ) ← LINEAR SUM ASSIGNMENT (D) # Hungarian Algo  
+
+> 32:
+
+cost ← cost + min sum  
+
+> 33:
+
+rows ← { r | (r, c ) ∈ pairs } 
+
+> 34:
+
+cols ← { c | (r, c ) ∈ pairs } 
+
+> 35:
+
+for i = 0 to M − 1 do  
+
+> 36:
+
+if i / ∈ rows then  
+
+> 37:
+
+cost ← cost + C1[i].size + 1 # Unmatched child: delete  
+
+> 38:
+
+end if  
+
+> 39:
+
+end for  
+
+> 40:
+
+for j = 0 to N − 1 do  
+
+> 41:
+
+if j / ∈ cols then  
+
+> 42:
+
+cost ← cost + C2[j].size + 1 # Unmatched child: insert  
+
+> 43:
+
+end if  
+
+> 44:
+
+end for  
+
+> 45:
+
+end if  
+
+> 46:
+
+return cost
