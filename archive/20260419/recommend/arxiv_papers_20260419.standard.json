@@ -1,0 +1,692 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-19T19:31:49.313821+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 7,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 21,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2604.12102v1",
+      "title": "Spatial Atlas: Compute-Grounded Reasoning for Spatial-Aware Research Agent Benchmarks",
+      "abstract": "We introduce compute-grounded reasoning (CGR), a design paradigm for spatial-aware research agents in which every answerable sub-problem is resolved by deterministic computation before a language model is asked to generate. Spatial Atlas instantiates CGR as a single Agent-to-Agent (A2A) server that handles two challenging benchmarks: FieldWorkArena, a multimodal spatial question-answering benchmark spanning factory, warehouse, and retail environments, and MLE-Bench, a suite of 75 Kaggle machine learning competitions requiring end-to-end ML engineering. A structured spatial scene graph engine extracts entities and relations from vision descriptions, computes distances and safety violations deterministically, then feeds computed facts to large language models, thereby avoiding hallucinated spatial reasoning. Entropy-guided action selection maximizes information gain per step and routes queries across a three-tier frontier model stack (OpenAI + Anthropic). A self-healing ML pipeline with strategy-aware code generation, a score-driven iterative refinement loop, and a prompt-based leak audit registry round out the system. We evaluate across both benchmarks and show that CGR yields competitive accuracy while maintaining interpretability through structured intermediate representations and deterministic spatial computations.",
+      "authors": [
+        "Arun Sharma"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-04-13T22:22:07+00:00",
+      "link": "https://arxiv.org/pdf/2604.12102v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "spatial-aware research agents using multimodal reasoning",
+      "llm_evidence_cn": "使用多模态推理的空间感知研究智能体",
+      "llm_evidence": "使用多模态推理的空间感知研究智能体",
+      "canonical_evidence": "使用多模态推理的空间感知研究智能体",
+      "llm_tldr_en": "Introduces a compute-grounded reasoning paradigm for spatial-aware research agents to improve accuracy.",
+      "llm_tldr_cn": "为空间感知研究智能体引入计算落地推理范式，以提高准确性。",
+      "llm_tldr": "为空间感知研究智能体引入计算落地推理范式，以提高准确性。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.12358v2",
+      "title": "Why and When Visual Token Pruning Fails? A Study on Relevant Visual Information Shift in MLLMs Decoding",
+      "abstract": "Recently, visual token pruning has been studied to handle the vast number of visual tokens in Multimodal Large Language Models. However, we observe that while existing pruning methods perform reliably on simple visual understanding, they struggle to effectively generalize to complex visual reasoning tasks, a critical gap underexplored in previous studies. Through a systematic analysis, we identify Relevant Visual Information Shift (RVIS) during decoding as the primary failure driver. To address this, we propose Decoding-stage Shift-aware Token Pruning (DSTP), a training-free add-on framework that enables existing pruning methods to align visual tokens with shifting reasoning requirements during the decoding stage. Extensive experiments demonstrate that DSTP significantly mitigates performance degradation of pruning methods in complex reasoning tasks, while consistently yielding performance gains even across visual understanding benchmarks. Furthermore, DSTP demonstrates effectiveness across diverse state-of-the-art architectures, highlighting its generalizability and efficiency with minimal computational overhead.",
+      "authors": [
+        "Jiwan Kim",
+        "Kibum Kim",
+        "Wonjoong Kim",
+        "Byung-Kwan Lee",
+        "Chanyoung Park"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-14T06:48:31+00:00",
+      "link": "https://arxiv.org/pdf/2604.12358v2",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "aligning visual tokens with shifting reasoning requirements",
+      "llm_evidence_cn": "使视觉标记与不断变化的推理需求对齐",
+      "llm_evidence": "使视觉标记与不断变化的推理需求对齐",
+      "canonical_evidence": "使视觉标记与不断变化的推理需求对齐",
+      "llm_tldr_en": "Addresses failure in complex visual reasoning by aligning token pruning with decoding-stage reasoning shifts.",
+      "llm_tldr_cn": "通过在解码阶段使标记剪枝与推理需求对齐，解决复杂视觉推理任务中的失效问题。",
+      "llm_tldr": "通过在解码阶段使标记剪枝与推理需求对齐，解决复杂视觉推理任务中的失效问题。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "visual reasoning and decision making",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.14041v1",
+      "title": "Seek-and-Solve: Benchmarking MLLMs for Visual Clue-Driven Reasoning in Daily Scenarios",
+      "abstract": "Daily scenarios are characterized by visual richness, requiring Multimodal Large Language Models (MLLMs) to filter noise and identify decisive visual clues for accurate reasoning. Yet, current benchmarks predominantly aim at evaluating MLLMs' pre-existing knowledge or perceptual understanding, often neglecting the critical capability of reasoning. To bridge this gap, we introduce DailyClue, a benchmark designed for visual clue-driven reasoning in daily scenarios. Our construction is guided by two core principles: (1) strict grounding in authentic daily activities, and (2) challenging query design that necessitates more than surface-level perception. Instead of simple recognition, our questions compel MLLMs to actively explore suitable visual clues and leverage them for subsequent reasoning. To this end, we curate a comprehensive dataset spanning four major daily domains and 16 distinct subtasks. Comprehensive evaluation across MLLMs and agentic models underscores the formidable challenge posed by our benchmark. Our analysis reveals several critical insights, emphasizing that the accurate identification of visual clues is essential for robust reasoning.",
+      "authors": [
+        "Xiaomin Li",
+        "Tala Wang",
+        "Zichen Zhong",
+        "Ying Zhang",
+        "Zirui Zheng",
+        "Takashi Isobe",
+        "Dezhuang Li",
+        "Huchuan Lu",
+        "You He",
+        "Xu Jia"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-15T16:22:10+00:00",
+      "link": "https://arxiv.org/pdf/2604.14041v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "visual clue-driven reasoning in daily scenarios",
+      "llm_evidence_cn": "日常场景中视觉线索驱动的推理",
+      "llm_evidence": "日常场景中视觉线索驱动的推理",
+      "canonical_evidence": "日常场景中视觉线索驱动的推理",
+      "llm_tldr_en": "Benchmarks MLLMs on visual clue-driven reasoning to evaluate active exploration and decision making.",
+      "llm_tldr_cn": "推出DailyClue基准测试，评估多模态大模型在日常场景中基于视觉线索的推理能力。",
+      "llm_tldr": "推出DailyClue基准测试，评估多模态大模型在日常场景中基于视觉线索的推理能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.14041v2",
+      "title": "Seek-and-Solve: Benchmarking MLLMs for Visual Clue-Driven Reasoning in Daily Scenarios",
+      "abstract": "Daily scenarios are characterized by visual richness, requiring Multimodal Large Language Models (MLLMs) to filter noise and identify decisive visual clues for accurate reasoning. Yet, current benchmarks predominantly aim at evaluating MLLMs' pre-existing knowledge or perceptual understanding, often neglecting the critical capability of reasoning. To bridge this gap, we introduce DailyClue, a benchmark designed for visual clue-driven reasoning in daily scenarios. Our construction is guided by two core principles: (1) strict grounding in authentic daily activities, and (2) challenging query design that necessitates more than surface-level perception. Instead of simple recognition, our questions compel MLLMs to actively explore suitable visual clues and leverage them for subsequent reasoning. To this end, we curate a comprehensive dataset spanning four major daily domains and 16 distinct subtasks. Comprehensive evaluation across MLLMs and agentic models underscores the formidable challenge posed by our benchmark. Our analysis reveals several critical insights, emphasizing that the accurate identification of visual clues is essential for robust reasoning.",
+      "authors": [
+        "Xiaomin Li",
+        "Tala Wang",
+        "Zichen Zhong",
+        "Ying Zhang",
+        "Zirui Zheng",
+        "Takashi Isobe",
+        "Dezhuang Li",
+        "Huchuan Lu",
+        "You He",
+        "Xu Jia"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-15T16:22:10+00:00",
+      "link": "https://arxiv.org/pdf/2604.14041v2",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "benchmarking MLLMs for visual clue-driven reasoning in daily scenarios",
+      "llm_evidence_cn": "评估多模态大模型在日常场景中视觉线索驱动的推理能力",
+      "llm_evidence": "评估多模态大模型在日常场景中视觉线索驱动的推理能力",
+      "canonical_evidence": "评估多模态大模型在日常场景中视觉线索驱动的推理能力",
+      "llm_tldr_en": "Introduces DailyClue, a benchmark for evaluating complex visual reasoning in multimodal large language models.",
+      "llm_tldr_cn": "引入了DailyClue，这是一个用于评估多模态大模型复杂视觉推理能力的基准。",
+      "llm_tldr": "引入了DailyClue，这是一个用于评估多模态大模型复杂视觉推理能力的基准。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.14399v1",
+      "title": "SpaceMind: A Modular and Self-Evolving Embodied Vision-Language Agent Framework for Autonomous On-orbit Servicing",
+      "abstract": "Autonomous on-orbit servicing demands embodied agents that perceive through visual sensors, reason about 3D spatial situations, and execute multi-phase tasks over extended horizons. We present SpaceMind, a modular and self-evolving vision-language model (VLM) agent framework that decomposes knowledge, tools, and reasoning into three independently extensible dimensions: skill modules with dynamic routing, Model Context Protocol (MCP) tools with configurable profiles, and injectable reasoning-mode skills. An MCP-Redis interface layer enables the same codebase to operate across simulation and physical hardware without modification, and a Skill Self-Evolution mechanism distills operational experience into persistent skill files without model fine-tuning. We validate SpaceMind through 192 closed-loop runs across five satellites, three task types, and two environments, a UE5 simulation and a physical laboratory, deliberately including degraded conditions to stress-test robustness. Under nominal conditions all modes achieve 90--100% navigation success; under degradation, the Prospective mode uniquely succeeds in search-and-approach tasks where other modes fail. A self-evolution study shows that the agent recovers from failure in four of six groups from a single failed episode, including complete failure to 100% success and inspection scores improving from 12 to 59 out of 100. Real-world validation confirms zero-code-modification transfer to a physical robot with 100% rendezvous success. Code: https://github.com/wuaodi/SpaceMind",
+      "authors": [
+        "Aodi Wu",
+        "Haodong Han",
+        "Xubo Luo",
+        "Ruisuo Wang",
+        "Shan He",
+        "Xue Wan"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI",
+        "eess.SY"
+      ],
+      "published": "2026-04-15T20:27:57+00:00",
+      "link": "https://arxiv.org/pdf/2604.14399v1",
+      "tags": [
+        "keyword:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "modular and self-evolving vision-language agent framework",
+      "llm_evidence_cn": "模块化且自进化的视觉语言智能体框架",
+      "llm_evidence": "模块化且自进化的视觉语言智能体框架",
+      "canonical_evidence": "模块化且自进化的视觉语言智能体框架",
+      "llm_tldr_en": "A modular VLM agent framework for autonomous servicing that evolves through operational experience.",
+      "llm_tldr_cn": "一种用于自主服务的模块化VLM智能体框架，通过操作经验进行进化。",
+      "llm_tldr": "一种用于自主服务的模块化VLM智能体框架，通过操作经验进行进化。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "advancements in vision language reasoning agents",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.14520v1",
+      "title": "Chain of Modality: From Static Fusion to Dynamic Orchestration in Omni-MLLMs",
+      "abstract": "Omni-modal Large Language Models (Omni-MLLMs) promise a unified integration of diverse sensory streams. However, recent evaluations reveal a critical performance paradox: unimodal baselines frequently outperform joint multimodal inference. We trace this perceptual fragility to the static fusion topologies universally employed by current models, identifying two structural pathologies: positional bias in sequential inputs and alignment traps in interleaved formats, which systematically distort attention regardless of task semantics. To resolve this functional rigidity, we propose Chain of Modality (CoM), an agentic framework that transitions multimodal fusion from passive concatenation to dynamic orchestration. CoM adaptively orchestrates input topologies, switching among parallel, sequential, and interleaved pathways to neutralize structural biases. Furthermore, CoM bifurcates cognitive execution into two task-aligned pathways: a streamlined ``Direct-Decide'' path for direct perception and a structured ``Reason-Decide'' path for analytical auditing. Operating in either a training-free or a data-efficient SFT setting, CoM achieves robust and consistent generalization across diverse benchmarks.",
+      "authors": [
+        "Ziyang Luo",
+        "Nian Liu",
+        "Junwei Han"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-16T01:21:14+00:00",
+      "link": "https://arxiv.org/pdf/2604.14520v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "agentic framework for dynamic multimodal orchestration",
+      "llm_evidence_cn": "用于动态多模态编排的代理框架",
+      "llm_evidence": "用于动态多模态编排的代理框架",
+      "canonical_evidence": "用于动态多模态编排的代理框架",
+      "llm_tldr_en": "Proposes Chain of Modality (CoM) to transition MLLMs from static fusion to dynamic agentic orchestration.",
+      "llm_tldr_cn": "提出CoM框架，将多模态大模型从静态融合转向动态代理编排。",
+      "llm_tldr": "提出CoM框架，将多模态大模型从静态融合转向动态代理编排。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.15231v1",
+      "title": "RadAgent: A tool-using AI agent for stepwise interpretation of chest computed tomography",
+      "abstract": "Vision-language models (VLM) have markedly advanced AI-driven interpretation and reporting of complex medical imaging, such as computed tomography (CT). Yet, existing methods largely relegate clinicians to passive observers of final outputs, offering no interpretable reasoning trace for them to inspect, validate, or refine. To address this, we introduce RadAgent, a tool-using AI agent that generates CT reports through a stepwise and interpretable process. Each resulting report is accompanied by a fully inspectable trace of intermediate decisions and tool interactions, allowing clinicians to examine how the reported findings are derived. In our experiments, we observe that RadAgent improves Chest CT report generation over its 3D VLM counterpart, CT-Chat, across three dimensions. Clinical accuracy improves by 6.0 points (36.4% relative) in macro-F1 and 5.4 points (19.6% relative) in micro-F1. Robustness under adversarial conditions improves by 24.7 points (41.9% relative). Furthermore, RadAgent achieves 37.0% in faithfulness, a new capability entirely absent in its 3D VLM counterpart. By structuring the interpretation of chest CT as an explicit, tool-augmented and iterative reasoning trace, RadAgent brings us closer toward transparent and reliable AI for radiology.",
+      "authors": [
+        "Mélanie Roschewitz",
+        "Kenneth Styppa",
+        "Yitian Tao",
+        "Jiwoong Sohn",
+        "Jean-Benoit Delbrouck",
+        "Benjamin Gundersen",
+        "Nicolas Deperrois",
+        "Christian Bluethgen",
+        "Julia Vogt",
+        "Bjoern Menze",
+        "Farhad Nooralahzadeh",
+        "Michael Krauthammer",
+        "Michael Moor"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-16T17:09:30+00:00",
+      "link": "https://arxiv.org/pdf/2604.15231v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "VLM-based agent for interpretable reasoning",
+      "llm_evidence_cn": "基于VLM的代理进行可解释推理",
+      "llm_evidence": "基于VLM的代理进行可解释推理",
+      "canonical_evidence": "基于VLM的代理进行可解释推理",
+      "llm_tldr_en": "RadAgent is a tool-using VLM agent that generates interpretable reasoning traces for medical imaging.",
+      "llm_tldr_cn": "RadAgent是一个使用工具的VLM代理，为医学影像生成可解释的推理过程。",
+      "llm_tldr": "RadAgent是一个使用工具的VLM代理，为医学影像生成可解释的推理过程。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.11042v1",
+      "title": "Improving Layout Representation Learning Across Inconsistently Annotated Datasets via Agentic Harmonization",
+      "abstract": "Fine-tuning object detection (OD) models on combined datasets assumes annotation compatibility, yet datasets often encode conflicting spatial definitions for semantically equivalent categories. We propose an agentic label harmonization workflow that uses a vision-language model to reconcile both category semantics and bounding box granularity across heterogeneous sources before training. We evaluate on document layout detection as a challenging case study, where annotation standards vary widely across corpora. Without harmonization, naïve mixed-dataset fine-tuning degrades a pretrained RT-DETRv2 detector: on SCORE-Bench, which measures how accurately the full document conversion pipeline reproduces ground-truth structure, table TEDS drops from 0.800 to 0.750. Applied to two corpora whose 16 and 10 category taxonomies share only 8 direct correspondences, harmonization yields consistent gains across content fidelity, table structure, and spatial consistency: detection F-score improves from 0.860 to 0.883, table TEDS improves to 0.814, and mean bounding box overlap drops from 0.043 to 0.016. Representation analysis further shows that harmonized training produces more compact and separable post-decoder embeddings, confirming that annotation inconsistency distorts the learned feature space and that resolving it before training restores representation structure.",
+      "authors": [
+        "Renyu Li",
+        "Vladimir Kirilenko",
+        "Yao You",
+        "Crag Wolfe"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-13T06:14:20+00:00",
+      "link": "https://arxiv.org/pdf/2604.11042v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Agentic harmonization using vision-language models for layout detection",
+      "llm_evidence_cn": "使用视觉语言模型进行布局检测的代理协调",
+      "llm_evidence": "使用视觉语言模型进行布局检测的代理协调",
+      "canonical_evidence": "使用视觉语言模型进行布局检测的代理协调",
+      "llm_tldr_en": "Uses VLMs in an agentic workflow to reconcile inconsistent annotations across datasets for better layout learning.",
+      "llm_tldr_cn": "在代理工作流中使用VLM来协调跨数据集的不一致标注，以实现更好的布局学习。",
+      "llm_tldr": "在代理工作流中使用VLM来协调跨数据集的不一致标注，以实现更好的布局学习。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.10949v1",
+      "title": "Pseudo-Unification: Entropy Probing Reveals Divergent Information Patterns in Unified Multimodal Models",
+      "abstract": "Unified multimodal models (UMMs) were designed to combine the reasoning ability of large language models (LLMs) with the generation capability of vision models. In practice, however, this synergy remains elusive: UMMs fail to transfer LLM-like reasoning to image synthesis and exhibit divergent response behaviors. We term this phenomenon pseudo-unification. Diagnosing its internal causes is important, but existing probing methods either lack model-internal insight or ignore prompt-response dependencies. To address these limitations, we propose an information-theoretic probing framework that jointly analyzes how UMMs encode inputs and generate outputs. Applied to ten representative UMMs, our framework reveals that pseudo-unification stems from a dual divergence: (i) Modality-Asymmetric Encoding, where vision and language follow different entropy trajectories, and (ii) Pattern-Split Response, where text generation exhibits high-entropy creativity while image synthesis enforces low-entropy fidelity. Only models that unify both sides (e.g., via contextual prediction) achieve more genuine unification, enabling stronger reasoning-based text-to-image generation even with fewer parameters. Our work provides the first model-internal probing of unification, demonstrating that real multimodal synergy requires consistency in information flow, not just shared parameters.",
+      "authors": [
+        "Songlin Yang",
+        "Xianghao Kong",
+        "Anyi Rao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-04-13T03:46:45+00:00",
+      "link": "https://arxiv.org/pdf/2604.10949v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "reasoning ability in unified multimodal models",
+      "llm_evidence_cn": "统一多模态模型中的推理能力",
+      "llm_evidence": "统一多模态模型中的推理能力",
+      "canonical_evidence": "统一多模态模型中的推理能力",
+      "llm_tldr_en": "Probes the internal information patterns of unified multimodal models to understand reasoning transfer failures.",
+      "llm_tldr_cn": "探索统一多模态模型的内部信息模式，以理解推理迁移失败的原因。",
+      "llm_tldr": "探索统一多模态模型的内部信息模式，以理解推理迁移失败的原因。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.11462v1",
+      "title": "Escaping the Context Bottleneck: Active Context Curation for LLM Agents via Reinforcement Learning",
+      "abstract": "Large Language Models (LLMs) struggle with long-horizon tasks due to the \"context bottleneck\" and the \"lost-in-the-middle\" phenomenon, where accumulated noise from verbose environments degrades reasoning over multi-turn interactions. To address this issue, we introduce a symbiotic framework that decouples context management from task execution. Our architecture pairs a lightweight, specialized policy model, ContextCurator, with a powerful frozen foundation model, TaskExecutor. Trained via reinforcement learning, ContextCurator actively reduces information entropy in the working memory. It aggressively prunes environmental noise while preserving reasoning anchors, that is, sparse data points that are critical for future deductions. On WebArena, our framework improves the success rate of Gemini-3.0-flash from 36.4% to 41.2% while reducing token consumption by 8.8% (from 47.4K to 43.3K). On DeepSearch, it achieves a 57.1% success rate, compared with 53.9%, while reducing token consumption by a factor of 8. Remarkably, a 7B ContextCurator matches the context management performance of GPT-4o, providing a scalable and computationally efficient paradigm for autonomous long-horizon agents.",
+      "authors": [
+        "Xiaozhe Li",
+        "Tianyi Lyu",
+        "Yizhao Yang",
+        "Liang Shan",
+        "Siyi Yang",
+        "Ligao Zhang",
+        "Zhuoyi Huang",
+        "Qingwen Liu",
+        "Yang Li"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-13T13:39:17+00:00",
+      "link": "https://arxiv.org/pdf/2604.11462v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "reinforcement learning for agent context management",
+      "llm_evidence_cn": "强化学习用于代理上下文管理",
+      "llm_evidence": "强化学习用于代理上下文管理",
+      "canonical_evidence": "强化学习用于代理上下文管理",
+      "llm_tldr_en": "Uses RL to train a context curator that improves reasoning in long-horizon LLM agent tasks.",
+      "llm_tldr_cn": "利用强化学习训练上下文管理模型，以提升长程LLM代理任务中的推理表现。",
+      "llm_tldr": "利用强化学习训练上下文管理模型，以提升长程LLM代理任务中的推理表现。",
+      "llm_tags": [
+        "query:vlm-rl:composite"
+      ],
+      "matched_query_tag": "query:vlm-rl:composite",
+      "matched_query_text": "Papers central to 查找vision-language agentic rl及vision-language reasoning相关的文章，排除diffusion model、robotics、video和audio。, especially work that connects or combines: vision-language agentic reinforcement learning; multimodal reinforcement learning with vision and language; reasoning in vision-language models; vision-language model based agents; visual reasoning and decision making; multimodal reasoning for reinforcement learning; vision language reinforcement learning for agentic reasoning; advancements in vision language reasoning agents; multimodal agentic reinforcement learning without robotics; vision language models for complex reasoning tasks.",
+      "matched_requirement_id": "req-composite-vlm-rl",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.11402v1",
+      "title": "Scene Change Detection with Vision-Language Representation Learning",
+      "abstract": "Scene change detection (SCD) is crucial for urban monitoring and navigation but remains challenging in real-world environments due to lighting variations, seasonal shifts, viewpoint differences, and complex urban layouts. Existing methods rely primarily on low-level visual features, limiting their ability to accurately identify changed objects amid the visual complexity of urban scenes. In this paper, we propose LangSCD, a vision-language framework for scene change detection that overcomes this single-modal limitation by incorporating semantic reasoning through language. Our approach introduces a modular language component that leverages vision-language models (VLMs) to generate textual descriptions of scene changes, which are fused with visual features through a cross-modal feature enhancer. We further introduce a geometric-semantic matching module that refines the predicted masks by enforcing semantic consistency and spatial completeness. Existing real-world scene change detection benchmarks provide only binary change annotations, which are insufficient for downstream applications requiring fine-grained understanding of scene dynamics. To address this limitation, we introduce NYC-CD, a large-scale dataset of 8,122 real-world image pairs collected in New York City with multiclass change annotations generated through a semi-automatic pipeline. Extensive experiments across multiple street-view benchmarks demonstrate that our language and matching modules consistently improve existing change-detection architectures, achieving state-of-the-art performance and highlighting the value of integrating linguistic reasoning with visual representations for robust scene change detection.",
+      "authors": [
+        "Diwei Sheng",
+        "Vijayraj Gohil",
+        "Satyam Gaba",
+        "Zihan Liu",
+        "Giles Hamilton-Fletcher",
+        "John-Ross Rizzo",
+        "Yongqing Liang",
+        "Chen Feng"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-13T12:43:35+00:00",
+      "link": "https://arxiv.org/pdf/2604.11402v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "incorporating semantic reasoning through language for scene change detection",
+      "llm_evidence_cn": "通过语言结合语义推理进行场景变化检测",
+      "llm_evidence": "通过语言结合语义推理进行场景变化检测",
+      "canonical_evidence": "通过语言结合语义推理进行场景变化检测",
+      "llm_tldr_en": "Proposes a vision-language framework that uses semantic reasoning to improve scene change detection in urban environments.",
+      "llm_tldr_cn": "提出了一种视觉语言框架，利用语义推理来改进城市环境中的场景变化检测。",
+      "llm_tldr": "提出了一种视觉语言框架，利用语义推理来改进城市环境中的场景变化检测。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "visual reasoning and decision making",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.11627v1",
+      "title": "POINTS-Long: Adaptive Dual-Mode Visual Reasoning in MLLMs",
+      "abstract": "Multimodal Large Language Models (MLLMs) have recently demonstrated remarkable capabilities in cross-modal understanding and generation. However, the rapid growth of visual token sequences--especially in long-video and streaming scenarios--poses a major challenge to their scalability and real-world deployment. Thus, we introduce POINTS-Long, a native dual-mode MLLM featuring dynamic visual token scaling inspired by the human visual system. The model supports two complementary perception modes: focus mode and standby mode, enabling users to dynamically trade off efficiency and accuracy during inference. On fine-grained visual tasks, the focus mode retains the optimal performance, while on long-form general visual understanding, the standby mode retains 97.7-99.7% of the original accuracy using only 1/40-1/10th of the visual tokens. Moreover, POINTS-Long natively supports streaming visual understanding via a dynamically detachable KV-cache design, allowing efficient maintenance of ultra-long visual memory. Our work provides new insights into the design of future MLLMs and lays the foundation for adaptive and efficient long-form visual understanding.",
+      "authors": [
+        "Haicheng Wang",
+        "Yuan Liu",
+        "Yikun Liu",
+        "Zhemeng Yu",
+        "Zhongyin Zhao",
+        "Yangxiu You",
+        "Zilin Yu",
+        "Le Tian",
+        "Xiao Zhou",
+        "Jie Zhou",
+        "Weidi Xie",
+        "Yanfeng Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-13T15:38:22+00:00",
+      "link": "https://arxiv.org/pdf/2604.11627v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "adaptive visual reasoning in multimodal large language models",
+      "llm_evidence_cn": "多模态大语言模型中的自适应视觉推理",
+      "llm_evidence": "多模态大语言模型中的自适应视觉推理",
+      "canonical_evidence": "多模态大语言模型中的自适应视觉推理",
+      "llm_tldr_en": "Proposes a dual-mode MLLM that dynamically scales visual tokens to balance efficiency and reasoning accuracy.",
+      "llm_tldr_cn": "提出一种双模式MLLM，通过动态缩放视觉标记来平衡效率和推理准确性。",
+      "llm_tldr": "提出一种双模式MLLM，通过动态缩放视觉标记来平衡效率和推理准确性。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.11496v2",
+      "title": "Revisiting Compositionality in Dual-Encoder Vision-Language Models: The Role of Inference",
+      "abstract": "Dual-encoder Vision-Language Models (VLMs) such as CLIP are often characterized as bag-of-words systems due to their poor performance on compositional benchmarks. We argue that this limitation may stem less from deficient representations than from the standard inference protocol based on global cosine similarity. First, through controlled diagnostic experiments, we show that explicitly enforcing fine-grained region-segment alignment at inference dramatically improves compositional performance without updating pretrained encoders. We then introduce a lightweight transformer that learns such alignments directly from frozen patch and token embeddings. Comparing against full fine-tuning and prior end-to-end compositional training methods, we find that although these approaches improve in-domain retrieval, their gains do not consistently transfer under distribution shift. In contrast, learning localized alignment over frozen representations matches full fine-tuning on in-domain retrieval while yielding substantial improvements on controlled out-of-domain compositional benchmarks. These results identify global embedding matching as a key bottleneck in dual-encoder VLMs and highlight the importance of alignment mechanisms for robust compositional generalization.",
+      "authors": [
+        "Imanol Miranda",
+        "Ander Salaberria",
+        "Eneko Agirre",
+        "Gorka Azkune"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-04-13T14:03:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.11496v2",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "improving compositional performance in vision-language models",
+      "llm_evidence_cn": "提高视觉语言模型的组合推理性能",
+      "llm_evidence": "提高视觉语言模型的组合推理性能",
+      "canonical_evidence": "提高视觉语言模型的组合推理性能",
+      "llm_tldr_en": "Revisits compositionality in dual-encoder VLMs by enforcing fine-grained region-segment alignment during inference.",
+      "llm_tldr_cn": "通过在推理时强制执行细粒度的区域-片段对齐，重新审视双编码器视觉语言模型的组合性。",
+      "llm_tldr": "通过在推理时强制执行细粒度的区域-片段对齐，重新审视双编码器视觉语言模型的组合性。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.12358v1",
+      "title": "Why and When Visual Token Pruning Fails? A Study on Relevant Visual Information Shift in MLLMs Decoding",
+      "abstract": "Recently, visual token pruning has been studied to handle the vast number of visual tokens in Multimodal Large Language Models. However, we observe that while existing pruning methods perform reliably on simple visual understanding, they struggle to effectively generalize to complex visual reasoning tasks, a critical gap underexplored in previous studies. Through a systematic analysis, we identify Relevant Visual Information Shift (RVIS) during decoding as the primary failure driver. To address this, we propose Decoding-stage Shift-aware Token Pruning (DSTP), a training-free add-on framework that enables existing pruning methods to align visual tokens with shifting reasoning requirements during the decoding stage. Extensive experiments demonstrate that DSTP significantly mitigates performance degradation of pruning methods in complex reasoning tasks, while consistently yielding performance gains even across visual understanding benchmarks. Furthermore, DSTP demonstrates effectiveness across diverse state-of-the-art architectures, highlighting its generalizability and efficiency with minimal computational overhead.",
+      "authors": [
+        "Jiwan Kim",
+        "Kibum Kim",
+        "Wonjoong Kim",
+        "Byung-Kwan Lee",
+        "Chanyoung Park"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-14T06:48:31+00:00",
+      "link": "https://arxiv.org/pdf/2604.12358v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "complex visual reasoning tasks",
+      "llm_evidence_cn": "复杂视觉推理任务",
+      "llm_evidence": "复杂视觉推理任务",
+      "canonical_evidence": "复杂视觉推理任务",
+      "llm_tldr_en": "Addresses visual information shift to improve MLLM performance on complex visual reasoning during decoding.",
+      "llm_tldr_cn": "解决视觉信息偏移问题，以提高多模态大模型在解码过程中处理复杂视觉推理任务的能力。",
+      "llm_tldr": "解决视觉信息偏移问题，以提高多模态大模型在解码过程中处理复杂视觉推理任务的能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.12652v1",
+      "title": "PromptEcho: Annotation-Free Reward from Vision-Language Models for Text-to-Image Reinforcement Learning",
+      "abstract": "Reinforcement learning (RL) can improve the prompt following capability of text-to-image (T2I) models, yet obtaining high-quality reward signals remains challenging: CLIP Score is too coarse-grained, while VLM-based reward models (e.g., RewardDance) require costly human-annotated preference data and additional fine-tuning. We propose PromptEcho, a reward construction method that requires \\emph{no} annotation and \\emph{no} reward model training. Given a generated image and a guiding query, PromptEcho computes the token-level cross-entropy loss of a frozen VLM with the original prompt as the label, directly extracting the image-text alignment knowledge encoded during VLM pretraining. The reward is deterministic, computationally efficient, and improves automatically as stronger open-source VLMs become available. For evaluation, we develop DenseAlignBench, a benchmark of concept-rich dense captions for rigorously testing prompt following capability. Experimental results on two state-of-the-art T2I models (Z-Image and QwenImage-2512) demonstrate that PromptEcho achieves substantial improvements on DenseAlignBench (+26.8pp / +16.2pp net win rate), along with consistent gains on GenEval, DPG-Bench, and TIIFBench without any task-specific training. Ablation studies confirm that PromptEcho comprehensively outperforms inference-based scoring with the same VLM, and that reward quality scales with VLM size. We will open-source the trained models and the DenseAlignBench.",
+      "authors": [
+        "Jinlong Liu",
+        "Wanggui He",
+        "Peng Zhang",
+        "Mushui Liu",
+        "Hao Jiang",
+        "Pipei Huang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-04-14T12:21:15+00:00",
+      "link": "https://arxiv.org/pdf/2604.12652v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "VLM-based reward for reinforcement learning in image generation",
+      "llm_evidence_cn": "基于视觉语言模型的强化学习图像生成奖励机制",
+      "llm_evidence": "基于视觉语言模型的强化学习图像生成奖励机制",
+      "canonical_evidence": "基于视觉语言模型的强化学习图像生成奖励机制",
+      "llm_tldr_en": "Uses frozen VLMs to provide annotation-free rewards for RL-based text-to-image prompt following.",
+      "llm_tldr_cn": "利用冻结的视觉语言模型为基于强化学习的文生图提示词跟随提供无标注奖励信号。",
+      "llm_tldr": "利用冻结的视觉语言模型为基于强化学习的文生图提示词跟随提供无标注奖励信号。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reinforcement learning with vision and language",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.12812v2",
+      "title": "DocSeeker: Structured Visual Reasoning with Evidence Grounding for Long Document Understanding",
+      "abstract": "Existing Multimodal Large Language Models (MLLMs) suffer from significant performance degradation on the long document understanding task as document length increases. This stems from two fundamental challenges: 1) a low Signal-to-Noise Ratio (SNR), with crucial evidence buried in irrelevant pages; and 2) supervision scarcity, as datasets offering only final short answers provide a weak learning signal. In this paper, we address these challenges by proposing a paradigm that requires the model to execute a structured Analysis, Localization and Reasoning workflow. To instill this capability, we design a two-stage training framework: we first perform Supervised Fine-Tuning on high-quality data generated via an efficient knowledge distillation strategy. Subsequently, we employ an Evidence-aware Group Relative Policy Optimization which jointly optimizes for both evidence localization and answer accuracy. Additionally, we introduce a Evidence-Guided Resolution Allocation strategy to mitigate memory constraints of training on multi-pages documents. Extensive experiments demonstrate that DocSeeker achieves superior performance on both in-domain and out-of-domain tasks. We show it robustly generalizes from short-page training to ultra-long documents and is naturally synergistic with visual Retrieval-Augmented Generation systems, serving as a solid foundation for their implementation.",
+      "authors": [
+        "Hao Yan",
+        "Yuliang Liu",
+        "Xingchen Liu",
+        "Yuyi Zhang",
+        "Minghui Liao",
+        "Jihao Wu",
+        "Wei Chen",
+        "Xiang Bai"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-14T14:39:26+00:00",
+      "link": "https://arxiv.org/pdf/2604.12812v2",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "structured analysis and reasoning workflow for multimodal models",
+      "llm_evidence_cn": "多模态模型的结构化分析与推理工作流",
+      "llm_evidence": "多模态模型的结构化分析与推理工作流",
+      "canonical_evidence": "多模态模型的结构化分析与推理工作流",
+      "llm_tldr_en": "Proposes a structured workflow to improve long document understanding and visual reasoning in MLLMs.",
+      "llm_tldr_cn": "提出一种结构化工作流，旨在提升多模态大模型在长文档理解中的视觉推理能力。",
+      "llm_tldr": "提出一种结构化工作流，旨在提升多模态大模型在长文档理解中的视觉推理能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.12966v1",
+      "title": "Boosting Visual Instruction Tuning with Self-Supervised Guidance",
+      "abstract": "Multimodal large language models (MLLMs) perform well on many vision-language tasks but often struggle with vision-centric problems that require fine-grained visual reasoning. Recent evidence suggests that this limitation arises not from weak visual representations, but from under-utilization of visual information during instruction tuning, where many tasks can be partially solved using language priors alone. We propose a simple and lightweight approach that augments visual instruction tuning with a small number of visually grounded self-supervised tasks expressed as natural language instructions. By reformulating classical self-supervised pretext tasks, such as rotation prediction, color matching, and cross-view correspondence, as image-instruction-response triplets, we introduce supervision that cannot be solved without relying on visual evidence. Our approach requires no human annotations, no architectural modifications, and no additional training stages. Across multiple models, training regimes, and benchmarks, injecting only a small fraction (3-10%) of such visually grounded instructions consistently improves performance on vision-centric evaluations. Our findings highlight instruction tuning with visually grounded SSL tasks as a powerful lever for improving visual reasoning in MLLMs through simple adjustments to the training data distribution. Code available at: https://github.com/sirkosophia/V-GIFT",
+      "authors": [
+        "Sophia Sirko-Galouchenko",
+        "Monika Wysoczanska",
+        "Andrei Bursuc",
+        "Nicolas Thome",
+        "Spyros Gidaris"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-14T16:59:53+00:00",
+      "link": "https://arxiv.org/pdf/2604.12966v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "fine-grained visual reasoning in multimodal large language models",
+      "llm_evidence_cn": "多模态大语言模型中的细粒度视觉推理",
+      "llm_evidence": "多模态大语言模型中的细粒度视觉推理",
+      "canonical_evidence": "多模态大语言模型中的细粒度视觉推理",
+      "llm_tldr_en": "Enhances visual instruction tuning using self-supervised tasks to improve fine-grained visual reasoning.",
+      "llm_tldr_cn": "利用自监督任务增强视觉指令微调，以提高细粒度的视觉推理能力。",
+      "llm_tldr": "利用自监督任务增强视觉指令微调，以提高细粒度的视觉推理能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "visual reasoning and decision making",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
