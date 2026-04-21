@@ -1,0 +1,398 @@
+Title: RS-HyRe-R1: A Hybrid Reward Mechanism to Overcome Perceptual Inertia for Remote Sensing Images Understanding
+
+URL Source: https://arxiv.org/pdf/2604.17504v1
+
+Published Time: Tue, 21 Apr 2026 01:55:57 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 1
+
+# RS-HyRe-R1: A Hybrid Reward Mechanism to Overcome Perceptual Inertia for Remote Sensing Images Understanding 
+
+Gaozhi Zhou, Hu He, Peng Shen, Jipeng Zhang, Liujue Zhang, Linrui Xu, Zeyuan Wang, Ziyu Li, Xuezhi Cui, Wang Guo Member, IEEE, Haifeng Li Senior Member, IEEE 
+
+Fig. 1: Illustration of the “perceptual inertia” phenomenon and our proposed RS-HyRe-R1 solution. (a) Existing RL-driven models (e.g., TinyRS-R1, Geo-R1) often struggle with visual reasoning, exhibiting hallucinations or relying on localized salient visual cues. (b) We identify this bottleneck as “perceptual inertia”, the tendency of models to fixate on salient visual cues (e.g., buildings) while neglecting broader context. (c) To overcome this, our RS-HyRe-R1 employs a hybrid reward evolutionary strategy that incentivizes “observing more diverse”. This strategy constructs diverse and logically rigorous reasoning chains by observing more complementary visual evidence. 
+
+Abstract —Reinforcement learning (RL) post-training signif-icantly enhances the performance of remote sensing vision-language models (RS-VLMs). However, when processing complex remote sensing imagery (RSI) that demands exhaustive visual scanning, models often rely on localized salient cues to rapidly deduce answers. We term this phenomenon as RL-induced “perceptual inertia”. Driven by the greedy nature of reward maximization, these models often seek rewards by quickly fitting outcomes. This greedy optimization results in dual limitations: at the cognitive level, an overreliance on specific features hinders the construction of a complete chain of evidence; at the execution level, the models struggle to flexibly shift their visual focus when handling different RS tasks. To overcome this optimization bias, compel the model to resume exhaustive mining of visual evidence, we propose RS-HyRe-R1, a hybrid reward mechanism for RSI understanding. Specifically, it employs a spatial reasoning activation reward to impose structural constraints for explicit visual reasoning. At the outcome-supervision level, the RS-
+
+This work was supported in part by the National Natural Science Foundation of China under Grant 42271481, in part by Using Computing Resources at the High-Performance Computing Platform of Central South University, and in part by the Science and Technology Innovation Program of Hunan Province 2025RC3011. Gaozhi Zhou and Hu He are with the School of Mechanical and Electrical Engineering, Central South University, Changsha 410083, China (e-mail: hehu.mech@csu.edu.cn). Peng Shen, Jipeng Zhang, LiuJue Zhang, Linrui Xu, Zeyuan Wang, Ziyu Li, Xuezhi Cui, Wang Guo and Haifeng Li are with the School of Geosciences and Info-Physics, Central South University, Changsha 410083, China (e-mail: lihaifeng@csu.edu.cn). (Corresponding author: Hu He) 
+
+task perception correctness reward establishes adaptive quality anchors. By dynamically calibrating answer deviations across different task paradigms, it ensures precise locking of geometric boundaries and semantic ground truths during transitions be-tween RS tasks. Furthermore, at the reasoning process level, the visual-semantic path evolution reward is integrated to penalize repetitive reasoning patterns, thereby incentivizing the capture of neglected complementary cues to construct comprehensive evidence chains. Experimental results confirm that RS-HyRe-R1 effectively mitigates the “perceptual inertia”, prompting the model to generate deep reasoning sequences rich in diverse visual detail. With only 3B parameters, it achieves state-of-the-art performance across referring expression comprehension (REC), open vocabulary object detection (OVD), and visual question answering (VQA) tasks, outperforming existing models with up to 7B parameters. Notably, it demonstrates robust zero-shot gen-eralization, surpassing the second-best model by 3.16%, 3.97%, and 2.72% in VQA, OVD, and REC tasks, respectively. Code and datasets are publicly available at https://github.com/geox-lab/RS-HyRe-R1. 
+
+Index Terms —Reinforcement Learning, Remote Sensing Vision-Language Models, Perceptual Inertia, Hybrid Reward Mechanism 
+
+I. I NTRODUCTION 
+
+# VIsion-language models (VLMs) have emerged as a cru-cial tool for remote sensing imagery (RSI) understand-ing [1]–[8]. Recently, deep reasoning models represented by  
+
+> arXiv:2604.17504v1 [cs.CV] 19 Apr 2026 IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 2
+
+DeepSeek-R1 [9] and Qwen3 [10] have demonstrated the im-mense potential of reinforcement learning (RL) post-training paradigms [11]–[13]. By incorporating reward mechanisms, these models have achieved performance breakthroughs in fields such as mathematical computation and coding tasks. Inspired by this success, the RL-driven paradigm has been extended to VLMs to generate structured reasoning [14]–[16]. In closely related work, existing reasoning models can be broadly categorized into two frameworks based on their re-ward feedback mechanisms: outcome-supervised reward mod-els (ORMs) and process-supervised reward models (PRMs). This classification has been widely accepted in the general reasoning research community [17], [18]. ORMs optimize strategies using rewards derived solely from the final output (e.g., answer correctness) [13], [14], [19], whereas PRMs utilize fine-grained feedback on intermediate reasoning steps to mitigate reward sparsity [18], [20], [21]. In the field of RS, current reasoning models primarily rely on outcome-oriented rewards [22]–[25]. Whether employing the verifiable outcome rewards in Geo-R1 [22] (e.g., coordinate matching) or the “consistency-aware rewards” introduced by GeoReason [25] to align reasoning with decision-making, these methods are essentially still constrained by guidance at the outcome level. The characteristics of RSI, including broad fields of view, complex ground elements, and sparse visual cues, demand that models perform exhaustive visual scanning for accurate interpretation [26]–[31]. However, existing outcome-guided RS reasoning models exhibit significant limitations: their in-ference processes often remain superficial, severely lacking in the deep exploration of fine-grained visual information. We refer to this phenomenon of visual degradation observed after RL optimization as “perceptual inertia” (as shown in Fig. 1 (a) and (b)). Specifically, driven by the “greedy” nature of RL to maximize cumulative rewards [32]–[34], outcome-guided models often rely on localized salient visual cues to rapidly deduce answers, rather than engaging in a detailed understanding of the RS scene. This “perceptual inertia” results in dual limitations: at the cognitive level, an overreliance on specific salient visual features hinders the construction of a complete and rigorous chain of evidence; at the execution level, the models struggle to flexibly shift their visual focus when handling different tasks, causing feature anchoring drift and localization errors. Ultimately, these flaws lead to a degradation in generalization ability, resulting in a sharp decline in performance when faced with unseen tasks or zero-shot scenarios. To address the aforementioned issues and mitigate “per-ceptual inertia”, this paper proposes RS-HyRe-R1, a hybrid reward-based RL framework for RSI understanding. We con-structed a hybrid task environment encompassing referring expression comprehension (REC), open vocabulary object detection (OVD), and visual question answering (VQA), and innovatively designed a hybrid reward mechanism. First, via a spatial reasoning activation reward, we impose strict structural constraints on the reasoning process, compelling the model to generate explicit reasoning steps. Second, providing outcome-level supervision, we design an RS-task perception correctness reward specifically calibrated for REC, OVD, and VQA, ensuring precise geometric localization and semantic accuracy across tasks. Finally, at the process supervision level, we introduce a visual-semantic path evolution reward. This reward calculates the semantic similarity of different inference paths and penalizes repetitive inference patterns, thereby incentiviz-ing the model to capture overlooked supplementary clues and construct diverse, comprehensive chains of evidence. Experiments demonstrate that RS-HyRe-R1 achieves state-of-the-art (SOTA) performance across three core RS tasks: REC, OVD, and VQA. With superior parameter efficiency, it comprehensively surpasses existing mainstream reasoning models, including Geo-R1 and GeoReason. Qualitative anal-ysis and response length evolution further corroborate the advantages of our framework in mitigating “perceptual in-ertia”. At the cognitive level, the model constructs diverse and information-rich chains of evidence rather than relying on simple, salient visual cues. At the executive level, it exhibits dynamic adaptability in visual anchoring, ensuring precise geometric localization and semantic alignment even when switching between heterogeneous tasks. These findings robustly validate the effectiveness of RS-HyRe-R1 in fostering deep visual reasoning and enhancing cross-domain generaliza-tion capabilities. Our main contributions are summarized as follows: 
+
+• We established a unified RL environment for diverse RS tasks, integrating three core tasks: REC, OVD, and VQA. This unification provides a standardized training platform for collaborative optimization across complex heterogeneous tasks, laying the foundation for the co-evolution of these three distinct RS tasks. 
+
+• We propose a hybrid reward-based RL framework (RS-HyRe-R1) to combat “perceptual inertia”: By simulta-neously introducing hybrid reward mechanisms for both outcomes and processes, we successfully guide the model to perform exhaustive visual mining on complex RSI. While maintaining high accuracy, this framework com-pels the model to establish logical reasoning chains, achieving a transition from shallow feature matching to deep logical inference. 
+
+• We train RS-HyRe-R1, which achieves SOTA perfor-mance across multiple benchmarks for three RS tasks. Analyses confirm that by employing RL with a hybrid reward mechanism on RS data, the proposed method effectively mitigates “perceptual inertia”. II. R ELATED WORK 
+
+A. Vision-language Model for Remote Sensing 
+
+The automated interpretation of RSI is crucial for applica-tions such as environmental monitoring, urban planning, and disaster response [35], [36]. This necessity has propelled the rapid evolution of automated interpretation technologies. Early research primarily focused on task-specific visual ground-ing; for instance, addressing remote sensing visual grounding (RSVG) problems via contrastive learning or multi-scale fea-ture fusion [37], [38]. With the emergence of Large Language Models (LLMs), researchers have endeavored to align RS visual features into the semantic space of LLMs, giving IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 3
+
+rise to RS-LVLMs such as GeoChat [39], SkySense [40], and RingMoGPT [41]. By employing supervised fine-tuning (SFT) on large-scale RS instruction datasets, these models have demonstrated robust image understanding capabilities. Subsequent works, such as SkySenseGPT [42] and EarthGPT [43], have further expanded capabilities in multi-sensor data fusion, significantly enhancing performance across various RS benchmarks. However, the aforementioned methods rely predominantly on SFT. While the SFT paradigm enables models to efficiently learn “instruction-output” mapping patterns [44], [45], it often falls short in fostering deep logical reasoning capabilities when confronting complex spatial relationships within RSI [46], [47]. 
+
+B. Reinforcement Learning and Reasoning Model 
+
+To overcome the inherent limitations of SFT in handling complex logical reasoning, RL has been introduced into the post-training phase of LLMs, emerging as a key paradigm for enhancing cognitive capabilities. Seminal works such as Ope-nAI o1 [48] and DeepSeek-R1 [9] demonstrate that learning from outcome-based feedback significantly enhances models’ reasoning capabilities, particularly in mathematical derivation and code generation. Notably, the Group Relative Policy Opti-mization (GRPO) [49] algorithm introduced by DeepSeek-R1 eliminates the reliance on value networks, enabling efficient reasoning evolution. Within this rapidly advancing domain, reasoning models are generally categorized into two frameworks based on their re-ward feedback mechanisms: outcome-supervised reward mod-els (ORMs) and process-supervised reward models (PRMs) [17], [18]. ORMs optimize policy networks based solely on the correctness of the final output. For instance, Vision-R1 [13] adapts the GRPO algorithm to multi-modal tasks, employing rule-based rewards exclusively for final answer accuracy. Similarly, VLM-R1 [14] integrates length penalties with outcome rewards to curb reasoning redundancy while ensuring task completion. Furthermore, MM-Eureka [11] ex-plore self-evolved Chain-of-Thought (CoT) data, yet their RL verification remains strictly confined to the final reasoning result. In contrast, PRMs address the issue of reward sparsity by providing feedback on intermediate reasoning steps. For example, R1-VL [21] introduces step-wise rewards to validate each logical deduction within the reasoning chain. Mulberry [50] utilizes collective tree search to enforce structured rea-soning paths. Additionally, Visual-PRM [51] employs process reward models for step-wise verification. However, most existing VLMs reasoning frameworks are designed for general natural images and rely on either purely outcome-based signals or generic process rewards. They often overlook the unique challenges of remote sensing imagery, such as scale variation and sparse visual cues, where coarse outcome rewards may fail to guide precise spatial reasoning. 
+
+C. Remote Sensing Reasoning Model 
+
+To adapt the complexities of RS tasks and elevate interpreta-tion performance, researchers have increasingly integrated RL training techniques into the domain. However, most existing RS reasoning models rely on ORMs. For instance, TinyRS-R1 [24] pioneered compact RS-VLMs based on Qwen2VL-2B. This model employs a four-stage paradigm, encompassing pre-training, instruction tuning, CoT fine-tuning, and GRPO optimization with ORMs, to achieve exceptional performance on simple VQA tasks. Geo-R1 [22] advances the reasoning-first reinforcement fine-tuning (RFT) paradigm, enforcing a “reason first, act later” protocol in few-shot scenarios to max-imize the interpretability through explicit reasoning resolution. Similarly, although GeoReason [25] constructs a logic-driven dataset (GeoReason-Bench) and utilizes a “SFT initialization + consistency-aware RL” strategy to enhance reasoning re-liability, its feedback mechanism remains fundamentally an outcome-level constraint focused on textual alignment. In stark contrast, this paper shifts from a pure ORMs frame-work to a hybrid strategy integrating both outcome-level and process-level supervision. We utilize outcome-level rewards (RS-task-aware correctness) to ensure geometric and semantic accuracy across different RS tasks, while employing process-level rewards (visual-semantic path evolution) to guide the model toward acquiring more visual information. This hybrid mechanism mitigates the “perceptual inertia” phenomenon commonly observed in RL with ORMs, compelling the model to actively engage in comprehensive visual exploration. Ul-timately, we establish a hybrid reward RL framework (RS-HyRe-R1) capable of seamlessly switching between REC, OVD, and VQA tasks, demonstrating robust performance and exceptional cross-domain generalization capabilities. III. T ASK AND METHODOLOGY 
+
+To mitigate the cognitive and executive limitations caused by “perceptual inertia” in RS-VLMs during the RL post-training phase, we propose RS-HyRe-R1, a hybrid reward-based RL framework designed for RS-task that incorporates both outcome and process supervision. Our primary objective is to enable RS-VLMs to adapt to diverse tasks and incentivize it to actively explore neglected visual details. As illustrated in Fig. 2, we employ GRPO as the foundational algorithm, integrated with a hybrid reward mechanism encompassing structural constraints, outcome-oriented evaluation, and pro-cess evolution. Following RL training on our curated RS-task dataset, the model demonstrates the capability to robustly perform three distinct RS tasks. This section first elucidates the principles of the GRPO algorithm. Subsequently, we provide formal definitions for the three target RS tasks: REC, OVD, and VQA. Finally, we detail how our proposed hybrid reward mechanism adapts GRPO to address diverse task challenges in RS scenarios and mitigate “perceptual inertia”. 
+
+A. Group Relative Policy Optimization (GRPO) 
+
+We leverage the GRPO algorithm to implement RL for the post-training of vision-language models. In contrast to traditional Proximal Policy Optimization (PPO) approaches, which depend on a separate value estimator (Critic Model), IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 4
+
+Fig. 2: Overview of the proposed RS-HyRe-R1 framework. The pipeline begins with the construction of a RS-Task Dataset (Left), utilizing only 1,600 samples across REC, OVD, and VQA tasks. We employ GRPO for RL training (Middle), where the Policy Model generates multiple rollout answers ( o1 to oN ). The optimization is guided by the Hybrid Reward Mechanism, which evaluates outputs through three dimensions: Spatial Reasoning Activation, RS-task Perception Correctness, and Visual-Semantic Path Evolution. The rightmost section demonstrates the model’s capability to generate comprehensive reasoning chains and accurate predictions across all three tasks. GRPO eliminates this requirement. By utilizing group sam-pling and relative advantage estimation, GRPO significantly reduces memory overhead and improves training stability, making it particularly effective for fostering complex reason-ing capabilities in large-scale models. Specifically, for each input query q (comprising an image and text prompt), the model policy πθ samples a set of outputs 
+
+{o1, o 2, . . . , o G}, where G denotes the group size. Each output 
+
+oi receives a scalar reward ri based on the reward function 
+
+R (q, o i). To guide optimization, GRPO computes the relative advantage ˆAi for each output within the group as follows: 
+
+ˆAi = ri − mean {r1, . . . , r G}
+
+std {r1, . . . , r G} . (1) The optimization objective of GRPO is to maximize this advantage while utilizing the KL divergence constraint to prevent the policy from deviating too far from the reference model πref . The optimization function is as follows: 
+
+JGRPO (θ) = E{oi}Ni=1 ∼πθold (·| q)
+
+"
+
+1
+
+G
+
+> G
+
+X
+
+> i=1
+
+min 
+
+
+
+c1 · ˆAi,c2 · ˆAi
+
+
+
+− βD KL (πθ ∥ πref )
+
+!# , (2) here: 
+
+c1 = πθ (oi | q)
+
+πθold (oi | q) , (3) 
+
+c2 = clip 
+
+ πθ (oi | q)
+
+πθold (oi | q) , 1 − ε, 1 + ε
+
+
+
+, (4) where DKL (πθ ∥ πref ) denotes the KL divergence between the current policy πθ and the reference policy πref , serving as a regularization term to prevent excessive deviation. The clipping mechanism within c2 stabilizes training by con-straining the policy update rate. In this paper, we leverage GRPO’s sampling properties to not only compare performance at the outcome level but also introduce diversity competition at the inference process level, thereby evolving strategies to counteract “perceptual inertia”. 
+
+B. Task Definition 
+
+Our proposed methodology comprises three core tasks, designed to establish a unified interpretation framework for RS images understanding: 
+
+Referring Expression Comprehension (REC) : Given a RS image I and a textual query describing a specific object (e.g.,“the small car located in the bottom-right corner adjacent to the truck”), the model is required to predict the bounding box coordinates Bpred = [x1, y 1, x 2, y 2] corresponding to the described object. This task demands sophisticated spatial reasoning capabilities to accurately resolve complex visual-linguistic references. 
+
+Open Vocabulary Object Detection (OVD) : Given aRS image I and a target category list Clist , the model is tasked with identifying all instances belonging to the specified categories. The output is defined as a set of predictions 
+
+Ppred = {(bk, c k)}Nk=1 , where bk represents the bounding box IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 5
+
+and ck denotes the corresponding category label for the k-th instance. This task rigorously evaluates the model’s capacity for multi-object localization and semantic category alignment within complex, clutter-rich backgrounds. 
+
+Visual Question Answering (VQA) : Given a RS image I
+
+and a natural language question Q, the model is required to generate a free-form textual answer Avqa . This task demands the holistic integration of visual perception and semantic reasoning to interpret and respond to complex queries. 
+
+C. Hybrid Reward Mechanism 1) Spatial Reasoning Activation Reward: To compel the model to perform explicit visual scanning and reasoning on ground features within RSI, while ensuring the reliability of output parsing and evaluation, we introduce the spatial reasoning activation reward. This mechanism enforces explicit visual information processing by strictly verifying the presence of <think >... </think > and <answer >... </answer > tags in the model’s output. The reward is defined as follows: 
+
+Rsrar (q, o ) = 
+
+(
+
+1, if output follows the expected format 
+
+0, otherwise . (5) As defined in Equation (5), we implement this reward as a binary function. A full reward of 1 is assigned exclusively when the model encapsulates its reasoning process within the 
+
+<think >... </think > tag and encloses the final result within the <answer >... </answer > tags, otherwise, the reward is 0.This mechanism transforms the implicit CoT into an explicit constraint, compelling the model to articulate a logical reason-ing path regarding the spatial relationships of ground features prior to generating final detection bounding boxes or answers. 
+
+2) RS-task Perception Correctness Reward: To accommo-date the unique characteristics of different RS tasks, we designed adaptive quality anchors and introduced outcome-supervision for REC, OVD, and VQA to dynamically calibrate interpretation biases. For the REC task, we adopted the Intersection over Union (IoU) between predicted and ground-truth bounding boxes as the primary metric, incorporating a segment-wise penalty mechanism to incentivize high-precision localization. The spe-cific reward function is defined as follows:             
+
+> RREC (Bpred , B gt ) =
+> 
+> IoU (Bpred , B gt ),if IoU ≥0.50.8·IoU (Bpred , B gt ),if 0.3≤IoU <0.50,otherwise
+
+. (6) As shown in Equation (6), the reward function is piecewise: if IoU ≥ 0.5, the function returns the raw IoU value. For cases where 0.3 ≤ IoU < 0.5, a partial reward( 0.8 × IoU ) is assigned to encourage the model to progressively approximate the ground truth boundary. Conversely, if IoU < 0.3, the reward is set to 0. For the OVD task, we formulate it as a set prediction problem, employing a set matching metric grounded in the F1 score. Let P = {p1, . . . , p m} denote the prediction set, where each element pi = ( bk, c k) consists of a bounding box bk and its corresponding category label ck. Similarly, let 
+
+G = {g1, . . . , g n} represent the ground truth set. For any given prediction-ground truth pair (p, g ), we define the matching score as follows:                  
+
+> M(p, g ) =
+> 
+> 1.0,if L(p) = L(g)and IoU (p, g )≥0.50.5,if L(p) = L(g)and 0.3≤IoU (p, g )<0.50,otherwise
+
+, (7) where L(∗) represents the class label. Based on the maximum matching principle, we calculate the total true positive score as T P total = P max M (p, g ). The final reward is defined as: 
+
+ROVD = 2 · P · RP + R , (8) where Precision P = T P total /|P | and Recall R = T P total /|G|.We not only considered IoU but also introduced a “soft matching” mechanism. This approach assigns a partial reward (0.5) even in instances of low spatial overlap ( 0.3 ≤ IoU <
+
+0.5), contingent upon the predicted category label cpred ex-hibiting semantic alignment with the ground truth. For the VQA task, Implement a strict matching policy. The specific reward definition is as follows:     
+
+> RVQA (Apred , A gt ) =
+> (
+> 1.0,if Norm (Apred ) = Norm (Agt )0,otherwise
+
+. (9) As defined in Equation (9), a perfect score of 1 is awarded exclusively when the predicted vector is identical to the normalized ground truth vector; all other cases yield a score of 0.To accommodate diverse task scenarios, we designed a dynamic task routing mechanism. This mechanism identifies specific task types by analyzing input instructions or response formats, and aggregates the evaluation feedback from sub-tasks into a unified RS-task perception correctness reward, denoted as Rrpcr . Formally, this reward is defined as follows: 
+
+Rrpcr =
+
+
+
+RREC , if task type = REC 
+
+ROVD , if task type = OVD 
+
+RVQA , if task type = VQA 
+
+. (10) 
+
+3) Visual-Semantic Path Evolution Reward: The visual-semantic path evolution reward serves as the key mechanism for overcoming the “perceptual inertia”. Its core logic lies in introduction “semantic dissimilarity reward” targeting the inference process: if the model repetitively exploits a singular or stereotyped reasoning template, it receives no reward; con-versely, the lower the semantic similarity between a generated path and existing paths, the higher the reward assigned. This constraint compels the policy network to escape its “comfort zone”, forcing the model to diversify its reasoning pathways. This incentivizes the model to actively explore complementary visual cues and heterogeneous logical chains. The specific calculation process is as follows, within a single GRPO sampling iteration, we first apply terrain spatial reasoning activation reward and RS-task correctness reward. This preliminary step ensures the generation of valid reasoning paths and guarantees answer quality, preventing the model IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 6
+
+from maximizing evolutionary rewards via ungrounded, ran-dom reasoning. We restrict the evolutionary reward calculation exclusively to valid samples—specifically, those satisfying both strict format constraints ( Rsrar > 0.99 ) and high accuracy thresholds ( Rrpcr > 0.80 ). For these qualified samples, we ex-tract embedding vectors from the reasoning content (enclosed in <think > tags) to compute an intra-group cosine similarity matrix, formulated as follows: 
+
+ei = Embed ( ti) , S ij = ei · ej
+
+|ei|| ej | , (11) where Sij denotes the semantic similarity between the i-th and 
+
+j-th inference samples. To eliminate self-influence, diagonal elements are set to zero, i.e., Sii = 0 . To comprehensively evaluate whether a sample has performed redundant visual inference, we calculate the average similarity between the sample and other samples within the group, defined as: 
+
+¯Si = 1
+
+k − 1
+
+X
+
+> j
+
+Sij . (12) Finally, the visual-semantic path evolution reward is defined as: 
+
+Revol ,i = 1 .0 − ¯Si. (13) This reward mechanism establishes an inverse correlation between the similarity of reasoning responses and the assigned reward value: the lower the semantic similarity between infer-ence paths, the higher the reward value obtained. This design explicitly incentivizes unique reasoning paths that diverge significantly from other samples. It compels the model to actively navigate diverse reasoning trajectories and exploit a broader spectrum of complementary visual cues, ultimately facilitating the construction of evidence chains that are both informationally rich and highly discriminative. The final reward is aggregated from the three aforemen-tioned rewards, with the overall reward defined as: 
+
+R = λsrar · Rsrar + λrpcr · Rrpcr + λevol · Revol (14) where λsrar , λrpcr and λevol are tradeoff parameters. IV. E XPERIMENTS 
+
+A. Experimental Setup 
+
+Datasets . To develop a RL environment for RS task in-terpretation, we constructed a RL training dataset comprising REC, OVD, and VQA. This dataset integrates data from three established open-source repositories: REC samples were extracted from VRSBench [52], OVD data from NWPU VHR-10 [53], and VQA samples from RSVQA-LR [54]. The resulting RS-task RL corpus consists of 1,600 samples. Table I summarizes the dataset configuration and statistical details. 
+
+Model and Training Details . We employ Qwen2.5-VL-3B-Instruct [55] as the base model to demonstrate its performance on lightweight architectures. Our implementation utilizes the Easy-R1 1 codebase [56]. Unless otherwise specified, we retain default hyperparameters without manual tuning. We incor-porate thought prompting into the RL framework, utilizing 
+
+> 1https://github.com/hiyouga/EasyR1
+
+TABLE I: Overview of RS-task RL Training Datasets                   
+
+> Task Source Dataset Samples Images Definition REC VRSBench 260 254 image-query-box OVD NWPU VHR-10 650 150 image-query-boxes VQA RSVQA-LR 690 274 image-query-answer RS-Task 1600 678
+
+GRPO as the post-training paradigm. GRPO is configured with 15 generations per rollout. The hybrid reward mechanism weights configured as λsrar = 0 .1, λ rpcr = 0 .7, and λevol =0.2. These parameter values were selected based on exper-imental experience. Training was conducted on four A800 GPUs for approximately 72 to 96 hours (40 epochs), yielding a unified model with a single set of weights for all three tasks, eliminating the need for task-specific fine-tuning. 
+
+Benchmark . To comprehensively evaluate the model’s ca-pabilities, we employ a multi-dimensional validation strategy. We assess RS task performance across REC, OVD, and VQA using three distinct RS benchmarks: RSVQA-LR-test [54], NWPU VHR-10 [53], and VRSBench-test [52]. Table II details the statistical characteristics of these test sets. TABLE II: Overview of Test Datasets             
+
+> Task Source Dataset Samples Images REC VRSBbench-test 16159 9318 OVD NWPU VHR-10 2424 500 VQA RSVQA-LR-test 10003 1001
+
+To evaluate the model’s zero-shot generalization capability, we extended our assessment to unseen benchmarks, specifi-cally DIOR-RSVG [46] for the REC task, RSOD [57] for the OVD task, and VRSBench-VQA [52] for the VQA task. Table III summarizes the statistics for these test sets. TABLE III: Overview of Zero-shot Test Datasets             
+
+> Task Source Dataset Samples Images REC DIOR-RSVG 7422 3372 OVD RSOD 936 936 VQA VRSBench-VQA 37409 9349
+
+Metrics . We evaluate experimental performance using stan-dard, widely accepted metrics tailored to each task: Inter-section over Union (IoU) for REC, Mean Average Precision (mAP) for OVD, and Pass@1 accuracy for VQA. 
+
+Baseline . To rigorously evaluate the efficacy of our pro-posed RS-HyRe-R1, we compare it against three categories of SOTA methods. First, we utilize the official Zero-shot Baselines of Qwen2.5-VL [55] checkpoints (3B and 7B) to assess the foundational performance of general-purpose VLMs without domain adaptation. Second, in the SFT category, we compare against our own Qwen2.5-VL-SFT [55] (fine-tuned on our 1,600-samples dataset) and GeoChat [39], a leading RS-VLM fine-tuned on a massive 36k+ instruction dataset, alongside other notable SFT baselines such as LLaVA-1.5 [58], Mini-Gemini [59], and MiniGPT-v2 [60]. Finally, we benchmark against recent RL-driven Models that integrate IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 7
+
+RL for reasoning, including TinyRS-R1 [24], Geo-R1 [22], GeoReason [25] and R1-VL [21](PRMs), and task-specific variants like VLM-R1-OVD/REC [14] and Geo-R1-OVD/REC [23]. 
+
+B. Performance Analysis 1) REC Task: Task Evaluation . We evaluate REC perfor-mance using Acc@ t, defined as the percentage of samples where the IoU between the predicted and ground truth bound-ing boxes exceeds the threshold t. In this study, we report the stringent metrics of Acc@0.5 and Acc@0.7. The highest-performing results are highlighted in bold. 
+
+Results Analysis . As shown in Table IV, RS-HyRe-R1 achieves SOTA performance on the VRSBench-test dataset. It significantly surpasses the SFT+RL trained TinyRS-R1 by 27.42% on Acc@0.5 and more than triples its perfor-mance on the stricter Acc@0.7 metric (32.25% vs. 10.07%). Notably, our framework outperforms both the generic pure PRMs baseline R1-VL and the pure ORMs baseline VLM-R1-REC. Despite utilizing a smaller 3B backbone, RS-HyRe-R1 outperforms 7B-parameter models like GeoReason by 9.69% on Acc@0.5 and 8.75% on Acc@0.7. It even edges out the task-specific variant Geo-R1-REC, demonstrating that our framework dramatically enhances precise target localization without compromising task-specific accuracy. Furthermore, RS-HyRe-R1 outperforms fully fine-tuned models such as GeoChat, establishing a new benchmark for data efficiency. This validates that our hybrid reward mechanism, integrating outcome-level correctness with process-level path evolution, effectively mitigates “perceptual inertia”. By compelling the model to engage in deep visual scanning, the strategy signif-icantly enhances the precise localization of target geometric boundaries while reducing reliance on massive annotated data. 
+
+2) OVD Task: Task Evaluation . For the OVD task, we employed the standard COCO-style mAP metric on the NWPU VHR-10-val dataset, which explicitly excludes the 150 image samples designated for training in the original NWPU VHR-10 dataset. We focus on two primary metrics: mAP@0.5 and mAP@[0.5:0.95]. The mAP@0.5 metric measures baseline detection accuracy at an IoU threshold of 0.5, reflecting fun-damental localization capability. In contrast, mAP@[0.5:0.95] averages precision across IoU thresholds ranging from 0.5 to 0.95 (in 0.05 increments). By imposing stricter requirements on bounding box overlap, this metric provides a more rigorous and comprehensive assessment of the model’s localization precision across varying levels of stringency. 
+
+Results Analysis . The quantitative assessment in Table V highlights RS-HyRe-R1’s superior OVD capabilities. It achieves a mAP@[0.5:0.95] of 0.2600 and a mAP@0.5 of 0.5225. The experimental results highlight significant advan-tages over both similarly sized and larger-scale RL-driven models. Specifically. It more than doubles the performance of GeoReason and R1-VL, indicating that the inference tra-jectories generated by our proposed hybrid reward mechanism are more effective than the logical consistency constraints of GeoReason and the general process reward mechanism of R1-VL. Even when compared to GEO-R1-OVD, a variant TABLE IV: Quantitative Performance Comparison of REC Task on the VRSBench-test Dataset 
+
+Method Base LLM Overall Acc@0.5 Acc@0.7 Zero-shot Baseline Qwen2.5-VL 3B [55] Qwen2.5-3B 16.89 7.36 Qwen2.5-VL 7B [55] Qwen2.5-7B 41.28 23.32 RS-task Dataset Fine-tune (1600 samples) Qwen2.5-VL-SFT Qwen2.5-3B 35.39 18.58 Full Amount Fine-tune (36,313 samples) LLaVA-1.5 [58] Vicuna1.5-7B 41.60 13.60 Mini-Gemini [59] Gemma-7B 30.10 6.80 MiniGPT-v2 [60] Vicuna1.5-7B 35.80 16.80 GeoChat [39] Vicuna1.5-7B 49.80 19.90 RL Train TinyRS-R1 [24] Qwen2-2B 23.94 10.07 Geo-R1 [22] Qwen2.5-7B 42.03 17.62 GeoReason [25] Qwen2.5-7B 41.67 23.50 R1-VL [21] Qwen2-7B 35.02 19.28 VLM-R1-OVD [14] Qwen2.5-3B 33.51 17.68 VLM-R1-REC [14] Qwen2.5-3B 38.77 21.18 Geo-R1-OVD [23] Qwen2.5-3B 38.22 20.90 Geo-R1-REC [23] Qwen2.5-3B 49.60 29.77 RS-HyRe-R1 Qwen2.5-3B 51.36 32.25 
+
+optimized solely for detection, RS-HyRe-R1 achieves a per-formance leap of approximately 18% on the mAP@0.5. This substantial gain strongly validates that the proposed framework effectively achieves more precise target acquisition and local-ization in OVD scenarios by dynamically calibrating cross-task deviations and incentivizing diverse visual reasoning within the model. TABLE V: Quantitative Performance Comparison of OVD Task on the NWPU VHR-10-val Dataset                                           
+
+> Method Base LLM Overall mAP@[0.5:0.95] mAP@0.5 Zero-shot Baseline Qwen2.5-VL 3B [55] Qwen2.5-3B 0.0386 0.0948 Qwen2.5-VL 7B [55] Qwen2.5-7B 0.1044 0.1539 RS-task Dataset Fine-tune (1600 samples) Qwen2.5-VL-SFT Qwen2.5-3B 0.1592 0.3474 GeoChat [39] Vicuna1.5-7B 0.1731 0.3509 RL Train TinyRS-R1 [24] Qwen2-2B 0.0873 0.1605 Geo-R1 [22] Qwen2.5-7B 0.1561 0.3358 GeoReason [25] Qwen2.5-7B 0.1205 0.2916 R1-VL [21] Qwen2-7B 0.1012 0.2590 VLM-R1-OVD [14] Qwen2.5-3B 0.0740 0.1901 VLM-R1-REC [14] Qwen2.5-3B 0.0603 0.1658 Geo-R1-OVD [23] Qwen2.5-3B 0.1887 0.3428 Geo-R1-REC [23] Qwen2.5-3B 0.1067 0.2612 RS-HyRe-R1 Qwen2.5-3B 0.2600 0.5225
+
+3) VQA Task: Task Evaluation . For the VQA task, we adopt Top-1 Accuracy (Pass@1) as the primary evaluation metric on the RSVQA-LR-test dataset. This metric measures IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 8
+
+the proportion of samples where the model’s highest-ranked prediction yields an exact match with the ground truth. It serves as a rigorous indicator of the model’s logical reasoning capabilities and precision when interpreting complex visual-linguistic scenarios. 
+
+Results Analysis . The quantitative analysis in Table VI reveals the breakthrough performance of RS-HyRe-R1 on the VQA task. RS-HyRe-R1 achieves a Pass@1 accuracy of 59.87%. It substantially outperforms both the generic pure PRMs baseline R1-VL (48.21%) and domain-adapted pure ORMs frameworks such as GeoReason (50.32%), GEO-R1 (46.88%) and VLM-R1-OVD (49.16%). This significant margin, nearly 10% over 7B-parameter reasoning models, proves that relying solely on generic step-wise verification or outcome-level textual consistency is inadequate for resolving complex RS visual queries. It proves that the RS-HyRe-R1 can capture rich visual details to support complex logical rea-soning, outperforming larger-scale models despite its compact size. TABLE VI: Quantitative Performance Comparison of VQA Task on the RSVQA-LR-test Dataset                             
+
+> Method Base LLM Pass@1 Zero-shot Baseline Qwen2.5-VL 3B [55] Qwen2.5-3B 39.27 Qwen2.5-VL 7B [55] Qwen2.5-7B 46.21 RS-task Dataset Fine-tune (1600 samples) Qwen2.5-VL-SFT Qwen2.5-3B 44.63 GeoChat [39] Vicuna1.5-7B 56.62 RL Train TinyRS-R1 [24] Qwen2-2B 51.73 Geo-R1 [22] Qwen2.5-7B 46.88 GeoReason [25] Qwen2.5-7B 50.32 R1-VL [21] Qwen2-7B 48.21 VLM-R1-OVD [14] Qwen2.5-3B 49.16 VLM-R1-REC [14] Qwen2.5-3B 44.86 Geo-R1-OVD [23] Qwen2.5-3B 46.29 Geo-R1-REC [23] Qwen2.5-3B 44.66 RS-HyRe-R1 Qwen2.5-3B 59.87
+
+Experimental results across these three distinct RS tasks demonstrate that RS-HyRe-R1 achieves outstanding SOTA performance, fully validating its robust RS-task generaliza-tion capabilities. Despite utilizing a compact 3B-parameter architecture and fine-tuning on only 1,600 RS-task samples, RS-HyRe-R1 comprehensively outperforms larger-scale base-line models, generic PRMs, and domain-adapted pure ORMs across the REC, OVD, and VQA tasks. This cross-scale per-formance superiority powerfully underscores the value of the proposed hybrid reward framework. By integrating outcome-level correctness (ORMs) with process-level path evolution (PRMs), the hybrid reward mechanism effectively mitigates both the “perceptual inertia” induced by greedy optimization and the “feature drift” commonly observed during hetero-geneous RS-task transitions. Consequently, the framework endows the model with pixel-level localization precision for detection and referential tasks, while ensuring logical reason-ing completeness for the VQA task. Ultimately, this establishes dual robustness at both the cognitive and executive levels within complex RS environments. 
+
+C. Evaluation of Zero-Shot Generalization across Datasets 
+
+To thoroughly evaluate the model’s generalization abil-ity under non-homogeneous data distributions, we conducted cross-dataset zero-shot testing for the REC, OVD, and VQA tasks. In this experimental setup, all comparative models underwent limited supervised fine-tuning on our constructed 1,600-samples RS-task dataset and were subsequently de-ployed for inference on completely unseen target domains. We used the DIOR-RSVG, RSOD-test, and VRSBench-VQA datasets to validate the models’ generalization capabilities on the REC, OVD, and VQA tasks, respectively. 
+
+Results Analysis . The experimental results in Table VII further validate the robust zero-shot generalization capability of RS-HyRe-R1 under data distribution shifts. Despite under-going training on a limited number of source domain sam-ples, our model maintains significant performance advantages when directly transferred to completely unseen target domains. Specifically, in the REC transfer task (VRSBench-REC →
+
+DIOR-RSVG), RS-HyRe-R1 achieves a Acc@0.5 of 46.85% and a Acc@0.7 of 31.84%. These scores comprehensively surpass both the larger-parameter GeoChat model (44.13% and 30.62%) and the Geo-R1-REC baseline. Furthermore, in the OVD zero-shot evaluation (NWPU VHR-10 → RSOD-test), RS-HyRe-R1 demonstrates superior robustness in unseen target detection, achieving an mAP@[0.5:0.95] of 0.2350. This significantly outperforms the fully fine-tuned GeoChat model (0.1953) and the base model (0.1778). Similarly, in VQA cross-domain testing (RSVQA → VRSBench-VQA), it achieves a Pass@1 accuracy of 45.13%, exceeding GeoChat by approximately 3.2% and the base fine-tuned Qwen2.5-VL-SFT by nearly 15%. These results strongly suggest that the proposed hybrid reward mechanism enables the model to construct more generalized visual-language mapping logic and a comprehensive visual scanning strategy, prompting the model to focus on the geometric and semantic essence of target objects rather than specific dataset-induced biases. Consequently, the model acquires robust transfer learning ca-pabilities, facilitating accurate reasoning on non-homogeneous data. TABLE VII: Quantitative Performance Comparison of Cross-Dataset Zero-Shot Generalization for REC, OVD, and VQA Tasks                   
+
+> Method VRSBench-REC
+> ↓
+> DIOR-RSVG NWPU VHR-10
+> ↓
+> RSOD-test RSVQA
+> ↓
+> VRSBench-VQA
+> Acc@0.5 Acc@0.7 mAP@[0.5:0.95] Pass@1 Qwen2.5-VL-SFT 28.22 13.76 0.1778 30.15 GeoChat 44.13 30.62 0.1953 41.97 Geo-R1-REC 43.20 29.32 0.1004 40.22 RS-HyRe-R1 46.85 31.84 0.2350 45.13 IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 9
+
+(a) 
+
+(b) 
+
+Fig. 3: Qualitative comparison results with six models (including five RL training models). (a) Visualization of REC Task Results on the VRSBench-test Dataset. (b) Visualization of OVD Task Results on the RSOD-test Dataset. The proposed RS-HyRe-R1 consistently outperforms other baselines. IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 10 
+
+D. Qualitative Analysis 
+
+We conducted a comprehensive qualitative evaluation of the model’s performance on the REC and OVD tasks, as illustrated in Fig. 3. The visualization results provide concrete evidence of RS-HyRe-R1’s superiority over five competing RL-driven models. In the REC task (Fig. 3(a)), RS-HyRe-R1 exhibits ex-ceptional localization precision. Compared to baselines like TinyRS-R1 and GeoReason, which often generate loose bounding boxes or drift away from the target, our model consistently produces tight, accurate predictions that align closely with the Ground Truth. Notably, RS-HyRe-R1 achieves localization accuracy comparable to, and in complex scenes even slightly surpassing, the specialized Geo-R1-REC model, verifying that our unified training does not compromise task-specific precision. In the OVD task (Fig. 3(b)), which challenges the model’s ability to handle dense, multi-scale objects, RS-HyRe-R1 demonstrates robust detection capabilities. As observed in the dense storage tank and aircraft scenarios, existing models often suffer from high omission rates (false negatives) for small-scale targets. In contrast, RS-HyRe-R1 successfully identifies a significantly higher number of small objects, outperform-ing SOTA baselines including Geo-R1-OVD. This qualitative superiority confirms that our evolutionary reward mechanism effectively compels the model to perform meticulous visual scanning, thereby overcoming “perceptual inertia” and ensur-ing comprehensive target discovery in cluttered RS environ-ments. 
+
+E. Analysis of Reasoning Expansion 
+
+To investigate cognitive behavioral shifts during RL, Fig. 4 compares the average response length evolution of RS-HyRe-R1 against an ORMs-RL baseline (guided solely by correctness reward), both trained on the identical 1,600 RS-task samples. Initially (first 20 steps), both models generate short responses of approximately 60 tokens. However, their trajectories soon diverge. The ORMs-RL model’s length slug-gishly plateaus between 150 and 180 tokens, suggesting that outcome-only feedback encourages shallow semantic analysis and reliance on prominent visual features. In sharp contrast, RS-HyRe-R1’s response length surges after step 50, ultimately stabilizing in the high range of 350 to 400 tokens by step 250. This substantial disparity, more than double that of the baseline, does not represent redundant information but rather a significantly extended CoT. Driven by the visual-semantic path reward, our model is compelled to overcome “perceptual inertia” and actively leverage deeper visual details for multi-hop reasoning. This “short-to-long” evolution strongly vali-dates that our strategy successfully transitions the model from simple outcome prediction to deep visual-logical reasoning.         
+
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+>    
+> 
+>   
+
+Fig. 4: Comparison of response length trajectories. Unlike the ORMs-RL baseline (gray), which converges to 150–180 tokens, RS-HyRe-R1 (blue) surges to 350–400 tokens. This significant increase indicates that the proposed hybrid reward evolutionary strategy performs more in-depth visual reasoning. 
+
+F. RL Training Stability Analysis 
+
+Fig. 5 illustrates the overall reward curve of the RS-HyRe-R1 model during the RL training process. We observe a smooth and consistent upward trajectory, where the average re-ward steadily increases from an initial value of approximately 0.06 and converges around 0.85 after step 400. This stable rise strongly indicates the effectiveness of our reconstructed reward strategy designed for RS data. The convergence behavior suggests that our proposed multi-source hybrid reward mech-anism successfully mitigates reward hacking and provides a stable, robust learning signal. This enables the model to learn efficiently across heterogeneous RS hybrid datasets without training collapse.          
+
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+>    
+
+Fig. 5: The overall reward curve for the RL training. The curve illustrates the steady ascent of the total reward for RS-HyRe-R1 throughout the training process. This stable upward trajectory demonstrates the effectiveness of our hybrid reward mechanism in providing a robust learning signal, effectively guiding the model toward optimal performance without ex-hibiting training instability or collapse. 
+
+G. Ablation Study 
+
+The proposed hybrid reward mechanism, integrating both outcome-level and process-level supervision, successfully mit-igates “perceptual inertia”. To validate this assertion, as illus-trated in Fig. 6, we conducted an ablation study by removing IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 11           
+
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+>   
+> "
+> !  
+> !  
+> !   
+
+(a) REC Task            
+
+> 
+> 
+> 
+> 
+> 
+> 
+>   
+> #
+> "  ! 
+> "  
+> "  !
+
+(b) OVD Task            
+
+> 
+> 
+> 
+> 
+> 
+> 
+>    
+> "
+> !  
+> !  
+> !   
+
+(c) VQA Task Fig. 6: Ablation study for different rewards. The comparison curves of (a) Acc@0.5 for REC, (b) mAP@0.5 for OVD, and (c) Pass@1 for VQA during the training process. The complete model (red solid line) achieves optimal performance and robustness; removing the perceptual correctness reward (blue dashed-dotted line) results in a significant drop in performance; removing the reasoning activation reward (green dashed line) causes significant training fluctuations; and while removing the path evolution reward (orange dashed line) initially relies on salient features to adapt quickly to the reward, its subsequent performance improvement is hindered by “perceptual inertia”. each reward component individually. Specifically, the model lacking the “visual-semantic path evolution reward” (w/o Path-Evolution) shows a higher performance gain during the early stages of training. However, as training progresses, its later performance plateaus and is eventually overtaken by the full model. This confirms that without this reward constraint, the model tends to rapidly fit rewards using localized salient visual cues for quick convergence; yet, due to the lack of deep exploration into diverse visual information, it ultimately falls into local optima. Furthermore, experimental results reveal the critical roles of the other components. The model lacking the “RS-task perception correctness reward” (w/o Perception-Correctness) performs the worst across all metrics, strongly proving that outcome-level supervision is indispensable as the core of the reward mechanism for ensuring geometric and semantic align-ment. Meanwhile, the model without the “spatial reasoning activation reward” (w/o Reasoning-Activation) exhibits severe performance fluctuations during training, demonstrating that this reward ensures the stability of reasoning through structural constraints, preventing randomness in logical trajectories. In summary, the full model achieves the best performance across all tasks, fully demonstrating that the three reward mechanisms are indispensable in synergistically promoting deep visual reasoning. V. C ONCLUSION 
+
+This paper addresses the critical challenge of “perceptual inertia” in VLMs during the RL post-training phase for RS interpretation. Specifically, existing outcome-guided reasoning models tend to rely on localized salient visual cues for rapid deduction, neglecting the exhaustive visual scanning required for complex RS imagery. To tackle this, we propose RS-HyRe-R1, a hybrid reward-based RL framework tailored for comprehensive RS-task adaptation. To counteract this optimization bias and encourage com-prehensive visual grounding, we constructed a unified training environment integrating REC, OVD, and VQA tasks, driven by a novel hybrid reward mechanism. Specifically, we enforce explicit structural reasoning via the spatial reasoning activation reward. At the outcome level, we guarantee localization pre-cision and semantic accuracy across task transitions through the RS-task perception correctness reward. At the process supervision level, we introduce the visual-semantic path evo-lution reward to incentivize the model to actively discover complementary visual cues to construct diverse, evidence-based reasoning chains. Extensive experimental results strongly validate the effec-tiveness of our model. RS-HyRe-R1 successfully overcomes the “perceptual inertia” inherent in traditional RL, signifi-cantly increasing the utilization of visual information during deep logical inference. With only 3B parameters, the model comprehensively outperforms larger-scale fine-tuned models (e.g., GeoChat), as well as existing outcome-guided reasoning models (e.g., Geo-R1 and GeoReason) and process-guided reasoning models (such as R1-VL) across the REC, OVD, and VQA tasks. Crucially, the framework endows the model with dual robustness at both cognitive and executive levels, enabling dynamic visual anchoring and precise geometric localization even when facing distinct RS tasks and zero-shot datasets. Future work will explore the application of this evolutionary framework to multi-modal data such as multi-spectral and SAR imagery, and investigate its scalability with larger datasets, aiming to build a more generalizable [61]–[63], and inter-pretable intelligent RS interpretation system. REFERENCES [1] X. Li, C. Wen, Y. Hu, Z. Yuan, and X. X. Zhu, “Vision-Language Models in Remote Sensing: Current progress and future trends,” IEEE Geoscience and Remote Sensing Magazine , vol. 12, no. 2, pp. 32–66, 2024. [2] F. Liu, D. Chen, Z. Guan, X. Zhou, J. Zhu et al. , “RemoteCLIP: A Vision Language Foundation Model for Remote Sensing,” IEEE Transactions on Geoscience and Remote Sensing , vol. 62, pp. 1–16, 2024. [3] J. Wang, Z. Zheng, Z. Chen, A. Ma, and Y. Zhong, “EarthVQA: towards queryable earth via relational reasoning-based remote sensing visual question answering,” in Proceedings of the Thirty-Eighth AAAI Confer-ence on Artificial Intelligence and Thirty-Sixth Conference on Innovative Applications of Artificial Intelligence and Fourteenth Symposium on IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 12 
+
+Educational Advances in Artificial Intelligence . AAAI Press, 2024, pp. 5481–5489. [4] D. Liu, T. Li, Y. Qi, Y. Xi, J. Jin, and J. Zhang, “Vision-Language Model for Remote Sensing Images Object Detection,” in IGARSS 2025 - 2025 IEEE International Geoscience and Remote Sensing Symposium , 2025, pp. 6069–6072. [5] S. Xu, C. Zhang, L. Fan, G. Meng, S. Xiang, and J. Ye, “AddressCLIP: Empowering Vision-Language Models for City-Wide Image Address Localization,” in Computer Vision – ECCV 2024 . Cham: Springer Nature Switzerland, 2025, pp. 76–92. [6] R. Shao, C. Yang, Q. Li, L. Xu, X. Yang et al. , “Allspark: A multimodal spatio-temporal general intelligence model with ten modalities via language as a reference framework,” IEEE Transactions on Geoscience and Remote Sensing , vol. 63, 2025. [7] J. Peng, H. Zhang, J. Shen, Z. Li, J. Ma, and H. Li, “Rethinking domain-agnostic continual learning via frequency completeness learning,” Infor-mation Fusion , vol. 129, p. 103961, 2026. [8] R. Shao, Z. Zhang, C. Tao, Y. Zhang, C. Peng, and H. Li, “Homogeneous tokenizer matters: Homogeneous visual tokenizer for remote sensing image understanding,” ISPRS Journal of Photogrammetry and Remote Sensing , vol. 218, 2024. [9] D. Guo, D. Yang, H. Zhang, J. Song, P. Wang et al. , “DeepSeek-R1 incentivizes reasoning in LLMs through reinforcement learning,” Nature ,vol. 645, no. 8081, pp. 633–638, 2025. [10] A. Yang, A. Li, B. Yang, B. Zhang, B. Hui et al. , “Qwen3 Technical Report,” 2025. [11] F. Meng, L. Du, Z. Liu, Z. Zhou, Q. Lu et al. , “MM-Eureka: Exploring the Frontiers of Multimodal Reasoning with Rule-based Reinforcement Learning,” 2025. [12] L. Wen, Y. Cai, F. Xiao, X. He, Q. An et al. , “Light-R1: Curriculum SFT, DPO and RL for Long COT from Scratch and Beyond,” in Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics , vol. 6, Vienna, Austria, jul 2025, pp. 318–327. [13] W. Huang, B. Jia, Z. Zhai, S. Cao, Z. Ye et al. , “Vision-R1: Incentivizing Reasoning Capability in Multimodal Large Language Models,” 2025. [14] H. Shen, P. Liu, J. Li, C. Fang, Y. Ma et al. , “VLM-R1: A Stable and Generalizable R1-style Large Vision-Language Model,” 2025. [15] H. Chen, H. Tu, F. Wang, H. Liu, X. Tang et al. , “SFT or RL? An Early Investigation into Training R1-Like Reasoning Large Vision-Language Models,” 2025. [16] J. Yang, F. Ma, Z. Wang, D. Yin, K. Rong et al. , “WeThink: Toward General-purpose Vision-Language Reasoning via Reinforcement Learn-ing,” 2025. [17] H. Lightman, V. Kosaraju, Y. Burda, H. Edwards, B. Baker et al. , “Let’s Verify Step by Step,” 2023. [18] J. Uesato, N. Kushman, R. Kumar, F. Song, N. Siegel et al. , “Solving math word problems with process- and outcome-based feedback,” 2022. [19] E. Zelikman, Y. Wu, J. Mu, and N. Goodman, “STaR: Bootstrapping Reasoning With Reasoning,” in Advances in Neural Information Pro-cessing Systems , vol. 35. Curran Associates, Inc., 2022, pp. 15 476– 15 488. [20] M. Khalifa, R. Agarwal, L. Logeswaran, J. Kim, H. Peng et al. , “Process reward models that think,” 2025. [21] J. Zhang, J. Huang, H. Yao, S. Liu, X. Zhang et al. , “R1-VL: Learning to Reason with Multimodal Large Language Models via Step-wise Group Relative Policy Optimization,” 2025. [22] Z. Zhang, Z. Guan, T. Zhao, H. Shen, T. Li et al. , “Geo-R1: Improving Few-Shot Geospatial Referring Expression Understanding with Rein-forcement Fine-Tuning,” 2025. [23] C. Xu, F. Yu, M. J. Bianco, J. Kovarskiy, R. Tang et al. , “Geo-R1: Unlocking VLM Geospatial Reasoning with Cross-View Reinforcement Learning,” 2025. [24] A. K¨ oksal and A. A. Alatan, “TinyRS-R1: Compact Vision Language Model for Remote Sensing,” IEEE Geoscience and Remote Sensing Letters , vol. 22, p. 1–5, 2025. [25] W. Li, X. Xiang, Z. Wen, G. Zhou, B. Niu et al. , “GeoReason: Aligning Thinking And Answering In Remote Sensing Vision-Language Models Via Logical Consistency Reinforcement Learning,” 2026. [26] J. A. Richards and X. Jia, Remote Sensing Digital Image Analysis: An Introduction , 6th ed. Berlin, Heidelberg: Springer, 2022. [27] G. Cheng, J. Han, and X. Lu, “Remote Sensing Image Scene Classifi-cation: Benchmark and State of the Art,” Proceedings of the IEEE , vol. 105, no. 10, pp. 1865–1883, 2017. [28] J. Qu, Z. Tang, L. Zhang, Y. Zhang, and Z. Zhang, “Remote Sensing Small Object Detection Network Based on Attention Mechanism and Multi-Scale Feature Fusion,” Remote Sensing , vol. 15, no. 11, p. 2728, 2023. [29] J. Cui, W. Guo, H. Huang, X. Lv, H. Cao, and H. Li, “Adversarial examples for vehicle detection with projection transformation,” IEEE Transactions on Geoscience and Remote Sensing , vol. 62, p. 5632418, 2024. [30] W. Guo, J. Cui, X. Cui, J. Li, Z. Zhang et al. , “Trimem: Tri-fold memory framework for continual learning of vlms in remote sensing,” IEEE Transactions on Geoscience and Remote Sensing , vol. 63, p. 5648115, 2025. [31] C. Yang, J. Zhang, Q. Li, W. Guo, and H. Li, “Rs deepreason: Llm-driven deep reasoning for multigranularity remote sensing scene interpretation,” IEEE Geoscience and Remote Sensing Letters , vol. 23, p. 6005305, 2026. [32] R. S. Sutton and A. G. Barto, Reinforcement Learning: An Introduction ,2nd ed. Cambridge, MA: MIT Press, 2018. [33] L. P. Kaelbling, M. L. Littman, and A. W. Moore, “Reinforcement learning: A survey,” Journal of Artificial Intelligence Research , vol. 4, no. 1, pp. 237–285, 1996. [34] V. Mnih, K. Kavukcuoglu, D. Silver, A. A. Rusu, J. Veness et al. ,“Human-level control through deep reinforcement learning,” Nature , vol. 518, no. 7540, pp. 529–533, 2015. [35] Z. Huang, H. Yan, Q. Zhan, S. Yang, M. Zhang et al. , “A Survey on Remote Sensing Foundation Models: From Vision to Multimodality,” 2025. [36] M. M. A. Rahhal, Y. Bazi, S. O. Alsaleh, M. Al-Razgan, M. L. Mekhalfi 
+
+et al. , “Open-ended remote sensing visual question answering with transformers,” International Journal of Remote Sensing , vol. 43, no. 18, pp. 6809–6823, 2022. [37] Y. Sun, S. Feng, X. Li, Y. Ye, J. Kang, and X. Huang, “Visual Grounding in Remote Sensing Images,” in Proceedings of the 30th ACM International Conference on Multimedia . New York, NY, USA: Association for Computing Machinery, 2022, p. 404–412. [38] Y. Zhao, Y. Chen, R. Yao, S. Xiong, and X. Lu, “Context-driven and sparse decoding for Remote Sensing Visual Grounding,” Information Fusion , vol. 123, p. 103296, 2025. [39] K. Kuckreja, M. S. Danish, M. Naseer, A. Das, S. Khan, and F. S. Khan, “GeoChat: Grounded Large Vision-Language Model for Remote Sensing,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , June 2024, pp. 27 831–27 840. [40] X. Guo, J. Lao, B. Dang, Y. Zhang, L. Yu et al. , “SkySense: A Multi-Modal Remote Sensing Foundation Model Towards Universal Interpre-tation for Earth Observation Imagery,” 2024 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pp. 27 662–27 673, 2024. [41] P. Wang, H. Hu, B. Tong, Z. Zhang, F. Yao et al. , “RingMoGPT: A Unified Remote Sensing Foundation Model for Vision, Language, and Grounded Tasks,” IEEE Transactions on Geoscience and Remote Sensing , vol. 63, pp. 1–20, 2025. [42] J. Luo, Z. Pang, Y. Zhang, T. Wang, L. Wang et al. , “SkySenseGPT: A Fine-Grained Instruction Tuning Dataset and Model for Remote Sensing Vision-Language Understanding,” arXiv , 2024. [43] W. Zhang, M. Cai, T. Zhang, Y. Zhuang, and X. Mao, “EarthGPT: A Universal Multimodal Large Language Model for Multisensor Image Comprehension in Remote Sensing Domain,” IEEE Transactions on Geoscience and Remote Sensing , vol. 62, pp. 1–20, 2024. [44] L. Ouyang, J. Wu, X. Jiang, D. Almeida, C. L. Wainwright et al. , “Train-ing language models to follow instructions with human feedback,” in 
+
+Proceedings of the 36th International Conference on Neural Information Processing Systems , vol. 35, Red Hook, NY, USA, 2022, pp. 27 730– 27 744. [45] S. Longpre, L. Hou, T. Vu, A. Webson, H. W. Chung et al. , “The Flan Collection: Designing Data and Methods for Effective Instruction Tun-ing,” in Proceedings of the 40th International Conference on Machine Learning (ICML) , vol. 202. JMLR.org, 2023, pp. 22 631–22 648. [46] Y. Zhan, Z. Xiong, and Y. Yuan, “RSVG: Exploring Data and Models for Visual Grounding on Remote Sensing Data,” IEEE Transactions on Geoscience and Remote Sensing , vol. 61, pp. 1–13, 2023. [47] J. Yang, S. Yang, A. W. Gupta, R. Han, L. Fei-Fei, and S. Xie, “Thinking in Space: How Multimodal Large Language Models See, Remember, and Recall Spaces,” in 2025 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2025, pp. 10 632–10 643. [48] OpenAI, A. Jaech, A. Kalai, A. Lerer, A. Richardson et al. , “OpenAI o1 System Card,” 2024. [49] Z. Shao, P. Wang, Q. Zhu, R. Xu, J. Song et al. , “DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models,” 2024. IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 13 
+
+[50] H. Yao, J. Huang, W. Wu, J. Zhang, Y. Wang et al. , “Mulberry: Em-powering MLLM with o1-like Reasoning and Reflection via Collective Monte Carlo Tree Search,” 2024. [51] W. Wang, Z. Gao, L. Chen, Z. Chen, J. Zhu et al. , “VisualPRM: An Effective Process Reward Model for Multimodal Reasoning,” 2025. [52] X. Li, J. Ding, and M. Elhoseiny, “VRSBench: A Versatile Vision-Language Benchmark Dataset for Remote Sensing Image Understand-ing,” in Proceedings of the 38th International Conference on Neural Information Processing Systems . Curran Associates Inc., 2024. [53] G. Cheng, J. Han, P. Zhou, and L. Guo, “Multi-class geospatial object detection and geographic image classification based on collection of part detectors,” ISPRS Journal of Photogrammetry and Remote Sensing ,vol. 98, pp. 119–132, 2014. [54] S. Lobry, D. Marcos, J. Murray, and D. Tuia, “RSVQA: Visual Question Answering for Remote Sensing Data,” IEEE Transactions on Geoscience and Remote Sensing , vol. 58, no. 12, pp. 8555–8566, 2020. [55] S. Bai, K. Chen, X. Liu, J. Wang, W. Ge et al. , “Qwen2.5-VL Technical Report,” 2025. [56] Z. Yaowei, L. Junting, W. Shenzhi, F. Zhangchi, K. Dongdong, and X. Yuwen, “EasyR1: An Efficient, Scalable, Multi-Modality RL Training Framework,” https://github.com/hiyouga/EasyR1, 2025. [57] Y. Long, Y. Gong, Z. Xiao, and Q. Liu, “Accurate Object Localization in Remote Sensing Images Based on Convolutional Neural Networks,” 
+
+IEEE Transactions on Geoscience and Remote Sensing , vol. 55, no. 5, pp. 2486–2498, 2017. [58] H. Liu, C. Li, Y. Li, and Y. J. Lee, “Improved Baselines with Visual Instruction Tuning,” in 2024 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2024, pp. 26 286–26 296. [59] Y. Li, Y. Zhang, C. Wang, Z. Zhong, Y. Chen et al. , “Mini-Gemini: Mining the Potential of Multi-modality Vision Language Models,” 2024. [60] J. Chen, D. Zhu, X. Shen, X. Li, Z. Liu et al. , “MiniGPT-v2: large language model as a unified interface for vision-language multi-task learning,” 2023. [61] L. Zhao, M. Li, R. Shao, and H. Li, “Pcir: An open-world remote sensing image representation learning method from a causal perspective,” IEEE Transactions on Geoscience and Remote Sensing , vol. 64, p. 5601916, 2026. [62] S. He, P. Shen, P. Xu, Q. Luo, and H. Li, “Stdcformer: A transformer-based model with a spatial-temporal causal de-confounding strategy for crowd flow prediction,” Information Fusion , vol. 126, p. 103645, 2026. [63] Y. Wang, S. He, Q. Luo, H. Yuan, L. Zhao et al. , “Causal invariant geographic network representations with feature and structural distribu-tion shifts,” Future Generation Computer Systems , vol. 169, p. 107814, 2025. 
+
+Gaozhi Zhou received the Master’s degree in Elec-tronic Information from Kunming University of Sci-ence and Technology, Kunming, China, in 2025. He is currently pursuing the Ph.D. with the School of Mechanical and Electrical Engineering, Central South University, Changsha, China. His research interests include multimodal reasoning models, com-puter vision, and remote sensing image understand-ing. 
+
+Hu He received a B.Eng degree in Microelectronic Manufacturing Engineering from Central South Uni-versity, Changsha, China, in 2008, and a Ph.D. de-gree in computer science and electrical engineering from the Queensland University of Technology, Bris-bane, QLD, Australia, in 2014. He is an Associate Professor with Central South University, Changsha, China. He has authored more than 50 articles in international journals and conferences. His current research interests include electronic packaging and reliability, AI for engineering, and precision mea-surement technology. 
+
+Peng Shen received the M.D. degree from Univer-sity of Science and Technology Beijing, China, in 2024. He is currently pursuing the Ph.D. degree in the School of Geosciences and Info-Physics, Central South University. His research interests include time series and spatio-temporal data mining. 
+
+Jipeng Zhang is a Ph.D. student in the Department of Geomatics and remote sensing at Central South Universitty. His research interests include embodied agents in UAV and memory systems of agents. 
+
+Liujue Zhang received the Master’s degree in Me-chanical and Automation Engineering from The Chi-nese University of Hong Kong, Hong Kong, China, in 2025. He is currently pursuing the Ph.D. with the School of Geo-Sciences and Info-Physics, Central South University, Changsha, China. His research interests include multimodal reasoning models, com-puter vision, and remote sensing image understand-ing. 
+
+Linrui Xu is currently pursuing the Ph.D. degree with Central South University, Changsha, China. His research interests include computer vision, multi-modal reasoning large language models, and remote sensing image understanding. 
+
+Zeyuan Wang received the Bachelor’s degree in Safety Engineering from the School of Resources and Safety Engineering, Central South University, Changsha, China, in 2025. He is currently pursuing the Master’s degree in Remote Sensing Science and Technology with the School of Geosciences and Info-Physics, Central South University, Changsha, China. His research interests include remote sensing agent tool learning, multimodal remote sensing agent memory. IEEE TRANSACTIONS ON GEOSCIENCE AND REMOTE SENSING 14 
+
+Ziyu Li received the B.S. degree in Geographic Information Science from Central South University, Changsha, Hunan, China, in June 2025. He is cur-rently pursuing the Ph.D. degree in Surveying and Mapping Science and Technology at Central South University. His research interests include reason-ing techniques for remote sensing large language models, multimodal geospatial understanding, and intelligent analysis of Earth observation data. 
+
+Xuezhi Cui received the B.S. degree in Geographic Information Science from Central South University, Changsha, Hunan, China, in June 2025. He is cur-rently pursuing a Ph.D. degree in Surveying and Mapping Science and Technology at Central South University. His research interests include intelligent interpretation of remote sensing imagery, vision-language models, and continual fine-tuning of pre-trained models. 
+
+Wang Guo received the M.Sc. degree in the Interac-tive Media from University College Cork, Cork, Ire-land, in 2019 and is currently pursuing the Ph.D. de-gree in Central South University, Changsha, China. His research interests include memory model, life-long learning and remote sensing image processing. 
+
+Haifeng Li received a master’s degree in transporta-tion engineering from the South China University of Technology, Guangzhou, China, in 2005, and a Ph.D. degree in photogrammetry and remote sensing from Wuhan University, Wuhan, China, in 2009. He is currently a professor at the School of Geosciences and Info-Physics, Central South University, Chang-sha, China. He was a research associate with the Department of Land Surveying and Geo-Informatics, The Hong Kong Polytechnic University, Hong Kong, in 2011, and a visiting scholar with the University of Illinois at Urbana-Champaign, Urbana, IL, USA, from 2013 to 2014. He has authored over 30 journal papers. His current research interests include geo/remote sensing big data, machine/deep learning, and artificial/brain-inspired intelligence. He is a reviewer for many journals.

@@ -1,0 +1,833 @@
+Title: ReactBench: A Benchmark for Topological Reasoning in MLLMs on Chemical Reaction Diagrams
+
+URL Source: https://arxiv.org/pdf/2604.15994v1
+
+Published Time: Mon, 20 Apr 2026 00:50:28 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# ReactBench: A Benchmark for Topological Reasoning in MLLMs on Chemical Reaction Diagrams 
+
+Qiang Xu 1 Shengyuan Bai 1 Yu Wang 2 He Cao 1 Leqing Chen 1
+
+Yuanyuan Liu 1 Bin Feng 1 Zijing Liu 1 Yu Li 1†
+
+1International Digital Economy Academy, Shenzhen, China 2University of Wisconsin–Madison 
+
+†Corresponding Author: liyu@idea.edu.cn Q: Please analyze how many different end products are formed               
+
+> from compound emodin through various pathways in this
+> reaction diagram?
+> A: There are 6different end products formed from emodin through
+> various pathways in this reaction network. Products (2), (3), (4), (5),
+> (6), and (7) are all the end products.
+> Q: Why do you think they are the end products?
+> A: Products (2) and (7) are directly formed from emodin (1)
+> through clear reaction pathways. Products (4), (5), and (6) are
+> formed through transformations. (3) appears in the diagram as a
+> distinct compound. Reaction Diagram
+> Q: Please analyze how many end products
+> are formed from the first step ?
+> A: There is only 1 end product formed from
+> the first step through the entire process: brewed
+> coffee.
+> Q: Why do you think only 1 end product?
+> A:The process is linear , with
+> each step building on the previous one to
+> create a single result.
+> General Diagram
+
+Figure 1: Comparing General Diagram and Chemical Reaction Diagram on Element Localization Tasks. 
+
+GPT-4o performs well on general diagrams for identification tasks. However, for chemical reaction diagram, the structural complexity of molecular diagrams and reaction pathways leads to errors. 
+
+Abstract 
+
+Multimodal Large Language Models (MLLMs) excel at recognizing individual visual elements and reasoning over simple linear diagrams. However, when faced with complex topologi-cal structures involving branching paths, con-verging flows, and cyclic dependencies, their reasoning capabilities degrade sharply, even on tasks as basic as counting endpoints. Ex-isting benchmarks fail to probe this gap, fo-cusing on semantic comprehension rather than structural reasoning. We introduce ReactBench, a benchmark that reveals fundamental limita-tions in structural reasoning through chemical reaction diagrams. These real-world scientific diagrams offer an ideal testbed because they naturally span diverse structures from linear chains to cyclic graphs, while requiring both precise local recognition and coherent global reasoning. Our benchmark comprises 1,618 expert-annotated QA pairs across four hierar-chical task dimensions. Extensive evaluation across 17 MLLMs reveals a significant perfor-mance gap exceeding 30% between anchor-based tasks and holistic structural reasoning tasks. Controlled ablations confirm this bottle-neck lies in reasoning, not perception. These findings expose a fundamental deficit in struc-tural understanding and establish directions for advancing visual reasoning. 
+
+1 Introduction 
+
+Recent advances in MLLMs have demonstrated remark-able capabilities in visual-linguistic reasoning across di-verse domains (OpenAI, 2024a; Anthropic, 2024; Team et al., 2024; Bai et al., 2025). These models excel at rec-ognizing individual visual elements and reasoning over simple linear diagrams. However, real-world diagrams often encode information through complex topological structures involving branching paths, converging flows, and cyclic dependencies. The capacity of MLLMs to reason about such structural connections remains largely unexplored, as existing benchmarks (Mathew et al., 2021; Singh et al., 2019; Masry et al., 2022; Lu et al., 2022) primarily evaluate semantic comprehension rather than structural reasoning capabilities. We illustrate this gap through a controlled compari-son in Fig. 1. Both tasks require the same topological operation of identifying terminal nodes in a diagram. When presented with a simple linear topology such as a sequential coffee brewing process, GPT-4o correctly identifies the single endpoint. However, when the same task is posed on a branching chemical network, the model fails systematically, misidentifying six endpoints instead of the actual three. Notably, neither task requires domain expertise. The failure is attributable to an inabil-ity to reason about complex branching structures rather than a lack of chemical knowledge. These observations reveal a fundamental limitation in current MLLMs. The ability to perceive local elements does not guarantee comprehension of global structure. As topological complexity increases, models exhibit systematic failures in integrating visual elements into coherent structural representations. Systematically diagnosing this limitation requires a testbed that combines diverse topological complexity with demands for both local recognition and global rea-soning. Chemical reaction diagrams satisfy these crite-ria. They naturally span structures from linear chains to cyclic graphs, and demand accurate local perception of molecules and conditions alongside coherent global                 
+
+> arXiv:2604.15994v1 [cs.AI] 17 Apr 2026 Spatial Element Localization Topological Information Extraction
+> How many end products are in the
+> diagram?
+> How many reactants are in the
+> diagram?
+> How many reaction steps in the
+> diagram require reaction conditions?
+> How many types of reaction
+> conditions are there in the reaction
+> step from subscript 3 to subscript 4?
+> What is the subscript of the final
+> product in the diagram?
+> What is the reaction temperature
+> for the step from 9 to 17 ?
+> What is the percentage yield of
+> the step from 16b to 5b
+> in the diagram?
+> What is the reaction time in
+> hours of the step from 17 to 14b?
+> Pathway Connectivity Tracing Structural Topology Reasoning
+> The current step involves compound
+> with subscript 19. What is the
+> subscript of the immediate previous
+> compound that led to this step?
+> Trace the full pathway leading to the
+> product with subscript 7. List all
+> compound subscripts in order, from
+> the starting material to the final
+> product.
+> z
+> Is there a circular reaction in
+> the diagram, YES or NO?
+> Which term classifies the
+> structure of reaction pathway?
+> A) Single line
+> B) Multiple line
+> C) Tree
+> D) Graph
+
+Figure 2: Overview of ReactBench. ReactBench systematically evaluates topological reasoning on chemical reaction diagrams across four complexity-stratified dimensions. understanding of reaction pathways. We introduce ReactBench , a benchmark designed to diagnose structural reasoning limitations in MLLMs through chemical reaction diagrams. ReactBench com-prises 1,618 question-answer pairs carefully curated from real-world chemistry literature and patents, orga-nized into four hierarchical task dimensions: spatial element localization, topological information extraction, pathway connectivity tracing, and structural topology reasoning. This design enables precise identification of where model capabilities degrade along the perception-to-reasoning spectrum. Our main contributions are as follows: • We present ReactBench, the first benchmark that systematically diagnoses structural reasoning lim-itations in MLLMs through hierarchical task de-composition, comprising 1,618 expertly annotated question-answer pairs across four skill dimensions. • We establish empirical evidence for a fundamen-tal capability gap in current MLLMs, revealing a significant performance dichotomy across task di-mensions. Accuracy exceeds 80% on information extraction and path tracing, but drops below 55% on element counting and topology classification, indicating that structural complexity is a primary determinant of task difficulty. • Through controlled ablations across multiple model families, we demonstrate that this bottle-neck lies in reasoning rather than perception, and identify specific failure modes in structural under-standing, providing concrete directions for improv-ing visual reasoning in future architectures. 
+
+2 Related Work 
+
+2.1 Multimodal Large Language Models 
+
+MLLMs extend text-only LLMs by adding visual com-prehension capabilities. Early works like CLIP (Rad-ford et al., 2021) established vision-language align-ment through contrastive learning. Recent MLLMs mainly follow two design paradigms. The first includes encoder-decoder architectures like BLIP-2 (Li et al., 2023) that use separate visual and textual encoders with a Q-Former (Zhang et al., 2023) for cross-modal fusion. The second encompasses decoder-only architectures, such as LLaVA (Liu et al., 2023), that project visual fea-tures directly into the LLM input space. These models are typically trained through a multistage process in-volving pre-training on image-text pairs and instruction tuning on high-quality multimodal datasets. Recent ad-vances include KOSMOS-1 (Huang et al., 2023), which supports multimodal in-context learning, and Qwen2.5-VL (Bai et al., 2025) and GPT-4V (OpenAI, 2024b), which demonstrate strong performance in various vision language tasks, including visual reasoning and OCR understanding. 
+
+2.2 Visual Question Answering (VQA) Benchmarks 
+
+Visual Question Answering (VQA) benchmarks have been instrumental in driving the development and eval-uation of Multimodal Large Language Models. Ex-isting datasets like DocVQA (Mathew et al., 2021) and ChartQA (Masry et al., 2022) primarily evaluate visual information extraction capabilities across rela-tively simple, standardized layouts. On the other hand, science-oriented benchmarks such as ScienceQA (Lu et al., 2022) and AI2D (Hiippala et al., 2021) test domain-specific scientific knowledge and basic dia-grammatic understanding, yet they predominantly target Category Number Question Dimensions 
+
+Spatial Element Localization 835 (52%) Topological Information Extraction 414 (26%) Pathway Connectivity Tracing 167 (10%) Structural Topology Reasoning 202 (12%) 
+
+Question types 
+
+Numerical questions 1094 (67%) Multiple-choice questions 202 (13%) Free-form questions 322 (20%) 
+
+Total 1618 
+
+Table 1: Key statistics of ChemReaction. Reactant      
+
+> 11%
+> Product
+> 11%
+> Reaction
+> Steps
+> 26%
+> Tem perature
+> 7%
+> Time
+> 4%
+> Yield
+> 5%
+> Subscript
+> 10%
+> Topology
+> classificatio n
+> 11.9 %
+> Reaction
+> Conditions 4 %
+> Forward
+> Reasoning (4% )
+> Reverse
+> Reasoning (5% )
+> Path
+> Tracing (1% )
+> Cyclicity
+> Detection (0.1 %)
+> Localization
+> (52%)
+> Information
+> Extraction
+> (26%)
+> Connectivity
+> (10%)
+> Topology
+> (12%)
+
+Figure 3: Composition of ChemReaction. non-structural or shallow visual reasoning. In these scenarios, visual inputs typically act as static seman-tic references rather than intricate relational networks. Consequently, while current VQA benchmarks heav-ily focus on general semantic comprehension and basic grounding, they lack a systematic evaluation of complex topological reasoning. Our work addresses this critical gap by specifically isolating and evaluating multi-hop, graph-theoretic reasoning within dense structural topolo-gies. 
+
+2.3 Chemical Reaction Diagram Understanding 
+
+Existing approaches to chemical reaction diagram un-derstanding employ multi-stage pipelines that first per-form Optical Chemical Structure Recognition (OCSR) to detect individual molecular structures, then con-vert detected elements into text representations such as SMILES (Rajan et al., 2020; et al., 2023; Qian et al., 2023; Clevert et al., 2021). Representative meth-ods include RxnScribe (Qian et al., 2023) and Reac-tionDataExtractor 2.0 (Wilary and Cole, 2023). Such pipeline-based frameworks are fundamentally incom-patible with end-to-end MLLMs, which directly process visual inputs without intermediate symbolic conversion. Furthermore, text-based representations discard spatial positioning and pathway directionality, precluding dif-ferentiation between recognition errors and reasoning deficits (Filippov and Nicklaus, 2009; Oldenhof et al., 2020; Rajan et al., 2023). In contrast, ReactBench evaluates MLLMs’ topological reasoning capabilities through visual question-answering tasks, enabling direct assessment of structural understanding without pipeline-induced confounds. 
+
+3 The ReactBench Benchmark 
+
+3.1 Overview 
+
+We introduce ReactBench , a specialized benchmark de-signed to evaluate MLLMs’ ability to comprehend and reason about chemical reaction diagrams. ReactBench consists of a high-quality dataset ChemReaction with 1,618 rigorously curated QA pairs derived from real-world chemical reaction diagrams, and a comprehensive evaluation framework assessing four key dimensions of reaction diagram understanding: (1) spatial element lo-calization , (2) topological information extraction , (3) pathway connectivity tracing , (4) structural topology reasoning . Key statistics of ChemReaction are sum-marized in Tab. 1, and its composition is illustrated in Fig. 3. The complete benchmark construction pipeline is depicted in Fig. 4. Below, we detail the dataset col-lection and annotation methodology for ChemReaction, and the evaluation scope of ReactBench. 
+
+3.2 Dataset Details 
+
+To ensure reproducibility and transparency, we pro-vide a comprehensive description of the data collection pipeline, annotation protocols, and quality control mea-sures used to construct ReactBench. 
+
+Data Collection and Curation. ReactBench is con-structed from a collection of over 1,300 unique real-world chemical reaction diagrams systematically cu-rated from chemical literature and patent databases, ensuring both academic rigor and industrial relevance. Specifically, the academic sources include major Amer-ican Chemical Society (ACS) journals—such as Or-ganic Process Research & Development (OPR&D), The Journal of Organic Chemistry (JOC), Journal of the American Chemical Society (JACS), and Organic Let-ters —spanning the period from 1996 to 2016. To maxi-mize diversity at both the document and reaction levels, we employ a strict selection strategy where every im-age is sourced from a distinct article. This ensures the dataset reflects the broad spectrum of layout variability, notation styles, and information densities encountered in practical literature. Through a multi-stage filtering process that excludes diagrams with incomplete mecha-nisms, ambiguous visual representations, or duplicate content, we obtain a high-fidelity dataset integrating diverse layout structures with nuanced mechanistic de-(a)    
+
+> (a)
+> Chemical
+> Literature
+> Chemical
+> Reaction Diagrams
+> Manually
+> collect and crop
+> the diagram s
+> (a) Chemical Reaction Diagrams Collect
+> Filtered
+> out
+> Preprocess
+> (b) Manually Question Generation
+> Concrete Questions & Answers
+> Design question
+> & Provide answer
+> (c) Evaluation & Analysis
+> Multimodal Large Language
+> Models
+> Qwen-VL-MAX: 15 ℃
+> GPT-4o: 10 ℃
+> Claude-3.5-Sonnet : 5 ℃
+> Model
+> Reasoning
+
+Figure 4: ReactBench dataset construction and evaluation pipeline. (a) Data acquisition involves systematic collection of chemical reaction diagrams from peer-reviewed literature and patent databases, followed by prepro-cessing through manual curation and quality filtering protocols. (b) Annotation framework encompasses structured generation and expert validation of question-answer pairs, ensuring alignment with target evaluation dimensions and chemical accuracy. (c) Systematic evaluation protocol for assessing multimodal large language model performance across predefined reasoning dimensions with comprehensive analysis metrics. tails. In total, the final dataset comprises 1,618 question-answer pairs derived from these 1,300+ unique reaction diagrams. 
+
+Taxonomy of Reaction Topologies. To capture the full spectrum of visual complexity and reasoning chal-lenges, the curated diagrams are stratified into four cate-gories representing real-world workflows, ranging from single-step reactions to complex multistep processes: ( a)
+
+Single-line : Linear pathways with unidirectional flows; (b) Multiple-lines : Parallel or branched mechanisms with competing intermediates; ( c) Tree : Hierarchical branching with divergent synthesis routes; ( d) Graph :Cyclic networks requiring non-linear reasoning. This taxonomy covers prevalent reaction topologies across experimental and industrial contexts with balanced cov-erage. 
+
+3.3 Question Design 
+
+To enable a detailed evaluation of MLLMs’ capabilities in understanding chemical reaction diagrams, as shown in Fig. 2, we have systematically designed questions across four key dimensions: 
+
+Spatial Element Localization. This task evaluates mod-els’ capacity for fine-grained spatial reasoning and ob-ject localization within structured diagrams. Given a reaction network represented as a visual graph, models must accurately identify and classify node types (source, sink, intermediate) and edge properties (directed con-nections, branching points) based solely on topological position and visual context. This requires robust visual grounding and spatial attention mechanisms without reliance on domain-specific semantic priors. 
+
+Topological Information Extraction. This dimension assesses models’ ability to perform structured informa-tion extraction guided by topological context. Mod-els must extract numerical and textual attributes from graph elements while maintaining spatial correspon-dence between visual tokens and their semantic roles. The task challenges models’ capacity for fine-grained visual-linguistic alignment and context-dependent pars-ing in dense, multi-modal representations. 
+
+Pathway Connectivity Tracing. This dimension probes models’ grasp of connectivity and path traversal in reaction networks. Models must trace pathways, pre-dict sequential nodes, and reconstruct complete paths based purely on topological connections. These tasks demand graph-theoretic reasoning, minimizing the need for predictive chemical knowledge. 
+
+Structural Topology Reasoning. This dimension fo-cuses on models’ ability to classify and analyze the overall topological structure of reaction diagrams. Mod-els must identify structural patterns (linear, branched, cyclic, tree-like, or graph topologies) and detect struc-tural properties like cycles or terminal nodes. This re-quires holistic graph-theoretic understanding of diagram architecture. 
+
+3.4 Annotation and Validation 
+
+All questions and answers are meticulously annotated by multiple chemistry experts to ensure accuracy and Table 2: Detailed evaluation results on ReactBench across different models, showing the answer accuracy (Acc.) of each model in each task. Average denotes the arithmetic mean of a model’s scores over all four tasks. The best and second-best per model category is highlighted with bold and underlined respectively. 
+
+Models # Params ReactBench Average Localization Extraction Tracing Reasoning 
+
+API-based Models 
+
+GPT-4o - 44.07 79.71 82.04 49.50 63.83 Claude-3.5-Sonnet - 50.78 81.88 92.22 49.50 68.60 
+
+Gemini-1.5-Pro - 45.75 75.60 71.86 55.45 62.17 Qwen-VL-MAX - 49.22 90.10 88.62 32.18 65.03 
+
+Open Source Models 
+
+InternVL2.5-MPO 8B 38.20 66.43 59.28 37.62 50.38 InternVL2.5 8B 27.43 65.22 45.51 26.73 41.22 InternVL2.5 26B 33.89 66.18 65.87 19.80 46.44 InternVL2.5 78B 41.08 79.47 67.66 26.73 53.74 Qwen2.5-VL 3B 24.43 89.61 49.70 34.65 49.60 Qwen2.5-VL 7B 37.96 85.75 66.47 39.11 57.32 Qwen2.5-VL 72B 46.47 89.86 83.83 54.46 68.66 
+
+DeepSeek-VL2 3B 45.39 50.72 16.17 33.66 36.49 DeepSeek-VL2 16B 28.62 78.50 8.38 28.71 36.05 LLaVA-NeXT-Mistral 7B 18.44 30.43 26.95 21.78 24.40 LLaVA-NeXT-Vicuna 13B 13.77 39.13 1.80 28.22 20.73 Phi-3.5-vision-instruct 4.2B 21.80 69.75 29.34 38.12 39.75 MiniCPM-o 2.6 8B 35.09 75.12 51.50 39.60 50.33 consistency. The annotation process involves several iterative rounds of cross-checking, during which dis-crepancies are discussed and resolved collaboratively. This rigorous multi-round review mechanism guarantees high-quality annotations, providing a robust benchmark for evaluating MLLMs’ understanding of chemical re-action diagrams. 
+
+3.5 Evaluation Method 
+
+To simplify the evaluation process, all questions in ChemReaction are presented in either multiple-choice or open-ended formats with concise, easily verifiable ground truth answers. We utilize prompting and tem-plate matching to extract answers. Prompts guide the model in generating responses in both full and short-answer formats. After generations, the short answer is extracted to compare it with the ground truth. Detailed prompts used in our experiments can be found in Ap-pendix. C.2. This design eliminates the need for using MLLMs as judges (Chen et al., 2024a) and enables fully automated accuracy measurement through exact string matching. 
+
+4 Experiment 
+
+4.1 Experimental Setups 
+
+We comprehensively evaluate various MLLMs across multiple chemical reaction diagram understanding tasks. We test open-source models including Qwen2.5-VL (Bai et al., 2025) (3B, 7B, 72B), InternVL2.5 (Chen et al., 2024b) (8B, 8B-MPO, 26B, 78B), LLaVA-NeXT (Liu et al., 2024) (Mistral-7B, Vicuna-13B), MiniCPM-o 2.6 (Yao et al., 2024) (8B), DeepSeek-VL2 (Wu et al., 2024) (Tiny and Small) and Phi-3.5-vision-instruct (Ab-din et al., 2024) (4B). Furthermore, we evaluate API-based models such as GPT-4o (OpenAI, 2024a), Claude-3.5-Sonnet (Anthropic, 2024), Gemini-1.5-Pro (Team et al., 2024), and Qwen-VL-MAX (Qwen, 2024). Eval-uation of these MLLMs ensures fair comparison con-sidering model architecture differences and parameter scales. 
+
+4.2 Main Results 
+
+In this section, we extensively evaluate both open-source and API-based MLLMs on ReactBench. Tab. 2 sum-marizes the performance of various models across four key task dimensions. Crucially, our evaluation confirms the central hypothesis outlined in Sec. 1: there is a pro-nounced performance dichotomy between anchor-based tasks and those requiring holistic structural reasoning. 
+
+Results of Topological Information Extraction (Anchor-Based). This task evaluates the ability to ex-tract explicit textual and numerical information. Be-cause this relies primarily on localized perception (act-ing as visual anchors) rather than global graph structure, most models excel. Qwen-VL-MAX leads with Acc. Q: How many total reaction steps 
+
+are there in the diagram? 
+
+Gemini1.5 pro LLaVA 1.6 13B GPT-4o Qwen-VL max Claude3.5 GT 
+
+3 15 3 3 3 1
+
+GPT-4o Reasoning: 
+
+The reaction sequence in the diagram consists of three steps: 
+
+① Activation of the carboxylic acid (14) with CDI (Carbonyldiimidazole) in MeCN at 
+
+40 °C – This step likely forms an acyl imidazolide intermediate. 
+
+② Reaction with the hydrazine derivative (1) at ambient temperature – This step 
+
+facilitates cyclization to form the fused pyrazolopyrimidine core. 
+
+③ Additional CDI treatment at ambient temperature – This likely completes the 
+
+transformation into the final product (15). 
+
+Thus, the total number of reaction steps in the diagram is three. 
+
+Q: What is the subscript of the 
+
+final product in the diagram? 
+
+Gemini1.5 pro LLaVA 1.6 13B GPT-4o Qwen-VL max Claude3.5 GT 
+
+14 13 2 18 18 18 
+
+GPT-4o Reasoning: 
+
+To determine the subscript in the final product, we trace the reaction scheme: 
+
+① Start with compound **11 **: (a benzaldehyde with fluorine and chlorine). 
+
+② React with DIPEA , adding a Boc-protected piperazine to form **12 **.
+
+③ React with thioglycolic acid ethyl ester and K₂CO₃, yielding **13 **.
+
+④ Hydrolyze with KOH and thioglycolic acid, converting the ester to a 
+
+carboxylic acid in **14 **.
+
+⑤ Treat with Cu₂O, forming a thieno[3,2-d]pyrimidin-4-one structure in 18 .
+
+⑥ React with HCl **, producing the final hydrochloride salt **18•2HCl. 
+
+Thus, the final product has a **subscript of 2 **.
+
+Gemini1.5 pro LLaVA 1.6 13B GPT-4o Qwen-VL max Claude3.5 GT 
+
+2 6 5 5 5 3
+
+GPT-4o Reasoning: 
+
+We observe that 4 leads to the formation of compound 5, as indicated by the 
+
+reaction arrow. 
+
+Compound 4 features an alkyne (-C≡C-) functional group and hydroxyl (-OH) groups. 
+
+The reaction conditions (Pd, H ⁺) suggest a catalytic hydrogenation or coupling 
+
+process. 
+
+In compound 5, the alkyne functional group remains, and a new structural unit (a 
+
+bromo-aryl ether moiety) appears. 
+
+This transformation suggests 4 → 5 is a key synthetic step. 
+
+Q: The current step involves compound 
+
+with subscript 4, What is the subscript 
+
+of the immediate next compound 
+
+formed in this reaction? 
+
+Gemini1.5 pro LLaVA 1.6 13B GPT-4o Qwen-VL max Claude3.5 GT 
+
+C A B C C A
+
+GPT-4o Reasoning: 
+
+The reaction pathway in the diagram is best classified as a multiple-line structure 
+
+because: 
+
+① Sequential Transformations: The diagram shows a stepwise progression from 
+
+compound (1) → (2) → (3), indicating a sequential reaction mechanism. 
+
+② Branching Pathways: After forming intermediate (3), the reaction further 
+
+branches into multiple distinct final products (4) and (5). This signifies that the 
+
+pathway is not a simple linear sequence but involves multiple outcomes. 
+
+Thus, the correct answer is: B) Multiple line 
+
+The diagram illustrates a reaction. 
+
+Which term classifies the structure of 
+
+the reaction pathway? A) Single line 
+
+B) Multiple line C) Tree D) Graph 
+
+## (a) 
+
+## (b) 
+
+## (c) 
+
+## (d) Figure 5: Qualitative analysis of recurring failure patterns in ReactBench evaluation. Each case study exemplifies a characteristic reasoning deficit observed across multiple model architectures. 90.10%, followed closely by Qwen2.5-VL-72B (Acc. 89.86%). Notably, some open-source models with fewer parameters, such as Qwen2.5-VL-3B (Acc. 89.61%), outperform several larger API-based models. This high baseline confirms that MLLMs are already highly profi-cient at recognizing local visual anchors within dense chemical diagrams. 
+
+Results of Pathway Connectivity Tracing (Anchor-Based). Similarly, this task shows strong performance because it primarily demands step-by-step connectivity tracking between adjacent nodes. By leveraging local-ized causal links as sequential anchors, closed-source models achieve their highest scores, with Claude-3.5-Sonnet reaching 92.22% and Qwen-VL-MAX achieving 88.62%. Although this task requires multi-step infer-ence, the logic remains tightly bound to local pathways. However, differences in training strategies play a sig-nificant role; while top API models excel, some open-source models like DeepSeek-VL2-3B (Acc. 16.17%) struggle to follow even local sequences accurately. 
+
+Results of Spatial Element Localization (Holistic Topological). In stark contrast to the anchor-based tasks, this dimension demands holistic topological understand-ing. Tasks such as identifying and counting terminal endpoints require the model to comprehend the global graph structure to distinguish intermediate nodes from true sinks. Consequently, performance drops sharply. While Claude-3.5-Sonnet (Acc. 50.78%) and Qwen-VL-MAX (Acc. 49.22%) rank highest, these scores represent a roughly 40% decline from their extraction capabilities. Furthermore, inconsistencies emerge in model scaling: InternVL2.5-26B (Acc. 33.89%) trails its 8B variant (InternVL2.5-MPO, Acc. 38.20%). This confirms that accurately perceiving local elements is insufficient for understanding their structural roles. 
+
+Results of Structural Topology Reasoning (Holistic Topological). This task further exposes the fundamental deficit in global topological comprehension. It directly evaluates the ability to classify the overall network topol-ogy, such as distinguishing linear chains, branching trees, and cyclic graphs. Performance is critically weak across the board. Gemini-1.5-Pro scores highest among API models at only 55.45%, while Qwen-VL-MAX falls to 32.18%, despite its near-perfect extraction abilities. Open-source models vary widely; Qwen2.5-VL-72B (Acc. 54.46%) leads, but others like InternVL2.5-26B (Acc. 19.80%) score poorly. These findings demonstrate that current MLLM architectures lack the inductive bias necessary for global structural reasoning. 
+
+Overall Performance and Discussion. Models per-form well on Extraction and Tracing, with the best accu-racy reaching 90% and 92% respectively, yet struggle on Localization and Reasoning, where even top-performing models remain below 56%. This reveals a pronounced dichotomy between anchor-based tasks, where mod-els can ground their analysis on specific queried ele-ments, and tasks requiring holistic structural reasoning across the entire diagram. This gap exceeding 30% per-sists within individual models. Qwen-VL-MAX scores Table 3: Performance comparison of Qwen2.5-VL using chemical reaction diagram image and linearized ground-truth JSON. Loc. : Localization; Ext. : Extraction; Trac. :Tracing; Reas. : Reasoning.                        
+
+> Model Input Loc. Ext. Trac. Reas.
+> Qwen2.5-VL 3B Image 24.43 89.61 49.70 34.65
+> Text-Only 34.37 34.54 19.17 9.90 Qwen2.5-VL 7B Image 37.96 85.75 66.47 39.11
+> Text-Only 39.88 41.06 10.78 8.91
+
+90.1% on Extraction but only 32.18% on Reasoning. These findings suggest that current MLLMs can parse local information when explicitly queried, but fail to integrate visual elements into coherent global structural representations. 
+
+5 Diagnosing the Reasoning Gap: Analysis and Ablations 
+
+The preceding results reveal a consistent pattern in which models achieve over 80% accuracy on informa-tion extraction and path tracing, yet fall below 55% on element counting and topology classification. This performance dichotomy raises a fundamental question: Does the bottleneck lie in visual perception or structural reasoning? We address this through systematic analysis and ablations. 
+
+5.1 Is the Bottleneck Perception or Reasoning? 
+
+The preceding results reveal a clear performance gap. We now investigate whether this deficit originates from the visual modality itself, a failure in perception, or a limitation in reasoning. 
+
+Step 1: The Necessity of Visual Modality. We first investigate whether complex topological reasoning can be bypassed by providing perfectly structured text. We conduct an ablation study using ground-truth structured JSON (see Appendix C.1), linearized into a text-only prompt to completely replace the image input. This JSON representation encompasses all essential chemi-cal information, including SMILES strings, molecular names, textual tags (e.g., A, B, C), bounding box coor-dinates (bbox), reaction roles, and reaction conditions. As shown in Tab. 3, while Localization scores slightly improve due to the explicit coordinates in the JSON, performance on Extraction, Tracing, and Reasoning tasks drops precipitously. Notably, for Qwen2.5-VL 7B, the Tracing score falls from 66.47% to a mere 10.78%. This contrast demonstrates that topological reasoning inherently requires the spatial and structural informa-tion encoded in visual diagrams, which is lost during the linearization process. However, this necessity of visual input does not imply the bottleneck lies in perception, a point we investigate next. 
+
+Step 2a: Does Structured Perception Help? To test whether perception is the bottleneck, we prompt models to first decompose the chemical diagram into a struc-Figure 6: Performance comparison of three models with two enhancement techniques: Chain-of-Thought (CoT) and External Knowledge (EK). tured JSON representation before answering, following Chain-of-Thought methodologies (Wang et al., 2025; Wei et al., 2022; Sprague et al., 2024; Deng et al., 2024). As illustrated in Fig. 6, this structured perception step yields only modest improvements for GPT-4o, Qwen2.5-VL-72B, and Qwen2.5-VL-3B (gains of 2.16%, 8.38%, and 10.30%, respectively). While enforcing system-atic visual analysis provides some benefit, the limited gains suggest the problem runs deeper than disorganized perception. 
+
+Step 2b: What If Perception Were Perfect? To elim-inate the perception variable, we supply models with error-free structural information as External Knowledge (EK) alongside the image (see Appendix C.4). This by-passes the models’ visual processing, testing reasoning capabilities in a best-case scenario. Results in Fig. 6 are striking. While accuracy reaches 57.49% for GPT-4o and 62.63% for Qwen2.5-VL, overall performance re-mains below 65%. This confirms the primary bottleneck is not visual perception, but a deep-seated limitation in core reasoning over complex topologies. 
+
+5.2 How Reasoning Failures Manifest 
+
+Having established that the bottleneck lies in reason-ing rather than perception, we now examine how these failures manifest across our four task dimensions. The following cases illustrate recurring patterns observed across multiple model architectures. 
+
+Localization: Failure in Hierarchical Abstraction. 
+
+As shown in Fig. 5(a), MLLMs correctly identify local textual markers (e.g., 1), 2), 3)) but cannot perform the hierarchical abstraction needed to understand these are conditions for a single global transformation. This leads to systematic over-segmentation when counting reaction steps, revealing an inability to move from local feature recognition to global process understanding. 
+
+Extraction: Loss of Structural Consistency. Track-ing entities across a diagram requires maintaining focus throughout multiple visual elements. In Fig. 5(b), GPT-4o correctly follows the main molecular transforma-Table 4: Impact of molecular placeholder masking on model performance.                                        
+
+> Model Task Original images Masked images ∆
+> Qwen2.5-VL-3B Localization 24.43 19.76 -4.67 Extraction 89.61 78.50 -11.11 Tracing 49.70 42.51 -7.19 Reasoning 34.65 31.19 -3.46 Qwen2.5-VL-7B Localization 37.96 35.81 -2.15 Extraction 85.75 77.78 -7.97 Tracing 66.47 56.89 -9.58 Reasoning 39.11 47.52 +8.41 Qwen2.5-VL-72B Localization 46.47 45.15 -1.32 Extraction 89.86 80.68 -9.18 Tracing 83.83 68.26 -15.57 Reasoning 54.46 55.94 +1.48
+
+tion but is derailed by a local, irrelevant visual feature (2HCl ) when identifying the final product subscript. This demonstrates a breakdown in structural consistency, where the model cannot filter out distractors while ex-tracting target information. 
+
+Tracing: Failure in Topological Path Tracing. 
+
+MLLMs often disregard explicit topological rules in favor of learned heuristics. In Fig. 5(c), models ignore directed arrows (5 → 4 → 3), predicting the next com-pound via superficial numerical sequences. This reveals a critical deficit in graph-theoretic reasoning and the inability to process connective logic. 
+
+Reasoning: Inability to Classify Global Topology. 
+
+The ultimate test of structural reasoning is classifying a diagram’s overall topology. In Fig. 5(d), models cor-rectly perceive local features like a linear sequence and a branching point, but fail to integrate these into the cor-rect global classification of “single line” structure. This directly confirms our central finding: local perception is intact, but global structural reasoning fails. 
+
+5.3 The Role of Molecular Structures in Topological Reasoning 
+
+Having established that the bottleneck lies in reason-ing, we investigate the role of molecular structures. Do they serve as visual anchors that organize structural understanding, or act as distractors impeding global rea-soning? To answer this, we replace molecular structures with black borders (details in Appendix C.5), evaluating models on diagrams that preserve topological connec-tivity while removing chemical visual cues. As shown in Tab. 4, masking molecular structures leads to consistent performance drops on Localization, Extraction, and Tracing across all model sizes. This indicates that models rely on molecular structures as visual anchors for organizing their understanding of reaction connectivity and flow. However, the Reasoning task reveals a more nuanced pattern. While the 3B model shows a slight decline (-3.46%), the 7B and 72B models exhibit improvements (+8.41% and +1.48%). This suggests that for global Table 5: Comparison of evaluation protocols: Exact Match vs. LLM-as-a-Judge. Avg. denotes the arithmetic mean of a model’s scores over all four tasks.                             
+
+> Model Protocol Localization Extraction Tracing Reasoning Avg.
+> Qwen2.5-VL 3B Exact Match 24.43 89.61 49.70 34.65 49.60 LLM-as-a-Judge 36.40 83.33 70.06 25.25 53.76 Qwen2.5-VL 7B Exact Match 37.96 85.75 66.47 39.11 57.32 LLM-as-a-Judge 54.01 87.44 87.42 42.57 67.86
+
+topology classification, molecular details can act as dis-tractors for larger models. When these details are re-moved, models can better focus on the abstract structural relationships needed for topology classification. These findings reinforce our central observation. Smaller models depend on molecular structures across all tasks, while larger models benefit from their removal on tasks requiring global structural reasoning. The molecular visual context provides useful anchors for local tasks but can impede the hierarchical abstraction needed for global analysis. 
+
+5.4 Robustness of the Evaluation Protocol 
+
+To ensure our findings are not artifacts of an overly strict evaluation metric, we compare exact-match scor-ing against an LLM-as-a-judge approach. Strict exact-match risks penalizing semantically correct answers due to surface-form variations (e.g., “2” vs. “two”). We explicitly mitigate such variations in React-Bench through constrained task design, including single-character multiple-choice questions and strict prompts for numeric outputs. To quantify potential underestimation, we relax these constraints and use 
+
+Gemini-2.5-Flash (Comanici et al., 2025) as an ex-ternal semantic judge. As shown in Tab. 5, semantic evaluation substan-tially increases absolute scores (e.g., Tracing improves from 49.70% to 70.06% for Qwen2.5-VL 3B). However, relative performance between models remain perfectly consistent, and the significant capability gaps persist. This indicates that while the absolute scale shifts, the comparative assessment of model capabilities remains undistorted. We therefore retain exact-match as the primary metric for ReactBench. It guarantees absolute reproducibility, eliminates the computational overhead and inherent bi-ases of LLM judges (Li et al., 2025), and provides a rigorous lower-bound standard for future benchmarking. 
+
+5.5 Summary of Findings 
+
+Our diagnostic analysis directly addresses the questions raised in the introduction and offers concrete directions for future work. 
+
+The Bottleneck is Reasoning, Not Perception. Our central finding is that structured visual analysis is funda-mentally a reasoning problem. Simply scaling up visual encoders or improving OCR will yield diminishing re-turns. Even with perfect perception and explicit text representations, current architectures lack the sophisti-cated reasoning skills to interpret complex topologies. 
+
+A Core Deficit in Hierarchical Abstraction. We pro-vide empirical evidence that MLLMs systematically fail at hierarchical abstraction. They become entan-gled in local visual or textual details and cannot build a coherent global understanding from constituent parts. ReactBench effectively measures this crucial yet un-derexplored failure mode, emphasizing the need for architectures capable of robust multi-hop topological reasoning over integrated visual contexts. 
+
+6 Limitation 
+
+Our benchmark focuses on chemical reaction diagrams rather than abstract graphs or other diagram types. This choice is deliberate. Chemical reaction diagrams pro-vide natural topological diversity from linear chains to cyclic networks while demanding both local perception and global reasoning. Abstract synthetic graphs lack the visual complexity that makes findings practically meaningful, and other diagram types such as flowcharts typically exhibit limited topological variety. Extend-ing this framework to other scientific domains remains valuable future work. 
+
+7 Conclusion 
+
+We introduce ReactBench, a benchmark to systemati-cally investigate MLLMs’ comprehension capabilities in chemical reaction diagrams. We evaluate MLLMs using 1,618 QA pairs based on real-world reaction im-ages, covering tasks from basic recognition to advanced reasoning. Our findings reveal persistent limitations in MLLMs’ ability to perform topological reasoning over chemical reaction diagrams, particularly when tasks re-quire integrating local visual cues into a holistic under-standing of reaction structure. Our work highlights the need for improved multimodal reasoning in scientific domains and provides a critical evaluation framework for the community. 
+
+References 
+
+Marah Abdin, Jyoti Aneja, Hany Awadalla, Ahmed Awadallah, Ammar Ahmad Awan, Nguyen Bach, Amit Bahree, Arash Bakhtiari, Jianmin Bao, Harkirat Behl, and 1 others. 2024. Phi-3 technical report: A highly capable language model locally on your phone. 
+
+arXiv preprint arXiv:2404.14219 .Anthropic. 2024. Claude 3.5 sonnet. Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wen-bin Ge, Sibo Song, Kai Dang, Peng Wang, Shi-jie Wang, Jun Tang, Humen Zhong, Yuanzhi Zhu, Mingkun Yang, Zhaohai Li, Jianqiang Wan, Pengfei Wang, Wei Ding, Zheren Fu, Yiheng Xu, and 8 oth-ers. 2025. Qwen2.5-vl technical report. Preprint ,arXiv:2502.13923. Dongping Chen, Ruoxi Chen, Shilin Zhang, Yaochen Wang, Yinuo Liu, Huichi Zhou, Qihui Zhang, Yao Wan, Pan Zhou, and Lichao Sun. 2024a. Mllm-as-a-judge: Assessing multimodal llm-as-a-judge with vision-language benchmark. In Forty-first Interna-tional Conference on Machine Learning .Zhe Chen, Weiyun Wang, Yue Cao, Yangzhou Liu, Zhangwei Gao, Erfei Cui, Jinguo Zhu, Shenglong Ye, Hao Tian, Zhaoyang Liu, and 1 others. 2024b. Expanding performance boundaries of open-source multimodal models with model, data, and test-time scaling. arXiv preprint arXiv:2412.05271 .Djork-Arné Clevert, Tuan Le, Robin Winter, and Flo-riane Montanari. 2021. Img2mol–accurate smiles recognition from molecular graphical depictions. 
+
+Chemical science , 12(42):14174–14181. Gheorghe Comanici, Eric Bieber, Mike Schaekermann, Ice Pasupat, Noveen Sachdeva, Inderjit Dhillon, Mar-cel Blistein, Ori Ram, Dan Zhang, Evan Rosen, and 1 others. 2025. Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long context, and next generation agentic capabilities. arXiv preprint arXiv:2507.06261 .Yuntian Deng, Yejin Choi, and Stuart Shieber. 2024. From explicit cot to implicit cot: Learning to internalize cot step by step. arXiv preprint arXiv:2405.14838 .Qian et al. 2023. Molscribe: robust molecular structure recognition with image-to-graph generation. Journal of Chemical Information and Modeling .Igor V Filippov and Marc C Nicklaus. 2009. Optical structure recognition software to recover chemical information: Osra, an open source solution. Tuomo Hiippala, Malihe Alikhani, Jonas Haverinen, Timo Kalliokoski, Evanfiya Logacheva, Serafina Orekhova, Aino Tuomainen, Matthew Stone, and John A Bateman. 2021. Ai2d-rst: a multimodal cor-pus of 1000 primary school science diagrams. Lan-guage Resources and Evaluation , 55(3):661–688. Shaohan Huang, Li Dong, Wenhui Wang, Yaru Hao, Saksham Singhal, Shuming Ma, Tengchao Lv, Lei Cui, Owais Khan Mohammed, Barun Patra, and 1 others. 2023. Language is not all you need: Align-ing perception with language models. Advances in Neural Information Processing Systems , 36:72096– 72109. Dawei Li, Renliang Sun, Yue Huang, Ming Zhong, Bo-han Jiang, Jiawei Han, Xiangliang Zhang, Wei Wang, and Huan Liu. 2025. Preference leakage: A contam-ination problem in llm-as-a-judge. arXiv preprint arXiv:2502.01534 .Junnan Li, Dongxu Li, Silvio Savarese, and Steven Hoi. 2023. Blip-2: Bootstrapping language-image pre-training with frozen image encoders and large lan-guage models. Preprint , arXiv:2301.12597. Haotian Liu, Chunyuan Li, Yuheng Li, Bo Li, Yuanhan Zhang, Sheng Shen, and Yong Jae Lee. 2024. Llava-next: Improved reasoning, ocr, and world knowledge. Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. 2023. Visual instruction tuning. Advances in neural information processing systems , 36:34892– 34916. Pan Lu, Swaroop Mishra, Tanglin Xia, Liang Qiu, Kai-Wei Chang, Song-Chun Zhu, Oyvind Tafjord, Peter Clark, and Ashwin Kalyan. 2022. Learn to explain: Multimodal reasoning via thought chains for science question answering. Advances in Neural Information Processing Systems , 35:2507–2521. Ahmed Masry, Do Xuan Long, Jia Qing Tan, Shafiq Joty, and Enamul Hoque. 2022. Chartqa: A benchmark for question answering about charts with visual and logical reasoning. arXiv preprint arXiv:2203.10244 .Minesh Mathew, Dimosthenis Karatzas, and CV Jawa-har. 2021. Docvqa: A dataset for vqa on document images. In Proceedings of the IEEE/CVF winter con-ference on applications of computer vision , pages 2200–2209. Martijn Oldenhof, Adam Arany, Yves Moreau, and Jaak Simm. 2020. Chemgrapher: optical graph recognition of chemical compounds by deep learn-ing. Journal of chemical information and modeling ,60(10):4506–4517. OpenAI. 2024a. Gpt-4o system card. Preprint ,arXiv:2410.21276. OpenAI. 2024b. Gpt-4v(ision) system card. Yujie Qian, Jiang Guo, Zhengkai Tu, Connor W Co-ley, and Regina Barzilay. 2023. Rxnscribe: a se-quence generation model for reaction diagram pars-ing. Journal of chemical information and modeling ,63(13):4030–4041. Qwen. 2024. Qwen-vl-max. Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sas-try, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever. 2021. Learn-ing transferable visual models from natural language supervision. CoRR , abs/2103.00020. Kohulan Rajan, Henning Otto Brinkhaus, M Isabel Agea, Achim Zielesny, and Christoph Steinbeck. 2023. Decimer. ai: an open platform for automated optical chemical structure identification, segmenta-tion and recognition in scientific publications. Nature communications , 14(1):5045. Kohulan Rajan, Achim Zielesny, and Christoph Stein-beck. 2020. Decimer: towards deep learning for chemical image recognition. Journal of Cheminfor-matics , 12(1):65. Amanpreet Singh, Vivek Natarajan, Meet Shah, Yu Jiang, Xinlei Chen, Dhruv Batra, Devi Parikh, and Marcus Rohrbach. 2019. Towards vqa models that can read. In Proceedings of the IEEE/CVF con-ference on computer vision and pattern recognition ,pages 8317–8326. Zayne Sprague, Fangcong Yin, Juan Diego Rodriguez, Dongwei Jiang, Manya Wadhwa, Prasann Singhal, Xinyu Zhao, Xi Ye, Kyle Mahowald, and Greg Dur-rett. 2024. To cot or not to cot? chain-of-thought helps mainly on math and symbolic reasoning. arXiv preprint arXiv:2409.12183 .Gemini Team, Petko Georgiev, Ving Ian Lei, Ryan Burnell, Libin Bai, Anmol Gulati, Garrett Tanzer, Damien Vincent, Zhufeng Pan, Shibo Wang, and 1 others. 2024. Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context. 
+
+arXiv preprint arXiv:2403.05530 .Yu Wang, Xiaogeng Liu, Yu Li, Muhao Chen, and Chaowei Xiao. 2025. Adashield : Safeguarding mul-timodal large language models from structure-based attack via adaptive shield prompting. In Computer Vision – ECCV 2024 , pages 77–94, Cham. Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, and 1 others. 2022. Chain-of-thought prompting elic-its reasoning in large language models. Advances in neural information processing systems , 35:24824– 24837. Damian M Wilary and Jacqueline M Cole. 2023. Re-actiondataextractor 2.0: a deep learning approach for data extraction from chemical reaction schemes. 
+
+Journal of Chemical Information and Modeling ,63(19):6053–6067. Zhiyu Wu, Xiaokang Chen, Zizheng Pan, Xingchao Liu, Wen Liu, Damai Dai, Huazuo Gao, Yiyang Ma, Chengyue Wu, Bingxuan Wang, Zhenda Xie, Yu Wu, Kai Hu, Jiawei Wang, Yaofeng Sun, Yukun Li, Yishi Piao, Kang Guan, Aixin Liu, and 8 oth-ers. 2024. Deepseek-vl2: Mixture-of-experts vision-language models for advanced multimodal under-standing. Preprint , arXiv:2412.10302. Yuan Yao, Tianyu Yu, Ao Zhang, Chongyi Wang, Junbo Cui, Hongji Zhu, Tianchi Cai, Haoyu Li, Weilin Zhao, Zhihui He, and 1 others. 2024. Minicpm-v: A gpt-4v level mllm on your phone. arXiv preprint arXiv:2408.01800 .Qiming Zhang, Jing Zhang, Yufei Xu, and Dacheng Tao. 2023. Vision transformer with quadrangle attention. 
+
+arXiv preprint arXiv:2303.15105 .A Empirical Validation of OCSR Limitations 
+
+In the main text, we posit that existing Optical Chemical Structure Recognition (OCSR) methods are insufficient for topological reasoning because they fail to capture the structural connectivity of reaction diagrams. In this section, we provide empirical evidence to support this claim through both qualitative case studies and quantitative ablation experiments. 
+
+A.1 Qualitative Analysis: Loss of Topology in OCSR Output 
+
+To illustrate the information loss inherent in current OCSR tools, we analyze the output of RxnScribe (Qian et al., 2023), a state-of-the-art method. The following example displays a typical prediction for a reaction scheme: While this representation correctly recovers individual molecules and textual labels, it fails to encode the reaction topology targeted by our benchmark: • Connectivity: It does not specify which arrow connects which reactant to which product. • Sequential Order: It does not indicate the temporal order of individual steps in a multi-step scheme. • Global Structure: It does not represent branching pathways or convergent steps within the global network. Consequently, a model relying solely on OCSR-derived textual representations (SMILES or JSON) lacks the necessary structural context to perform complex topological reasoning.                       
+
+> Example output from RxnScribe
+> 1[
+> 2{
+> 3"reactants": [
+> 4{
+> 5"category": "[Mol]",
+> 6"smiles": "Cc1ncc(C[n+]2csc(CCO)c2C)c(N)n1.Cl"
+> 7}
+> 8],
+> 9"conditions": [
+> 10 { "category": "[Txt]", "text": "28.5% aq" },
+> 11 { "category": "[Mol]", "smiles": "O=S(=O)([O][Na])SCC1CCCO1" },
+> 12 { "category": "[Txt]", "text": "NaOH" },
+> 13 { "category": "[Txt]", "text": "rt, 10 min" }
+> 14 ],
+> 15 "products": [
+> 16 {
+> 17 "category": "[Mol]",
+> 18 "smiles": "C/C(=C(\\CCO)SSCC1CCCO1)N(C=O)Cc1cnc(C)nc1N"
+> 19 }
+> 20 ]
+> 21 }
+> 22 ]
+
+A.2 Quantitative Analysis: Image vs. Textual JSON 
+
+To validate this limitation empirically, we conducted an ablation study comparing the performance of MLLMs when processing the original visual diagram versus the text-based OCSR output. 
+
+Experimental Setup. We re-evaluated Qwen2.5-VL (3B and 7B) on our benchmark. In the JSON setting, we replaced the input reaction diagrams with the corresponding RxnScribe JSON outputs, while keeping prompts and other settings unchanged. 
+
+Results. Table 6 presents the comparison results. While Localization scores show mild variation (likely due to the JSON explicitly containing entity lists), performance on Extraction , Reasoning , and Analysis drops precipitously in the JSON setting. For instance, Qwen2.5-VL 7B’s Reasoning score plummets from 66.47% to 10.78%, and Analysis scores fall below 10% for both models. This drastic performance degradation confirms that OCSR-derived JSON is insufficient to support high-level topological reasoning. Therefore, evaluating models directly on visual reaction diagrams is necessary to capture the full semantic structure of chemical schemes. Table 6: Ablation study: Performance comparison between visual input (Image) and OCSR-derived textual input (JSON). The significant drop in Reasoning and Analysis scores confirms that JSON representations lack critical topological information. 
+
+Model Input Type Localization Extraction Tracing Reasoning 
+
+Qwen2.5-VL 3B Image 24.43 89.61 49.70 34.65 JSON 34.37 34.54 19.17 9.90 Qwen2.5-VL 7B Image 37.96 85.75 66.47 39.11 JSON 39.88 41.06 10.78 8.91 
+
+B Dataset Details 
+
+B.1 Annotation Protocol and Annotator Qualifications 
+
+We established a rigorous annotation pipeline involving domain experts. All annotators are graduate-level chemists with extensive experience in reading and interpreting organic reaction schemes. • Guidelines: Annotators followed detailed guidelines designed to standardize the extraction of structured information. This included specific instructions on (i) identifying and labeling reactants, products, reagents, and reaction conditions; and (ii) formulating diverse question-answer pairs that target recognition (e.g., entity identification) as well as higher-level reasoning (e.g., mechanistic relations, condition analysis). • Training Phase: Before large-scale annotation, all annotators underwent a training phase using pilot examples. Their initial annotations were reviewed and corrected by a senior expert to ensure alignment with the guidelines. • Data Format: Each reaction diagram is annotated with structured ground truth in JSON format, capturing the semantic roles of all chemical entities within the diagram. 
+
+B.2 Quality Control and Inter-Annotator Agreement 
+
+To ensure high data quality, we implemented a multi-stage verification process. Each sample was independently reviewed by three distinct annotators. Disagreements regarding diagram interpretation or answer correctness were resolved through group discussion, with a senior expert making the final decision in ambiguous cases. Through this rigorous review process, the empirical consistency of the final annotations exceeded 95%. 
+
+C Detailed Experiment Setups 
+
+In this section, we provide more details about our experiment designs. 
+
+C.1 Illustration of Ground-Truth Structured JSON 
+
+In this section, we provide a concrete example of the ground-truth structured JSON used in the text-only ablation study discussed in the main paper. Fig. 7 shows the original chemical reaction diagram, while the subsequent JSON snippet demonstrates how its constituent elements are computationally structured. 
+
+Figure 7: Example of a chemical reaction diagram used for the text-only ablation study. This visual representa-tion is translated into the structured JSON format shown below, which preserves the chemical semantics (SMILES, text). Example of Ground-Truth JSON                       
+
+> 1[
+> 2{
+> 3"reactants": [
+> 4{
+> 5"category": "[Mol]",
+> 6"smiles": "ClC(CC1=CC=CC=C1)=O"
+> 7}
+> 8],
+> 9"conditions": [
+> 10 { "category": "[Txt]", "text": "triethylamine" },
+> 11 { "category": "[Txt]", "text": "2-ehyl-1-hexanol" },
+> 12 { "category": "[Txt]", "text": "methylene chloride" },
+> 13 { "category": "[Txt]", "text": "50C" }
+> 14 ],
+> 15 "products": [
+> 16 {
+> 17 "category": "[Mol]",
+> 18 "smiles": "[O]C(CC1=CC=CC=C1)=O"
+> 19 }
+> 20 ]
+> 21 }
+> 22 ]
+
+C.2 Prompt for Answer Extraction 
+
+In our main experiment, we directly pose questions to the model and employ prompt engineering and template matching to extract answers. As illustrated in Fig. 9, prompts guide the model in generating responses in both full and short answer formats, where the short answer format adheres to the requirements specified in Tab. 7 for different question types. After generation, the short answer is extracted for comparison with the ground truth, while the full answer is used to analyze the reasoning process of MLLMs. Table 7: The prompt for different QA types in answer generation.     
+
+> Answer type Prompt
+> multiple choice Just provide the corresponding choice option, such as ‘A’, ‘B’, ‘C’, or ‘D’. number Provide ONLY the numerical answer without any units, symbols, or additional text. text Just give the subscript without any other text.
+
+C.3 Prompt of Chain-of-Thought 
+
+The prompt of the CoT prompting strategy is illustrated in Fig. 10, where the model is first instructed to convert the reaction diagram into a predefined JSON format, followed by the question being posed. 
+
+C.4 Prompt of External Knowledge 
+
+Here, we present the specific prompt and external knowledge format used in the main text. An illustrative example is provided in Fig. 11 for reference. 
+
+C.5 Illustration of Molecular Structure Masking 
+
+To provide a clear visual example of the visual context ablation described in the main paper, Fig. 8 illustrates how the chemical diagrams are specifically modified for this experiment. By replacing detailed molecular structures with black rectangular placeholders, we force the models to rely solely on the remaining topological elements (e.g., arrows and text) without the aid of familiar chemical visual cues. 
+
+D Examples in ReactBench 
+
+In this section, we present selected samples from different tasks in our dataset, as illustrated in Fig. 13, 14, 15, and 16. These examples highlight the diversity of our designed questions, which encompass a wide range of problem types. Figure 8: Illustration of the visual context ablation. Detailed molecule images are masked and replaced with rectangle placeholders to isolate the topological structure. Direct Answer System Prompt 
+
+Multimodal Chemical Reaction QA Task 
+
+Inputs :
+
+1. Chemical reaction scheme image 
+
+2. Question 
+
+Answer the question by following these rules: 
+
+1. Provide ONLY the numerical answer (e.g., \"80\") without any units, symbols, or additional text. 
+
+2. Provide a detailed explanation of the step-by-step reasoning.\n" 
+
+Final Output Format (as a JSON object): 
+
+{
+
+" \"answer\": \"<numerical_value>\", 
+
+" \"explanation\": \"< step-by-step reasoning >\" 
+
+}
+
+Figure 9: The direct answer prompt in our ReactBench. Chain of Thought System Prompt 
+
+Chemical Reaction QA Task :
+
+"Step 1 - Structural Parsing : Analyze the reaction image and convert it to this JSON format:" 
+
+[{ 
+
+\"reactants\": [ 
+
+"{" \"category\": \"[Mol]\"," 
+
+\"category_id\": 1," 
+
+\"bbox\": [x_min, y_min, x_max, y_max]," 
+
+\"compound_id\": \"...\""} ]
+
+// Additional reactants ..." ], 
+
+\"conditions\": [ 
+
+"{" \"category\": \"[Txt]\"," 
+
+\"category_id\": 2," 
+
+\"bbox\": [x_min, y_min, x_max, y_max]," 
+
+\"text\": [\"reagent\", \"(equiv)\"]"}" 
+
+/ Additional conditions..." ], 
+
+\"products\": [ 
+
+// Product entries... ]
+
+// "Additional reactions..." 
+
+]
+
+"Step 2 - Question Answering:" 
+
+Using the parsed structure from Step 1, answer the question by following these rules:" 
+
+1. Provide ONLY the numerical answer (e.g., \"80\") without any units, symbols, or additional text." 
+
+2. Provide a detailed explanation of the step-by-step reasoning." 
+
+"Final Output Format (as a JSON object): " 
+
+"{" 
+
+\"answer\": \"<numerical_value>\"," 
+
+\"explanation\": \"<step-by-step reasoning>\"" 
+
+"}" Figure 10: The prompt of Chain-of-Thought in our ReactBench. External Knowledge System Prompt 
+
+Multimodal Chemical Reaction QA Tas k
+
+Inputs :
+
+1. Chemical reaction scheme image 
+
+2. Supplemental JSON data 
+
+Task Requirements :
+
+1. Cross-validate information between image and JSON data 
+
+2. Answer format requirements: 
+
+- Return ONLY numerical value (e.g. \"80\") 
+
+- No units, symbols or additional text" 
+
+3. Explicitly explain how both modalities contribute to the answer 
+
+Output Format (strict JSON): 
+
+{
+
+\"answer\": \"<numerical_value>\"," 
+
+\"explanation\": \"<integration_steps>\"" 
+
+}
+
+Figure 11: The prompt of external knowledge in our ReactBench. {
+
+"bboxes": [
+
+{ "id": 0, "bbox": [ 829.38, 21.2, 204.02, 163.45], "category_id": 1}, // molecules
+
+{ "id": 1, "bbox": [ 1079.75, 26.38, 204.02, 132.37 ], "category_id": 1}, // molecules
+
+{ "id": 2, "bbox": [ 466.77, 5.66, 284.32, 178.12 ], "category_id": 1 }, // molecules
+
+{ "id": 3, "bbox": [ 7.14, 275.7, 1333.64, 150.9 ], "category_id": 4 },
+
+{ "id": 4, "bbox": [1210.98,203.37,27.9,34.8],"category_id": 3 },
+
+{ "id": 5, "bbox": [ 60.14, 12.57, 285.17, 146.18], "category_id": 1}, //molecules
+
+{ "id": 6, "bbox": [ 229.35, 203.37, 22.72,35.67 ], "category_id": 3},
+
+{ "id": 7, "bbox": [ 640.31, 200.78, 27.9, 35.67], "category_id": 3},
+
+{ "id": 8, "bbox": [ 964.06, 210.27, 25.31, 34.81], "category_id": 3
+
+} ],
+
+"reactions": [ { "reactants": [5], "conditions": [], "products": [2,0,1]} ]
+
+}
+
+{"id": 5} Figure 12: External Knowledge Example in our ReactBench. This JSON represents molecular structures and reaction relationships extracted from the image. The bboxes section defines detected elements with their respective IDs, bounding box coordinates, and the category_id , where 1 indicates molecules, 2 denotes text, 3
+
+corresponds to compound identifiers (numerical labels without molecular structures), and 4 represents auxiliary information. The reactions section associates reactants and products by referencing their IDs, illustrating the transformations occurring between molecules. Overall, it systematically organizes visual and chemical data for structured interpretation. Question: How many reactants are 
+
+in the diagram? 
+
+Question: How many end products 
+
+are in the diagram? 
+
+Question: How many generation 
+
+paths are there for the compound with 
+
+subscript 2 in the diagram? 
+
+Question: How many reaction steps in 
+
+the diagram require reaction conditions? 
+
+Question: How many infeasible 
+
+reaction steps are in the diagram? 
+
+Question: How many types of reaction 
+
+conditions are there zn the reaction step 
+
+from subscript 3 to subscript 4? 
+
+Question: How many generation paths 
+
+are there for the compound with subscript 
+
+(S)-3 in the diagram? 
+
+Question: How many reversible 
+
+reaction steps are in the diagram? 
+
+Question: "How many total reaction 
+
+steps are there in the diagram?" Figure 13: Examples of Element Localization Task in our ReactBench. Question: "Which term classifies the 
+
+> structure of the reaction pathway? A) Single
+> line B) Multiple line C) Tree D) Graph"
+> Question: " Is there a circular reaction in the
+> diagram, YES or NO? "
+> Question: "Which term classifies the structure of
+> the reaction pathway? A) Single line B) Multiple
+> line C) Tree D) Graph"
+
+Figure 14: Examples of Topology Reasoning Task in our ReactBench. Question: " What is the highest 
+
+reaction temperature of the step 
+
+from 24 to 3b in degrees Celsius? "
+
+# Reaction Information Extraction 
+
+Question: " What is the reaction 
+
+temperature? "
+
+Question: " What is the subscript of 
+
+the final product in the diagram? "
+
+Question: "What is the subscript 
+
+of the reactant in the diagram? "
+
+Question: " What is the longest 
+
+reaction time in hours? "
+
+Question: " What is the shortest 
+
+reaction time in hours for the step 
+
+from 6b to 1b? "
+
+Question: " What is the reaction time 
+
+in minutes from subscript 1 to 2 "
+
+Question: "What is the percentage 
+
+yield of the step from subscript 4b to 
+
+subscript 13d in the diagram? "
+
+Question: "What is the highest/ shortest 
+
+percentage yield of the step from 18 to 
+
+19 in the diagram? "
+
+Question: " What is the lowest 
+
+reaction temperature of the step 
+
+from 4 to 5 in degrees Celsius? "Figure 15: Examples of Information Extraction Task in our ReactBench. Question: " What is the subscript of the 
+
+immediate next compound formed in 
+
+this reaction? 
+
+Question: "What is the subscript of the 
+
+immediate previous compound that led to 
+
+this step? "
+
+Question: " Trace the full pathway leading 
+
+to the product with subscript 7. List all 
+
+compound subscripts **in order **, from 
+
+the starting material to the final product. 
+
+Figure 16: Examples of Connectivity Tracing Task in our ReactBench.
