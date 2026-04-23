@@ -6,73 +6,76 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-22
-- 运行时间：2026-04-22 20:09:06 UTC
+- 最新运行日期：2026-04-23
+- 运行时间：2026-04-23 20:45:31 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：6
+- 本次总论文数：18
+- 精读区：7
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦多模态推理与规划，OneVL 与可靠性激励研究以 9.0 高分领跑 17 篇最新成果。
-重点关注“一步式潜空间推理”对规划效率的提升，以及通过奖励推理过程而非仅看答案来确保模型可靠性。
-建议深入了解视觉语言解释如何赋能具身智能策略与长文档的精准证据溯源。
-- 详情：[/202604/22/README](/202604/22/README)
+今日深度解析 18 篇多模态前沿论文，重点攻克 LVLM 强化学习微调与自监督后训练难题。
+两篇满分论文揭示了奖励分解对模型泛化的关键作用，并定义了 SSL-R1 这一自监督视觉强化新范式。
+建议优先研读 LVLM 的偏好优化
+- 详情：[/202604/23/README](/202604/23/README)
 
 ### 精读区论文标签
-1. [OneVL: One-Step Latent Reasoning and Planning with Vision-Language Explanation](/202604/22/2604.18486v1-onevl-one-step-latent-reasoning-and-planning-with-vision-language-explanation)  
+1. [Rethinking Reinforcement Fine-Tuning in LVLM: Convergence, Reward Decomposition, and Generalization](/202604/23/2604.19857v1-rethinking-reinforcement-fine-tuning-in-lvlm-convergence-reward-decomposition-and-generalization)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：LVLM中用于智能体能力和多步推理的强化微调
+2. [SSL-R1: Self-Supervised Visual Reinforcement Post-Training for Multimodal Large Language Models](/202604/23/2604.20705v1-ssl-r1-self-supervised-visual-reinforcement-post-training-for-multimodal-large-language-models)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：用于多模态大模型推理的自监督视觉强化学习
+3. [The Essence of Balance for Self-Improving Agents in Vision-and-Language Navigation](/202604/23/2604.19064v1-the-essence-of-balance-for-self-improving-agents-in-vision-and-language-navigation)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：带有视觉语言解释的潜空间推理与规划
-2. [Prioritizing the Best: Incentivizing Reliable Multimodal Reasoning by Rewarding Beyond Answer Correctness](/202604/22/2604.18892v1-prioritizing-the-best-incentivizing-reliable-multimodal-reasoning-by-rewarding-beyond-answer-correctness)  
+   evidence：视觉语言导航中的自我改进智能体
+4. [Visual Reasoning through Tool-supervised Reinforcement Learning](/202604/23/2604.19945v1-visual-reasoning-through-tool-supervised-reinforcement-learning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：通过可验证奖励的强化学习进行多模态推理
-3. [DR-MMSearchAgent: Deepening Reasoning in Multimodal Search Agents](/202604/22/2604.19264v1-dr-mmsearchagent-deepening-reasoning-in-multimodal-search-agents)  
+   evidence：用于多模态大模型复杂视觉推理的工具监督强化学习
+5. [Hybrid Latent Reasoning with Decoupled Policy Optimization](/202604/23/2604.20328v1-hybrid-latent-reasoning-with-decoupled-policy-optimization)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：利用轨迹优势信号的代理多模态模型
-4. [Multi-modal Reasoning with LLMs for Visual Semantic Arithmetic](/202604/22/2604.19567v1-multi-modal-reasoning-with-llms-for-visual-semantic-arithmetic)  
+   evidence：结合策略优化的多模态大模型混合潜空间推理
+6. [ProMMSearchAgent: A Generalizable Multimodal Search Agent Trained with Process-Oriented Rewards](/202604/23/2604.20486v1-prommsearchagent-a-generalizable-multimodal-search-agent-trained-with-process-oriented-rewards)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：利用强化学习增强视觉语义算术中的多模态推理
-5. [SmoGVLM: A Small, Graph-enhanced Vision-Language Model](/202604/22/2604.16517v1-smogvlm-a-small-graph-enhanced-vision-language-model)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：图增强VLM用于知识密集型推理
-6. [GRAIL: Autonomous Concept Grounding for Neuro-Symbolic Reinforcement Learning](/202604/22/2604.16871v1-grail-autonomous-concept-grounding-for-neuro-symbolic-reinforcement-learning)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：利用大语言模型进行概念落地的神经符号强化学习
+   evidence：使用强化学习和过程奖励训练的多模态搜索智能体
+7. [V-tableR1: Process-Supervised Multimodal Table Reasoning with Critic-Guided Policy Optimization](/202604/23/2604.20755v1-v-tabler1-process-supervised-multimodal-table-reasoning-with-critic-guided-policy-optimization)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：多模态表格推理的强化学习
 
 ### 速读区论文标签
-1. [ReFineVLA: Multimodal Reasoning-Aware Generalist Robotic Policies via Teacher-Guided Fine-Tuning](/202604/22/2604.17800v1-refinevla-multimodal-reasoning-aware-generalist-robotic-policies-via-teacher-guided-fine-tuning)  
+1. [Think before Go: Hierarchical Reasoning for Image-goal Navigation](/202604/23/2604.17407v1-think-before-go-hierarchical-reasoning-for-image-goal-navigation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：通过教师引导微调的具备多模态推理能力的机器人策略
-2. [DocSeeker: Structured Visual Reasoning with Evidence Grounding for Long Document Understanding](/202604/22/2604.12812v3-docseeker-structured-visual-reasoning-with-evidence-grounding-for-long-document-understanding)  
+   evidence：用于导航智能体的视觉语言模型分层推理
+2. [S2H-DPO: Hardness-Aware Preference Optimization for Vision-Language Models](/202604/23/2604.18512v1-s2h-dpo-hardness-aware-preference-optimization-for-vision-language-models)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：视觉语言模型多图推理的偏好优化
+3. [Environmental Understanding Vision-Language Model for Embodied Agent](/202604/23/2604.19839v1-environmental-understanding-vision-language-model-for-embodied-agent)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：微调VLM以提升智能体的环境理解和任务规划能力
+4. [If you're waiting for a sign... that might not be it! Mitigating Trust Boundary Confusion from Visual Injections on Vision-Language Agentic Systems](/202604/23/2604.19844v1-if-youre-waiting-for-a-sign-that-might-not-be-it-mitigating-trust-boundary-confusion-from-visual-injections-on-vision-language-agentic-systems)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：视觉语言智能体系统对真实场景的推理
+5. [Goal2Skill: Long-Horizon Manipulation with Adaptive Planning and Reflection](/202604/23/2604.13942v1-goal2skill-long-horizon-manipulation-with-adaptive-planning-and-reflection)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于长文档理解的结构化视觉推理
-3. [DocSeeker: Structured Visual Reasoning with Evidence Grounding for Long Document Understanding](/202604/22/2604.12812v4-docseeker-structured-visual-reasoning-with-evidence-grounding-for-long-document-understanding)  
+   evidence：基于VLM的高层规划器用于长程具身操控
+6. [ADAPT: Benchmarking Commonsense Planning under Unspecified Affordance Constraints](/202604/23/2604.14902v2-adapt-benchmarking-commonsense-planning-under-unspecified-affordance-constraints)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：长文档理解中的结构化视觉推理
-4. [Mind's Eye: A Benchmark of Visual Abstraction, Transformation and Composition for Multimodal LLMs](/202604/22/2604.16054v1-minds-eye-a-benchmark-of-visual-abstraction-transformation-and-composition-for-multimodal-llms)  
+   evidence：具身智能体关于动作可及性与规划的推理
+7. [CoGR-MoE: Concept-Guided Expert Routing with Consistent Selection and Flexible Reasoning for Visual Question Answering](/202604/23/2604.16930v1-cogr-moe-concept-guided-expert-routing-with-consistent-selection-and-flexible-reasoning-for-visual-question-answering)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：多模态LLM视觉推理基准
-5. [AtManRL: Towards Faithful Reasoning via Differentiable Attention Saliency](/202604/22/2604.16158v1-atmanrl-towards-faithful-reasoning-via-differentiable-attention-saliency)  
+   evidence：利用概念引导的专家路由改进视觉问答中的选项推理
+8. [Do LLM-derived graph priors improve multi-agent coordination?](/202604/23/2604.17191v1-do-llm-derived-graph-priors-improve-multi-agent-coordination)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：通过强化学习实现大语言模型的忠实推理
-6. [Where Do Vision-Language Models Fail? World Scale Analysis for Image Geolocalization](/202604/22/2604.16248v1-where-do-vision-language-models-fail-world-scale-analysis-for-image-geolocalization)  
-   标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型在地理推理中的零样本推理能力
-7. [KIRA: Knowledge-Intensive Image Retrieval and Reasoning Architecture for Specialized Visual Domains](/202604/22/2604.16915v1-kira-knowledge-intensive-image-retrieval-and-reasoning-architecture-for-specialized-visual-domains)  
-   标签：评分：7.0/10、query:vlm-rl
-   evidence：专业领域检索图像的多跳推理
-8. [SPS: Steering Probability Squeezing for Better Exploration in Reinforcement Learning for Large Language Models](/202604/22/2604.16995v1-sps-steering-probability-squeezing-for-better-exploration-in-reinforcement-learning-for-large-language-models)  
-   标签：评分：7.0/10、query:vlm-rl
-   evidence：面向推理模型的强化学习与探索
-9. [Benchmarking Deflection and Hallucination in Large Vision-Language Models](/202604/22/2604.12033v1-benchmarking-deflection-and-hallucination-in-large-vision-language-models)  
+   evidence：LLM用于多智能体强化学习的协调图先验
+9. [HiVLA: A Visual-Grounded-Centric Hierarchical Embodied Manipulation System](/202604/23/2604.14125v1-hivla-a-visual-grounded-centric-hierarchical-embodied-manipulation-system)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：知识密集型多模态问题的VLM推理
-10. [Beyond a Single Frame: Multi-Frame Spatially Grounded Reasoning Across Volumetric MRI](/202604/22/2604.15808v1-beyond-a-single-frame-multi-frame-spatially-grounded-reasoning-across-volumetric-mri)  
+   evidence：用于操控任务分解和视觉定位的VLM规划器
+10. [Rethinking Patient Education as Multi-turn Multi-modal Interaction](/202604/23/2604.14656v1-rethinking-patient-education-as-multi-turn-multi-modal-interaction)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：医疗视觉语言模型中的空间落地推理
-11. [Rule-VLN: Bridging Perception and Compliance via Semantic Reasoning and Geometric Rectification](/202604/22/2604.16993v1-rule-vln-bridging-perception-and-compliance-via-semantic-reasoning-and-geometric-rectification)  
+   evidence：用于多模态患者教育的医生智能体与患者智能体交互
+11. [AdaVFM: Adaptive Vision Foundation Models for Edge Intelligence via LLM-Guided Execution](/202604/23/2604.15622v1-adavfm-adaptive-vision-foundation-models-for-edge-intelligence-via-llm-guided-execution)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：导航智能体的语义推理与决策
+   evidence：大语言模型引导的自适应视觉基础模型执行
 
 
 <div class="dpr-home-promo-card">
