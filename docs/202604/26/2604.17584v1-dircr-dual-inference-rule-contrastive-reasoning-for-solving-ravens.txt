@@ -1,0 +1,349 @@
+Title: DIRCR: Dual-Inference Rule-Contrastive Reasoning for Solving RAVENs
+
+URL Source: https://arxiv.org/pdf/2604.17584v1
+
+Published Time: Tue, 21 Apr 2026 01:34:45 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+## DIRCR: DUAL-INFERENCE RULE-CONTRASTIVE REASONING FOR SOLVING RAVENS 
+
+## Jiachen Zhang ‡§ , Chengtai Li ‡, Jianfeng Ren ‡† , Linlin Shen §, Zheng Lu ‡† , Ruibin Bai ‡† ‡School of Computer Science, University of Nottingham Ningbo China, China 
+
+> †
+
+## Nottingham Ningbo China Beacons of Excellence Research and Innovation Institute, China 
+
+> §
+
+## School of Artificial Intelligence, Shenzhen University, China 
+
+ABSTRACT 
+
+Abstract visual reasoning remains challenging as existing methods often prioritize either global context or local row-wise relations, failing to integrate both, and lack intermediate feature constraints, leading to incomplete rule capture and en-tangled representations. To address these issues, we propose the Dual-Inference Rule-Contrastive Reasoning (DIRCR) model. Its core component, the Dual-Inference Reasoning Module, combines a local path for row-wise analogical rea-soning and a global path for holistic inference, integrated via a gated attention mechanism. Additionally, a Rule-Contrastive Learning Module introduces pseudo-labels to construct posi-tive and negative rule samples, applying contrastive learning to enhance feature separability and promote abstract, trans-ferable rule learning. Experimental results on three RAVEN datasets demonstrate that DIRCR significantly enhances rea-soning robustness and generalization. Codes are available at https://github.com/csZack-Zhang/DIRCR. 
+
+Index Terms — Abstract Visual Reasoning, Contrastive Learning, RAVEN 
+
+1. INTRODUCTION 
+
+Abstract Visual Reasoning (AVR) is a multidisciplinary field spanning computer science, cognitive science, and artifi-cial intelligence [1], focused on deriving abstract concepts from visual data to solve complex problems through pattern recognition and logical inference [1–4]. It has served as a benchmark for evaluating human-like generalization in AI systems [1], with applications in tasks such as RAVEN-style progressive matrices [5–8], machine number reasoning [9], and compositional reasoning [10, 11]. AVR also supports real-world domains like autonomous driving by enhancing real-time scene interpretation and decision-making [12–15]. AVR models fall into three primary paradigms: 1) Tradi-tional approaches employ relational networks to model visual relationships [16], or attention-based mechanisms to empha-size salient features [17, 18]; 2) Neuroscience-inspired mod-els, such as PredRNet, incorporate cognitive principles like prediction and verification for AVR problem-solving [9, 19]; 3) Graph-based methods use graph neural networks to capture and reason over structural and evolutionary patterns among abstract visual entities [20, 21]. However, existing AVR models still face two major chal-lenges: 1) While many methods treat AVR as a direct map-ping from all context images to an answer [22–25], capturing global patterns but neglecting row-wise 1 analogical relation-ships, approaches that focus solely on row-wise reasoning [9, 14, 19] often miss cross-row interactions and global rule con-sistency. 2) Supervision is typically confined to the final layer, leaving intermediate features unconstrained [26]. This leads to entangled embeddings that obscure abstract rule distinc-tions, promoting dependence on superficial features and hin-dering generalization to unseen data. To tackle the challenges, we propose a Dual-Inference 
+
+Rule-Contrastive Reasoning ( DIRCR ) model for solving RAVEN-style problems. The core of DIRCR is a Dual-
+
+Inference Reasoning Module ( DIRM ), which consists of two complementary reasoning paths: 1) The local path conducts row-wise analogy, predicting the third image from the first two to capture fine-grained intra-row dependencies. 2) The global path holistically infers the missing image using all context images, integrating both intra-row and inter-row re-lations. A structure-aware gated attention mechanism further adaptively enhances salient reasoning features and suppresses noise, effectively fusing information from both pathways. To improve generalization, we introduce the Rule-Contrastive 
+
+Learning Module (RCLM ) based on contrastive learn-ing [27]. RCLM generates pseudo-labels to form positive samples from the first two rows and the pseudo-positive last row, each representing underlying row-wise rules, while us-ing pseudo-negative candidates as negative samples. These features are projected into a contrastive space, where posi-tives are attracted and negatives repelled. This process reg-ularizes rule-based features via an auxiliary contrastive loss, enhancing discernibility of row-level reasoning patterns and promoting abstract, transferable rule learning. Our contributions can be summarized as follows: 1) The proposed DIRM integrates global n-to-1 reasoning with lo-cal row-wise analogy, capturing both long-range consistency and fine-grained relational patterns to more comprehensively 
+
+> 1We focus on row-wise relationships without loss of generality.
+> arXiv:2604.17584v1 [cs.AI] 19 Apr 2026
+
+𝐀 3
+
+> 3
+> Row #1
+> Row #2
+> Row #3
+
+# ？ 
+
+> Candidate Set
+> 3x3 Conv
+> BatchNorm
+> LeakyReLU
+> 3x3 Conv
+> BatchNorm
+> +
+> ResBlock
+> ×4
+> 3x3 Conv
+> BatchNorm
+> ReL U
+
+𝐀 3
+
+> 1
+> -
+> Local Predictor
+> Row #1
+
+𝐀 1 
+
+> 2
+
+𝐀 2 
+
+> 2
+
+𝐀 3
+
+> 2
+> Row #2
+
+𝐀 1 
+
+> 3
+
+𝐀 2 
+
+> 3
+
+𝐀 3
+
+> 3
+> Row #3
+> Local Predictor
+> Local Predictor
+
+𝐀 9
+
+> 3x3 Conv
+> BatchNorm
+> ReLU
+> -
+> Cross-Attention
+> +
+> Cross-Attention
+> Self-Attention
+> Gated Fusion
+> Conv
+> Conv
+> Pseudo
+> label
+
+𝐀 1 
+
+> 3
+
+𝐀 2 
+
+> 3
+
+𝐀 3
+
+> 3
+> Row #3
+
+𝐀 1 
+
+> 3
+
+𝐀 2 
+
+> 3
+
+𝐀 3   
+
+> 3
+> Row #3
+> Negative sample
+> … ×7
+> 𝐀 𝐀 𝐀 𝐀 𝐀 +𝐀 𝐀 𝐀 𝐀 𝐀 𝐀
+> Dual-Inference Reasoning Module
+> Rule-Contrastive Learning Module
+
+𝐀 𝐀 𝐀 =1
+
+> 8
+> Global Predictor
+
+𝐀 1 
+
+> 1
+
+𝐀 2 
+
+> 1
+
+𝐀 3
+
+> 1
+
+ˆ
+
+ˆ
+
+> Classification H ead
+
+ˆ
+
+> Class ifier
+> 𝐀
+
+𝐀 1 
+
+> 1
+
+𝐀 2 
+
+> 1
+
+𝐀 3
+
+> 1
+> Row #1
+
+𝐀 1 
+
+> 2
+
+𝐀 2 
+
+> 2
+
+𝐀 3
+
+> 2
+> Row #2
+
+𝐀 1 
+
+> 3
+
+𝐀 2 
+
+> 3
+
+𝐀 3
+
+> 3
+> Row #3
+> Positive Samples
+
+ˆFig. 1 : Block diagram of proposed Dual-Inference Rule-Contrastive Reasoning model: 1) Dual-Inference Reasoning Module (DIRM), integrating a local row-wise analogy path and a global holistic inference path through a gated attention mechanism; and 2) Rule-Contrastive Learning Module (RCLM), regularizing rule-aware features via an auxiliary contrastive loss. exploit multi-level reasoning cues. 2) The RCLM explic-itly attracts representations of valid rule combinations while repelling incorrect candidates, enabling learning of abstract and transferable reasoning structures that substantially im-prove model generalization. 3) DIRCR achieves state-of-the-art performance across three major RAVEN datasets [5–7]. 
+
+2. PROPOSED METHOD 2.1. Overview of DIRCR 
+
+The RAVEN task [5–7] is structured as a 3 × 3 matrix. Given question images {Qi}8
+
+> i=1
+
+, the task is to infer the last miss-ing image At from candidate answers {Ai}8
+
+> i=1
+
+, so that the three rows of images follow the same underlying rule. We propose the DIRCR model (Fig. 1) to solve it. A lightweight ResNet-4b serves as the feature encoder. The DIRCR con-sists of two core modules. 1) The DIRM uses a dual-path design: the global path infers the missing image from all con-text panels, and the local path performs row-wise analogy to model intra-row relations. Both paths employ convolutional layers for prediction, compare results with targets, and utilize prediction errors to capture latent rules. DIRM further inte-grates error-guided gated attention to amplify rule-consistent features and suppress noise, effectively merging global and local cues to learn structural and analogical patterns. 2) The RCLM employs pseudo-label rule-contrastive learning to en-hance representations. It generates pseudo-labels for candi-date answers, forming positive samples from the first two rows and the pseudo-positive third row, and negative samples from pseudo-negative third-row candidates. All are projected into a contrastive space, where positive pairs are attracted and negative pairs repelled. This promotes compact clustering of valid rule structures and separation of incorrect ones, enforc-ing row-level structural consistency. 
+
+2.2. Dual-Inference Reasoning Module Local Row-wise Reasoning: Row-wise rule modelling has been widely adopted [14, 19, 27]. In particular, for each row (i), the prediction network ψL(·) predicts the last column of features using the first two columns of features as: 
+
+ˆF (i)3 = ψL(F (i)1 , F(i)2 ). (1) The predictor ψL(·) uses a 2-D convolution, batch normaliza-tion, and ReLU activation (ConvNormAct) for stable train-ing and convergence. All rows share the same predictor, en-suring representational consistency, reducing parameters, and promoting learning of general compositional patterns (row-specific features) to improve generalization. The predicted target feature is subtracted from the actual target feature to obtain the prediction error: E(i) = ˆF (i)3 − F i 
+
+> 3
+
+. The residual features are concatenated with the original features along the channel dimension to form the output feature OL. This resid-ual connection preserves original semantics, preventing over-reliance on residuals while enhancing discriminative repre-sentation learning [27]. 
+
+Global n-to-1 Reasoning: DIRM incorporates both global 
+
+n-to-1 and local row-wise reasoning. The global predictor 
+
+ψG(·) infers the target feature using all eight context images: 
+
+ˆFt = ψG(F1, . . . , F8), (2) and the residual EG = ˆFt − Ft is computed and fused with the original features as in the row-wise branch to integrate holistic contextual patterns to form the output feature OG.
+
+Gated Attention Mechanism: To enhance interaction between local row-wise and global residuals, we introduce a cross-attention fusion mechanism. The concatenated out-puts OL (from local reasoning branch) and OG (from global reasoning branch) are processed through multi-head cross-attention FCA (·) and self-attention FSA (·) as: 
+
+O = FSA (FCA (OL, OG) + FCA (OG, OL)) . (3) The three attention layers iteratively fuse local ( OL) and global ( OG) reasoning features via bidirectional interaction and integrated refinement. This enhances semantic consis-tency, reasoning robustness, and generalization. Then, a structure-aware gating mechanism dynamically modulates features using a linearly projected gating vector g.The fused output O is element-wise modulated as: 
+
+R = γ(g) ⊙ O, (4) where γ is the GELU activation and ⊙ is the element-wise multiplication. This mechanism enhances rule-consistent fea-tures while reducing noise, focusing on valid patterns and im-proving robustness and generalization in abstract reasoning. 
+
+Hierarchical Reasoning: To handle increasingly complex structural rules and their interactions, we stack K DIRMs, enabling deeper reasoning over compositional relationships: 
+
+R(k) = DIRM (k) R(k−1) , k = 1 , . . . , K, (5) This hierarchical design facilitates progressive learning from simple patterns to higher-order rule combinations, enhancing representational capacity and structural generalization. 
+
+2.3. Rule-Contrastive Learning Module 
+
+After training the DIRM, we can utilize it to generate the like-lihood pj of each candidate image Aj being the correct one so that the last row of three images follows the same rule as the first two rows. Then, we select the candidate with the highest probability as the pseudo-label ˆc = argmax j pj .After obtaining pseudo-labels, we construct positive and negative sample sets using reasoning features as: 
+
+P = {G1, G2, Gˆc
+
+> 3
+
+}, N = {Gj 
+
+> 3
+
+| j̸ = ˆ c}.
+
+where G1 and G2 denote the features of the first and sec-ond rows, and Gˆc 
+
+> 3
+
+represents the third-row features with the pseudo-positive candidate, and Gj 
+
+> 3
+
+denotes the third-row fea-tures with a pseudo-negative candidate. These row-wise fea-tures encode the latent relations within each triple-image row. A two-layer perceptron maps row-wise reasoning features into a contrastive space to reduce classification bias and se-mantic noise. Supervised contrastive loss enhances discrim-inability by maximizing intra-positive similarity and mini-mizing positive-negative affinity, pulling positives together and pushing negatives apart per anchor. 
+
+LRCLM = − X 
+
+> P∈P
+
+log 
+
+X 
+
+> U∈P
+
+sim( P , U )
+
+X 
+
+> U∈P∪N i
+
+sim( P , U ) ,
+
+where sim( ·, ·) denotes a similarity function. This restruc-tures intermediate features: rule-consistent positives cluster tightly, while rule-violating negatives are separated, reducing ambiguity from end-layer-only supervision. 
+
+3. EXPERIMENTAL RESULTS 3.1. Experimental Settings 
+
+We conduct comparison experiments on the RAVEN [5], I-RAVEN [6] and RAVEN-FAIR [7] datasets. These three datasets have been widely utilized to evaluate the reasoning capabilities. The DIRCR model is compared with ten state-of-the-art methods, including LEN [23], SRAN [6], DC-Net [28], MRNet [7], SCL [29], Rel-Base [30], STSN [31], PredRNet [19], DRNet [32] and TRIVR [14]. Following the standard evaluation protocol [5–7], the number of training, validation, and test samples in each dataset is 42,000, 14,000, and 14,000, respectively. Images are resized to 80 ×80 ×1, with a batch size of 128. Training uses the Adam optimizer (initial learning rate 10 −3,weight decay 10 −5). The model employs K = 3 DIRMs and a dropout rate of 0.1 in both reasoning and classification lay-ers. Rule-Contrastive Learning (RCL) is applied with a pro-jection dimension of 128, temperature τ = 0 .2, confidence threshold 0.60, and loss weight 0.1. 
+
+3.2. Comparison to State-of-the-Art Methods Comparison on RAVEN/I-RAVEN/RAVEN-FAIR Dataset: 
+
+Tab. 1 reports the reasoning accuracy (%) of various models on RAVEN, I-RAVEN, and RAVEN-FAIR. Key observations include: 1) DIRCR consistently achieves state-of-the-art Table 1 : Comparison with state-of-the-art models on the RAVEN [5], I-RAVEN [6] and RAVEN-FAIR [7] datasets. Model RAVEN I-RAVEN RAVEN-F Avg LEN [23] NeurIPS’19 72.9 41.4 51.0 55.1 SRAN [6] AAAI’21 54.3 72.9 60.8 62.7 DCNet [28] ICLR’21 93.6 56.1 47.2 65.6 MRNet [7] CVPR’21 96.6 88.4 83.5 89.5 SCL [29] arXiv’23 91.7 93.5 91.1 92.1 Rel-Base [30] ECCV’20 91.6 90.1 95.0 92.2 STSN [31] ICLR’23 95.8 97.1 96.5 96.4 PredRNet [19] ICML’23 89.7 95.4 95.7 93.6 DRNet [32] AAAI’24 96.9 97.6 97.8 97.4 TRIVR [14] PR’25 93.6 95.9 – 94.8 
+
+DIRCR 98.5 97.8 98.7 98.3 Table 2 : Comparisons on RAVEN and I-RAVEN shrunk datasets following the setups in [14]. 
+
+Models 10,500 21,000 42,000 CoPINet [22] NeurIPS’19 81.8/- 89.2/- 91.4/50.6 SRAN [6] AAAI’21 -/40.8 -/53.4 54.3/72.9 SCL [29] arXiv’23 64.8/68.4 75.0/78.7 91.7/93.5 TRIVR [14] PR’25 91.5/94.7 91.8/94.9 93.6/95.9 
+
+DIRCR 92.3/95.8 94.1/97.1 98.5/97.8 
+
+performance across all datasets, with 98.5% on RAVEN, 97.8% on I-RAVEN, and 98.7% on RAVEN-FAIR (avg: 98.3%), outperforming strong baselines like STSN [31] (96.4%), DRNet [32] (97.4%), and TRIVR [14] (94.8%). 2) The significant performance gains on the bias-minimized datasets RAVEN and RAVEN-FAIR further demonstrate that DIRCR is more robust to superficial visual biases and excels at extracting underlying structural rules for abstract reason-ing. 3) Despite the strong performance of existing methods, DIRCR achieves substantial improvements over state-of-the-art models, attributable to its dual-inference architecture and rule-contrastive learning mechanism. 
+
+Comparison on Shrunk Datasets: DIRCR effectively extracts latent rules from abstract reasoning problems, main-taining strong performance even under limited training data. To evaluate this, we conducted comparisons on shrunk RAVEN/I-RAVEN datasets following [14], utilizing only 1/4 (10,500 samples) and 1/2 (21,000 samples) of the origi-nal training data, while keeping validation and test sets un-changed. Tab. 2 shows that DIRCR achieves state-of-the-art performance across shrunk RAVEN and I-RAVEN. It attains 92.3%, 94.1%, and 98.5% on RAVEN at 1/4, 1/2, and full training scales, outperforming TRIVR [14] and CoPINet [22]. On I-RAVEN, it reaches 95.8%, 97.1%, and 97.8%, exceed-ing TRIVR [14] and SCL [29], demonstrating strong gener-
+
+Table 3 : Ablation of the two major components and K.2-to-1 8-to-1 RCLM RAVEN I-RAVEN RAVEN-F Avg. 
+
+✓ ✗ ✗ 96.2 97.3 97.6 97.0 
+
+✗ ✓ ✗ 96.0 96.4 97.1 96.5 
+
+✓ ✗ ✓ 96.5 97.7 97.8 97.3 
+
+✓ ✓ ✗ 97.1 97.5 98.1 97.6 
+
+✓ ✓ ✓ 98.5 97.8 98.7 98.3 
+
+K = 1 96.9 97.4 98.2 97.5 
+
+K = 2 97.3 97.5 98.3 97.7 
+
+K = 3 98.5 97.8 98.7 98.3 
+
+K = 4 96.7 97.7 98.4 97.6 alization. DIRCR also shows better robustness to data bias, with less accuracy drop on debiased I-RAVEN, indicating greater reliance on structural rules. Moreover, it achieves high accuracy (92.3% on RAVEN, 95.8% on I-RAVEN) with only 10,500 samples, highlighting high data efficiency. 
+
+3.3. Ablation Studies of Key Modules and K
+
+We conducted ablation studies on three RAVENs to evaluate the contribution of each module in DIRCR and the effect of the number of DIRM blocks. Tab. 3 reveals the following key findings: 1) Using only 2-to-1 or 8-to-1 modules yields the lowest accuracies (97.0% and 96.5%, respectively), with 2-to-1 slightly outperforming 8-to-1; 2) Adding RCLM to the 2-to-1 module improves accuracy to 97.3%, with notable gains on I-RAVEN and RAVEN-FAIR; 3) Combining 2-to-1 and 8-to-1 modules integrates local and global information, sub-stantially boosting performance; 4) Employing all three mod-ules achieves the highest accuracy by capturing both struc-tural patterns and deeper abstract rules; 5) Increasing DIRM blocks from K = 1 to K = 3 improves accuracy from 97.5% to 98.3%, suggesting iterative reasoning enhances modeling of complex rules. However, performance drops to 97.6% at 
+
+K = 4 , likely due to overfitting. 
+
+4. CONCLUSION 
+
+To advance the comprehension of abstract rules and enhance robust reasoning capabilities, this paper introduces the Dual-Inference Rule-Contrastive Reasoning (DIRCR) model, con-sisting of two core modules. The DIRM module integrates global structural reasoning with local analogical reasoning, while the RCLM module imposes contrastive constraints by attracting representations of valid rule combinations and re-pelling incorrect candidates. Extensive experiments on three RAVENs show that DIRCR consistently and significantly out-performs state-of-the-art methods across diverse settings. 5. REFERENCES 
+
+[1] M. Małki´ nski and J. Ma´ ndziuk, “A review of emerging re-search directions in abstract visual reasoning,” Inf. Fusion , vol. 91, pp. 713–736, 2023. [2] W. He, J. Zhang, J. Ren, R. Bai, and X. Jiang, “Hierarchi-cal ConViT with attention-based relational reasoner for visual analogical reasoning,” in Proc. AAAI Conf. Artif. Intell. , 2023, vol. 37, pp. 22–30. [3] W. He, J. Ren, and R. Bai, “Data augmentation by morpho-logical mixup for solving raven’s progressive matrices,” Vis. Comput. , vol. 40, no. 4, pp. 2457–2470, 2024. [4] C. Li, Y. He, J. Ren, R. Bai, Y. Zhao, H. Yu, and X. Jiang, “Pre-dictive reasoning with augmented anomaly contrastive learning for compositional visual relations,” IEEE Trans. on Multime-dia , 2026. [5] C. Zhang, F. Gao, B. Jia, Y. Zhu, and S.-C. Zhu, “Raven: A dataset for relational and analogical visual reasoning,” in 
+
+Proc. IEEE Int. Conf. Comput. Vis. Pattern Recognit. , 2019, pp. 5317–5327. [6] S. Hu, Y. Ma, X. Liu, Y. Wei, and S. Bai, “Stratified rule-aware network for abstract visual reasoning,” in Proc. AAAI Conf. Artif. Intell. , 2021, vol. 35, pp. 1567–1574. [7] Y. Benny, N. Pekar, and L. Wolf, “Scale-localized abstract rea-soning,” in Proc. IEEE Int. Conf. Comput. Vis. Pattern Recog-nit. , 2021, pp. 12557–12565. [8] C. Li, Y. Y. Tan, Y. He, J. Ren, R. Bai, Y. Zhao, H. Yu, and X. Jiang, “DARR: A dual-branch arithmetic regression rea-soning framework for solving machine number reasoning,” in 
+
+Proc. AAAI Conf. Artif. Intell. , 2025, vol. 39, pp. 1373–1382. [9] C. Li, G. Su, J. Ren, R. Bai, Y. Zhao, and X. Jiang, “DBCR: Exploiting both intra-cluster and extra-cluster relations for compositional reasoning,” in Proc. IEEE Int. Conf. Acoust. Speech Signal Process., 2025 . IEEE, 2025, pp. 1–5. [10] A. Zerroug, M. Vaishnav, J. Colin, S. Musslick, and T. Serre, “A benchmark for compositional visual reasoning,” Adv. Neu-ral Inf. Process. Syst. , vol. 35, pp. 29776–29788, 2022. [11] C. Li, Y. He, J. Ren, R. Bai, Y. Zhao, and X. Jiang, “DSRF: A dynamic and scalable reasoning framework for solving rpms,” in Adv. Neural Inf. Process. Syst. , 2025. [12] Y. Liang, P. Zheng, and L. Xia, “A visual reasoning-based ap-proach for driving experience improvement in the AR-assisted head-up displays,” Advanced Engineering Informatics , vol. 55, pp. 101888, 2023. [13] S. Grigorescu, B. Trasnea, T. Cocias, and G. Macesanu, “A survey of deep learning techniques for autonomous driving,” J. Field Robot. , vol. 37, no. 3, pp. 362–386, 2020. [14] W. He, J. Ren, R. Bai, and X. Jiang, “Two-stage rule-induction visual reasoning on rpms with an application to video predic-tion,” Pattern Recognit. , vol. 160, pp. 111151, 2025. [15] X. Yang, T. Cui, H. Wang, and Y. Ye, “Multiagent deep re-inforcement learning for electric vehicle fast charging station pricing game in electricity-transportation nexus,” IEEE Trans. Ind. Informat. , vol. 20, no. 4, pp. 6345–6355, 2024. [16] D. Barrett, F. Hill, A. Santoro, A. Morcos, and T. Lillicrap, “Measuring abstract reasoning in neural networks,” in Proc. Int. Conf. Mach. Learn. PMLR, 2018, pp. 511–520. [17] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin, “Attention is all you need,” Adv. Neural Inf. Process. Syst. , vol. 30, 2017. [18] W. He, J. Ren, R. Bai, and X. Jiang, “Hierarchical percep-tual and predictive analogy-inference network for abstract vi-sual reasoning,” in Proc. ACM Int. Conf. Multimedia , 2024, pp. 4841–4850. [19] L. Yang, H. You, Z. Zhen, D. Wang, X. Wan, X. Xie, and R.-Y. Zhang, “Neural prediction errors enable analogical visual reasoning in human standard intelligence tests,” in Proc. Int. Conf. Mach. Learn. PMLR, 2023, pp. 39572–39583. [20] Y. Wang, M. Yasunaga, H. Ren, S. Wada, and J. Leskovec, “Vqa-gnn: Reasoning with multimodal knowledge via graph neural networks for visual question answering,” in Proc. IEEE Int. Conf. Comput. Vis. Pattern Recognit. , 2023, pp. 21582– 21592. [21] A. Santoro, D. Raposo, D. G. Barrett, M. Malinowski, R. Pas-canu, P. Battaglia, and T. Lillicrap, “A simple neural network module for relational reasoning,” Adv. Neural Inf. Process. Syst. , vol. 30, 2017. [22] C. Zhang, B. Jia, F. Gao, Y. Zhu, H. Lu, and S.-C. Zhu, “Learn-ing perceptual inference by contrasting,” Adv. Neural Inf. Pro-cess. Syst. , vol. 32, 2019. [23] K. Zheng, Z.-J. Zha, and W. Wei, “Abstract reasoning with distracting features,” Adv. Neural Inf. Process. Syst. , vol. 32, 2019. [24] Y. Kim, J. Shin, E. Yang, and S. J. Hwang, “Few-shot vi-sual reasoning with meta-analogical contrastive learning,” Adv. Neural Inf. Process. Syst. , vol. 33, pp. 16846–16856, 2020. [25] D. Wang, M. Jamnik, and P. Lio, “Abstract diagrammatic reasoning with multiplex graph networks,” arXiv preprint arXiv:2006.11197 , 2020. [26] A. Uselis and S. J. Oh, “Intermediate layer classifiers for ood generalization,” arXiv preprint arXiv:2504.05461 , 2025. [27] C. Li, Y. He, J. Ren, R. Bai, Y. Zhao, H. Yu, and X. Jiang, “Re-gression residual reasoning with pseudo-labeled contrastive learning for uncovering multiple complex compositional rela-tions,” in Inter. Joint Conf. on Arti. Intell. , 2024, vol. 4, pp. 3466–3474. [28] T. Zhuo and M. Kankanhalli, “Effective abstract reasoning with dual-contrast network,” arXiv preprint arXiv:2205.13720 ,2022. [29] Y. Wu, H. Dong, R. Grosse, and J. Ba, “The scattering compo-sitional learner: Discovering objects, attributes, relationships in analogical reasoning,” arXiv preprint arXiv:2007.04212 ,2020. [30] S. Spratley, K. Ehinger, and T. Miller, “A closer look at gener-alisation in raven,” in Eur. Conf. Comput. Vis. Springer, 2020, pp. 601–616. [31] S. S. Mondal, T. Webb, and J. D. Cohen, “Learning to reason over visual objects,” arXiv preprint arXiv:2303.02260 , 2023. [32] K. Zhao, C. Xu, and B. Si, “Learning visual abstract reason-ing through dual-stream networks,” in Proc. AAAI Conf. Artif. Intell. , 2024, vol. 38, pp. 16979–16988.
