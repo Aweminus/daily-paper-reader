@@ -6,73 +6,70 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-28
-- 运行时间：2026-04-28 20:57:24 UTC
+- 最新运行日期：2026-04-29
+- 运行时间：2026-04-29 20:36:56 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：6
+- 本次总论文数：16
+- 精读区：5
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦 17 篇 AI 论文，深度解析了视觉语言模型（VLM）在强化学习与复杂推理领域的最新突破。
-重点推荐 RL Token 引导的在线强化学习，以及通过底层视觉线索与反思机制实现奥数级多图推理的创新方法。
-建议读者关注 VLM 如何从简单的图像描述进化为具备自我反思与具身操作能力的智能体。
-- 详情：[/202604/28/README](/202604/28/README)
+今日聚焦多模态大模型安全与空间推理，深度解析 16 篇涵盖智能体社交与场景生成的最新成果。
+重点关注 SafetyALFRED 对安全规划的严苛评估及 SpatiO 的自适应推理编排，两者共同定义了视觉语言智能体的新高度。
+建议从“重写”接口与反事实证据等新视角出发，探索多模态嵌入与开放词汇场景生成的进阶路径。
+- 详情：[/202604/29/README](/202604/29/README)
 
 ### 精读区论文标签
-1. [RL Token: Bootstrapping Online RL with Vision-Language-Action Models](/202604/28/2604.23073v1-rl-token-bootstrapping-online-rl-with-vision-language-action-models)  
-   标签：评分：10.0/10、query:vlm-rl
-   evidence：支持对预训练的视觉-语言-动作模型进行在线强化学习微调
-2. [See Further, Think Deeper: Advancing VLM's Reasoning Ability with Low-level Visual Cues and Reflection](/202604/28/2604.24339v1-see-further-think-deeper-advancing-vlms-reasoning-ability-with-low-level-visual-cues-and-reflection)  
-   标签：评分：10.0/10、query:vlm-rl
-   evidence：通过强化学习和视觉反馈增强视觉语言模型推理
-3. [GoClick: Lightweight Element Grounding Model for Autonomous GUI Interaction](/202604/28/2604.23941v1-goclick-lightweight-element-grounding-model-for-autonomous-gui-interaction)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：用于非机器人领域的自主GUI交互智能体的轻量级VLM
-4. [Grounding Before Generalizing: How AI Differs from Humans in Causal Transfer](/202604/28/2604.24062v1-grounding-before-generalizing-how-ai-differs-from-humans-in-causal-transfer)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：VLM 和强化学习中的交互式因果学习与迁移
-5. [Improving Vision-language Models with Perception-centric Process Reward Models](/202604/28/2604.24583v1-improving-vision-language-models-with-perception-centric-process-reward-models)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：结合过程奖励模型进行视觉语言模型推理的强化学习
-6. [The Expense of Seeing: Attaining Trustworthy Multimodal Reasoning Within the Monolithic Paradigm](/202604/28/2604.20665v1-the-expense-of-seeing-attaining-trustworthy-multimodal-reasoning-within-the-monolithic-paradigm)  
+1. [SafetyALFRED: Evaluating Safety-Conscious Planning of Multimodal Large Language Models](/202604/29/2604.19638v1-safetyalfred-evaluating-safety-conscious-planning-of-multimodal-large-language-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型中可靠的多模态推理
+   evidence：评估多模态大模型作为自主智能体
+2. [SpatiO: Adaptive Test-Time Orchestration of Vision-Language Agents for Spatial Reasoning](/202604/29/2604.21190v2-spatio-adaptive-test-time-orchestration-of-vision-language-agents-for-spatial-reasoning)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：视觉语言模型中用于自适应空间推理的多智能体编排
+3. [AutoGUI-v2: A Comprehensive Multi-Modal GUI Functionality Understanding Benchmark](/202604/29/2604.24441v1-autogui-v2-a-comprehensive-multi-modal-gui-functionality-understanding-benchmark)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：基于视觉语言模型的GUI导航与决策自主智能体
+4. [PhysNote: Self-Knowledge Notes for Evolvable Physical Reasoning in Vision-Language Model](/202604/29/2604.24443v1-physnote-self-knowledge-notes-for-evolvable-physical-reasoning-in-vision-language-model)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：用于视觉语言模型物理推理的智能体框架
+5. [Instruction-Evidence Contrastive Dual-Stream Decoding for Grounded Vision-Language Reasoning](/202604/29/2604.25809v1-instruction-evidence-contrastive-dual-stream-decoding-for-grounded-vision-language-reasoning)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：专注于视觉语言模型中的接地视觉语言推理和指令遵循
 
 ### 速读区论文标签
-1. [OMIBench: Benchmarking Olympiad-Level Multi-Image Reasoning in Large Vision-Language Model](/202604/28/2604.20806v1-omibench-benchmarking-olympiad-level-multi-image-reasoning-in-large-vision-language-model)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：大型视觉语言模型中的多图推理
-2. [Do MLLMs Understand Pointing? Benchmarking and Enhancing Referential Reasoning in Egocentric Vision](/202604/28/2604.21461v1-do-mllms-understand-pointing-benchmarking-and-enhancing-referential-reasoning-in-egocentric-vision)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：评估多模态大模型在第一人称AI智能体中的指代推理能力
-3. [SketchVLM: Vision language models can annotate images to explain thoughts and guide users](/202604/28/2604.22875v1-sketchvlm-vision-language-models-can-annotate-images-to-explain-thoughts-and-guide-users)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型中的视觉推理
-4. [DLM: Unified Decision Language Models for Offline Multi-Agent Sequential Decision Making](/202604/28/2604.23557v1-dlm-unified-decision-language-models-for-offline-multi-agent-sequential-decision-making)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：利用大语言模型将多智能体决策建模为序列预测问题
-5. [E3VS-Bench: A Benchmark for Viewpoint-Dependent Active Perception in 3D Gaussian Splatting Scenes](/202604/28/2604.17969v2-e3vs-bench-a-benchmark-for-viewpoint-dependent-active-perception-in-3d-gaussian-splatting-scenes)  
+1. [AI-Gram: When Visual Agents Interact in a Social Network](/202604/29/2604.21446v1-ai-gram-when-visual-agents-interact-in-a-social-network)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：具身智能体执行视觉搜索和主动感知的基准测试
-6. [Revisiting Change VQA in Remote Sensing with Structured and Native Multimodal Qwen Models](/202604/28/2604.18429v1-revisiting-change-vqa-in-remote-sensing-with-structured-and-native-multimodal-qwen-models)  
+   evidence：多智能体视觉网络中的大模型驱动智能体
+2. [CAGE-SGG: Counterfactual Active Graph Evidence for Open-Vocabulary Scene Graph Generation](/202604/29/2604.22274v2-cage-sgg-counterfactual-active-graph-evidence-for-open-vocabulary-scene-graph-generation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：使用视觉语言模型对遥感图像中的变化进行复杂推理
-7. [Infection-Reasoner: A Compact Vision-Language Model for Wound Infection Classification with Evidence-Grounded Clinical Reasoning](/202604/28/2604.19937v1-infection-reasoner-a-compact-vision-language-model-for-wound-infection-classification-with-evidence-grounded-clinical-reasoning)  
+   evidence：视觉语言模型中的视觉推理与定位
+3. [Beyond Chain-of-Thought: Rewrite as a Universal Interface for Generative Multimodal Embeddings](/202604/29/2604.22280v1-beyond-chain-of-thought-rewrite-as-a-universal-interface-for-generative-multimodal-embeddings)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于证据驱动临床推理的VLM
-8. [Object Referring-Guided Scanpath Prediction with Perception-Enhanced Vision-Language Models](/202604/28/2604.20361v1-object-referring-guided-scanpath-prediction-with-perception-enhanced-vision-language-models)  
+   evidence：多模态大模型中基于推理驱动的生成式多模态嵌入
+4. [SpaMEM: Benchmarking Dynamic Spatial Reasoning via Perception-Memory Integration in Embodied Environments](/202604/29/2604.22409v1-spamem-benchmarking-dynamic-spatial-reasoning-via-perception-memory-integration-in-embodied-environments)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：基于VLM的视觉搜索扫描路径序列决策
-9. [LEPO: \underline{L}atent R\underline{e}asoning \underline{P}olicy \underline{O}ptimization for Large Language~Models](/202604/28/2604.17892v1-lepo-underlinelatent-runderlineeasoning-underlinepolicy-underlineoptimization-for-large-languagemodels)  
+   evidence：具身环境中的动态空间推理和动作条件场景变换
+5. [CGC: Compositional Grounded Contrast for Fine-Grained Multi-Image Understanding](/202604/29/2604.22498v1-cgc-compositional-grounded-contrast-for-fine-grained-multi-image-understanding)  
+   标签：评分：7.0/10、query:vlm-rl
+   evidence：增强多模态大模型在多图场景下的细粒度理解与推理能力
+6. [EgoDyn-Bench: Evaluating Ego-Motion Understanding in Vision-Centric Foundation Models for Autonomous Driving](/202604/29/2604.22851v1-egodyn-bench-evaluating-ego-motion-understanding-in-vision-centric-foundation-models-for-autonomous-driving)  
+   标签：评分：7.0/10、query:vlm-rl
+   evidence：评估视觉中心基础模型中的高级推理和物理接地能力
+7. [Learning Lifted Action Models from Unsupervised Visual Traces](/202604/29/2604.19043v1-learning-lifted-action-models-from-unsupervised-visual-traces)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：大语言模型潜空间推理的强化学习方法
-10. [LEPO: Latent Reasoning Policy Optimization for Large Language Models](/202604/28/2604.17892v2-lepo-latent-reasoning-policy-optimization-for-large-language-models)  
+   evidence：从视觉轨迹中学习动作模型以进行决策和规划
+8. [From Scene to Object: Text-Guided Dual-Gaze Prediction](/202604/29/2604.20191v1-from-scene-to-object-text-guided-dual-gaze-prediction)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：将强化学习直接应用于连续潜空间推理表示
-11. [AnchorSeg: Language Grounded Query Banks for Reasoning Segmentation](/202604/28/2604.18562v1-anchorseg-language-grounded-query-banks-for-reasoning-segmentation)  
+   evidence：用于驾驶语义推理的视觉语言模型
+9. [From Scene to Object: Text-Guided Dual-Gaze Prediction](/202604/29/2604.20191v2-from-scene-to-object-text-guided-dual-gaze-prediction)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：使用语言驱动的查询库进行推理分割
+   evidence：用于驾驶语义推理的视觉语言模型
+10. [Learning to Communicate: Toward End-to-End Optimization of Multi-Agent Language Systems](/202604/29/2604.21794v1-learning-to-communicate-toward-end-to-end-optimization-of-multi-agent-language-systems)  
+   标签：评分：6.0/10、query:vlm-rl
+   evidence：使用可学习潜空间通信的多智能体系统处理复杂推理任务
+11. [Agent-Centric Visual Reinforcement Learning under Dynamic Perturbations](/202604/29/2604.24661v1-agent-centric-visual-reinforcement-learning-under-dynamic-perturbations)  
+   标签：评分：6.0/10、query:vlm-rl
+   evidence：专注于视觉强化学习以及在扰动下的以智能体为中心的决策制定
 
 
 <div class="dpr-home-promo-card">
