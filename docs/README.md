@@ -6,72 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-30
-- 运行时间：2026-04-30 20:41:57 UTC
+- 最新运行日期：2026-05-01
+- 运行时间：2026-05-01 20:38:13 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析17篇AI论文，见证原生多模态智能体 GLM-5V-Turbo 开启“满分”表现。
-研究揭
-- 详情：[/202604/30/README](/202604/30/README)
+今日深度解析 17 篇 AI 论文，聚焦多模态强化学习与推理系统的跨代演进。
+满分论文 PRISM 提出黑盒在线蒸馏新范式，PRTS 则通过对比表征重塑了原始推理与任务化系统。
+推荐优先攻读 PRISM 的对齐框架，并关注推理驱动型图像编辑及天文大模型的跨界实践。
+- 详情：[/202605/01/README](/202605/01/README)
 
 ### 精读区论文标签
-1. [GLM-5V-Turbo: Toward a Native Foundation Model for Multimodal Agents](/202604/30/2604.26752v1-glm-5v-turbo-toward-a-native-foundation-model-for-multimodal-agents)  
+1. [PRISM: Pre-alignment via Black-box On-policy Distillation for Multimodal Reinforcement Learning](/202605/01/2604.28123v1-prism-pre-alignment-via-black-box-on-policy-distillation-for-multimodal-reinforcement-learning)  
    标签：评分：10.0/10、query:vlm-rl
-   evidence：多模态感知与推理、规划及强化学习的集成
-2. [World2VLM: Distilling World Model Imagination into VLMs for Dynamic Spatial Reasoning](/202604/30/2604.26934v1-world2vlm-distilling-world-model-imagination-into-vlms-for-dynamic-spatial-reasoning)  
+   evidence：多模态强化学习与可验证奖励及推理
+2. [PRTS: A Primitive Reasoning and Tasking System via Contrastive Representations](/202605/01/2604.27472v1-prts-a-primitive-reasoning-and-tasking-system-via-contrastive-representations)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：通过世界模型蒸馏实现视觉语言模型的动态空间推理
-3. [Three-Step Nav: A Hierarchical Global-Local Planner for Zero-Shot Vision-and-Language Navigation](/202604/30/2604.26946v1-three-step-nav-a-hierarchical-global-local-planner-for-zero-shot-vision-and-language-navigation)  
+   evidence：通过目标条件强化学习构建的VLA基础模型
+3. [Rethinking Agentic Reinforcement Learning In Large Language Models](/202605/01/2604.27859v1-rethinking-agentic-reinforcement-learning-in-large-language-models)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：由多模态大模型驱动的零样本视觉语言导航智能体
-4. [EmbodiedMidtrain: Bridging the Gap between Vision-Language Models and Vision-Language-Action Models via Mid-training](/202604/30/2604.20012v1-embodiedmidtrain-bridging-the-gap-between-vision-language-models-and-vision-language-action-models-via-mid-training)  
+   evidence：大模型中的代理强化学习
+4. [The Effects of Visual Priming on Cooperative Behavior in Vision-Language Models](/202605/01/2604.27953v1-the-effects-of-visual-priming-on-cooperative-behavior-in-vision-language-models)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：VLM在博弈论场景中的决策与推理
+5. [Echo-α: Large Agentic Multimodal Reasoning Model for Ultrasound Interpretation](/202605/01/2604.28011v1-echo--large-agentic-multimodal-reasoning-model-for-ultrasound-interpretation)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：用于解释和落地决策的智能体多模态推理模型
+6. [ShredBench: Evaluating the Semantic Reasoning Capabilities of Multimodal LLMs in Document Reconstruction](/202605/01/2604.23813v1-shredbench-evaluating-the-semantic-reasoning-capabilities-of-multimodal-llms-in-document-reconstruction)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：桥接视觉语言模型与智能体动作模型
-5. [SketchVLM: Vision language models can annotate images to explain thoughts and guide users](/202604/30/2604.22875v2-sketchvlm-vision-language-models-can-annotate-images-to-explain-thoughts-and-guide-users)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：迷宫导航和轨迹预测中的视觉推理
-6. [VLM-VPI: A Vision-Language Reasoning Framework for Improving Automated Vehicle-Pedestrian Interactions](/202604/30/2604.23934v1-vlm-vpi-a-vision-language-reasoning-framework-for-improving-automated-vehicle-pedestrian-interactions)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：用于意图理解和控制的多模态推理框架
+   evidence：评估多模态大模型在复杂任务中的语义推理能力
 
 ### 速读区论文标签
-1. [Agentic AI for Remote Sensing: Technical Challenges and Research Directions](/202604/30/2604.24919v1-agentic-ai-for-remote-sensing-technical-challenges-and-research-directions)  
+1. [A systematic evaluation of vision-language models for observational astronomical reasoning tasks](/202605/01/2604.24589v1-a-systematic-evaluation-of-vision-language-models-for-observational-astronomical-reasoning-tasks)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于多步分析工作流的智能体AI和视觉语言模型
-2. [M$^3$-VQA: A Benchmark for Multimodal, Multi-Entity, Multi-Hop Visual Question Answering](/202604/30/2604.25122v1-m3-vqa-a-benchmark-for-multimodal-multi-entity-multi-hop-visual-question-answering)  
+   evidence：视觉语言模型用于天文推理任务
+2. [JURY-RL: Votes Propose, Proofs Dispose for Label-Free RLVR](/202605/01/2604.25419v1-jury-rl-votes-propose-proofs-dispose-for-label-free-rlvr)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：多模态大语言模型中的复杂多跳推理
-3. [Where Did It Go Wrong? Capability-Oriented Failure Attribution for Vision-and-Language Navigation Agents](/202604/30/2604.25161v1-where-did-it-go-wrong-capability-oriented-failure-attribution-for-vision-and-language-navigation-agents)  
+   evidence：具有可验证奖励的强化学习推理
+3. [DDA-Thinker: Decoupled Dual-Atomic Reinforcement Learning for Reasoning-Driven Image Editing](/202605/01/2604.25477v1-dda-thinker-decoupled-dual-atomic-reinforcement-learning-for-reasoning-driven-image-editing)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言导航智能体的故障归因
-4. [OCR-Memory: Optical Context Retrieval for Long-Horizon Agent Memory](/202604/30/2604.26622v1-ocr-memory-optical-context-retrieval-for-long-horizon-agent-memory)  
+   evidence：用于图像编辑推理驱动规划的强化学习
+4. [Beyond Shortcuts: Mitigating Visual Illusions in Frozen VLMs via Qualitative Reasoning](/202605/01/2604.26250v1-beyond-shortcuts-mitigating-visual-illusions-in-frozen-vlms-via-qualitative-reasoning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：将视觉模态作为智能体记忆的高密度表示
-5. [CAGE-SGG: Counterfactual Active Graph Evidence for Open-Vocabulary Scene Graph Generation](/202604/30/2604.22274v1-cage-sgg-counterfactual-active-graph-evidence-for-open-vocabulary-scene-graph-generation)  
+   evidence：定性推理以减轻VLM中的视觉错觉
+5. [Reasoning About Traversability: Language-Guided Off-Road 3D Trajectory Planning](/202605/01/2604.21249v1-reasoning-about-traversability-language-guided-off-road-3d-trajectory-planning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型用于视觉证据落地和语义推理
-6. [Cross-Stage Coherence in Hierarchical Driving VQA: Explicit Baselines and Learned Gated Context Projectors](/202604/30/2604.22560v1-cross-stage-coherence-in-hierarchical-driving-vqa-explicit-baselines-and-learned-gated-context-projectors)  
+   evidence：用于高级语义推理和轨迹规划的VLM
+6. [Seeing Isn't Believing: Uncovering Blind Spots in Evaluator Vision-Language Models](/202605/01/2604.21523v1-seeing-isnt-believing-uncovering-blind-spots-in-evaluator-vision-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型中的分层推理与规划
-7. [Intention-Aware Semantic Agent Communications for AI Glasses](/202604/30/2604.23691v1-intention-aware-semantic-agent-communications-for-ai-glasses)  
+   evidence：评估视觉语言模型中的空间推理
+7. [Context Unrolling in Omni Models](/202605/01/2604.21921v1-context-unrolling-in-omni-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型为智能体执行高级认知与推理
-8. [Multimodal QUD: Inquisitive Questions from Scientific Figures](/202604/30/2604.23733v1-multimodal-qud-inquisitive-questions-from-scientific-figures)  
+   evidence：跨多种模态的多模态推理
+8. [CharTide: Data-Centric Chart-to-Code Generation via Tri-Perspective Tuning and Inquiry-Driven Evolution](/202605/01/2604.22192v1-chartide-data-centric-chart-to-code-generation-via-tri-perspective-tuning-and-inquiry-driven-evolution)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：评估视觉语言模型在科学图表上的高层推理能力
-9. [WebGen-R1: Incentivizing Large Language Models to Generate Functional and Aesthetic Websites with Reinforcement Learning](/202604/30/2604.20398v1-webgen-r1-incentivizing-large-language-models-to-generate-functional-and-aesthetic-websites-with-reinforcement-learning)  
+   evidence：用于复杂图表到代码推理任务的视觉语言模型
+9. [CAGE-SGG: Counterfactual Active Graph Evidence for Open-Vocabulary Scene Graph Generation](/202605/01/2604.22274v4-cage-sgg-counterfactual-active-graph-evidence-for-open-vocabulary-scene-graph-generation)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：非机器人领域的网页生成智能体强化学习
-10. [Prototype-Based Test-Time Adaptation of Vision-Language Models](/202604/30/2604.21360v1-prototype-based-test-time-adaptation-of-vision-language-models)  
+   evidence：场景图生成推理中的视觉证据对齐
+10. [Robust Grounding with MLLMs against Occlusion and Small Objects via Language-guided Semantic Cues](/202605/01/2604.24036v1-robust-grounding-with-mllms-against-occlusion-and-small-objects-via-language-guided-semantic-cues)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：视觉语言模型的测试时自适应
-11. [Source-Modality Monitoring in Vision-Language Models](/202604/30/2604.22038v1-source-modality-monitoring-in-vision-language-models)  
+   evidence：多模态大模型定位与语义线索
+11. [Robust Grounding with MLLMs Against Occlusion and Small Objects via Language-Guided Semantic Cues](/202605/01/2604.24036v2-robust-grounding-with-mllms-against-occlusion-and-small-objects-via-language-guided-semantic-cues)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：研究视觉语言模型中的源模态监控能力
+   evidence：多模态大模型定位与语义线索
 
 
 <div class="dpr-home-promo-card">
