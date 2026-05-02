@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-01
-- 运行时间：2026-05-01 20:38:13 UTC
+- 最新运行日期：2026-05-02
+- 运行时间：2026-05-02 19:55:13 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析 17 篇 AI 论文，聚焦多模态强化学习与推理系统的跨代演进。
-满分论文 PRISM 提出黑盒在线蒸馏新范式，PRTS 则通过对比表征重塑了原始推理与任务化系统。
-推荐优先攻读 PRISM 的对齐框架，并关注推理驱动型图像编辑及天文大模型的跨界实践。
-- 详情：[/202605/01/README](/202605/01/README)
+今日聚焦具身智能与视觉导航，深度研读了 SpaAct 等 17 篇涵盖 VLA 架构与强化学习的前沿成果。
+核心突破在于利用空间激活课程学习优化导航路径，并结合代码规划与语义图状态提升复杂任务的推理能力。
+推荐开发者关注 1-bit 量化等轻量化 RL 技术，探索大模型在资源受限边缘端的落地可能。
+- 详情：[/202605/02/README](/202605/02/README)
 
 ### 精读区论文标签
-1. [PRISM: Pre-alignment via Black-box On-policy Distillation for Multimodal Reinforcement Learning](/202605/01/2604.28123v1-prism-pre-alignment-via-black-box-on-policy-distillation-for-multimodal-reinforcement-learning)  
-   标签：评分：10.0/10、query:vlm-rl
-   evidence：多模态强化学习与可验证奖励及推理
-2. [PRTS: A Primitive Reasoning and Tasking System via Contrastive Representations](/202605/01/2604.27472v1-prts-a-primitive-reasoning-and-tasking-system-via-contrastive-representations)  
+1. [SpaAct: Spatially-Activated Transition Learning with Curriculum Adaptation for Vision-Language Navigation](/202605/02/2604.27620v1-spaact-spatially-activated-transition-learning-with-curriculum-adaptation-for-vision-language-navigation)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：通过目标条件强化学习构建的VLA基础模型
-3. [Rethinking Agentic Reinforcement Learning In Large Language Models](/202605/01/2604.27859v1-rethinking-agentic-reinforcement-learning-in-large-language-models)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：大模型中的代理强化学习
-4. [The Effects of Visual Priming on Cooperative Behavior in Vision-Language Models](/202605/01/2604.27953v1-the-effects-of-visual-priming-on-cooperative-behavior-in-vision-language-models)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：VLM在博弈论场景中的决策与推理
-5. [Echo-α: Large Agentic Multimodal Reasoning Model for Ultrasound Interpretation](/202605/01/2604.28011v1-echo--large-agentic-multimodal-reasoning-model-for-ultrasound-interpretation)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：用于解释和落地决策的智能体多模态推理模型
-6. [ShredBench: Evaluating the Semantic Reasoning Capabilities of Multimodal LLMs in Document Reconstruction](/202605/01/2604.23813v1-shredbench-evaluating-the-semantic-reasoning-capabilities-of-multimodal-llms-in-document-reconstruction)  
+   evidence：具有动作推理能力的视觉语言导航智能体
+2. [CodeGraphVLP: Code-as-Planner Meets Semantic-Graph State for Non-Markovian Vision-Language-Action Models](/202605/02/2604.22238v1-codegraphvlp-code-as-planner-meets-semantic-graph-state-for-non-markovian-vision-language-action-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：评估多模态大模型在复杂任务中的语义推理能力
+   evidence：用于长程推理和操作的视觉-语言-动作模型
+3. [Vision-Language-Action Safety: Threats, Challenges, Evaluations, and Mechanisms](/202605/02/2604.23775v1-vision-language-action-safety-threats-challenges-evaluations-and-mechanisms)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：具身智能视觉-语言-动作模型的安全性
+4. [CF-VLA: Efficient Coarse-to-Fine Action Generation for Vision-Language-Action Policies](/202605/02/2604.24622v1-cf-vla-efficient-coarse-to-fine-action-generation-for-vision-language-action-policies)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：用于动作生成的视觉-语言-动作策略
+5. [CheXthought: A global multimodal dataset of clinical chain-of-thought reasoning and visual attention for chest X-ray interpretation](/202605/02/2604.26288v2-chexthought-a-global-multimodal-dataset-of-clinical-chain-of-thought-reasoning-and-visual-attention-for-chest-x-ray-interpretation)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：复杂任务的多模态思维链推理
+6. [Bridging Values and Behavior: A Hierarchical Framework for Proactive Embodied Agents](/202605/02/2604.27699v1-bridging-values-and-behavior-a-hierarchical-framework-for-proactive-embodied-agents)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：主动具身智能体的分层认知架构
 
 ### 速读区论文标签
-1. [A systematic evaluation of vision-language models for observational astronomical reasoning tasks](/202605/01/2604.24589v1-a-systematic-evaluation-of-vision-language-models-for-observational-astronomical-reasoning-tasks)  
+1. [LaST-R1: Reinforcing Action via Adaptive Physical Latent Reasoning for VLA Models](/202605/02/2604.28192v1-last-r1-reinforcing-action-via-adaptive-physical-latent-reasoning-for-vla-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型用于天文推理任务
-2. [JURY-RL: Votes Propose, Proofs Dispose for Label-Free RLVR](/202605/01/2604.25419v1-jury-rl-votes-propose-proofs-dispose-for-label-free-rlvr)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：具有可验证奖励的强化学习推理
-3. [DDA-Thinker: Decoupled Dual-Atomic Reinforcement Learning for Reasoning-Driven Image Editing](/202605/01/2604.25477v1-dda-thinker-decoupled-dual-atomic-reinforcement-learning-for-reasoning-driven-image-editing)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：用于图像编辑推理驱动规划的强化学习
-4. [Beyond Shortcuts: Mitigating Visual Illusions in Frozen VLMs via Qualitative Reasoning](/202605/01/2604.26250v1-beyond-shortcuts-mitigating-visual-illusions-in-frozen-vlms-via-qualitative-reasoning)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：定性推理以减轻VLM中的视觉错觉
-5. [Reasoning About Traversability: Language-Guided Off-Road 3D Trajectory Planning](/202605/01/2604.21249v1-reasoning-about-traversability-language-guided-off-road-3d-trajectory-planning)  
+   evidence：具有潜空间推理的VLA模型强化学习
+2. [Bridging Reasoning and Action: Hybrid LLM-RL Framework for Efficient Cross-Domain Task-Oriented Dialogue](/202605/02/2604.23345v1-bridging-reasoning-and-action-hybrid-llm-rl-framework-for-efficient-cross-domain-task-oriented-dialogue)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于高级语义推理和轨迹规划的VLM
-6. [Seeing Isn't Believing: Uncovering Blind Spots in Evaluator Vision-Language Models](/202605/01/2604.21523v1-seeing-isnt-believing-uncovering-blind-spots-in-evaluator-vision-language-models)  
+   evidence：推理与动作的混合LLM-RL框架
+3. [BitRL: Reinforcement Learning with 1-bit Quantized Language Models for Resource-Constrained Edge Deployment](/202605/02/2604.24273v1-bitrl-reinforcement-learning-with-1-bit-quantized-language-models-for-resource-constrained-edge-deployment)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：评估视觉语言模型中的空间推理
-7. [Context Unrolling in Omni Models](/202605/01/2604.21921v1-context-unrolling-in-omni-models)  
+   evidence：使用量化语言模型进行决策的强化学习智能体
+4. [K-MetBench: A Multi-Dimensional Benchmark for Fine-Grained Evaluation of Expert Reasoning, Locality, and Multimodality in Meteorology](/202605/02/2604.24645v1-k-metbench-a-multi-dimensional-benchmark-for-fine-grained-evaluation-of-expert-reasoning-locality-and-multimodality-in-meteorology)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：跨多种模态的多模态推理
-8. [CharTide: Data-Centric Chart-to-Code Generation via Tri-Perspective Tuning and Inquiry-Driven Evolution](/202605/01/2604.22192v1-chartide-data-centric-chart-to-code-generation-via-tri-perspective-tuning-and-inquiry-driven-evolution)  
+   evidence：图表和图解的专家级视觉推理
+5. [Libra-VLA: Achieving Learning Equilibrium via Asynchronous Coarse-to-Fine Dual-System](/202605/02/2604.24921v1-libra-vla-achieving-learning-equilibrium-via-asynchronous-coarse-to-fine-dual-system)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于复杂图表到代码推理任务的视觉语言模型
-9. [CAGE-SGG: Counterfactual Active Graph Evidence for Open-Vocabulary Scene Graph Generation](/202605/01/2604.22274v4-cage-sgg-counterfactual-active-graph-evidence-for-open-vocabulary-scene-graph-generation)  
+   evidence：用于落地语义指令的VLA模型
+6. [One Perturbation, Two Failure Modes: Probing VLM Safety via Embedding-Guided Typographic Perturbations](/202605/02/2604.25102v1-one-perturbation-two-failure-modes-probing-vlm-safety-via-embedding-guided-typographic-perturbations)  
+   标签：评分：7.0/10、query:vlm-rl
+   evidence：探究自主智能体中VLM的安全性
+7. [DRAGON: A Benchmark for Evidence-Grounded Visual Reasoning over Diagrams](/202605/02/2604.25231v1-dragon-a-benchmark-for-evidence-grounded-visual-reasoning-over-diagrams)  
+   标签：评分：7.0/10、query:vlm-rl
+   evidence：评估图表中的证据驱动视觉推理
+8. [SIEVES: Selective Prediction Generalizes through Visual Evidence Scoring](/202605/02/2604.25855v1-sieves-selective-prediction-generalizes-through-visual-evidence-scoring)  
+   标签：评分：7.0/10、query:vlm-rl
+   evidence：推理模型生成视觉证据以实现可靠泛化
+9. [OccDirector: Language-Guided Behavior and Interaction Generation in 4D Occupancy Space](/202605/02/2604.22240v1-occdirector-language-guided-behavior-and-interaction-generation-in-4d-occupancy-space)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：场景图生成推理中的视觉证据对齐
-10. [Robust Grounding with MLLMs against Occlusion and Small Objects via Language-guided Semantic Cues](/202605/01/2604.24036v1-robust-grounding-with-mllms-against-occlusion-and-small-objects-via-language-guided-semantic-cues)  
+   evidence：VLM驱动的多智能体交互生成
+10. [IntentVLM: Open-Vocabulary Intention Recognition through Forward-Inverse Modeling with Video-Language Models](/202605/02/2604.24002v1-intentvlm-open-vocabulary-intention-recognition-through-forward-inverse-modeling-with-video-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：多模态大模型定位与语义线索
-11. [Robust Grounding with MLLMs Against Occlusion and Small Objects via Language-Guided Semantic Cues](/202605/01/2604.24036v2-robust-grounding-with-mllms-against-occlusion-and-small-objects-via-language-guided-semantic-cues)  
+   evidence：用于意图推理的视频语言模型
+11. [$M^2$-VLA: Boosting Vision-Language Models for Generalizable Manipulation via Layer Mixture and Meta-Skills](/202605/02/2604.24182v1-m2-vla-boosting-vision-language-models-for-generalizable-manipulation-via-layer-mixture-and-meta-skills)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：多模态大模型定位与语义线索
+   evidence：用于通用操作的视觉-语言-动作模型
 
 
 <div class="dpr-home-promo-card">
