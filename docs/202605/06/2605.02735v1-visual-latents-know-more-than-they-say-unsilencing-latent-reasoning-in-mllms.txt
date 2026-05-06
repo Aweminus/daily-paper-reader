@@ -1,0 +1,566 @@
+Title: Visual Latents Know More Than They Say: Unsilencing Latent Reasoning in MLLMs
+
+URL Source: https://arxiv.org/pdf/2605.02735v1
+
+Published Time: Tue, 05 May 2026 02:14:35 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# Visual Latents Know More Than They Say: Unsilencing Latent Reasoning in MLLMs 
+
+Xin Zhang 1,2 Qiqi Tao 1,2,3 Jiawei Du 1,2 Moyun Liu 4 Joey Tianyi Zhou 1,2 
+
+> 1
+
+Centre for Frontier AI Research, Agency for Science, Technology and Research, Singapore 
+
+> 2
+
+Institute of High Performance Computing, Agency for Science, Technology and Research, Singapore 
+
+> 3
+
+Singapore University of Technology and Design 
+
+> 4
+
+Huazhong University of Science and Technology, China 
+
+{zhangx7, dujw, Joey_Zhou}@a-star.edu.sg qiqi_tao@mymail.sutd.edu.sg, lmomoy@hust.edu.cn 
+
+## Abstract 
+
+Continuous latent-space reasoning offers a compact alternative to textual chain-of-thought for multimodal models, enabling high-dimensional visual evidence to be integrated without explicit reasoning tokens. However, we identify a previously overlooked optimization pathology in existing latent visual reasoning methods: although visual latents become semantically enriched during training, their contri-bution to final answer prediction is systematically suppressed. Within the shared parameter space, the autoregressive objective favors shortcut reliance on direct visual input, driving latent tokens toward transition-like states rather than informa-tive reasoning content. We term this phenomenon Silenced Visual Latents . To address it, we disentangle the two conflicting objectives by directly optimizing the latent reasoning at inference time, keeping backbone parameters frozen. In Stage I, visual latents are warmed up via query-guided contrastive latent–visual alignment, improving semantic quality while preventing latent collapse. In Stage II, the latent reasoning is further optimized via a confidence-progression reward, which incentivizes predicted token distributions along the latent span to become progressively more concentrated, routing predictions through the latent reasoning rather than bypassing it. Experiments across eight benchmarks and four model backbones show that inference-time latent optimization, without any parameter updates, effectively unleashes the suppressed reasoning capacity of visual latents. 
+
+## 1 Introduction 
+
+Multimodal Large Language Models (MLLMs) [ 42 , 1, 7 ] reconfigure the Large Language Model (LLM) paradigm beyond text-only inputs, integrating visual encoders to enable joint reasoning over language and visual perception. While this evolution brings remarkable advances in various cross-modal reasoning tasks, like scientific visual question answering [ 47 , 35 ], mathematics solving [ 37 , 10 ], and visual grounding [ 3, 28 ], the asymmetric inductive bias toward language frequently manifests as hallucinated visual understanding [32, 38, 30]. A straightforward remedy is to follow the standard Chain-of-Thought (CoT) [ 34 , 33 ] paradigm, encouraging explicit textual reasoning prior to the final answer prediction [ 44 , 45 , 43 ]. Subsequent efforts further expands the evidential space available during reasoning by enabling active visual manipulations [ 24 , 14 , 46 ] or intermediate generation [ 41 , 36 , 9]. In short, the key idea is to embed additional auxiliary reasoning contexts to maximize the probability of correct answer. Another promis-ing approach is Latent Reasoning [ 20 ], recently explored in LLMs (e.g., Coconut [ 13 ], CoLaR [ 27 ]), which shifts intermediate reasoning from discrete tokens to continuous latent representations [ 25 , 26 ]. 
+
+> Preprint.
+> arXiv:2605.02735v1 [cs.LG] 4 May 2026
+
+By operating in latent space, this paradigm increases representational bandwidth while reducing autoregressive context length. This expanded capacity is particularly advantageous for multimodal reasoning, enabling compact integration of high-dimensional visual evidence without external tool invocation or complex pixel-level generation [15, 21]. 
+
+Figure 1: The joint loss landscape of Latent Visual Rea-soning. Under joint optimization, the initial latents are simultaneously pulled toward two conflicting attractors: the autoregressive prediction objective (left) and the visual reasoning objective (right). The shortcut favored by the au-toregressive prediction objective dissociates latent quality from latent effectiveness and bypasses meaningful latent reasoning, driving the latents toward a compromise state. 
+
+Current Latent Visual Reasoning (LVR) meth-ods instantiate latent representations by aligning them with diverse forms of pre-curated visual evidence, such as trajectory maps in Mirage [ 40 ], regions of interest (ROIs) in LVR [ 15 ], 3D geometric priors in 3DThinker [ 6], and combinations of segmenta-tion, depth, and edge maps in CoVT [ 23 ]. Be-yond mere alignment with these pre-curated informative visual targets, the latents are si-multaneously optimized to ensure accurate au-toregressive answer prediction. Despite sub-stantial improvements in multimodal reason-ing, a critical inconsistency actually persists under joint optimization. Through prelimi-nary analysis, we observe that visual latents become progressively better aligned with task-relevant visual evidence, yet answer accuracy does not improve accordingly and often fluc-tuates. This reveals a counterintuitive dissoci-ation between latent quality and latent effec-tiveness : stronger latent representations are not necessarily translated into stronger final prediction behavior. As illustrated in Figure 1, this is because, within the shared parameter space, the autoregres-sive answer prediction objective tends to favor shortcut routes through direct visual input, while latent tokens are gradually pushed toward transition-like behavior rather than semantically informative reasoning states. Thus, the resulting latent representations are learned in a compromised manner and systematically under-utilized at answer time, which we term Silenced Visual Latents .Based on this insight, we disentangle these two objectives by directly optimizing the latent reasoning at inference time, keeping backbone parameters frozen. In Stage I, we perform visual latent warm-up via query-guided contrastive latent–visual alignment: visual tokens are ranked by their relevance to the query and partitioned into chunk-wise positive and negative sets, pulling each latent toward query-relevant visual evidence while pushing it away from irrelevant patches, with chunk-wise assignment preventing latent collapse by ensuring each latent token attends to a distinct subset of visual evidence. In Stage II, we enforce latent utilization via a confidence-progression reward: the latent reasoning is iteratively perturbed and updated so that predicted token distributions along the latent span become progressively more concentrated, directly incentivizing the model to route predictions through the latent reasoning rather than bypassing it. Together, they directly address both failure modes of Silenced Visual Latents by optimizing the latent reasoning itself, without modifying any model parameters. Our contributions are threefold: (1) We identify the Silenced Visual Latents phenomenon, revealing that visual latents become enriched yet remain under-utilized due to autoregressive shortcuts in the shared parameter space. (2) We propose an inference-time framework that disentangles latent quality from latent utilization via contrastive alignment and reward-driven reinforcement, with frozen backbone. (3) Extensive experiments across eight benchmarks and four model backbones confirm the effectiveness and generalizability of our framework, requiring no parameter updates. 
+
+## 2 Related Works 
+
+Latent space is broadly acknowledged to be more expressive than discrete token space, thanks to its continuous nature, inspiring a growing line of work that moves intermediate reasoning into the continuous domain. Latent reasoning in LLMs was pioneered by Coconut [ 13 ], which feeds the model’s last hidden state back as input without decoding, enabling implicit breadth-first search in latent space. Subsequent works improve upon this: CODI [ 25 ] aligns latent states with an explicit teacher via self-distillation, CoLaR [ 27 ] dynamically compresses reasoning chains to reduce inference cost, and Deliberation [ 17 ] augments the KV cache with differentiable latent vectors to enable iterative 2Figure 2: Enhanced visual latents improve reasoning performance, but this benefit is suppressed under joint optimization. Left: Visual latents are progressively enhanced during training, as evidenced by the deepening red color indicating higher similarity between latents and pre-curated visual clues (a), while the alignment loss decreases steadily (b). Right: Although visual latents continue to improve, the jointly optimized model’s performance still fluctuates (gray line). In contrast, equipping the vanilla model with latents from each checkpoint yields a monotonically increasing trend (blue line), revealing that enhanced latents do benefit reasoning, but their contribution is suppressed under joint optimization. 
+
+refinement of reasoning states without generating explicit tokens. These works collectively show that latent reasoning can be more expressive and efficient than textual CoT. Extending latent reasoning to multimodal settings also brings additional advantages: the model must integrate high-dimensional visual evidence into the reasoning process without resorting to costly pixel-level generation or external tool invocations. Several paradigms have recently emerged to explore this. Mirage [ 40 ] inserts compact latent visual tokens into the autoregressive reasoning and aligns them with trajectory-map visual signals, enabling visual imagination without decoding actual images. LVR [ 15 ] supervises latent tokens with pre-curated regions of interest (ROIs) and jointly optimizes them with answer prediction. CoVT [ 23 ] enriches this supervision by incorporating diverse visual targets, like segmentation, depth, and edge maps, providing richer visual grounding for latent tokens. Furthermore, Monet [ 31 ] improves supervision for latent visual reasoning by training MLLMs to generate continuous visual-thought embeddings through distillation-based SFT and visual-latent policy optimization. More recently, 3DThinker [ 6] incorporates 3D geometric priors as visual supervision, broadening the scope of latent visual reasoning to spatial understanding tasks. Despite their diversity in supervision design, most existing methods share a common optimization scheme: latent representations are optimized jointly with autoregressive answer prediction under a shared parameter space. This coupling implicitly assumes that improving the semantic quality of visual latents will naturally translate into stronger answer prediction. However, as we show in this work, the autoregressive objective can instead favor shortcut reliance on direct visual inputs, driving visual latents toward suboptimal compromise states and causing them to be under-utilized during final prediction. We refer to this joint failure as Silenced Visual Latents. 
+
+## 3 Methodology 
+
+Problem Formulation. Consider an MLLM M = F ◦ Φ, where F = {f (·), g (·)} consists of a visual encoder f (·)1 and a text embedding layer g(·). These modules encode visual and textual inputs, respectively, before they are fed into the language backbone Φ parameterized by 
+
+θ. For a multimodal input {Vision: V = ( v1, v2, . . . , vN ) , Query: Q} , Φθ is prompted to first produce a T -step reasoning sequence C = ( c1, c2, . . . , cT ) and then generate the final answer 
+
+A = ( a1, a2, . . . , aL). The key insight of Latent Visual Reasoning (LVR) is to enhance multimodal reasoning by lifting intermediate reasoning from discrete textual tokens C to continuous visual latent representations H = ( h1, h2, . . . , hK )2, where K ≪ T . Thus, current paradigms optimize Φθ with a joint objective that (i) encourages visual reasoning in the latent space , while (ii) enforcing faithful      
+
+> 1The visual encoder includes the projector; omitted for brevity.
+> 2Special tokens <latent_start> and <latent_end> are prepended and appended to H, respectively, to delimit the latent reasoning segment.
+
+3Figure 3: Joint optimization silences visual latents. (a) During training, attention gradually drifts toward the input visual tokens rather than the visual latents, indicating that visual latents progressively lose their voice in answer prediction. (b) Prediction logits of the first latent token at different training stages. The latent token is increasingly pushed toward the <latent_end> token, indicating by the overwhelmingly larger logit. 5 denotes the checkpoint optimized at 500 th Iter with half the weight of the autoregression loss, which effectively alleviates the damage to the semantic meaning of the latent token, resulting in a lower <latent_end> prediction logit and higher accuracy. 
+
+answer text autoregression, 
+
+θ∗ = arg min 
+
+> θ
+
+1
+
+K
+
+> K
+
+X
+
+> k=1
+
+∥hk − ˜vk∥22
+
+| {z }
+
+① visual latent reasoning 
+
+−λ
+
+> L
+
+X
+
+> l=2
+
+log Φ θ (al | V , Q, H, a1: l−1)
+
+| {z }
+
+② answer autoregression 
+
+. (1) Here, ˜V = (˜ v1, ˜v2, . . . , ˜vK ) denotes the visual reasoning clues ( e.g. regions of interest (ROIs) suggested by LVR [ 15 ]) for alignment. λ is a balancing hyperparameter between the two loss terms. 
+
+3.1 Silenced Visual Latents Observation #1: Better visual latents is the key to improve multimodal reasoning. 
+
+To understand how visual latents affect multimodal reasoning, we begin by examining what they encode. As shown in Figure 2 (a) and (b), visual latents become increasingly aligned with the pre-defined visual chain as the alignment loss decreases, suggesting that they progressively capture more task-relevant visual information. Naturally, we may ask: do such progressively enhanced visual latents foster reasoning? To isolate the effect of visual latents from the jointly optimized answer prediction branch, we use vanilla Qwen2.5VL-7B ( i.e. model at 0th Iter ) and replace only its visual latents with those produced by later optimized checkpoints. As shown by the blue line in Figure 2 (c), the accuracy improves as the donated visual latents become stronger, indicating that better visual latents indeed contribute positively to multimodal reasoning. 
+
+Observation #2: Joint optimization silences the visual latents. 
+
+However, the benefit in Observation #1 is not faithfully reflected in the performance of the jointly optimized checkpoints. As shown by the gray line in Figure 2 (c), the accuracy of the actual checkpoints fluctuates rather than improving monotonically over training. For example, the accuracy at the 2500 th Iter only reaches the level of the 500 th Iter , despite the substantially better visual latents. To further investigate this discrepancy, we visualize the attention maps of models at different training stages. As shown in Figure 3 (a), after training, prediction becomes dominated by the visual input rather than the optimized latents. In addition, Figure 3 (b) shows that the prediction logits of latent tokens on answer-related text tokens increase during training; however, the logits on the transition token <latent_end> also increase and become overwhelmingly larger. Can a smaller λ alleviate this issue? As shown in the figure, using half of the original λ enables the logits of answer-related tokens to reach, by the 500 th Iter , a level comparable to that obtained at the 2500 th Iter . Meanwhile, it yields smaller <latent_end> logits, thereby improving the overall performance. These observations suggest the optimization dynamic illustrated in Figure 1: both objectives are optimized within the same parameter space. As θ is updated toward a joint optimum, the autoregressive loss rapidly exploits shortcuts grounded in the visual input, while simultaneously driving latent tokens toward a transition-token-like role at the expense of their semantic content. Consequently, joint optimization produces compromised latent tokens whose contribution is no longer effectively retained in the final answer prediction. We term this phenomenon “ Silenced Visual Latents .” 4Figure 4: Overview of the proposed framework for unsilencing visual latents. Stage I performs query-guided contrastive latent–visual alignment with positive and negative patch sets to enhance latent semantics. Stage II initializes from the Stage-I latents and applies a confidence-progression reward that encourages progressively more concentrated output token distributions, yielding the final latents H∗ for answer generation. 
+
+As analyzed above, these two objectives are difficult to reconcile within a shared optimization space, and the resulting “Silenced Visual Latents” lead to unsatisfactory performance. A natural question, then, is whether their optimization spaces can be disentangled so as to preserve autoregressive answer prediction while fully exploiting the reasoning capacity of visual latents. To this end, we directly optimize the visual latents while retaining the original model parameters for autoregressive textual generation. Concretely, at test time, we perform per-instance latent-token optimization for each input sample, thereby enhancing latent effectiveness without compromising the model’s original capabilities. Based on the aforementioned observations, we optimize visual latents in two stages: Stage I: Visual Latent Warm-up and Stage II: Latent-to-Answer Reinforcement. 
+
+3.2 Stage I: Visual Latent Warm-up 
+
+As the optimization space is disentangled, visual latents can no longer rely on the model’s autoregres-sive generation. Accordingly, as shown in Figure 4, we explicitly reserve latent slots before answer generation to ensure that these tokens remain functionally involved in the reasoning process. Stage I is designed to enhance the semantic quality of visual latents before enforcing their contribution to final answer prediction. Existing approaches [ 15 , 31 ] typically supervise latent tokens through positive alignment with visual reasoning signals. However, this positive-only supervision does not explicitly distinguish relevant visual evidence from irrelevant or misleading content. To address this limitation, we introduce a query-guided contrastive warm-up objective that imposes a discriminative constraint on each latent token. Let A ∈ RM ×M denote the token-level attention matrix averaged across all layers and heads of 
+
+Φθ , where M is the total sequence length, and let IV = {1, . . . , N } and IQ ⊆ { N + 1 , . . . , M }
+
+denote the position index sets of V and Q within the full sequence, respectively. For each visual token vn ∈ V , its query-guided relevance score is defined as 
+
+sn = 1
+
+|I Q|
+
+X 
+
+> q∈ I Q
+
+Aq,n , n ∈ I V , (2) which measures the average attention that Q allocates to each visual token in V.The visual tokens in V are ranked in descending order of sn to form a permutation π, where vπ(1) is the most query-relevant patch with respect to Q. Rather than sharing a common supervision pool across all hk ∈ H , which would cause all latent tokens to collapse onto the same top-ranked evidence, the ranked tokens are partitioned into non-overlapping chunks, with distinct chunks assigned to each hk. Formally, the positive set Pk and negative set Nk for the k-th latent token hk ∈ H are constructed as: 
+
+Pk = {vπ(t) | t ∈ S + 
+
+> k
+
+}, Nk = {vπ(t) | t ∈ S − 
+
+> k
+
+}, (3) where S+ 
+
+> k
+
+and S− 
+
+> k
+
+denote the positive and negative index chunks assigned to the k-th latent token, respectively, with all assigned chunks mutually disjoint and with fixed cardinalities |S + 
+
+> k
+
+| = pos_num 
+
+5Algorithm 1 Optimization Procedure for Unsilencing Visual Latents 
+
+Require: Frozen backbone Φθ , multimodal input (V, Q), initial latent state H, warm-up steps Nsft ,reinforcement steps Nrl 
+
+Ensure: Optimized latent state H∗ 
+
+> 1:
+
+Stage I: Visual Latent Warm-up  
+
+> 2:
+
+for n = 1 to Nsft do  
+
+> 3:
+
+Compute relevance scores sn via Eq. (2)  
+
+> 4:
+
+Construct {(Pk, Nk)}Kk=1 via Eq. (3) ▷ chunk-wise pos/neg assignment  
+
+> 5:
+
+Update H by minimizing Eq. (4)  
+
+> 6:
+
+end for  
+
+> 7:
+
+H∗ 
+
+> sft
+
+← H  
+
+> 8:
+
+Stage II: Latent-to-Answer Reinforcement  
+
+> 9:
+
+Initialize HNsft ← H ∗
+
+> sft
+
+, H∗ ← H Nsft ▷ initialize from Stage I output  
+
+> 10:
+
+for i = Nsft to Nsft + Nrl − 1 do  
+
+> 11:
+
+Sample ϵi ∼ N (0, σ 2 
+
+> i
+
+I) 
+
+> 12:
+
+Form candidate ˜Hi ← H i + ϵi 
+
+> 13:
+
+Evaluate reward R( ˜Hi) via Eq. (5) ▷ reasoning progression reward  
+
+> 14:
+
+Update Hi+1 via Eq. (6)  
+
+> 15:
+
+if R( ˜Hi) > R (H∗) then  
+
+> 16:
+
+H∗ ← H i+1 ▷ retain best-performing latent state  
+
+> 17:
+
+end if  
+
+> 18:
+
+end for  
+
+> 19:
+
+return H∗
+
+and |S − 
+
+> k
+
+| = neg_num for all k. This ensures that each hk is supervised by a distinct subset of highly relevant tokens while being repelled from a distinct subset of low-relevance content, preserving diversity across H. The latent tokens are then optimized via the following contrastive objective over 
+
+(Pk, Nk):
+
+H∗ 
+
+> sft
+
+= arg min 
+
+> H
+
+− 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+log β P 
+
+> v∈P k
+
+exp(sim( hk, v)/τ )
+
+P  
+
+> v∈P k∪N k
+
+exp(sim( hk, v)/τ )
+
+!
+
+, (4) where sim( ·, ·) denotes cosine similarity, τ is a temperature hyperparameter, and β = pos_num +neg_num pos_num 
+
+corrects for the positive/negative set-size imbalance. Stage I optimizes only H with θ frozen for Nsft 
+
+steps (set to 5 by default), after which the warmed-up latent state H∗ 
+
+> sft
+
+is passed to Stage II. 
+
+3.3 Stage II: Latent-to-Answer Reinforcement 
+
+While Stage I improves the semantic quality of H, semantic quality alone does not guarantee that H
+
+is effectively utilized during answer prediction. Stage II therefore targets latent utilization directly, optimizing H to ensure that each hk actively contributes to the final answer. To this end, we formulate Stage II as a reward-driven optimization over H. The reward is designed to enforce 
+
+reasoning progression : the output distribution of each hk should become increasingly concentrated from h1 to hK , reflecting the intuition that latent tokens grow more certain as reasoning advances along H. Formally, the reward over a perturbed candidate ˜H = H + ϵ is defined as: 
+
+R( ˜H) = 1
+
+K − 1
+
+> K−1
+
+X
+
+> k=1
+
+max 
+
+
+
+0, E(k) − E (k+1) 
+
+, (5) where E(k) = − Pδj=1 ˜p(k) 
+
+> j
+
+log ˜ p(k) 
+
+> j
+
+denotes the top-δ entropy at the k-th latent position, and ˜p(k) 
+
+> j
+
+, j =1, . . . , δ are the top-δ predicted token probabilities. This reward increases when the output distribution of each hk becomes progressively more concentrated from h1 to hK .Optimization starts from H∗ 
+
+> sft
+
+and proceeds by stochastic local exploration for Nrl steps. At each step i, a Gaussian perturbation ϵi ∼ N (0, σ 2 
+
+> i
+
+I) is sampled to form a candidate ˜Hi = Hi + ϵi, and the latent state is updated according to the NES gradient estimator: 
+
+Hi+1 = Hi + ασ2
+
+> i
+
+· R( ˜Hi) · ϵi, (6) 6Table 1: Comparison of different reasoning methods across multiple benchmarks. Results are reported in accuracy (%), with bracketed values showing absolute gains over the vanilla baseline. Best and second-best results are highlighted with green and lighter green shading, respectively. 
+
+Methods Counting IQTest RR MMVP Hull-Bench ScienceQA MM-Star MM-Vista 
+
+Qwen2.5VL-7B 
+
+Vanilla 65.00 22.67 38.90 68.67 65.40 82.30 59.30 58.70 MCoT [44] 66.67 [+1.67] 22.67 [+0.00] 35.82 [-3.08] 68.00 [-0.67] 63.62 [-1.78] 83.90 [+1.60] 57.90 [-1.40] 56.40 [-2.30] 
+
+CCoT [22] 66.67 [+1.67] 21.33 [-1.34] 43.28 [+4.38] 69.00 [+0.33] 64.88 [-0.52] 83.80 [+1.50] 58.70 [-0.60] 57.80 [-0.90] 
+
+ICoT [11] 68.33 [+3.33] 25.33 [+2.66] 37.31 [-1.59] 69.33 [+0.66] 65.51 [+0.11] 78.40 [-3.90] 60.40 [+1.10] 58.90 [+0.20] 
+
+DMLR [16] 67.50 [+2.50] 25.33 [+2.66] 34.33 [-4.57] 70.00 [+1.33] 65.83 [+0.43] 83.40 [+1.10] 60.10 [+0.80] 59.10 [+0.40] 
+
+Monet [31] 60.83 [-4.17] 20.67 [-2.00] 40.36 [+1.46] 65.67 [-3.00] 65.67 [+0.27] 78.80 [-3.50] 55.50 [-3.80] 62.40 [+3.70] 
+
+CoVT [23] 67.50 [+2.50] 30.67 [+8.00] 38.81 [-0.09] 72.67 [+4.00] 64.46 [-0.94] 83.80 [+1.50] 62.00 [+2.70] 64.30 [+5.60] 
+
+LVR [15] 68.33 [+3.33] 28.67 [+6.00] 40.30 [+1.40] 69.00 [+0.33] 66.67 [+1.27] 82.80 [+0.50] 60.40 [+1.10] 61.40 [+2.70] 
+
+LVR RF [15] 68.33 [+3.33] 27.33 [+4.66] 42.54 [+3.64] 69.67 [+1.00] 65.19 [-0.21] 83.10 [+0.80] 61.80 [+2.50] 62.60 [+3.90] 
+
+Ours 68.33 [+3.33] 31.33 [+8.66] 44.78 [+5.88] 73.00 [+4.33] 67.30 [+1.90] 84.20 [+1.90] 61.80 [+2.50] 63.70 [+5.00] 
+
+Qwen2.5VL-3B 
+
+Vanilla 55.83 24.67 32.84 55.67 64.14 73.50 50.20 48.20 MCoT [44] 55.83 [+0.00] 21.33 [-3.34] 36.57 [+3.73] 54.33 [-1.34] 63.80 [-0.34] 74.10 [+0.60] 48.50 [-1.70] 47.30 [-0.90] 
+
+CCoT [22] 54.17 [-1.66] 31.33 [+6.66] 27.61 [-5.23] 55.33 [-0.34] 64.03 [-0.11] 73.90 [+0.40] 49.30 [-0.90] 48.00 [-0.20] 
+
+ICoT [11] 55.83 [+0.00] 21.33 [-3.34] 35.82 [+2.98] 56.00 [+0.33] 64.67 [+0.53] 68.90 [-4.60] 49.60 [-0.60] 49.80 [+1.60] 
+
+DMLR [16] 52.50 [-3.33] 22.67 [-2.00] 33.58 [+0.74] 56.67 [+1.00] 64.67 [+0.53] 73.80 [+0.30] 51.20 [+1.00] 51.00 [+2.80] 
+
+LVR [15] 59.17 [+3.34] 26.67 [+2.00] 35.82 [+2.98] 58.67 [+3.00] 59.31 [-4.83] 73.20 [-0.30] 51.40 [+1.20] 47.50 [-0.70] 
+
+LVR RF [15] 60.83 [+5.00] 28.33 [+3.66] 37.31 [+4.47] 58.33 [+2.66] 60.99 [-3.15] 73.70 [+0.20] 51.50 [+1.30] 48.60 [+0.40] 
+
+Ours 59.17 [+3.34] 32.00 [+7.33] 38.06 [+5.22] 59.33 [+3.66] 64.35 [+0.21] 74.30 [+0.80] 52.40 [+2.20] 50.00 [+1.80] 
+
+Table 2: Ablation study of the two-stage optimization design on Qwen2.5VL-7B. 
+
+Stage I Stage II MMVP Hull-Bench ScienceQA MM-Star MM-Vista 
+
+⃝ ⃝ 68.67 65.40 82.30 59.30 58.70 
+
+✓ ⃝ 72.00 [+ 3.33] 66.25 [+ 0.85] 83.40 [+ 1.10] 62.40 [+ 3.10] 62.10 [+ 3.40] 
+
+✓ ✓ 73.00 [+ 4.33] 67.30 [+ 1.90] 84.20 [+ 1.90] 61.80 [+ 2.50] 63.70 [+ 5.00] 
+
+where α is the step size and σi decays geometrically to gradually shrink the exploration radius around Hi. Since the reward trajectory is generally non-monotonic, the best-performing latent state encountered during optimization is retained as H∗ for final answer decoding. 
+
+## 4 Experiments 
+
+Implementation Details. All experiments are conducted with frozen MLLM backbones, and only the visual latents are optimized at inference time. Unless otherwise specified, we use Qwen2.5-VL-7B as the default backbone and set the latent reasoning length to K = 4 . In Stage I, we compute query-guided relevance scores over visual tokens and construct chunk-wise positive and negative patch sets for each latent token. We set the number of positive and negative patches to pos_num = 2 
+
+and neg_num = 4 , respectively. The latent warm-up is optimized for Nsft = 5 steps using the contrastive latent–visual alignment objective. In Stage II, we initialize from the warmed-up latent state H∗ 
+
+> sft
+
+and perform reward-driven latent optimization for Nrl = 15 steps. The reward encourages the predicted token distributions along the latent reasoning sequence to become progressively more concentrated, and the best latent state is retained as H∗ for final answer decoding. All experiments are run on 2 NVIDIA H100 GPUs, and all reported results are evaluated by GPT-4o. The detailed evaluation prompt is provided in Appendix A.3. 
+
+Benchmarks & Baselines. We evaluate across eight benchmarks spanning four categories: (1) Visual perception : Counting, IQ Test, Relative Reflectance (RR) [ 8 ]; (2) Visual reasoning : MMVP [ 29 ], Hull-Bench [ 12 ]; (3) Comprehensive : ScienceQA [ 19 ], MM-Star [ 5]; (4) Mathematical reasoning :MM-Vista [ 18 ]. We compare against two categories of baselines: non-latent reasoning methods (MCoT [44], CCoT [22], ICoT [11]) and latent reasoning methods that operate in continuous latent space (DMLR [ 16 ], Monet [ 31 ], CoVT [ 23 ], LVR [ 15 ]). We use Qwen2.5-VL-3B/7B [ 2 ], R1-OneVision-7B [ 39 ], and VLAA-Thinking-7B [ 4 ] as MLLM backbones. Details of each benchmark and baseline method are provided in Appendix A.1 and Appendix A.2. 7Figure 5: Ablation studies on Hull-Bench. (a,b) Effects of the Stage-I and Stage-II optimization steps, Nsft          
+
+> and Nrl , respectively. Gray bars denote the baseline without the corresponding component, and darker bars denote the final setting; we use Nsft = 5 and Nrl = 15 for the accuracy–efficiency trade-off. (c,d) Effects of the negative and positive patch numbers, with pos_num =2 and neg_num =4 fixed, respectively. The results favor compact positive sets with moderate negative supervision for Stage-I latent warm-up.
+
+4.1 Main Results 
+
+Table 1 compares our method with representative multimodal reasoning baselines across multiple benchmarks. Overall, our method achieves the best or second-best performance on most benchmarks under both Qwen2.5VL-7B and Qwen2.5VL-3B, demonstrating the effectiveness and scalability of the proposed two-stage latent optimization framework. On Qwen2.5VL-7B, our method achieves the best results on six out of eight benchmarks, including Counting, IQTest, RR, MMVP, Hull-Bench, and ScienceQA, while obtaining competitive second-best performance on MM-Star and MM-Vista. Compared with the vanilla baseline, it brings consistent gains across all benchmarks, with particularly notable improvements on IQTest (+8.66), RR (+5.88), MMVP (+4.33), and MM-Vista (+5.00). Compared with non-latent reasoning methods (MCoT [ 44 ], CCoT [ 22 ], ICoT [ 11 ]), our method achieves consistent improvements across all benchmarks, whereas verbal chain-of-thought methods occasionally degrade below the vanilla baseline on fine-grained visual tasks, suggesting that textual reasoning alone is insufficient for these challenges. Against latent reasoning baselines, our method also shows clear advantages on perception-intensive benchmarks such as RR, MMVP, and Hull-Bench. Unlike DMLR [ 16 ], which relies on dynamically retrieved visual patches at inference time, or training-based methods (Monet [ 31 ], CoVT [ 23 ], LVR [ 15 ]) prone to visual input shortcuts, our method optimizes latent representations directly without parameter updates or visual re-injection, ensuring the latents serve as genuine reasoning substrates. On Qwen2.5VL-3B, similar trends hold despite the smaller backbone capacity, with our method achieving best or second-best results on all eight benchmarks, demonstrating generalizability across model scales. 
+
+4.2 Ablation Study Two-Stage Optimization Design. We analyze the contribution of each stage and the allocation of optimization steps. As shown in Table 2, Stage I improves MMVP from 68.67 to 72.00 and Hull-Bench from 65.40 to 66.25, indicating the benefit of enhancing latent semantics. Adding Stage II further raises performance to 73.00 and 67.30, respectively, confirming that Stage I and Stage II are largely complementary: the former improves latent quality, while the latter promotes answer-time utilization. We also vary the optimization steps in both stages. As shown in Figure 5 (a) and (b), on Hull-Bench, increasing Nsft brings moderate gains, while performance is more sensitive to Nrl ,peaking at Nrl = 15 before declining, suggesting that over-optimization in Stage II may hurt the quality of latent-guided decoding. We therefore set Nsft = 5 and Nrl = 15 for a balance between effectiveness and efficiency. 
+
+Length of Latent Reasoning. We study the effect of latent reasoning length K and compare with LVR RF [ 15 ]. As shown in Table 3, our method yields roughly consistent performance gains as 
+
+K increases, with MMVP improving from 72.33 to 73.67 and Hull-Bench from 66.67 to 69.09 as 
+
+K grows from 2 to 10, demonstrating that our method can effectively leverage additional latent reasoning capacity. In contrast, LVR RF [15 ] shows little sensitivity to K, saturating early on MMVP and improving only marginally on Hull-Bench, which further evidences the underutilization of latent reasoning in LVR. More results on additional datasets are provided in Appendix B.1. 
+
+Contrastive Patch Configuration. We analyze the effect of positive and negative patch al-location in Stage I. As shown in Figure 5 (c), performance increases steadily from 66.8% to 67.3% as neg_num grows from 1 to 4, then slightly declines, indicating that too few negatives provide insufficient contrastive signal while too many may introduce noise. As shown in (d), 
+
+pos_num has a more pronounced effect: accuracy peaks at pos_num = 2 (67.3%) and drops 8Table 3: Ablation on latent reasoning length on MMVP and Hull-Bench. Our method benefits more from longer latent reasoning, while LVR RF [15] shows weaker utilization. 
+
+Latents Length K
+
+MMVP Hull-Bench Ours LVR RF [15] Ours LVR RF [15] 0 68.67 65.40 2 72.33 [+3.66] 70.33 [+1.66] 66.67 [+1.27] 64.46 [-0.94] 
+
+4 73.00 [+4.33] 71.33 [+2.66] 67.30 [+1.90] 65.19 [-0.21] 
+
+6 71.67 [+3.00] 71.67 [+3.00] 68.71 [+3.31] 65.19 [-0.21] 
+
+8 73.33 [+4.66] 71.67 [+3.00] 68.98 [+3.58] 65.40 [+0.00] 
+
+10 73.67 [+5.00] 71.67 [+3.00] 69.09 [+3.69] 65.51 [+0.11] 
+
+Figure 6: Attention visualization on an MMVP sample. Optimized latents receive more focused attention than visual inputs, reducing shortcuts compared with Figure 3. 
+
+Table 4: Comparison of different reasoning methods on VLAA Thinking-7B and R1 OneVision-7B. Results are reported in accuracy (%), with bracketed values showing absolute gains over the vanilla baseline. Best and second-best results are highlighted with green and lighter green shading, respectively. 
+
+Methods Counting IQTest RR MMVP Hull-Bench ScienceQA MM-Star MM-Vista 
+
+VLAA Thinking-7B 
+
+Vanilla 65.00 26.67 32.84 68.30 62.00 84.50 58.90 61.10 MCoT [44] 62.50 [-2.50] 22.00 [-4.67] 32.84 [+0.00] 67.20 [-1.10] 62.80 [+0.80] 84.70 [+0.20] 57.10 [-1.80] 59.60 [-1.50] 
+
+CCoT [22] 68.33 [+3.33] 26.00 [-0.67] 34.33 [+1.49] 68.00 [-0.30] 64.60 [+2.60] 84.60 [+0.10] 59.00 [+0.10] 60.50 [-0.60] 
+
+ICoT [11] 60.83 [-4.17] 27.33 [+0.66] 32.84 [+0.00] 68.30 [+0.00] 65.90 [+3.90] 83.80 [-0.70] 58.20 [-0.70] 61.40 [+0.30] 
+
+DMLR [16] 64.17 [-0.83] 25.00 [-1.67] 35.07 [+2.23] 69.40 [+1.10] 67.90 [+5.90] 85.00 [+0.50] 59.20 [+0.30] 62.90 [+1.80] 
+
+Ours 68.33 [+3.33] 26.67 [+0.00] 35.82 [+2.98] 73.67 [+5.37] 67.93 [+5.93] 85.40 [+0.90] 62.70 [+3.80] 65.70 [+4.60] 
+
+R1 OneVision-7B 
+
+Vanilla 59.17 22.67 29.85 67.00 62.10 85.60 52.10 51.20 MCoT [44] 58.33 [-0.84] 28.00 [+5.33] 30.60 [+0.75] 68.00 [+1.00] 62.50 [+0.40] 86.50 [+0.90] 51.60 [-0.50] 52.50 [+1.30] 
+
+CCoT [22] 60.00 [+0.83] 21.33 [-1.34] 33.58 [+3.73] 68.90 [+1.90] 63.00 [+0.90] 86.30 [+0.70] 53.50 [+1.40] 53.40 [+2.20] 
+
+ICoT [11] 59.17 [+0.00] 22.67 [+0.00] 29.85 [+0.00] 69.60 [+2.60] 63.80 [+1.70] 85.50 [-0.10] 54.00 [+1.90] 55.60 [+4.40] 
+
+DMLR [16] 54.17 [-5.00] 25.33 [+2.66] 35.07 [+5.22] 71.90 [+4.90] 64.10 [+2.00] 83.50 [-2.10] 56.20 [+4.10] 58.00 [+6.80] 
+
+Ours 61.67 [+2.50] 36.67 [+14.00] 37.30 [+7.45] 71.00 [+4.00] 69.51 [+7.41] 86.40 [+0.80] 56.80 [+4.70] 57.30 [+6.10] 
+
+notably at pos_num = 4 (66.1%), suggesting that enlarging the positive set dilutes the align-ment signal with less relevant patches. We therefore set pos_num = 2 and neg_num = 4 .
+
+Figure 7: Efficiency ratio of different methods on MMVP. Higher values indi-cate a better performance-efficiency bal-ance. Calculation details are provided in Appendix B.3. 
+
+Attention Visualization. We visualize the attention patterns on an MMVP sample in Figure 6. As expected, the opti-mized latents attract substantially stronger attention from the predicted outputs compared to the raw visual input to-kens, and attend more to task-relevant visual regions. This confirms that the two-stage optimization effectively unsi-lences the visual latents, enabling them to serve as genuine reasoning substrates rather than being bypassed. More visu-alizations are provided in Appendix B.2. 
+
+Efficiency. We measure the efficiency ratio of each method as performance gain relative to output token count (details in Appendix B.3). As shown in Figure 7, our method achieves the highest ratio (+0.75), surpassing LVR (+0.62), CoVT (+0.54), and DMLR (+0.18), while non-latent methods clus-ter near zero and Monet yields a negative ratio ( −0.32). This demonstrates that our method delivers superior performance gains with competitive token efficiency. 
+
+Generalization to Various Models. 3 We evaluate our two-stage latent optimization framework on VLAA Thinking-7B and R1 OneVision-7B. As shown in Table 4, our method consistently improves over the vanilla baseline and achieves the best or second-best results on all benchmarks. Notably, it improves MMVP, Hull-Bench, and MM-Vista by +5.37, +5.93, and +4.60 on VLAA Thinking-7B, and IQTest, RR, and Hull-Bench by +14.00, +7.45, and +7.41 on R1 OneVision-7B. These results demonstrate the model-agnostic effectiveness of our framework across diverse MLLMs. 
+
+> 3
+
+Monet [ 31 ], CoVT [ 23 ], and LVR [ 15 ] are excluded as they fundamentally alter the model’s reasoning behavior via training, making them incompatible with these reasoning-capable backbones. 
+
+95 Conclusion 
+
+We identify Silenced Visual Latents, a phenomenon where visual latents become semantically enhanced but are under-utilized during answer prediction. To address this, we propose a frozen-backbone two-stage latent optimization framework: Stage I improves latent quality through query-guided contrastive latent–visual alignment, while Stage II enhances latent utilization via reward-driven latent-to-answer reinforcement. Experiments across multiple benchmarks and model backbones show consistent improvements, demonstrating that disentangling latent quality and latent utilization is effective for multimodal reasoning. 
+
+## 6 Limitations 
+
+Our method introduces additional inference-time computation due to per-instance latent optimization, and its effectiveness depends on the quality of patch selection and reward design in each stage. Our evaluation focuses on image-based reasoning; extending to video and embodied settings remains an important direction for future work. 10 References 
+
+[1] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, et al. Qwen2. 5-vl technical report, 2025. URL https://arxiv. org/abs/2502.13923 , 6:13–23, 2025. [2] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, Humen Zhong, Yuanzhi Zhu, Mingkun Yang, Zhaohai Li, Jianqiang Wan, Pengfei Wang, Wei Ding, Zheren Fu, Yiheng Xu, Jiabo Ye, Xi Zhang, Tianbao Xie, Zesen Cheng, Hang Zhang, Zhibo Yang, Haiyang Xu, and Junyang Lin. Qwen2.5-vl technical report, 2025. [3] Sule Bai, Mingxing Li, Yong Liu, Jing Tang, Haoji Zhang, Lei Sun, Xiangxiang Chu, and Yansong Tang. Univg-r1: Reasoning guided universal visual grounding with reinforcement learning. arXiv preprint arXiv:2505.14231 , 2025. [4] Hardy Chen, Haoqin Tu, Fali Wang, Hui Liu, Xianfeng Tang, Xinya Du, Yuyin Zhou, and Cihang Xie. Sft or rl? an early investigation into training r1-like reasoning large vision-language models, 2025. [5] Lin Chen, Jinsong Li, Xiaoyi Dong, Pan Zhang, Yuhang Zang, Zehui Chen, Haodong Duan, Jiaqi Wang, Yu Qiao, Dahua Lin, et al. Are we on the right way for evaluating large vision-language models? arXiv preprint arXiv:2403.20330 , 2024. [6] Zhangquan Chen, Manyuan Zhang, Xinlei Yu, Xufang Luo, Mingze Sun, Zihao Pan, Yan Feng, Peng Pei, Xunliang Cai, and Ruqi Huang. Think with 3d: Geometric imagination grounded spatial reasoning from limited views. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2026. [7] Zhe Chen, Jiannan Wu, Wenhai Wang, Weijie Su, Guo Chen, Sen Xing, Muyan Zhong, Qinglong Zhang, Xizhou Zhu, Lewei Lu, et al. Internvl: Scaling up vision foundation models and aligning for generic visual-linguistic tasks. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 24185–24198, 2024. [8] Xingyu Fu, Yushi Hu, Bangzheng Li, Yu Feng, Haoyu Wang, Xudong Lin, Dan Roth, Noah A Smith, Wei-Chiu Ma, and Ranjay Krishna. Blink: Multimodal large language models can see but not perceive. arXiv preprint arXiv:2404.12390 , 2024. [9] Xingyu Fu, Minqian Liu, Zhengyuan Yang, John Richard Corring, Yijuan Lu, Jianwei Yang, Dan Roth, Dinei Florencio, and Cha Zhang. Refocus: Visual editing as a chain of thought for structured image understanding. In International Conference on Machine Learning , pages 17783–17805. PMLR, 2025. [10] Bofei Gao, Feifan Song, Zhe Yang, Zefan Cai, Yibo Miao, Qingxiu Dong, Lei Li, Chenghao Ma, Liang Chen, Runxin Xu, Zhengyang Tang, Benyou Wang, Daoguang Zan, Shanghaoran Quan, Ge Zhang, Lei Sha, Yichang Zhang, Xuancheng Ren, Tianyu Liu, and Baobao Chang. Omni-MATH: A universal olympiad level mathematic benchmark for large language models. In The Thirteenth International Conference on Learning Representations , 2025. [11] Jun Gao, Yongqi Li, Ziqiang Cao, and Wenjie Li. Interleaved-modal chain-of-thought, 2025. [12] Tianrui Guan, Fuxiao Liu, Xiyang Wu, Ruiqi Xian, Zongxia Li, Xiaoyu Liu, Xijun Wang, Lichang Chen, Furong Huang, Yaser Yacoob, Dinesh Manocha, and Tianyi Zhou. Hallusion-bench: An advanced diagnostic suite for entangled language hallucination & visual illusion in large vision-language models, 2023. [13] Shibo Hao, Sainbayar Sukhbaatar, DiJia Su, Xian Li, Zhiting Hu, Jason E Weston, and Yuandong Tian. Training large language models to reason in a continuous latent space. In Second Conference on Language Modeling .[14] Yushi Hu, Weijia Shi, Xingyu Fu, Dan Roth, Mari Ostendorf, Luke Zettlemoyer, Noah A Smith, and Ranjay Krishna. Visual sketchpad: Sketching as a visual chain of thought for multimodal language models. Advances in Neural Information Processing Systems , 37:139348–139379, 2024. 11 [15] Bangzheng Li, Ximeng Sun, Jiang Liu, Ze Wang, Jialian Wu, Xiaodong Yu, Hao Chen, Emad Barsoum, Muhao Chen, and Zicheng Liu. Latent visual reasoning. In International Conference on Learning Representations , 2026. [16] Chengzhi Liu, Yuzhe Yang, Yue Fan, Qingyue Wei, Sheng Liu, and Xin Eric Wang. Rea-soning within the mind: Dynamic multimodal interleaving in latent space. arXiv preprint arXiv:2512.12623 , 2025. [17] Luyang Liu, Jonas Pfeiffer, Jiaxing Wu, Jun Xie, and Arthur Szlam. Deliberation in latent space via differentiable cache augmentation. In Forty-second International Conference on Machine Learning .[18] Pan Lu, Hritik Bansal, Tony Xia, Jiacheng Liu, Chunyuan Li, Hannaneh Hajishirzi, Hao Cheng, Kai-Wei Chang, Michel Galley, and Jianfeng Gao. Mathvista: Evaluating mathematical reasoning of foundation models in visual contexts. In International Conference on Learning Representations (ICLR) , 2024. [19] Pan Lu, Swaroop Mishra, Tony Xia, Liang Qiu, Kai-Wei Chang, Song-Chun Zhu, Oyvind Tafjord, Peter Clark, and Ashwin Kalyan. Learn to explain: Multimodal reasoning via thought chains for science question answering. In The 36th Conference on Neural Information Process-ing Systems (NeurIPS) , 2022. [20] M-A-P. A survey on latent reasoning. arxiv , 2025. [21] Jizheng Ma, Xiaofei Zhou, Geyuan Zhang, Yanlong Song, and Han Yan. Multimodal reasoning via latent refocusing. arXiv preprint arXiv:2511.02360 , 2025. [22] Chancharik Mitra, Brandon Huang, Trevor Darrell, and Roei Herzig. Compositional chain-of-thought prompting for large multimodal models. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 14420–14431, June 2024. [23] Yiming Qin, Bomin Wei, Jiaxin Ge, Konstantinos Kallidromitis, Stephanie Fu, Trevor Darrell, and XuDong Wang. Chain-of-visual-thought: Teaching vlms to see and think better with continuous visual tokens. arXiv preprint arXiv:2511.19418 , 2025. [24] Hao Shao, Shengju Qian, Han Xiao, Guanglu Song, Zhuofan Zong, Letian Wang, Yu Liu, and Hongsheng Li. Visual cot: Advancing multi-modal language models with a comprehen-sive dataset and benchmark for chain-of-thought reasoning. Advances in Neural Information Processing Systems , 37:8612–8642, 2024. [25] Zhenyi Shen, Hanqi Yan, Linhai Zhang, Zhanghao Hu, Yali Du, and Yulan He. Codi: Com-pressing chain-of-thought into continuous space via self-distillation. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pages 677–693, 2025. [26] Dachuan Shi, Abedelkadir Asi, Keying Li, Xiangchi Yuan, Leyan Pan, Wenke Lee, and Wen Xiao. Swireasoning: Switch-thinking in latent and explicit for pareto-superior reasoning LLMs. In The Fourteenth International Conference on Learning Representations , 2026. [27] Wenhui Tan, Jiaze Li, Jianzhong Ju, Zhenbo Luo, Jian Luan, and Ruihua Song. Think silently, think fast: Dynamic latent compression of llm reasoning chains. Advances in Neural Information Processing Systems , 2025. [28] Wei Tang, Yanpeng Sun, Qinying Gu, and Zechao Li. Visual position prompt for mllm based visual grounding. IEEE Transactions on Multimedia , 2026. [29] Shengbang Tong, Zhuang Liu, Yuexiang Zhai, Yi Ma, Yann LeCun, and Saining Xie. Eyes wide shut? exploring the visual shortcomings of multimodal llms, 2024. [30] Chenxi Wang, Xiang Chen, Ningyu Zhang, Bozhong Tian, Haoming Xu, Shumin Deng, and Huajun Chen. MLLM can see? dynamic correction decoding for hallucination mitigation. In 
+
+The Thirteenth International Conference on Learning Representations , 2025. [31] Qixun Wang, Yang Shi, Yifei Wang, Yuanxing Zhang, Pengfei Wan, Kun Gai, Xianghua Ying, and Yisen Wang. Monet: Reasoning in latent visual space beyond images and language. arXiv preprint arXiv:2511.21395 , 2025. 12 [32] Weixing Wang, Zifeng Ding, Jindong Gu, Rui Cao, Christoph Meinel, Gerard de Melo, and Haojin Yang. Image tokens matter: Mitigating hallucination in discrete tokenizer-based large vision-language models via latent editing. arXiv preprint arXiv:2505.21547 , 2025. [33] Yaoting Wang, Shengqiong Wu, Yuecheng Zhang, Shuicheng Yan, Ziwei Liu, Jiebo Luo, and Hao Fei. Multimodal chain-of-thought reasoning: A comprehensive survey. arXiv preprint arXiv:2503.12605 , 2025. [34] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, et al. Chain-of-thought prompting elicits reasoning in large language models. 
+
+Advances in neural information processing systems , 35:24824–24837, 2022. [35] Yixuan Weng, Minjun Zhu, Qiujie Xie, QiYao Sun, Zhen Lin, Sifan Liu, and Yue Zhang. Deepscientist: Advancing frontier-pushing scientific findings progressively. In The Fourteenth International Conference on Learning Representations , 2026. [36] Wenshan Wu, Shaoguang Mao, Yadong Zhang, Yan Xia, Li Dong, Lei Cui, and Furu Wei. Mind’s eye of llms: visualization-of-thought elicits spatial reasoning in large language models. 
+
+Advances in Neural Information Processing Systems , 37:90277–90317, 2024. [37] Zhifei Xie, Ziyang Ma, Zihang Liu, Kaiyu Pang, Hongyu Li, Jialin Zhang, Yue Liao, Deheng Ye, Chunyan Miao, and Shuicheng Yan. Mini-omni-reasoner: Token-level thinking-in-speaking in large speech models. arXiv preprint , 2025. [38] Zhongxing Xu, Zhonghua Wang, Zhe Qian, Dachuan Shi, Feilong Tang, Ming Hu, Shiyan Su, Xiaocheng Zou, Wei Feng, Dwarikanath Mahapatra, Yifan Peng, Mingquan Lin, and Zongyuan Ge. Thinking in uncertainty: Mitigating hallucinations in mlrms with latent entropy-aware decoding. arXiv preprint arXiv:2603.13366 , 2026. [39] Yi Yang, Xiaoxuan He, Hongkun Pan, Xiyan Jiang, Yan Deng, Xingtao Yang, Haoyu Lu, Dacheng Yin, Fengyun Rao, Minfeng Zhu, Bo Zhang, and Wei Chen. R1-onevision: Advancing generalized multimodal reasoning through cross-modal formalization, 2025. [40] Zeyuan Yang, Xueyang Yu, Delin Chen, Maohao Shen, and Chuang Gan. Machine men-tal imagery: Empower multimodal reasoning with latent visual tokens. arXiv preprint arXiv:2506.17218 , 2025. [41] Jiacheng Ye, Shansan Gong, Liheng Chen, Lin Zheng, Jiahui Gao, Han Shi, Chuan Wu, Xin Jiang, Zhenguo Li, Wei Bi, et al. Diffusion of thought: Chain-of-thought reasoning in diffusion language models. Advances in Neural Information Processing Systems , 37:105345–105374, 2024. [42] Shukang Yin, Chaoyou Fu, Sirui Zhao, Ke Li, Xing Sun, Tong Xu, and Enhong Chen. A survey on multimodal large language models. National Science Review , 11(12):nwae403, 2024. [43] Jusheng Zhang, Kaitong Cai, Xiaoyang Guo, Sidi Liu, Qinhan Lv, Ruiqi Chen, Jing Yang, Yijia Fan, Xiaofei Sun, Jian Wang, et al. Mm-cot: a benchmark for probing visual chain-of-thought reasoning in multimodal models. arXiv preprint arXiv:2512.08228 , 2025. [44] Zhuosheng Zhang, Aston Zhang, Mu Li, Hai Zhao, George Karypis, and Alex Smola. Multi-modal chain-of-thought reasoning in language models. 2024. [45] Xueliang Zhao, Wei Wu, Jian Guan, and Lingpeng Kong. Promptcot: Synthesizing olympiad-level problems for mathematical reasoning in large language models. In Findings of the Association for Computational Linguistics: ACL 2025 , pages 18167–18188, 2025. [46] Qiji Zhou, Ruochen Zhou, Zike Hu, Panzhong Lu, Siyang Gao, and Yue Zhang. Image-of-thought prompting for visual reasoning refinement in multimodal large language models. arXiv preprint arXiv:2405.13872 , 2024. [47] Yicheng Zou, Dongsheng Zhu, Lin Zhu, Tong Zhu, Yunhua Zhou, Peiheng Zhou, Xinyu Zhou, Dongzhan Zhou, Zhiwang Zhou, Yuhao Zhou, et al. Intern-s1-pro: Scientific multimodal foundation model at trillion scale. arXiv preprint arXiv:2603.25040 , 2026. 13 A Detailed Experiments Setting 
+
+A.1 Benchmarks Counting [ 8]. This benchmark evaluates the MLLM abilities in detection, recognition, and composi-tional reasoning in complex scenes where objects may overlap, be occluded, or have varying sizes. It contains 120 test samples. 
+
+IQ Test [8]. This benchmark evaluates the ability of MLLMs to engage in graphical reasoning, without requiring any domain-specific knowledge. It contains 150 test samples. 
+
+Relative Reflectance [ 8 ]. This benchmark requires comparing the reflectance (albedo) of two pixels, where MLLMs need an understanding of material properties and their interaction with light. It contains 134 test samples. 
+
+MMVP [29 ]. This benchmark is specially crafted to measure MLLM’s visual capability via VQA, which consists of "CLIP-blind pairs" to reveal systematic visual shortcomings of MLLMs. It contains 300 test samples. 
+
+Hull-Bench [12 ]. This image-context reasoning benchmark evaluates MLLMs on their susceptibility to hallucination, visual illusion, and logical inconsistency through carefully designed questions. It contains 951 test samples. 
+
+ScienceQA [19 ]. This benchmark consists of multi-modal multiple-choice questions covering diverse scientific subjects, featuring rich visual and textual contexts alongside lecture materials and explanations to assess both answer accuracy and reasoning quality. We evaluate on the first 1,000 samples of the test split. 
+
+MM-Star [ 5]. This vision-centric benchmark ensures visual dependency, minimal data leakage, and the requirement for advanced multi-modal capabilities. We evaluate on the first 1,000 samples of the test split. 
+
+MM-Vista [18 ]. This benchmark consolidates mathematical reasoning within visual contexts, encompassing diverse and complex challenges in visual perception and mathematical reasoning. It contains 1,000 test samples. 
+
+A.2 Reasoning Baselines MCoT (Multi-modal CoT) [ 44 ] extends CoT reasoning to multi-modal settings by first generating a reasoning rationale conditioned on multi-modal inputs, then combining it with the original input to produce the final answer. 
+
+CCoT (Compositional CoT) [ 22 ] enables multi-modal reasoning by converting the visual inputs into a JSON-formatted scene graph, based on which the reasoning is performed. 
+
+ICoT (Interleaved CoT) [ 11 ] performs visual-text interleaved CoT by dynamically injecting visual clues during the reasoning process, which is triggered when specific tokens appear during reasoning. 
+
+LVR [15 ] is a latent reasoning method that enables MLLMs to perform autoregressive reasoning directly in the visual embedding space. Specifically, the model is trained to generate latent states to reconstruct query-relevant visual tokens, which are interleaved with standard text generation to enhance fine-grained visual understanding. 
+
+Monet [ 31 ] trains MLLMs to perform latent visual reasoning by learning to dynamically interleave text generation with latent thinking, where the model autonomously decides when to emit a <latent> token to initiate visual reasoning in the embedding space. 
+
+CoVT [23 ] is a training-based latent reasoning method that interleaves various continuous visual tokens into reasoning chains, including complementary perceptual cues such as segmentation, depth, and edges. Consequently, the model learns to selectively generate different types of visual tokens without requiring reinforcement learning. 
+
+DMLR [16 ] is a test-time latent reasoning framework that iteratively optimizes latent tokens and updates visual context through confidence-guided policy gradient optimization, dynamically injecting the most relevant visual patches into the reasoning process at inference time. 14 Figure 8: GPT-4o judging prompt used for answer evaluation. The prompt asks the evaluator to compare the model prediction with the ground-truth answer and judge semantic correctness. Table 5: Ablation on latent reasoning length on ScienceQA, MM-Star and MM-Vista. Our method benefits more from longer latent reasoning, while LVR shows weaker utilization.  
+
+> Latents Length K
+
+ScienceQA MM-Star MM-Vista Ours LVR RF [15] Ours LVR RF [15] Ours LVR RF [15] 0 82.30 59.30 58.70 2 83.40 [+1.10] 83.60 [+1.30] 61.30 [+2.00] 62.40 [+3.10] 63.00 [+4.30] 62.40 [+3.70] 
+
+4 84.20 [+1.90] 83.10 [+0.80] 61.80 [+2.50] 61.80 [+2.50] 63.70 [+5.00] 62.60 [+3.90] 
+
+6 84.90 [+2.60] 83.30 [+1.00] 62.00 [+2.70] 61.50 [+2.20] 63.80 [+5.10] 62.20 [+3.50] 
+
+8 85.10 [+2.80] 83.20 [+0.90] 62.20 [+2.90] 61.90 [+2.60] 64.10 [+5.40] 62.70 [+4.00] 
+
+10 85.20 [+2.90] 82.70 [+0.40] 62.60 [+3.30] 61.90 [+2.60] 64.30 [+5.60] 62.60 [+3.90] 
+
+A.3 Evaluation Prompt 
+
+Following DMLR [ 16 ], we use a fixed GPT-4o judging prompt for all GPT-based evaluations. The evaluator receives the question, the ground-truth answer, and the model prediction, and is asked to determine whether the prediction is semantically correct. This design avoids brittle string-matching and handles equivalent expressions (e.g., equivalent numerical forms or paraphrased answers) gracefully. The full prompt is shown in Figure 8. 
+
+## B More Ablation Study 
+
+B.1 Length of Latent Reasoning 
+
+We further evaluate the effect of latent reasoning length on ScienceQA, MM-Star, and MM-Vista. As shown in Table 5, our method consistently benefits from longer latent reasoning across all three benchmarks. For example, as the latent length increases from K = 2 to K = 10 , performance improves from 83.40 to 85.20 on ScienceQA, from 61.30 to 62.60 on MM-Star, and from 63.00 to 64.30 on MM-Vista. In contrast, LVR exhibits weaker and less stable gains: it gradually drops on ScienceQA, saturates early on MM-Star, and shows only marginal variation on MM-Vista. These results further support that our method can more effectively exploit extended latent reasoning and translate additional latent capacity into improved answer prediction. 15 B.2 Additional attention visualization. 
+
+We provide more attention visualizations in Figure 9 across Hull-Bench, ScienceQA, and MM-Vista. The optimized visual latents consistently receive concentrated attention during prediction, indicating that the model actively leverages the latent reasoning span rather than diffusely relying on raw visual inputs. These results further support that our two-stage optimization framework improves not only latent quality, but also their effective utilization in answer generation. 
+
+Figure 9: More attention visualization. 
+
+B.3 Efficiency Ratio Calculation 
+
+We define the efficiency ratio to jointly measure the performance gain and token efficiency of each method. Specifically, let ∆m denote the average accuracy improvement of method m over the vanilla baseline across all benchmarks, and let Tm denote the average number of output tokens generated per sample. The efficiency ratio is defined as: Efficiency Ratio = ∆m
+
+Tm
+
+× 10 (7) where the factor of 10 is applied for readability. A higher efficiency ratio indicates that the method achieves greater performance gains per unit of output token generation. Methods with negative ratios generate more tokens while degrading performance relative to the vanilla baseline. 16
