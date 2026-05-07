@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-06
-- 运行时间：2026-05-06 20:19:23 UTC
+- 最新运行日期：2026-05-07
+- 运行时间：2026-05-07 21:00:20 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-1) 今日速递 17 篇多模态前沿进展，深度解析 VLM 智能体如何通过“好奇心”与强化学习实现自我进化。
-2) 满分论文揭示了视觉语言好奇心对探索的驱动作用，而 GRPO-TTA 则展示了测试时视觉微调的巨大潜力。
-3) 建议关注 GUI 落地与异构模型对齐技术，探索多模态大模型在复杂交互任务中的推理边界。
-- 详情：[/202605/06/README](/202605/06/README)
+今日聚焦多模态智能体前沿，深度解析 GLM-5V-Turbo 与 OpenSearch-VL 等 17 篇重磅论文。
+原生多模态大模型正加速向搜索与具身智能领域演进，重点关注 GLM-5V-Turbo 在复杂任务规划中的原生能力突破。
+建议优先研读 GLM-5V-Turbo 论文，掌握下一代多模态智能体的核心架构与应用范式。
+- 详情：[/202605/07/README](/202605/07/README)
 
 ### 精读区论文标签
-1. [What You Think is What You See: Driving Exploration in VLM Agents via Visual-Linguistic Curiosity](/202605/06/2605.03782v1-what-you-think-is-what-you-see-driving-exploration-in-vlm-agents-via-visual-linguistic-curiosity)  
+1. [GLM-5V-Turbo: Toward a Native Foundation Model for Multimodal Agents](/202605/07/2604.26752v2-glm-5v-turbo-toward-a-native-foundation-model-for-multimodal-agents)  
    标签：评分：10.0/10、query:vlm-rl
-   evidence：具有好奇心的VLM智能体强化学习
-2. [GRPO-TTA: Test-Time Visual Tuning for Vision-Language Models via GRPO-Driven Reinforcement Learning](/202605/06/2605.03403v1-grpo-tta-test-time-visual-tuning-for-vision-language-models-via-grpo-driven-reinforcement-learning)  
+   evidence：结合强化学习与原生感知的多模态智能体
+2. [OpenSearch-VL: An Open Recipe for Frontier Multimodal Search Agents](/202605/07/2605.05185v1-opensearch-vl-an-open-recipe-for-frontier-multimodal-search-agents)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：利用智能体强化学习训练多模态搜索智能体
+3. [LaST-R1: Reinforcing Robotic Manipulation via Adaptive Physical Latent Reasoning](/202605/07/2604.28192v2-last-r1-reinforcing-robotic-manipulation-via-adaptive-physical-latent-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：基于GRPO驱动的强化学习用于视觉语言模型微调
-3. [UnAC: Adaptive Visual Prompting with Abstraction and Stepwise Checking for Complex Multimodal Reasoning](/202605/06/2605.03950v1-unac-adaptive-visual-prompting-with-abstraction-and-stepwise-checking-for-complex-multimodal-reasoning)  
+   evidence：VLA 模型中“行动前潜在推理”的强化学习后训练框架
+4. [Hierarchical Visual Agent: Managing Contexts in Joint Image-Text Space for Advanced Chart Reasoning](/202605/07/2605.04304v1-hierarchical-visual-agent-managing-contexts-in-joint-image-text-space-for-advanced-chart-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于复杂多步推理任务的VLM
-4. [FineState-Bench: Benchmarking State-Conditioned Grounding for Fine-grained GUI State Setting](/202605/06/2604.27974v1-finestate-bench-benchmarking-state-conditioned-grounding-for-fine-grained-gui-state-setting)  
+   evidence：用于多步图表推理的分层视觉智能体
+5. [The Effects of Visual Priming on Cooperative Behavior in Vision-Language Models](/202605/07/2604.27953v2-the-effects-of-visual-priming-on-cooperative-behavior-in-vision-language-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：基于视觉语言模型的GUI智能体
-5. [MedScribe: Clinically Grounded CT Reporting through Agentic Workflows](/202605/06/2605.01779v1-medscribe-clinically-grounded-ct-reporting-through-agentic-workflows)  
+   evidence：研究视觉启动对VLM决策和推理的影响
+6. [The Perceptual Bandwidth Bottleneck in Vision-Language Models: Active Visual Reasoning via Sequential Experimental Design](/202605/07/2605.01345v2-the-perceptual-bandwidth-bottleneck-in-vision-language-models-active-visual-reasoning-via-sequential-experimental-design)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于序列决策过程的VLM智能体工作流
-6. [Enhancing Multimodal In-Context Learning via Inductive-Deductive Reasoning](/202605/06/2605.02378v1-enhancing-multimodal-in-context-learning-via-inductive-deductive-reasoning)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型中的归纳-演绎推理
+   evidence：主动视觉推理智能体在回答前决定获取哪些视觉证据
 
 ### 速读区论文标签
-1. [AutoFocus: Uncertainty-Aware Active Visual Search for GUI Grounding](/202605/06/2605.02630v1-autofocus-uncertainty-aware-active-visual-search-for-gui-grounding)  
+1. [Anticipation-VLA: Solving Long-Horizon Embodied Tasks via Anticipation-based Subgoal Generation](/202605/07/2605.01772v1-anticipation-vla-solving-long-horizon-embodied-tasks-via-anticipation-based-subgoal-generation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：使用VLM和强化学习相关搜索的自主GUI智能体
-2. [Visual Latents Know More Than They Say: Unsilencing Latent Reasoning in MLLMs](/202605/06/2605.02735v1-visual-latents-know-more-than-they-say-unsilencing-latent-reasoning-in-mllms)  
+   evidence：通过子目标生成解决长程任务的VLA模型
+2. [MHPR: Multidimensional Human Perception and Reasoning Benchmark for Large Vision-Languate Models](/202605/07/2605.03485v1-mhpr-multidimensional-human-perception-and-reasoning-benchmark-for-large-vision-languate-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：多模态大语言模型中的潜空间推理
-3. [Replacing Parameters with Preferences: Federated Alignment of Heterogeneous Vision-Language Models](/202605/06/2605.03426v1-replacing-parameters-with-preferences-federated-alignment-of-heterogeneous-vision-language-models)  
+   evidence：用于多模态推理基准测试的强化学习数据
+3. [From Pixels to Tokens: A Systematic Study of Latent Action Supervision for Vision-Language-Action Models](/202605/07/2605.04678v1-from-pixels-to-tokens-a-systematic-study-of-latent-action-supervision-for-vision-language-action-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：使用GRPO强化学习进行视觉语言模型的联邦对齐
-4. [A11y-Compressor: A Framework for Enhancing the Efficiency of GUI Agent Observations through Visual Context Reconstruction and Redundancy Reduction](/202605/06/2605.00551v1-a11y-compressor-a-framework-for-enhancing-the-efficiency-of-gui-agent-observations-through-visual-context-reconstruction-and-redundancy-reduction)  
+   evidence：用于长程推理的视觉-语言-动作模型
+4. [Reward-Decomposed Reinforcement Learning for Immersive Video Role-Playing](/202605/07/2605.04733v1-reward-decomposed-reinforcement-learning-for-immersive-video-role-playing)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：用于视觉接地推理和对话生成的解耦强化学习框架
+5. [Lifting Traces to Logic: Programmatic Skill Induction with Neuro-Symbolic Learning for Long-Horizon Agentic Tasks](/202605/07/2605.01293v1-lifting-traces-to-logic-programmatic-skill-induction-with-neuro-symbolic-learning-for-long-horizon-agentic-tasks)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：使用视觉上下文进行定位的GUI智能体
-5. [Beyond Perceptual Shortcuts: Causal-Inspired Debiasing Optimization for Generalizable Video Reasoning in Lightweight MLLMs](/202605/06/2605.01324v1-beyond-perceptual-shortcuts-causal-inspired-debiasing-optimization-for-generalizable-video-reasoning-in-lightweight-mllms)  
+   evidence：用于智能体任务的神经符号学习
+6. [From Where Things Are to What They Are For: Benchmarking Spatial-Functional Intelligence in Multimodal LLMs](/202605/07/2605.02130v1-from-where-things-are-to-what-they-are-for-benchmarking-spatial-functional-intelligence-in-multimodal-llms)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：基于强化学习的微调用于多模态模型推理
-6. [ESARBench: A Benchmark for Agentic UAV Embodied Search and Rescue](/202605/06/2605.01371v1-esarbench-a-benchmark-for-agentic-uav-embodied-search-and-rescue)  
+   evidence：多模态大模型落地智能的高级推理
+7. [CoVSpec: Efficient Device-Edge Co-Inference for Vision-Language Models via Speculative Decoding](/202605/07/2605.02218v1-covspec-efficient-device-edge-co-inference-for-vision-language-models-via-speculative-decoding)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：无人机具身搜索与救援智能体
-7. [Multi-Scale Gaussian-Language Map for Zero-shot Embodied Navigation and Reasoning](/202605/06/2605.01736v1-multi-scale-gaussian-language-map-for-zero-shot-embodied-navigation-and-reasoning)  
+   evidence：视觉语言模型中的多模态感知与推理
+8. [A Semantic Autonomy Framework for VLM-Integrated Indoor Mobile Robots: Hybrid Deterministic Reasoning and Cross-Robot Adaptive Memory](/202605/07/2605.02525v1-a-semantic-autonomy-framework-for-vlm-integrated-indoor-mobile-robots-hybrid-deterministic-reasoning-and-cross-robot-adaptive-memory)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：具身环境中的视觉推理与导航
-8. [Chart-FR1: Visual Focus-Driven Fine-Grained Reasoning on Dense Charts](/202605/06/2605.01882v1-chart-fr1-visual-focus-driven-fine-grained-reasoning-on-dense-charts)  
-   标签：评分：7.0/10、query:vlm-rl
-   evidence：对密集视觉图表的细粒度推理
-9. [Scaling Video Understanding via Compact Latent Multi-Agent Collaboration](/202605/06/2605.00444v1-scaling-video-understanding-via-compact-latent-multi-agent-collaboration)  
+   evidence：集成VLM的自主导航与语义推理
+9. [A Brief Overview: Agentic Reinforcement Learning In Large Language Models](/202605/07/2604.27859v2-a-brief-overview-agentic-reinforcement-learning-in-large-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：视觉语言理解的智能体方法
-10. [Action Agent: Agentic Video Generation Meets Flow-Constrained Diffusion](/202605/06/2605.01477v1-action-agent-agentic-video-generation-meets-flow-constrained-diffusion)  
+   evidence：大语言模型中的智能体强化学习与交互式推理
+10. [Research on Vision-Language Question Answering Models for Industrial Robots](/202605/07/2605.01483v1-research-on-vision-language-question-answering-models-for-industrial-robots)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于导航的 LLM 编排智能体视频生成
-11. [SurgCheck: Do Vision-Language Models Really Look at Images in Surgical VQA?](/202605/06/2605.01911v1-surgcheck-do-vision-language-models-really-look-at-images-in-surgical-vqa)  
+   evidence：工业任务的视言联合推理空间
+11. [Before Forgetting, Learn to Remember: Revisiting Foundational Learning Failures in LVLM Unlearning Benchmarks](/202605/07/2605.03759v1-before-forgetting-learn-to-remember-revisiting-foundational-learning-failures-in-lvlm-unlearning-benchmarks)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于手术VQA推理的视觉语言模型
+   evidence：视觉语言模型的推理感知问答
 
 
 <div class="dpr-home-promo-card">
