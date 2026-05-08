@@ -1,0 +1,305 @@
+Title: FoodCHA: Multi-Modal LLM Agent for Fine-Grained Food Analysis
+
+URL Source: https://arxiv.org/pdf/2605.05499v1
+
+Published Time: Fri, 08 May 2026 00:18:46 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# FoodCHA: Multi-Modal LLM Agent for Fine-Grained Food Analysis 
+
+Woojin Lee, Pranav Mekkoth, Ye Tian, Onat Gungor, Tajana Rosing 
+
+Department of Computer Science and Engineering University of California, San Diego (UCSD) 
+
+{wol027, pmekkoth, yet002, ogungor, tajana }@ucsd.edu 
+
+Abstract —The widespread adoption of camera-equipped mo-bile devices and wearables has enabled convenient capture of meal images, making food recognition a key component for real-time dietary monitoring. However, real-world food images present challenges due to high intra-class similarity and the frequent presence of multiple food items within a single image. While deep learning models achieve strong performance in coarse-grained classification, they often struggle to capture fine-grained attributes such as cooking style. Moreover, open-ended generation in modern vision-language models can produce non-canonical labels, limiting their practical deployment. We propose Food-CHA, a multimodal agentic framework that reformulates food recognition as a hierarchical decision-making process. By pro-gressively anchoring predictions, FoodCHA guides subcategory identification using high-level categories and guides cooking style recognition using subcategories, improving semantic consistency and attribute-level discrimination. To ensure practical deploy-ability, FoodCHA utilizes the compact Moondream-2B vision-language model, which provides strong reasoning capability while maintaining lower computational and memory overhead. Exper-iments on FoodNExTDB show that FoodCHA outperforms Food-Llama-3.2-11B by 13.8% and 38.2% in category and subcategory recognition precision, respectively, and achieves a striking 153.2% improvement in cooking style classification precision. 
+
+Index Terms —Food recognition, Multimodal learning, Vision-language models, Fine-grained classification 
+
+I. I NTRODUCTION 
+
+Camera-equipped mobile devices and wearables have made meal image capture increasingly practical for dietary moni-toring and personalized nutrition support [6], [40]. However, converting real-world meal photos into reliable dietary logs re-mains difficult. Food images vary substantially in appearance, portion size, preparation style, lighting, and background, while visually similar or mixed dishes may blur semantic boundaries and cause models to focus on the most salient item rather than the full meal [13], [17]. Practical dietary assessment requires more than coarse food classification. Fine-grained attributes such as subcategory and cooking style can affect nutritional interpretation; for example, distinguishing poultry from beef or grilled from roasted prepa-ration changes the meaning of a meal log. Existing discrimi-native models, often built on CNN or Transformer backbones, typically treat these attributes as independent outputs and pro-vide no guarantee of hierarchical consistency. Vision-language models (VLMs) offer stronger open-ended reasoning, but their generated outputs may include synonyms, overly specific dish names, or labels outside the dataset taxonomy, complicating 
+
+Fig. 1: Overview of the FoodCHA framework. evaluation and deployment [23], [35]. These challenges high-light the need for predictions that are structured, ontology-compliant, and consistent across hierarchy levels. Addressing these limitations requires a reasoning framework that explicitly enforces hierarchical dependencies and validates intermediate outputs. Agentic orchestration provides a natu-ral solution: by decomposing perception and reasoning into staged, tool-guided actions, predictions become structured, ontology-compliant, and hierarchy-consistent [1]. Such an approach allows fine-grained attributes, including subcategory and cooking style, to be inferred conditionally on preceding stages, reducing hallucination and enabling reliable multi-attribute dietary logging. We propose FoodCHA (Fig. 1), a hierarchical VLM agent for staged prediction of food attributes. We focus on the FoodNExTDB taxonomy [35], which defines 10 high-level categories, 62 subcategories, and 9 cooking styles. Thus, Food-CHA targets ontology-constrained recognition within a fixed label space rather than open-world food discovery. FoodCHA predicts category, subcategory, and cooking style sequentially, restricts candidates using the dataset hierarchy, and normalizes free-form outputs to canonical labels. Compared to Food-Llama-3.2-11B-Vision-Instruct [4], [10], FoodCHA improves category and subcategory recognition precision by 13.9% and 38.2%, respectively, and achieves a 153.2% gain in cooking-style classification precision. In summary, this work makes three key contributions: (1) formulating ontology-constrained, fine-grained food recogni-tion for diet tracking, ensuring category, subcategory, and cooking style predictions are canonical and hierarchically consistent; (2) introducing FoodCHA, a multi-modal agen-
+
+> arXiv:2605.05499v1 [cs.AI] 6 May 2026
+
+tic model that decomposes recognition into a three-stage hierarchical process with dataset-constrained candidates and lightweight validation, recovery, and normalization tools; and (3) demonstrating that FoodCHA significantly outperforms state-of-the-art learning methods. II. R ELATED WORK 
+
+A. Deep Learning Models for Food Recognition 
+
+Food recognition has traditionally been formulated as a discriminative visual classification task mapping an image to a fixed label set. Convolutional backbones such as ResNet are widely used for their strong inductive biases and stable optimization, while attention-enhanced variants like SENet and SGLANet improve sensitivity to informative regions and subtle ingredient cues [17]. More recently, transformer-based models and CNN-transformer hybrids have been explored to capture long-range dependencies. Robustness-focused de-signs such as NoisyViT introduce structured perturbations to mitigate overfitting under real-world noise [14]. In parallel, retrieval-based pipelines offer an alternative for fine-grained recognition by matching query images against a labeled gallery and refining results via reranking. For example, CVNet re-places classical geometric verification with correlation-based verification to enhance instance-level retrieval [22]. Neverthe-less, these approaches remain limited for nutrition-focused dietary understanding. Discriminative models often predict category, subcategory, and cooking style via separate heads without enforcing hierarchical constraints, allowing errors to propagate across levels and reducing performance on long-tailed subcategories or attributes with weak or partially oc-cluded visual cues. Retrieval-based methods require main-taining exhaustive, up-to-date reference galleries and do not naturally produce structured, multi-attribute predictions from a single inference. These limitations highlight the need for inference that leverages semantic priors, enforces hierarchical consistency, and yields canonical labels. 
+
+B. Large Language Models for Food Recognition 
+
+Recent work has begun leveraging large language models (LLMs) and vision-language models (VLMs) for food under-standing, either by building multimodal assistants or training domain-specific food models. FoodLLM couples an LLM backbone with segmentation components to support recogni-tion, ingredient understanding, nutrition estimation, and in-teractive assistance, typically relying on multi-stage train-ing across diverse datasets [45]. Food-Llama-3.2-11B-Vision-Instruct is a food-adapted VLM baseline, while Moondream-2B, Qwen2.5-VL-7B, and InternVL3-8B represent general VLM baselines with different model sizes and reasoning capabilities [4], [10], [39], [41], [48]. In addition, FoodSky improves the depth and reliability of food and nutrition knowledge in text-based question answering by training on a curated food corpus, highlighting the benefits of specialization for dietetic reasoning and guidance [47]. Advances in visual backbones, such as ResV-Mamba, further demonstrate that stronger state-space architectures can enhance fine-grained food classification on curated benchmarks [8]. Despite these advances, none of these approaches directly address the core challenge of real-world dietary logging: producing structured, dataset-constrained predictions for hierarchical attributes from images. Open-ended model outputs can drift from canonical la-bels, and predictions across category, subcategory, and cooking style must remain consistent. Motivated by this gap, we pro-pose FoodCHA, a tool-augmented LLM agent that integrates semantic priors and hierarchical constraints to convert open-ended model responses into a controllable, dataset-aligned decision process. III. F OOD CHA D ESIGN 
+
+A. System Overview 
+
+Figure 2 illustrates the end-to-end FoodCHA pipeline, which transforms a user-provided image into a structured dietary record. FoodCHA models recognition as a hierar-chical decision sequence aligned with the dataset taxon-omy. Given an input image, our agentic framework first predicts the high-level category and subsequently selects the subcategory and cooking style conditioned on prior deci-sions. At each stage, candidate labels are constrained by the dataset hierarchy, ensuring that subsequent predictions remain taxonomy-valid. Integrated validation tools, including structured parsing, membership verification, and hierarchy checks, enforce canonical formatting and guarantee ontology compliance throughout the process. The final output is a deterministic (category , subcategory , cooking style ) triple that is directly displayable and suitable for structured storage. In short, FoodCHA is guided by three primary objectives:  
+
+> •
+
+Controllability: Restrict outputs to a predefined label set and maintain a predictable, machine-parseable format.  
+
+> •
+
+Hierarchical Consistency: Ensure that subcategory and cooking style predictions are valid under the dataset taxonomy and consistent with preceding decisions.  
+
+> •
+
+Robustness: Reduce hallucinations, label drift, and for-matting errors through constraint enforcement and recov-ery mechanisms. This design enables ontology-compliant dietary logging without increasing backbone complexity. By enforcing hi-erarchical constraints during inference rather than through additional model capacity, FoodCHA prevents invalid label combinations while maintaining computational efficiency. 
+
+B. User Input 
+
+FoodCHA takes a user-provided meal image as input and processes it under natural visual variation such as viewpoint, lighting, and background changes. Each image is mapped to a machine-parseable dietary record that can be aggregated over time for longitudinal tracking and downstream nutritional analysis. 
+
+C. Framework Setup 
+
+Figure 2 summarizes the framework components used to process each input image, including the VLM backbone, prompting scheme, and orchestration logic. FoodCHA  Orchestration                            
+
+> Category Identification
+> Examples:
+> •Fruits and Vegetables
+> •Cereals and Legumes
+> •Protein Sources
+> Restricted Subcategory labels
+> Labels
+> Restricted cooking style labels
+> Limited by category selection
+> Subcategory Identification
+> Examples :
+> •Pie
+> •Burger
+> •Seafood
+> Cooking Style Identification
+> Examples:
+> •Fried
+> •Grilled
+> •Boiled
+> Limited by subcategory selection
+> •VLM backbone ( i.e. Moondream 2B)
+> •Prompt Design
+> •OpenCHA
+> Framework Setup
+> User Input
+> Query/image
+> Hierarchical Inference
+> Output /User Interactio n
+> Output Validation
+> Final Output
+> •Category: Protein Source
+> •Subcategory: Burger
+> •Cooking Style: Grilled
+> Integrated Tools
+> Image I/O
+> PriorDB
+> Normalizer/Parser
+> Parse Check
+> Membership Check
+> Hierarchy Check
+> Validation Checks
+> Recovery Strategies
+> Strict -form Reprompting
+> Constrained -choic eReprompting
+> Canonical Mapping
+> User Query:
+> Analyze this dish
+
+Fig. 2: System-level pipeline of FoodCHA. An input image is processed by a backbone model and passed to an agent that performs hierarchical, dependency-aware decisions across category, subcategory, and cooking style. At each stage, candidate labels are constrained by the dataset taxonomy and validated, producing an ontology-compliant structured output. 
+
+1) VLM Backbone: FoodCHA uses a VLM backbone for image-text reasoning and is compatible with any model that supports structured prompting. Unlike CNN-based pipelines that perform a single closed-set prediction, FoodCHA per-forms staged inference in which each prediction restricts the candidate set for the next stage. In our experiments, we use Moondream-2B to balance recognition quality and computa-tional cost. Although FoodCHA requires multiple model calls per image, each call operates over a restricted label space and is followed by deterministic validation. 
+
+2) Prompt Design: FoodCHA uses stage-specific prompt templates to enforce structured, ontology-compliant outputs. At each stage, we provide the stage candidate set returned by PriorDB, require strict JSON with exactly one field, and disallow any additional text. This design minimizes free-form drift and enables deterministic parsing, membership checks, and hierarchy validation. FoodCHA performs hierarchical in-ference using stage-specific prompts: 
+
+3) OpenCHA: FoodCHA is implemented on top of Open-CHA [2], an agent framework designed for multi-step, multi-modal workflows with tool use. OpenCHA enables conditional branching, sequential stage orchestration, and integration of the lightweight utilities above. This ensures that each stage of inference produces ontology-valid, hierarchy-consistent, and strictly structured outputs. In combination, the VLM back-bone, deterministic utilities, and OpenCHA orchestration allow FoodCHA to achieve controlled, reproducible, and expert-aligned predictions for hierarchical food recognition. 
+
+D. Hierarchical Inference 
+
+Forming the central prediction pathway in Figure 2, Food-CHA only takes in the user’s image as input throughout the whole process and performs hierarchical inference across three sequential stages: category, subcategory, and cooking style. Each stage predicts a single label selected from an explicitly defined candidate set derived from the dataset taxonomy. By conditioning downstream decisions on upstream predictions and restricting candidates accordingly, FoodCHA guarantees taxonomy-valid outputs and mitigates a common failure mode of free-form VLM prompting, where plausible text does not correspond to canonical labels. Within our hierarchical in-ference process, the user does not provide additional input between stages. As such, inference proceeds as follows:  
+
+> •
+
+Stage 1 — Category. The model predicts the high-level food category from a predefined label set. Because category cues are typically global and visually salient, this stage establishes the search space for subsequent decisions. For example, if a user provides an image of a burger dish, Stage 1 correctly identifies it as a protein source rather than a vegetable or a beverage. This initial stage is critical for narrowing the candidate set of food labels in subsequent stages. Errors at this step can propagate downstream, preventing the correct label from being selected later in the recognition process.  
+
+> •
+
+Stage 2 — Subcategory. Conditioned on the predicted category, FoodCHA automatically retrieves valid sub-category labels from the dataset hierarchy and restricts prediction to this subset. This prevents drift into irrele-vant or non-canonical labels. Continuing with the burger example, once the dish is classified ”Protein Sources” in Stage 1, Stage 2 can correctly identify it as a burger. Selecting “Protein Sources” as the category restricts the subcategory candidates to valid protein-based options, such as lamb chops, steaks, fish, or chicken.  
+
+> •
+
+Stage 3 — Cooking Style. Conditioned on both category and subcategory, the model autonomously predicts the cooking style from the corresponding valid set. Deferring this decision allows the model to focus on preparation-specific cues. Once the food item has been classified as a protein source and specifically as a burger, Stage 3 further restricts the cooking-style candidates to valid options, such as grilled, fried, or baked. This allows the system to correctly identify the dish as a grilled burger.          
+
+> Stage 1: Category Selection
+> Task: Choose the single best category label for the food in the image. Valid labels: {candidates txt }
+> Output (strict JSON): {"category": "<LABEL>" }
+> Constraint: Output must exactly match one candidate label (or
+> {"unknown" }).
+> Stage 2: Subcategory Selection
+> Context: category = ” {category }”Task: Choose the best subcategory under the given category. Valid labels: {candidates txt }
+> Output (strict JSON): {"subcategory": "<LABEL>" }
+> Constraint: Exact match to a candidate label.
+> Stage 3: Cooking Style Selection
+> Context: category = ” {category }”, subcategory = ” {subcategory }”Task: Choose the best cooking style label. Valid labels: {candidates txt }
+> Output (strict JSON): {"cooking_style": "<LABEL>" }
+> Constraint: Exact match to a candidate label.
+
+At each stage, only labels that are valid descendants in the taxonomy are considered, preventing semantically invalid combinations by design. Constraining the label space in suc-cessive stages reduces hallucinations and increases the like-lihood that the resulting category, subcategory, and cooking-style combination is logically consistent. Without hierarchical inference, label combinations could be both incorrect and internally contradictory, reducing user trust in the system. 
+
+E. Integrated Tools 
+
+FoodCHA incorporates three deterministic utilities to sup-port controlled inference:  
+
+> •
+
+PriorDB: Encodes the FoodNExTDB ontology as atyped hierarchy (e.g., category → subcategory →
+
+cooking_style ) and returns stage-specific candidate sets Cs. Given upstream decisions, it provides only valid next-stage labels and optional aliases, reducing open-vocabulary drift and invalid label combinations.  
+
+> •
+
+Normalizer/Parser: Extracts canonical labels from model outputs, enforces fixed keys, normalizes surface variations, and maps responses to valid labels through exact matches, synonym lookup, or unique approximate matches above threshold τ . 
+
+> •
+
+ImageIO: Standardizes image ingestion, including resiz-ing, cropping, color-space conversion, and optional com-pression, ensuring reproducible inputs across repeated model calls. 
+
+F. Validation Checks 
+
+FoodCHA validates each stage before proceeding. Let O
+
+denote the ontology of allowed labels, and let π(·) be a parser that extracts a candidate label or item-level label set from the model response. Each stage enforces three checks:  
+
+> •
+
+Parse check: Ensures exactly one label per field for each predicted food item (e.g., category , subcategory ,
+
+cooking_style ). For mixed meals, the parser accepts a bounded list of item-level records, where each record follows the same schema.  
+
+> •
+
+Membership check: The extracted label ˆy must belong to the stage-specific candidate set C ⊆ O . Formally, accept if ˆy ∈ C , otherwise reject. C is conditioned on the current stage (e.g., top-level categories vs. subcategories given the category).  
+
+> •
+
+Hierarchy check: Ensures parent–child consistency us-ing a parent map g : O → 2O , where g(y) returns the set of valid children of y. If the upstream label is 
+
+y(k), the downstream prediction y(k+1) is accepted only if y(k+1) ∈ g(y(k)).
+
+G. Recovery strategies 
+
+As shown with the recovery branch illustrated in Figure 2, FoodCHA also has bounded recovery after each stage to further ensure robustness and proper outputs. When a check fails, FoodCHA applies bounded recovery with a maximum of R retries per stage. Each retry increases the strictness of output control: 1) Strict-format re-prompting: Enforces an explicit output schema, blocking explanations or extra text to correct parse failures. 2) Constrained-choice re-prompting: Restricts the model to the stage candidate set C and requires an exact single-label selection. Can be combined with constrained decod-ing to limit next-token generation to valid label tokens. 3) Canonical mapping: Applies deterministic normaliza-tion for near-miss outputs (e.g., spelling, pluralization, hyphenation) using lowercasing, punctuation stripping, synonym mapping, and string similarity threshold τ .Mapping is applied only if the nearest valid label is unique and within the threshold. If validation still fails after R retries, FoodCHA outputs a structured unknown label with an error code indicating the failed check and the recovery mode attempted. This explicit reporting prevents silent corruption, enables logging, and supports debugging while maintaining predictable latency. H. Output/User Interaction 
+
+Corresponding to the terminal output stage in Figure 2, FoodCHA produces structured, taxonomy-compliant predic-tions that can be displayed to users and appended to meal logs. For single-item meals, FoodCHA returns one label triple. For mixed meals, it can return a bounded list of item-level triples so that secondary food items are not forced into a single domi-nant prediction. This format supports aggregation, longitudinal trend analysis, and downstream nutrition computation more reliably than free-form text. To illustrate the staged process, consider an input meal photo containing a burger. FoodCHA performs three sequential calls, each time restricting the candidate set to valid descen-dants in the taxonomy. Stage 1 selects the coarse category from the global set, Stage 2 selects a subcategory from only those valid under the chosen category, and Stage 3 selects a cooking style valid for the selected (category, subcategory) pair:                    
+
+> Input: Burger meal photo
+> Stage 1 (Category)
+> Candidates: {Protein Sources, Grains, Vegetables, . . . }
+> Output: {"category": "Protein Sources" }
+> Stage 2 (Subcategory)
+> Candidates (Protein Sources): {Burger, Steak, Fish, Poultry, . . . }
+> Output: {"subcategory": "Burger" }
+> Stage 3 (Cooking Style)
+> Candidates (Protein Sources, Burger): {Grilled, Fried, Oven Baked, none, . . . }
+> Output: {"cooking_style": "Grilled" }
+> Final Prediction
+> {"category": "Protein Sources", "subcategory": "Burger", "cooking_style": "Grilled" }
+
+By constraining outputs to canonical labels, FoodCHA reduces label variance and enforces a consistent schema for downstream processing and comparison across meals and users. IV. E XPERIMENTAL ANALYSIS 
+
+A. Experimental Setup 
+
+Dataset. We evaluate FoodCHA on FoodNExTDB [35], a hierarchical food-recognition benchmark with three prediction targets: Category (Stage 1), Subcategory (Stage 2), and Cook-ing Style (Stage 3). It consists of 10 high-level categories, 62 subcategories, and 9 cooking styles. We split the dataset into 6,483 training images, 1,389 validation images, and 1,390 test images. FoodNExTDB is well suited for evaluating FoodCHA because its hierarchical structure aligns with staged outputs, its multi-annotator design captures the inherent ambiguity of consumer meal photos, and its scale supports comprehensive pipeline analysis. Multiple expert annotations per item enable expert-aligned evaluation under inter-annotator disagreement. 
+
+Task. The goal is to predict canonical labels from the Food-NExTDB taxonomy. FoodCHA performs staged inference: it first predicts the Category, restricts Subcategory candidates to those valid under the chosen Category, and finally predicts Cooking Style conditioned on previous stages. This hierar-chical design enforces structural validity and ensures reliable logging for downstream dietary tracking and nutrition analysis. 
+
+State-of-the-art Baselines. We compare FoodCHA against both CNN- and VLM-based methods. CNN baselines include SENet [16], SGLANet [3], and CVNet [22]. VLM baselines include Food-Llama-3.2-11B-Vision-Instruct [10], InternVL3-8B [48], Moondream-2B [41], and Qwen2.5-VL-7B [39]. All VLM baselines are evaluated under the same FoodNExTDB label space and image preprocessing. FoodCHA uses batch size 1, strict JSON outputs, and a retry budget of 3 per stage. The same canonical parsing and normalization rules are applied during evaluation. One-shot VLM baselines are prompted to predict category, subcategory, and cooking style in a structured format, but they do not receive stage-wise can-didate restriction, hierarchy validation, or bounded recovery. 
+
+Evaluation Metrics. We report Precision, Recall, and F1-score for each stage. To account for inter-annotator ambiguity, we also report Expert-Weighted Recall (EWR) [35]: 
+
+EWR i =
+
+PLi 
+
+> k=1
+
+WVLM 
+
+ i, l ik
+
+PLi 
+
+> k=1
+
+WNutritionists 
+
+ i, l ik
+
+ ,
+
+where Li is the number of labels annotated for image i, lik
+
+is the k-th annotated label, WNutritionists (i, l ik) is the expert-consensus weight for label lik, and WVLM (i, l ik) is the weight assigned to the model’s prediction. Since multiple annotators may disagree, EWR weights each test example according to expert consensus: predictions that match highly agreed-upon labels contribute more, while predictions on ambiguous labels contribute less. This makes EWR particularly suitable for evaluating subcategory and cooking-style predictions. 
+
+Hardware. All experiments were conducted on a worksta-tion equipped with an NVIDIA RTX 4090 GPU. 
+
+B. Performance Across Stages 
+
+Table I compares FoodCHA with CNN and VLM baselines across all three stages. FoodCHA achieves the strongest over-all performance, with gains persisting from coarse category recognition to fine-grained cooking-style identification. 
+
+Category (Stage 1). FoodCHA attains 0.820 EWR and 0.826 F1, with precision reaching 0.902. Since category cues are often global and visually salient, the strongest baselines remain relatively competitive at this level. However, stronger category prediction provides a more reliable starting point for downstream hierarchy-constrained decisions. 
+
+Subcategory (Stage 2). FoodCHA reaches 0.648 EWR and 0.668 F1. This stage is more difficult because visually similar dishes must be separated within a denser label space. FoodCHA improves performance by restricting prediction to category-valid subcategories, removing irrelevant alternatives from consideration. 
+
+Cooking Style (Stage 3). FoodCHA shows its clearest advantage at the cooking-style stage, reaching 0.640 EWR and 0.679 F1 with 0.871 precision. Cooking style depends on subtle preparation cues and consistency with earlier decisions, making one-shot VLMs vulnerable to drift. FoodCHA narrows the output space before predicting style, reducing hallucination and invalid label combinations. The fact that larger one-shot TABLE I: Overall prediction performance on FoodNExTDB. Precision (Prec.), Recall (Rec.), F1-Score (F1.), and Expert-Weighted Recall (EWR) are reported for the three hierarchical stages: Category, Subcategory, and Cooking Style.                                                                                                                   
+
+> Family Method Category (Stage 1) Subcategory (Stage 2) Cooking Style (Stage 3) Prec. Rec. F1. EWR Prec. Rec. F1. EWR Prec. Rec. F1. EWR
+> CNN baselines SENet 0.760 0.648 0.700 0.605 0.590 0.511 0.548 0.410 0.613 0.588 0.600 0.560 SGLANet 0.740 0.620 0.675 0.622 0.559 0.484 0.519 0.451 0.610 0.572 0.590 0.588 CVNet 0.280 0.270 0.275 0.255 0.060 0.070 0.065 0.060 0.310 0.330 0.320 0.290 VLM baselines Moondream-2B 0.781 0.759 0.770 0.710 0.652 0.616 0.633 0.602 0.267 0.226 0.245 0.203 Food-Llama-3.2-11B 0.792 0.742 0.766 0.742 0.571 0.468 0.514 0.446 0.344 0.318 0.330 0.286 InternVL3-8B 0.748 0.701 0.724 0.688 0.506 0.402 0.448 0.361 0.301 0.287 0.294 0.241 Qwen2.5-VL-7B 0.554 0.445 0.494 0.435 0.159 0.077 0.104 0.032 0.213 0.230 0.221 0.183 VLM (ours) FoodCHA 0.902 0.761 0.826 0.820 0.789 0.579 0.668 0.648 0.871 0.556 0.679 0.640
+
+Fig. 3: Subcategory analysis. Macro Recall and Macro EWR over subcategory bins defined by test-set support. VLMs still underperform suggests that backbone scale alone is insufficient for reliable taxonomy-valid food recognition. 
+
+C. Fine-Grained Dish Element Analysis 
+
+Subcategory Performance. Figure 3 illustrates FoodCHA’s performance on subcategory predictions as a function of label frequency. The x-axis groups subcategories by their occurrence in the dataset, and the y-axis shows Macro Recall and Macro EWR with 95% bootstrap confidence intervals. Performance decreases for rare subcategories due to limited examples and visual similarity with other classes. Notably, the gap between Recall and EWR increases for these tail classes, indicating that many errors are near misses rather than completely incorrect predictions. For example, within the Fast Food category, visually similar items such as Burgers and Sandwiches can be confused under occlusion, similar wraps, or mixed fillings. Predictions that are marked as incorrect by Recall may still receive partial credit under EWR because expert annotators also find these labels ambiguous. This behavior demonstrates the benefit of FoodCHA’s staged, candidate-restricted infer-ence, which constrains predictions to valid subcategories in the ontology. As a result, errors tend to remain close to expert consensus. Nevertheless, subcategory prediction remains the most challenging stage, and early mistakes can propagate to downstream tasks, such as cooking style classification, limiting recovery even when fine-grained visual cues are available. 
+
+Fig. 4: Cooking-style analysis. Recall and EWR for each cooking-style label. 
+
+Cooking Style Performance. Figure 4 presents a per-class analysis of cooking style predictions. Cooking style recogni-tion shows the largest relative improvements under FoodCHA, as unconstrained VLMs often drift when preparation cues are subtle or overlapping. Among all styles, Oven Baked achieves the strongest performance, likely because this preparation method produces clear and repeatable visual signatures such as uniform browning, crisp edges, and dry surface texture. 
+
+Grilled also performs strongly due to distinctive grill marks and localized charring. Similarly, Fresh ranks highly because raw or minimally processed ingredients preserve characteristic textures and colors, and the absence of browning or crust formation provides an informative visual signal. Boiled Or Steamed also shows relatively strong performance, as its moisture-rich appearance and low browning surfaces visually distinguish it from high heat cooking styles. Performance declines for the remaining categories. The 
+
+None class is particularly challenging because it represents a heterogeneous group of food items that do not clearly belong to any defined cooking style, which increases the likelihood of confusion with other categories. For styles such as Fermented ,
+
+Stewed , and Preserved , visual cues are often subtle and may overlap with other preparation styles, especially when dishes are combined with sauces. Although Fried foods may appear to have strong visual signals, their characteristic texture cues such as crispness or bubbling surfaces are not always visible in TABLE II: Ablation study across prediction stages. EWR is reported for each stage.             
+
+> Method Category EWR Subcategory EWR Cooking Style EWR Moondream-2B 0.710 0.602 0.203 FoodCHA w/o OpenCHA 0.764 0.631 0.529 FoodCHA 0.820 0.648 0.640
+
+natural images. However, it is worth noting that both Preserved 
+
+and Fried exhibit substantially higher EWR than Recall, indi-cating that disagreements frequently arise among semantically related styles rather than arbitrary labels. This pattern further suggests that FoodCHA tends to produce cautious, ontology-aligned predictions that remain close to expert consensus. 
+
+D. Ablation Study 
+
+Table II isolates the effects of the backbone, hierarchi-cal prompting, and OpenCHA validation. The Moondream-2B baseline uses the same backbone but predicts without staged hierarchy constraints. FoodCHA w/o OpenCHA keeps hierarchical prompting and candidate restriction, but removes explicit parsing, validation, and bounded recovery. Full Food-CHA combines hierarchy-aware candidate restriction with OpenCHA-based validation. FoodCHA improves over Moondream-2B across all stages, with the largest gain at cooking style, where EWR rises from 0.203 to 0.640. This reflects the benefit of progressively restricting candidate sets to ontology-valid descendants. Com-paring FoodCHA w/o OpenCHA to the full system shows that validation matters most at the finest-grained level: cooking-style EWR increases from 0.529 to 0.640. OpenCHA re-duces formatting errors, invalid labels, and hierarchy drift through parsing, membership checks, hierarchy checks, and bounded recovery. These results show that both hierarchy-aware prompting and validation are needed for reliable fine-grained prediction. 
+
+E. Overhead Analysis 
+
+Table III reports end-to-end latency per image (seconds) and summarizes the distribution using the median (p50) and tail percentiles (p90, p95). Here, p50 denotes the median latency, while p90 and p95 correspond to the latencies below which 90% and 95% of samples complete, respectively. Overall, FoodCHA increases median latency from 1.29 s for one-shot Moondream-2B to 3.19 s due to two additional conditioned calls introduced by hierarchical staging. Despite this overhead, FoodCHA remains substantially faster than larger one-shot VLMs, including Qwen2.5-VL-7B (9.97 s) and Food-Llama-3.2-11B (15.65 s). This result suggests that struc-tured, hierarchy-aware inference can achieve reliable canonical label selection more efficiently than scaling backbone capacity alone. The additional computation is therefore devoted to enforcing taxonomy validity and improving expert-aligned agreement through candidate restriction. V. C ONCLUSION 
+
+We introduce FoodCHA, an OpenCHA-based agent pipeline that reformulates food recognition as a sequence of hierarchy-TABLE III: End-to-end inference latency. Latency is reported in seconds per image.                     
+
+> Model Avg p50 p90 p95
+> Moondream 2B 1.50 1.29 2.09 2.61 FoodCHA 3.57 3.19 4.11 4.58 Qwen2.5-VL-7B 9.43 9.97 11.39 12.03 Food-Llama-3.2-11B 14.80 15.65 17.88 18.90
+
+constrained decisions across category, subcategory, and cook-ing style. By leveraging the dataset taxonomy to restrict candidate sets at each stage, FoodCHA produces canonical, hierarchy-consistent labels and mitigates drift inherent in open-ended VLM outputs. Evaluated on FoodNExTDB [35], FoodCHA consistently outperforms state-of-the-art CNN and VLM baselines, including SENet, SGLANet, Moondream-2B, Qwen2.5-VL-7B, and Food-Llama-3.2-11B-Vision-Instruct, across all three hierarchy levels. Its largest gains appear at the cooking-style stage, where staged conditioning substantially improves both F1 and EWR. Importantly, these gains are re-alized without increasing backbone complexity, demonstrating that structured, taxonomy-aware inference can deliver reliable, expert-aligned diet logging across diverse platforms. REFERENCES [1] Mahyar Abbasian, Iman Azimi, Amir M Rahmani, and Ramesh Jain. Conversational health agents: A personalized llm-powered agent frame-work. arXiv preprint arXiv:2310.02374 , 2023. [2] Mahyar Abbasian, Iman Azimi, Amir M Rahmani, and Ramesh Jain. Conversational health agents: a personalized large language model-powered agent framework. JAMIA open , 8(4):ooaf067, 2025. [3] Rahib Abiyev and Joseph Adepoju. Automatic food recognition us-ing deep convolutional neural networks with self-attention mechanism. 
+
+Human-Centric Intelligent Systems , 4(1):171–186, 2024. [4] AdaptLLM. Adaptllm/food-llama-3.2-11b-vision-instruct. https:// huggingface.co/AdaptLLM/food-Llama-3.2-11B-Vision-Instruct, 2025. Hugging Face model card, accessed 2026-02-24. [5] Dario Allegra, Sebastiano Battiato, Alessandro Ortis, Salvatore Urso, and Riccardo Polosa. A review on food recognition technology for health applications. Health psychology research , 8(3):9297, 2020. [6] Chioma Virginia Anikwe, Henry Friday Nweke, Anayo Chukwu Ikegwu, Chukwunonso Adolphus Egwuonwu, Fergus Uchenna Onu, Uzoma Rita Alo, and Ying Wah Teh. Mobile and wearable sensors for data-driven health monitoring system: State-of-the-art and future prospect. Expert Systems with Applications , 202:117362, 2022. [7] Aritra Bhowmik, Mohammad Mahdi Derakhshani, Dennis Koelma, Yuki M Asano, Martin R Oswald, and Cees GM Snoek. Twist & scout: Grounding multimodal llm-experts by forget-free tuning. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 1359–1368, 2025. [8] Chi-Sheng Chen, Guan-Ying Chen, Dong Zhou, Di Jiang, and Dai-Shi Chen. Res-vmamba: Fine-grained food category visual classification using selective state space models with deep residual learning. arXiv preprint arXiv:2402.15761 , 2024. [9] Daixuan Cheng, Shaohan Huang, and Furu Wei. Adapting large language models to domains via reading comprehension. arXiv preprint arXiv:2309.09530 , 2023. [10] Daixuan Cheng, Shaohan Huang, Ziyu Zhu, Xintong Zhang, Wayne Xin Zhao, Zhongzhi Luan, Bo Dai, and Zhenliang Zhang. On domain-adaptive post-training for multimodal large language models, 2024. [11] Stergios Christodoulidis, Marios Anthimopoulos, and Stavroula Mougiakakou. Food recognition for dietary assessment using deep convolutional neural networks. In International conference on image analysis and processing , pages 458–465. Springer, 2015. [12] Florin Dumitrescu, Adina Magda Florea, Mihai Tr˘ asc˘ au, and Alexandru Sorici. Intelligent agent for food recognition in a smart fridge. In 2022 24th International Symposium on Symbolic and Numeric Algorithms for Scientific Computing (SYNASC) , pages 220–225. IEEE, 2022. [13] Pedro Furtado, Manuel Caldeira, and Pedro Martins. Human visual system vs convolution neural networks in food recognition task: An empirical comparison. Computer Vision and Image Understanding ,191:102878, 2020. [14] Tonmoy Ghosh and Edward Sazonov. Improving food image recognition with noisy vision transformer. arXiv preprint arXiv:2503.18997 , 2025. [15] Ziyu Guo, Yong Yin, Haolin Gu, Guihua Peng, Xueya Wang, Ju Chen, and Jia Yan. An integrated lightweight neural network design and fpga-accelerated edge computing for chili pepper variety and origin identification via an e-nose. Foods , 14(15):2612, 2025. [16] Jie Hu, Li Shen, and Gang Sun. Squeeze-and-excitation networks. In 
+
+Proceedings of the IEEE conference on computer vision and pattern recognition , pages 7132–7141, 2018. [17] BN Jagadesh, Srihari Varma Mantena, Asha P Sathe, T Prabhakara Rao, Kranthi Kumar Lella, Shyam Sunder Pabboju, and Ramesh Vatambeti. Enhancing food recognition accuracy using hybrid transformer models and image preprocessing techniques. Scientific Reports , 15(1):5591, 2025. [18] Hokuto Kagaya, Kiyoharu Aizawa, and Makoto Ogawa. Food detection and recognition using convolutional neural network. In Proceedings of the 22nd ACM international conference on Multimedia , pages 1085– 1088, 2014. [19] Razia Sulthana Abdul Kareem, Timothy Tilford, and Stoyan Stoyanov. Fine-grained food image classification and recipe extraction using a customized deep neural network and nlp. Computers in Biology and Medicine , 175:108528, 2024. [20] Muhammad Talha Khan and Muhammad Hassan Khan. A cloud edge collaboration of food recognition using deep neural networks. Journal of Artificial Intelligence and Computing , 2(1):9–18, 2024. [21] Chairi Kiourt, George Pavlidis, and Stella Markantonatou. Deep learning approaches in food recognition. In Machine learning paradigms: advances in deep learning-based technological applications , pages 83– 108. Springer, 2020. [22] Seongwon Lee, Hongje Seong, Suhyeon Lee, and Euntai Kim. Corre-lation verification for image retrieval. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 5374– 5384, 2022. [23] Zhiwei Lin and Yongtao Wang. Vl-sam-v2: Open-world object detection with general and specific query fusion. arXiv preprint arXiv:2505.18986 ,2025. [24] Chang Liu, Yu Cao, Yan Luo, Guanling Chen, Vinod Vokkarane, and Yunsheng Ma. Deepfood: Deep learning-based food image recognition for computer-aided dietary assessment. In International Conference on Smart Homes and Health Telematics , pages 37–48. Springer, 2016. [25] Chang Liu, Yu Cao, Yan Luo, Guanling Chen, Vinod Vokkarane, Ma Yunsheng, Songqing Chen, and Peng Hou. A new deep learning-based food recognition system for dietary assessment on an edge com-puting service infrastructure. IEEE Transactions on Services Computing ,11(2):249–261, 2017. [26] Zheng Ma, Mianzhi Pan, Wenhan Wu, Kanzhi Cheng, Jianbing Zhang, Shujian Huang, and Jiajun Chen. Food-500 cap: A fine-grained food caption benchmark for evaluating vision-language models, 2023. [27] Chinedu Emmanuel Mbonu, Kenechukwu Anigbogu, Doris Asogwa, and Tochukwu Belonwu. An explorative analysis of svm classifier and resnet50 architecture on african food classification, 2025. [28] Simon Mezgec and Barbara Korouˇ si´ c Seljak. Nutrinet: a deep learn-ing food and drink image recognition system for dietary assessment. 
+
+Nutrients , 9(7):657, 2017. [29] Weiqing Min, Zhiling Wang, Yuxin Liu, Mengjiang Luo, Liping Kang, Xiaoming Wei, Xiaolin Wei, and Shuqiang Jiang. Large scale visual food recognition. IEEE Transactions on Pattern Analysis and Machine Intelligence , 45(8):9932–9949, 2023. [30] Sharada Prasanna Mohanty, Gaurav Singhal, Eric Antoine Scuccimarra, Djilani Kebaili, Harris H´ eritier, Victor Boulanger, and Marcel Salath´ e. The food recognition benchmark: Using deep learning to recognize food in images. Frontiers in Nutrition , 9:875143, 2022. [31] Nitis Monburinon, Salahuddin Muhammad Salim Zabir, Natthasak Vech-prasit, Satoshi Utsumi, and Norio Shiratori. A novel hierarchical edge computing solution based on deep learning for distributed image recognition in iot systems. In 2019 4th International Conference on Information Technology (InCIT) , pages 294–299. IEEE, 2019. [32] OpenGVLab. Opengvlab/internvl3-8b. https://huggingface.co/ OpenGVLab/InternVL3-8B, 2025. Hugging Face model card, accessed 2026-02-24. [33] Parisa Pouladzadeh and Shervin Shirmohammadi. Mobile multi-food recognition using deep learning. ACM Transactions on Multimedia Computing, Communications, and Applications (TOMM) , 13(3s):1–21, 2017. [34] Parisa Pouladzadeh, Gregorio Villalobos, Rana Almaghrabi, and Shervin Shirmohammadi. A novel svm based food recognition method for calorie measurement applications. In 2012 IEEE international conference on multimedia and expo workshops , pages 495–498. IEEE, 2012. [35] Sergio Romero-Tapiador, Ruben Tolosana, Blanca Lacruz-Pleguezuelos, Laura Judith Marcos-Zambrano, Guadalupe X Baz´ an, Isabel Espinosa-Salinas, Julian Fierrez, Javier Ortega-Garcia, Enrique Carrillo de Santa Pau, and Aythami Morales. Are vision-language models ready for dietary assessment? exploring the next frontier in ai-powered food image recognition. In Proceedings of the Computer Vision and Pattern Recognition Conference , pages 430–439, 2025. [36] Doyen Sahoo, Wang Hao, Shu Ke, Wu Xiongwei, Hung Le, Palakorn Achananuparp, Ee-Peng Lim, and Steven CH Hoi. Foodai: Food image recognition via deep learning for smart food logging. In Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining , pages 2260–2268, 2019. [37] Nareen OM Salim, Subhi RM Zeebaree, Mohammed AM Sadeeq, AH Radie, Hanan M Shukur, and Zryan Najat Rashid. Study for food recognition system using deep learning. In Journal of Physics: Conference Series , volume 1963, page 012014. IOP Publishing, 2021. [38] Andrea Sosa-Holwerda, Oak-Hee Park, Kembra Albracht-Schulte, Surya Niraula, Leslie Thompson, and Wilna Oldewage-Theron. The role of artificial intelligence in nutrition research: a scoping review. Nutrients ,16(13):2066, 2024. [39] Qwen Team. Qwen2.5-vl technical report, 2025. [40] Aida Turrini. Perspectives of dietary assessment in human health and disease. Nutrients , 14(4):830, 2022. [41] Vikhyat Kumar and contributors. vikhyatk/moondream2. https:// huggingface.co/vikhyatk/moondream2, 2025. Hugging Face model card, accessed 2026-02-24. [42] Yishu Wang, Fangyu Zhou, Xiaokang Han, Kecheng Yao, and Zhuy-ing Li. Foodsage: Addressing recognition uncertainty in automated dietary monitoring through human-robot dialogue. In Proceedings of the Extended Abstracts of the CHI Conference on Human Factors in Computing Systems , pages 1–7, 2025. [43] Muqing Xu. A closed-loop multi-agent system driven by llms for meal-level personalized nutrition management. arXiv preprint arXiv:2601.04491 , 2026. [44] Hui Ye and Qiming Zou. Food recognition and dietary assessment for healthcare system at mobile device end using mask r-cnn. In 
+
+International Conference on Testbeds and Research Infrastructures ,pages 18–35. Springer, 2019. [45] Yuehao Yin, Huiyan Qi, Bin Zhu, Jingjing Chen, Yu-Gang Jiang, and Chong-Wah Ngo. Foodlmm: A versatile food assistant using large multi-modal model, 2024. [46] Yudong Zhang, Lijia Deng, Hengde Zhu, Wei Wang, Zeyu Ren, Qinghua Zhou, Siyuan Lu, Shiting Sun, Ziquan Zhu, Juan Manuel Gorriz, et al. Deep learning in food category recognition. Information Fusion ,98:101859, 2023. [47] Pengfei Zhou, Weiqing Min, Chaoran Fu, Ying Jin, Mingyu Huang, Xiangyang Li, Shuhuan Mei, and Shuqiang Jiang. Foodsky: A food-oriented large language model that can pass the chef and dietetic examinations. Patterns , 6(5):101234, 2025. [48] Jinguo Zhu et al. Internvl3: Exploring advanced training and test-time recipes for open-source multimodal models, 2025.
