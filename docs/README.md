@@ -6,70 +6,59 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-09
-- 运行时间：2026-05-09 20:45:30 UTC
+- 最新运行日期：2026-05-10
+- 运行时间：2026-05-10 20:27:08 UTC
 - 运行状态：成功
-- 本次总论文数：16
-- 精读区：5
+- 本次总论文数：12
+- 精读区：1
 - 速读区：11
 
 ### 今日简报（AI）
-今日精选16篇论文，重点攻克多模态大模型在视觉问答RAG与机器人4D时空推理中的核心挑战。
-值得关注“问题链”引导的检索增强技术，以及通过时空一致性优化机器人操作感知与推理的新范式。
-建议读者留意多模态模型如何从单纯的“看图说话”转向具备高效推理与特征预测能力的动态交互控制。
-- 详情：[/202605/09/README](/202605/09/README)
+- 今日共生成 12 篇推荐（精读 1 篇，速读 11 篇）
+- 精读：《Cross-Modal Navigation with Multi-Agent Reinforcement Learning》（8.0/10）
+- 速读：《Rollout Pass-Rate Control: Steering Binary-Reward RL Toward Its Most Informative Regime》（7.0/10）, 《AstroAlertBench: Evaluating the Accuracy, Reasoning, and Honesty of Multimodal LLMs in Astronomical Classification》（7.0/10）, 《TableVista: Benchmarking Multimodal Table Reasoning under Visual and Structural Complexity》（7.0/10）
+- 这些结果覆盖了当下较热的方向，建议先看精读区论文的关键问题与方法。
+- 详情：[/202605/10/README](/202605/10/README)
 
 ### 精读区论文标签
-1. [Enhancing Visual Question Answering with Multimodal LLMs via Chain-of-Question Guided Retrieval-Augmented Generation](/202605/09/2605.03790v1-enhancing-visual-question-answering-with-multimodal-llms-via-chain-of-question-guided-retrieval-augmented-generation)  
+1. [Cross-Modal Navigation with Multi-Agent Reinforcement Learning](/202605/10/2605.06595v1-cross-modal-navigation-with-multi-agent-reinforcement-learning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：多模态大模型用于视觉推理和问答
-2. [ConsisVLA-4D: Advancing Spatiotemporal Consistency in Efficient 3D-Perception and 4D-Reasoning for Robotic Manipulation](/202605/09/2605.05126v1-consisvla-4d-advancing-spatiotemporal-consistency-in-efficient-3d-perception-and-4d-reasoning-for-robotic-manipulation)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：用于4D推理和机器人操作的视觉-语言-动作（VLA）模型
-3. [Reward Shaping and Action Masking for Compositional Tasks using Behavior Trees and LLMs](/202605/09/2605.05795v1-reward-shaping-and-action-masking-for-compositional-tasks-using-behavior-trees-and-llms)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：LLM 用于强化学习中的奖励塑造和动作掩码
-4. [VLA-GSE: Boosting Parameter-Efficient Fine-Tuning in VLA with Generalized and Specialized Experts](/202605/09/2605.06175v1-vla-gse-boosting-parameter-efficient-fine-tuning-in-vla-with-generalized-and-specialized-experts)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉-语言-动作（VLA）模型在控制任务中的参数高效微调
-5. [AI CFD Scientist: Toward Open-Ended Computational Fluid Dynamics Discovery with Physics-Aware AI Agents](/202605/09/2605.06607v1-ai-cfd-scientist-toward-open-ended-computational-fluid-dynamics-discovery-with-physics-aware-ai-agents)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：基于视觉的物理验证和用于科学发现的智能体工作流
+   evidence：用于导航的多模态强化学习
 
 ### 速读区论文标签
-1. [Chain of Evidence: Pixel-Level Visual Attribution for Iterative Retrieval-Augmented Generation](/202605/09/2605.01284v1-chain-of-evidence-pixel-level-visual-attribution-for-iterative-retrieval-augmented-generation)  
+1. [Rollout Pass-Rate Control: Steering Binary-Reward RL Toward Its Most Informative Regime](/202605/10/2605.05112v1-rollout-pass-rate-control-steering-binary-reward-rl-toward-its-most-informative-regime)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：针对复杂多跳问题的文档视觉推理
-2. [Act2See: Emergent Active Visual Perception for Video Reasoning](/202605/09/2605.01657v1-act2see-emergent-active-visual-perception-for-video-reasoning)  
+   evidence：二元奖励下的智能体强化学习
+2. [AstroAlertBench: Evaluating the Accuracy, Reasoning, and Honesty of Multimodal LLMs in Astronomical Classification](/202605/10/2605.05573v1-astroalertbench-evaluating-the-accuracy-reasoning-and-honesty-of-multimodal-llms-in-astronomical-classification)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：VLM中用于视频推理的主动视觉感知
-3. [Latent Bridge: Feature Delta Prediction for Efficient Dual-System Vision-Language-Action Model Inference](/202605/09/2605.02739v1-latent-bridge-feature-delta-prediction-for-efficient-dual-system-vision-language-action-model-inference)  
+   evidence：用于科学推理任务的多模态大模型
+3. [TableVista: Benchmarking Multimodal Table Reasoning under Visual and Structural Complexity](/202605/10/2605.05955v1-tablevista-benchmarking-multimodal-table-reasoning-under-visual-and-structural-complexity)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于机器人操作的视觉-语言-动作 (VLA) 模型
-4. [An Agent-Oriented Pluggable Experience-RAG Skill for Experience-Driven Retrieval Strategy Orchestration](/202605/09/2605.03989v1-an-agent-oriented-pluggable-experience-rag-skill-for-experience-driven-retrieval-strategy-orchestration)  
+   evidence：视觉复杂环境下的多模态表格推理基准测试
+4. [Towards Self-Explainable Document Visual Question Answering with Chain-of-Explanation Predictions](/202605/10/2605.06058v1-towards-self-explainable-document-visual-question-answering-with-chain-of-explanation-predictions)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：面向智能体的推理任务检索编排
-5. [From Language to Logic: A Theoretical Architecture for VLM-Grounded Safe Navigation](/202605/09/2605.04327v1-from-language-to-logic-a-theoretical-architecture-for-vlm-grounded-safe-navigation)  
+   evidence：通过解释链设计的落地推理过程
+5. [Milestone-Guided Policy Learning for Long-Horizon Language Agents](/202605/10/2605.06078v1-milestone-guided-policy-learning-for-long-horizon-language-agents)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：基于VLM的安全导航和零样本场景理解
-6. [ELVIS: Ensemble-Calibrated Latent Imagination for Long-Horizon Visual MPC](/202605/09/2605.04709v1-elvis-ensemble-calibrated-latent-imagination-for-long-horizon-visual-mpc)  
+   evidence：长程语言智能体的强化学习
+6. [Recursive Agent Optimization](/202605/10/2605.06639v1-recursive-agent-optimization)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：基于模型的强化学习视觉控制
-7. [Discovering Reinforcement Learning Interfaces with Large Language Models](/202605/09/2605.03408v1-discovering-reinforcement-learning-interfaces-with-large-language-models)  
+   evidence：用于递归智能体和任务委派的强化学习
+7. [Decompose and Recompose: Reasoning New Skills from Existing Abilities for Cross-Task Robotic Manipulation](/202605/10/2605.01448v1-decompose-and-recompose-reasoning-new-skills-from-existing-abilities-for-cross-task-robotic-manipulation)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：LLM引导的强化学习任务接口发现框架
-8. [Information Coordination as a Bridge: A Neuro-Symbolic Architecture for Reliable Autonomous Driving Scene Understanding](/202605/09/2605.04475v1-information-coordination-as-a-bridge-a-neuro-symbolic-architecture-for-reliable-autonomous-driving-scene-understanding)  
+   evidence：用于机器人操作决策的技能推理框架
+8. [Bolek: A Multimodal Language Model for Molecular Reasoning](/202605/10/2605.02745v1-bolek-a-multimodal-language-model-for-molecular-reasoning)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于自动驾驶场景理解与推理的神经符号架构
-9. [Reward-Guided Semantic Evolution for Test-time Adaptive Object Detection](/202605/09/2605.04531v1-reward-guided-semantic-evolution-for-test-time-adaptive-object-detection)  
+   evidence：用于分子推理的多模态语言模型
+9. [How Far Are VLMs from Privacy Awareness in the Physical World? An Empirical Study](/202605/10/2605.05340v1-how-far-are-vlms-from-privacy-awareness-in-the-physical-world-an-empirical-study)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：基于VLM检测的奖励引导语义演化
-10. [BALAR : A Bayesian Agentic Loop for Active Reasoning](/202605/09/2605.05386v1-balar--a-bayesian-agentic-loop-for-active-reasoning)  
+   evidence：VLM作为具身助手的自主认知核心
+10. [AffectGPT-RL: Revealing Roles of Reinforcement Learning in Open-Vocabulary Emotion Recognition](/202605/10/2605.06126v1-affectgpt-rl-revealing-roles-of-reinforcement-learning-in-open-vocabulary-emotion-recognition)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：交互式环境下的主动推理贝叶斯智能体循环
-11. [Large Vision-Language Models Get Lost in Attention](/202605/09/2605.05668v1-large-vision-language-models-get-lost-in-attention)  
+   evidence：用于多模态情感识别的强化学习
+11. [Skill1: Unified Evolution of Skill-Augmented Agents via Reinforcement Learning](/202605/10/2605.06130v1-skill1-unified-evolution-of-skill-augmented-agents-via-reinforcement-learning)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：大型视觉语言模型内部模块和注意力的分析
+   evidence：智能体技能演化的强化学习
 
 
 <div class="dpr-home-promo-card">
