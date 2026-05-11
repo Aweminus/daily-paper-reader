@@ -1,0 +1,1002 @@
+Title: Retrieve, Integrate, and Synthesize: Spatial-Semantic Grounded Latent Visual Reasoning
+
+URL Source: https://arxiv.org/pdf/2605.07106v1
+
+Published Time: Mon, 11 May 2026 00:44:01 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Retrieve, Integrate, and Synthesize : Spatial-Semantic Grounded Latent Visual Reasoning 
+
+Jin Cui ∗1, Xinyue Long ∗2, Xunyong Zhang 1, Yadong Zhang 1,Chuanchang Su 1, Jingye Gan 1, Boran Zhao †2, Pengju Ren 11State Key Laboratory of Human-Machine Hybrid Augmented Intelligence, and Institute of Artificial Intelligence and Robotics, Xi’an Jiaotong University 
+
+> 2
+
+School of Software Engineering, State Key Laboratory of Human-Machine Hybrid Augmented Intelligence, Institute of Artificial Intelligence and Robotics, Xi’an Jiaotong University 
+
+andycui@stu.xjtu.edu.cn, {boranzhao, pengjuren}@xjtu.edu.cn 
+
+Abstract 
+
+Multimodal Large Language Models (MLLMs) have made remarkable progress on vision-language reasoning, yet most methods still compress visual evidence into discrete textual thoughts, creating an information bottleneck for fine-grained perception. Recent latent visual reasoning methods attempt to reason in continuous hidden states, but we find that they suffer from insufficient manifold compati-bility: latent trajectories drift away from pretrained reasoning circuits, collapse into instance-agnostic patterns, and are often bypassed during answer generation. To address these issues, we propose RIS (Retrieve, Integrate, and Synthesize) , a spatial-semantic grounded framework that develops latent reasoning as a compat-ible extension of pretrained MLLM computation. We first construct a step-wise grounded reasoning dataset with bounding boxes and region-specific semantic descriptions. Built on this supervision, RIS anchors latent tokens to both spatial and semantic evidence, enforces their causal role through a progressive attention bottleneck, and introduces short language transition tokens to bridge synthesized la-tent states back to vocabulary-aligned decoding. Experiments on V ∗, HRBench4K, HRBench8K, MMVP, and BLINK show consistent improvements over closed/open-source and latent reasoning baselines. Further analyses demonstrate that RIS learns diverse, interpretable, and progressively integrated latent trajectories, offering a practical path toward faithful internal visual reasoning in MLLMs. 
+
+1 Introduction 
+
+Multimodal Large Language Models (MLLMs) have achieved remarkable success across diverse vision-language tasks, largely due to Chain-of-Thought (CoT) reasoning[ 1 , 2]. However, these models still treat visual information as static preconditions, converting continuous visual features into discrete textual tokens and reasoning only within the textual domain[ 3 ]. This creates an inherent bottleneck: fine-grained visual evidence must be compressed into language tokens before it can participate in reasoning . Recent “thinking with images”[ 4 ] methods alleviate this issue by injecting visual evidence through external tools[ 5– 7] or programmatic operations[ 8 –10 ], but their flexibility is limited by predefined tool interfaces and external execution. This necessitates a more unified solution to move intermediate visual reasoning inside the model, allowing it to manipulate question-relevant visual evidence directly in continuous hidden representations. 
+
+> *Equal contribution.
+> †Corresponding author. Preprint.
+> arXiv:2605.07106v1 [cs.CL] 8 May 2026
+
+Latent visual reasoning offers a promising path toward this goal. Unlike text-based CoT, latent states provide an expressive workspace where visual patterns and abstract concepts can be represented without being discretized into language[ 4 , 11 ]. Yet this freedom also introduces a fundamental tension. Since the model’s reasoning behavior and decoding interface are largely shaped by language pretraining, effective latent visual reasoning must not only exploit the expressive capacity of a latent visual manifold Mvis , but also remain compatible with the vocabulary-aligned manifold Mvocab 
+
+where pretrained reasoning circuits and language-grounded decoding are organized. Existing methods such as LVR[ 12 ] and Monet[ 13 ] take important steps by reconstructing visual tokens from latent states or generating continuous embeddings as intermediate visual thoughts, but they do not fully resolve this compatibility problem. In this work, we first analyze why existing latent visual reasoning methods remain ineffective despite forming distinct latent visual representations . Recent causal mediation study[ 14 ] reveals pronounced 
+
+Input–Latent and Latent–Answer disconnects, where latent tokens are weakly grounded in visual inputs and exert limited influence on final predictions. Our empirical analysis further shows that these failures are closely tied to manifold divergence. Specifically, (1) weakly supervised hidden states may drift away from the pretrained vocabulary-aligned manifold and tend to collapse into highly similar, instance-agnostic trajectories; (2) answer tokens usually bypass latent tokens and rely directly on the input image and question; (3) the model must converge high-entropy latent visual states abruptly to low-entropy answer tokens, which can induce representation mismatch during language decoding. To address these challenges, we propose RIS (Retrieve, Integrate, and Synthesize) , a grounded latent visual reasoning framework that develops latent space as a compatible extension of pretrained reasoning circuits rather than a detached visual manifold. To support training, we first construct a step-wise grounded visual reasoning dataset with 96 k samples in which each reasoning step is paired with bounding-box spatial supervision and a region-specific semantic description. Built on this spatial-semantic supervision, RIS structures latent tokens as directed visual evidence retrieval states: bounding-box supervision anchors where to look , semantic alignment specifies what is seen , and a progressive attention mask forces task-relevant evidence to flow through latent tokens instead of being bypassed during answer generation. Slots beyond the annotated reasoning steps are optimized solely through the final-answer objective, endowing them with the emergent ability to integrate and synthesize evidence retrieved by grounded slots. Finally, we demonstrate that generating a slightly elaborated answer between latent reasoning and final option-level answer acts as manifold transition tokens since it gradually reduces the entropy of reasoning paths from latent states to low-entropy answer tokens rather than abrupt degradation, while providing dense supervision during training. We evaluate RIS on five challenging visual reasoning benchmarks. RIS consistently outperforms strong baselines, with particularly clear gains on tasks requiring localization, structured visual search, and multi-step perceptual reasoning. Further analyses show that RIS produces more diverse, interpretable, and task-dependent latent trajectories. Our contributions are summarized as follows: 
+
+⋆ We provide a systematic analysis of latent visual reasoning in MLLMs, identifying the interaction between vocabulary-aligned manifold Mvocab and latent visual manifold Mvis , and revealing manifold divergence, latent trajectory collapse, and answer bypassing as key obstacles. 
+
+⋆ We construct an 96 k-sample Grounded Latent Supervision Dataset (GLSD) and propose RIS ,a spatial-semantic grounded latent reasoning framework that structures latent tokens to retrieve task-relevant visual evidence while developing latent space as a compatible extension of pretrained reasoning circuits rather than a detached visual manifold. 
+
+⋆ We demonstrate consistent improvements across visual reasoning benchmarks, especially on local-ization and multi-step visual reasoning tasks, and further show that RIS learns diverse, interpretable, and progressively integrated latent reasoning trajectories with state-of-the-art performance. 
+
+2 Related Work 
+
+From Static Perception to Internal Visual Imagination. Most current MLLMs adopt text-space CoT reasoning to solve complex visual tasks, treating visual inputs as static premises for language-based inference[ 15 , 16 ]. Although effective, such methods reason through discrete text tokens, which provide an indirect and lossy representation for fine-grained visual understanding. Recent Thinking with Images [4] methods alleviate this limitation by using external visual tools to manipulate and inject intermediate visual evidence[ 5 ]. However, their effectiveness is constrained by the availability, 2design, and granularity of predefined tools. This motivates internal visual reasoning, where models reason over visual evidence in continuous latent states rather than translating it into text or pixels. 
+
+Latent Reasoning. Recent studies have explored continuous latent spaces as an alternative to discrete token-level reasoning. Representative approaches include utilizing recursive hidden states for breadth-first search[ 17 ], self-distillation of explicit reasoning traces[ 18 ], and implicit reasoning via superposed latent chains[ 19 ]. While these methods enhance reasoning efficiency, they remain constrained in textual space. Extending them to MLLMs is non-trivial: representing visual evidence by vocabulary embeddings or weakly supervised hidden states can distort fine-grained cues such as texture, color, and spatial layout. Effective visual latent reasoning requires a visual manifold that can preserve rich perceptual evidence while remaining compatible with language-grounded reasoning. 
+
+Latent Visual Reasoning. To move beyond static perception toward internal visual imagination, recent paradigms have explored performing logical deductions directly within the latent space. LVR[ 12 ] performs autoregressive reasoning within the visual embedding space by reconstructing task-critical tokens from latent states. Monet generates continuous embeddings that serve as intermediate visual thoughts and aligns them with the visual semantic space through a distillation pipeline[ 13 ]. Mirage further treats hidden states as latent visual tokens to build multimodal reasoning trajectories without pixel-level image synthesis[ 20 ]. Despite these advances, recent diagnostic studies reveal a persistent causality gap: latent tokens are often weakly grounded in visual inputs and exert limited influence on final answers [ 14 ]. Our analyses further reveal a fundamental manifold divergence in existing baselines, where latent trajectories drift into deep, uncalibrated regions far from the pre-trained semantic anchors. These limitations thus motivate our grounded latent reasoning framework. 
+
+3 Analysis on Reasoning Manifold 
+
+To understand how latent tokens shape the reasoning trajectory of models trained for latent reasoning, we develop a geometric analysis that visualizes the path traversed by hidden states during a single inference, relative to both the original base-model manifold and the vocabulary embedding space. The analysis is motivated by a simple question: as the model generates a sequence of latent tokens followed by the decoded language answer tokens, how does its internal representation travel through the joint space of hidden states and vocabulary embeddings? 
+
+We construct a dataset of reasoning trajectories from an evaluation set of N samples. For each sample 
+
+i, a forward-decoding pass produces last-layer hidden states {h(i) 
+
+> t
+
+}Ti
+
+> t=1
+
+, where each state is labeled as belonging to either the latent or answer phase. We denote the aggregate of these reasoning states across all samples as HRIS . As references, we collect the corresponding hidden states from a frozen base model, denoted as Hbase , alongside the vocabulary embedding matrix E ∈ RV ×d. To visualize manifold distributions and reasoning trajectories in a shared space, we fit PCA jointly on Hbase , HRIS ,and E, and project each trajectory onto the plane spanned by the leading two principal components. 
+
+3.1 Manifold Compatibility and Trajectory Dynamics 
+
+We use manifold to refer to the empirical support of high-dimensional hidden-state or embedding representations. Figure 1 compares the hidden-state distributions of the frozen base model as an em-pirical reference for the pretrained vocabulary-aligned manifold with those induced by different latent reasoning training methods. In LVR and Monet, the learned latent states are visibly separated from this reference manifold, suggesting that they form distinct latent visual manifolds with richer visual expressiveness but also introduce representational distribution shifts. Such separation can weaken compatibility with the pretrained reasoning circuits acquired during large-scale language pretraining and with the language decoding process, which partly explains their degraded performance. The trajectory visualization provides a dynamic view of this phenomenon. Successful reasoning paths tend to remain connected to the vocabulary-aligned manifold, whereas failed paths are more often trapped within detached latent visual regions. This does not imply that correct reasoning must explicitly return to the vocabulary manifold at specific steps; rather, effective latent visual reasoning should remain compatible with the pretrained representation regime, allowing the model to exploit existing reasoning circuits while incorporating fine-grained visual evidence in latent space. This supports our view: latent visual reasoning should not replace the model’s original reasoning manifold, but should develop as a compatible extension of it. 
+
+3[Image Tokens] [Text Tokens] [Latent Tokens] [Answer Tokens]      
+
+> 56%
+> 31% 2%
+> 56% 31% 2% Answer attention: Minimal attention
+
+≈ ignored 
+
+LVR      
+
+> [Input Tokens] [Latent Tokens] [Answer Tokens]
+> 13% 9%
+> Answer attention: Adequate attention
+
+Bottleneck       
+
+> [Transition Tokens]
+> 12% 29% 34%
+> 78% 22%
+> 9% 13% 12% 29% 34%
+
+Ours 
+
+(c) Attention Distribution 
+
+0 5 10 15 20 25 
+
+0.0 
+
+2.5 
+
+5.0 
+
+7.5 
+
+10.0 
+
+12.5 
+
+15.0 
+
+17.5 
+
+Layer Depth                      
+
+> PC1 Shift Magnitude (Distance)
+> 𝐀𠐀 𝐀𨀀𝐀𥠀𨀀𥀀𨀀𦰀𝐀𥠀𝐀 𝐀𨐀𝐀𥠀𝐀𨀀𝐀𨀀𠐀𥠀 s𨀀𥠀 𝐀 ℎ𝐀
+> 𨀀𥠀𝐀𝐀𨐀𥠀𝐀𤠀 𦰀𠐀𝐀𧀀𝐀𝐀𝐀𝐀𨀀𠐀𥠀 𦰀𨀀𨐀𦰀𝐀𨀀𝐀
+> H𨀀𥠀𥠀𝐀𥠀 𝐀𝐀𝐀𝐀𝐀 𥠀𨀀𝐀𝐀𨐀𝐀𝐀𥠀𦰀𝐀 𤠀𝐀𨐀𝐀𝐀𤠀𝐀 𦰀𝐀𝐀𝐀𝐀𥠀
+> 𝐀𝐀 𝐀 ℎ𝐀 𥠀𨐀𨀀𥀀𝐀 𨀀𥠀 𠐀𝐀𝐀𧀀𝐀𝐀 𤠀𝐀𝐀𝐀𨐀𝐀
+> 𝐀𝐀𝐀𨐀𝐀𝐀𥠀𦰀𝐀 𠐀𥀀 𨀀𥠀𝐀𝐀𨐀𥠀𝐀𤠀 𦰀𨀀𨐀𦰀𝐀𨀀𝐀𝐀
+> 𝐀𥠀𝐀𧀀𝐀𝐀𥠀 𥀀𠐀𨐀 𤠀𝐀𝐀𝐀𥠀𝐀 𨐀𝐀𝐀𝐀𠐀𥠀𨀀𥠀𝐀
+
+Ours 
+
+LVR 
+
+Monet 
+
+(b) Layer-wise Parameter Shift 
+
+(a) Manifold Distribution and Reasoning Trajectories Vocabulary Manifold Latent Visual Manifold 
+
+Embedding Manifold 
+
+Embedding Manifold 
+
+Embedding Manifold 
+
+LVR    
+
+> Embedding Manifold
+> Embedding Manifold
+> Embedding Manifold
+
+Monet Ours   
+
+> 𝐀 𝐀𝐀𝐀𥠀𝐀 𝐀 𨀀𝐀𝐀𝐀𤠀 𝐀 𝐀𥠀𨀀𥀀𠐀𤠀𥠀
+> 𤠀𝐀𨐀𝐀𝐀𤠀𝐀
+
+detached from 
+
+Vocabulary Manifold   
+
+> 𝐀 𝐀𝐀𝐀𥠀𝐀 𝐀 𨀀𝐀𝐀𝐀𤠀 𝐀 𝐀𥠀𨀀𥀀𠐀𤠀𥠀
+> 𦰀𠐀𝐀𧀀𤠀𝐀𝐀𝐀𤠀𝐀
+
+detached from 
+
+Vocabulary Manifold     
+
+> 𝐀 𝐀𝐀𝐀𥠀𝐀 𝐀 𨀀𝐀𝐀𝐀𤠀 𝐀 𝐀𥠀𨀀𥀀𠐀𤠀𥠀
+> r𝐀𝐀𝐀𨀀𥠀 𦰀𠐀𝐀𧀀𝐀𝐀𨀀𝐀𤠀𝐀 𝐀𨀀𝐀 ℎ
+
+Vocabulary Manifold Figure 1: Geometric analysis of latent reasoning paradigms: (a) manifold distribution and trajectories, (b) layer-wise parameter shift relative to the base model, and (c) attention pattern of answer tokens. Grounding DINO 
+
+Question: What is the animal 
+
+that the building is behind of? 
+
+> 1:inspect
+
+Region  Description :
+
+background behind the  animal 
+
+Visual Information : a distant, 
+
+blurry structure with building -
+
+like shape behind the  animal .
+
+> 2:verify
+
+Region  Description : ground 
+
+area in front of the sheep 
+
+Visual Information : region with 
+
+the grass and muddy ground in 
+
+front of the sheep 
+
+> 3:locate
+
+Region  Description : animal in 
+
+front of the background  building 
+
+Visual Information : a white 
+
+woolly sheep with a black face 
+
+and legs, facing the camera. 
+
+MLLM  Qwen 3-VL -235 B-A22 B
+
+Verify Bounding Box 
+
+Bbox + [Region description: Visual information] 
+
+… produce a SHORT explicit reasoning 
+
+trace of 2 to 4 steps . Each step must: 
+
+1) provide bounding boxes to locate 
+
+the critical visual region; 2) describe 
+
+which image region is being looked at; 
+
+3) state what visual information is 
+
+extracted from that region. 
+
+Prompt 
+
+GQA Dataset 
+
+Figure 2: Dataset construction pipeline. An MLLM decomposes each QA pair into several grounded reasoning steps, which are then verified and calibrated by Grounding DINO. 
+
+3.2 Layer-wise Adaptation Pattern 
+
+To further analyze the observed manifold compatibility, Figure 1(b) measures the layer-wise parameter shift from the base model. LVR and Monet show limited changes in the middle layers but large shifts in the output layers, indicating that their adaptation is concentrated near the final decoding interface rather than distributed across the internal computation stack. This pattern suggests that they form limited internal circuits for latent visual reasoning and instead rely on late-stage compensation to map detached latent visual states back to language-grounded outputs. In contrast, our method produces a smoother and more sustained shifts across the middle layers, followed by much milder changes near the output layers. This indicates that the model gradually adapts its internal computation to support latent visual reasoning while preserving the vocabulary-aligned manifold near the decoding interface. 
+
+3.3 Latent Bypassing and Trajectory Collapse 
+
+The attention analysis further explains why a detached latent visual manifold does not necessarily lead to effective latent reasoning. As shown in Figure 1(c), answer tokens allocate most of their 4Multimodal Large Language Model Backbone 
+
+Hidden State 
+
+Embedding Layer 
+
+… …          
+
+> [Image Tokens] [Latent Tokens] [Text Tokens] [Transition Tokens]
+> [Answer]
+> Latent Manifold
+> Vocab Embedding Manifold
+> What is the animal that
+> the building is behind of?
+> 1:inspect
+> Region Description :
+> background behind the animal
+> Visual Information :a low,
+> indistinct building in the distance
+> 2:verify
+> Region Description :background
+> that the animal in front of
+> Visual Information :grass land,
+> consistent with the foreground
+> 3:locate
+> Region Description :the central
+> sheep in the image
+> Visual Information :white
+> woolly body, black face and legs
+> Semantic
+> Decoder
+> Visual
+> Decoder
+
+Supervised  Unsupervised   
+
+> Integrate & Synthesize
+> Training Strategy
+
+𝜃 𝑑𝑒𝑐 
+
+𝜃 𝑙𝑙𝑚 
+
+> Phase 1
+
+𝜃 𝑙𝑙𝑚 
+
+𝜃 𝑑𝑒𝑐 
+
+> Phase 2a
+
+𝜃 𝑙𝑙𝑚 
+
+𝜃 𝑑𝑒𝑐 
+
+> Phase 2b
+
+𝜃 𝑙𝑙𝑚 
+
+𝜃 𝑑𝑒𝑐             
+
+> Phase 3
+> mask
+> Embedding Layer
+> RMSNorm
+> LM Head
+> Softmax
+> MLLM Backbone
+> Language
+> token
+> Latent token
+> Progressive Mask
+> Grounded Latent Supervision Dataset: GT Bbox + [Region description: Visual information]
+> Per -step Supervision
+> Decode into Bbox + [Region description: Visual information]
+> [Image Tokens] [Text Tokens] [Latent Tokens] [Transition Tokens] [Answer Tokens]
+> Attention Mask
+> Attention
+> Pattern
+> Question:
+
+Figure 3: Overview of RIS framework. Visual and semantic decoders are only used for supervision in training and will be removed during inference. Full attention mask used during inference. attention to original image and text tokens, while assigning only minimal attention to latent tokens. This indicates that the final decoding largely bypasses the latent reasoning tokens instead of using them as intermediate computational states. This observation is consistent with [ 14 ] that latent tokens are weakly grounded in the visual premises and exert limited causal influence on the final answer. The trajectories of LVR and Monet in Figure 1(a) provide a complementary view. Across samples, their latent trajectories are highly similar and densely collapsed, suggesting limited instance-specific reasoning information. Thus, although these methods appear to form latent visual manifolds, such manifolds are not effectively integrated into the model’s computation: they neither receive sufficient input-grounded variation nor provide a reliable pathway back to the vocabulary-aligned manifold. Taken together, these analyses suggest: Effective latent reasoning requires more than learning a separated latent visual manifold. It must establish compatible internal circuits that ground latent states in visual inputs, preserve access to pretrained reasoning circuits, and smoothly transfer visual abstractions back to the vocabulary-aligned manifold for language-grounded answer generation. 
+
+4 Method 
+
+In this section, we first elaborate on the construction of our step-wise Grounded Latent Supervision Dataset (GLSD) , which provides spatial-semantic supervision for intermediate visual reasoning. Built on this, we introduce RIS , a grounded latent reasoning framework that uses last-layer hidden states as continuous latent tokens. Following common practice, RIS allocates a fixed number of latent tokens and feeds them forward as continuous embeddings. Figure 3 illustrates the overall training pipeline. 
+
+4.1 Dataset Construction 
+
+Since existing datasets rarely provide fine-grained supervision for intermediate reasoning, we convert standard GQA[ 21 ] data into a unified step-wise grounded format and curate such supervision through 5a two-stage pipeline. First, prompt an MLLM to decompose each question-answer pair into a 2–4 step trace, where each step contains an operation tag, a region-specific semantic description, visual information, and preliminary bounding-box coordinates, leading to a full answer (as transition tokens) and final answer as visualized in Appendix E. Then, we feed the generated descriptions and original image into Grounding DINO [22] to verify and calibrate the MLLM-proposed coordinates. The verified trace is serialized as T and padded to the fixed latent budget K. Each supervised step is represented as <step_start> <bbox> bi </bbox> vi <step_end> , where bi denotes the normalized bounding box coordinates and vi denotes the corresponding visual information. Let 
+
+mi ∈ { 0, 1} indicate whether the i-th slot has explicit step-wise supervision. For unsupervised slots with mi = 0 , we insert <step_start> [synthesize] <step_end> , allowing them to learn evidence integration from downstream answer supervision. This yields 96 k training samples. 
+
+4.2 Training Phase 1: Explicit Grounded Reasoning Initialization 
+
+In Phase 1, we initialize the MLLM with explicit grounded visual reasoning before moving to continuous latent computation. Given image embeddings Xv and a tokenized query Xq , the model is trained to generate the structured reasoning trace T followed by the full answer As and final answer 
+
+A. Unlike generic textual rationales, T contains step-wise normalized bounding-box coordinates, fine-grained visual information, and boundary tokens, thereby teaching the model to retrieve regions, integrate visual evidence, and synthesize the answer in a discrete but explicitly grounded format. We optimize the backbone M with the standard next-token prediction (NTP) objective:             
+
+> LNTP =−
+> |T ⊕ As⊕A|
+> X
+> t=1
+> log PM(yt|y<t ,Xv,Xq).(1)
+
+This stage equips the backbone with a reliable text-space grounded reasoning prior. After training, we use the Phase-1 trained model to encode the region-specific descriptions in each step. The resulting cached embeddings serve as stable semantic anchors for Phase 2 training, preventing the latent-space supervision targets from drifting during continuous-token training. 
+
+4.3 Training Phase 2a: Side-Head Grounding and Semantic Alignment 
+
+To transition from discrete textual reasoning to the continuous latent space, we introduce a set of fixed-capacity visual latent tokens C = {c1, c 2, . . . , c K }. In this phase, we freeze the MLLM backbone and calibrate two lightweight, task-specific side heads: Visual Grounding Decoder (freg ) and Semantic Alignment Decoder (fdesc ). For each reasoning step t where mt = 1 , we extract the last-layer hidden state zt at the <step_start> token in the explicit reasoning trace, which summarizes the context before generating the step content. The two decoders then operate as explicit supervision signals: 
+
+Spatial Grounding: freg predicts the bounding box coordinates ˆbt = freg (zt). We optimize this using a combination of ℓ1 distance and Generalized IoU (GIoU) loss against the verified boxes bt:       
+
+> Lreg =1
+> PKt=1 mtKX
+> t=1
+> mt
+> 
+> || ˆbt−bt|| 1+λGIoU LGIoU (ˆbt, b t)
+> 
+> (2)
+
+Semantic Anchoring: To prevent the latent representation from drifting into uninterpretable regions, 
+
+fdesc projects zt into a semantic embedding space. We minimize the cosine distance between the projected vector and the pre-computed text embeddings et of the corresponding region description:      
+
+> Ldesc =1
+> PKt=1 mtKX
+> t=1
+> mt
+> 
+> 1−cos( fdesc (zt), e t)
+> 
+> (3)
+
+The total loss for this warm-up phase is LPhase2a = λr Lreg + λdLdesc . This supervised calibration imposes spatial grounding to specify where to look , while semantic anchoring to specify what is seen . These calibrated side heads provide stable spatial-semantic constraints for converting explicit reasoning steps into grounded latent tokens in the subsequent phase. 64.4 Training Phase 2b: Progressive Latent Internalization 
+
+With the side heads calibrated, Phase 2b progressively converts explicit textual reasoning into continuous latent computation. Following the Coconut curriculum paradigm [ 17 ], we use a step-wise replacement schedule s ∈ { 1, . . . , K }: at stage s, the first s textual reasoning blocks are replaced by their corresponding latent states C≤s, while the remaining textual steps T>s and the full answer As
+
+and final answer A are still generated autoregressively as discrete text. Unlike Phase 2a, the MLLM backbone is unfrozen, allowing its internal computation to adapt to latent inputs. The model is trained with next-token prediction on the remaining textual trace and final answer:                        
+
+> Lcot =−
+> |T >s |
+> X
+> t=1
+> log PM(yt|y<t ,Xv,Xq,C≤s),Lans =−
+> |As⊕A|
+> X
+> t=1
+> log PM(at|a<t ,Xv,Xq,C≤s,T>s )(4)
+
+To preserve grounding during internalization, the side-head losses are applied only to supervised latent slots that have been replaced, i.e., {t ≤ s | mt = 1 }. The overall objective is 
+
+LPhase2b = Lans + αLcot + λr Lreg + λdLdesc (5) As s increases, information previously expressed by text is gradually internalized into continuous latent states. By the end of this curriculum, the model learns to retrieve and transform grounded visual evidence in latent space with reduced dependence on explicit verbalization. 
+
+4.5 Training Phase 3: Bottlenecked Latent Integration 
+
+In Phase 3, all explicit reasoning steps are replaced by latent tokens, so the intermediate reasoning process is fully mediated by the latent tokens C. To prevent answer decoding from bypassing these tokens and directly attending to the original image and query tokens (Xv , Xq ), we introduce a 
+
+Progressive Attention Mask . Specifically, we anneal a masking probability ρ(τ ) over training step 
+
+τ and sample M ∼ Bernoulli( ρ(τ )) to modulate the causal attention matrix. As ρ(τ ) increases, answer tokens are gradually forced to rely on C, making latent states the information conduit for task-relevant visual and semantic evidence. Since no textual reasoning steps remain in this phase, the textual CoT loss is removed. The model is trained with the final-answer objective, together with side-head constraints on supervised latent slots: 
+
+LPhase3 = Lans + λr Lreg + λdLdesc (6) Under the fully masked condition, the answer loss is conditioned on the latent tokens:          
+
+> Lans =−
+> |As⊕A|
+> X
+> t=1
+> log PM(ut|u<t ,C),(7)
+
+where As and A denote the full answer bridge and the final answer, ut indexes concated tokens. Under this information bottleneck, the supervised latent tokens remain spatially and semantically grounded through the side-head losses, while the free tokens, which receive no direct spatial-semantic supervision, are optimized only through the answer objective and are therefore encouraged to aggregate and synthesize the evidence retrieved by earlier grounded tokens. Finally, to facilitate a smooth return from the latent visual manifold to the discrete vocabulary manifold Mvocab , we utilize the short full answer As (as defined in Phase 1) as a sequence of 
+
+Manifold Transition Tokens . Instead of forcing an abrupt jump from synthesized latent states to final answer decoding, As provides an autoregressive intermediate path that gradually maps latent visual representations back toward the pretrained vocabulary-aligned manifold Mvocab . Its dense next-token supervision stabilizes this transition and improves the compatibility between latent visual reasoning and language-grounded answer generation. 7Model V* HRBench4K HRBench8K MMVP BLINK                                                                                                            
+
+> Overall Attribute Spatial Overall FSP FCP Overall FSP FCP
+> Proprietary Model
+> GPT-4o 65.15 69.68 58.39 54.70 64.93 44.51 51.12 57.08 45.12 72.00 63.55
+> Open-Source Model
+> Qwen2.5-VL-7B 76.65 77.12 74.35 68.30 80.60 56.03 64.33 74.42 54.24 63.49 54.94 Qwen2.5-VL-7B+ GLSD 78.25 78.39 78.11 70.58 83.30 57.86 64.70 74.69 54.70 66.80 56.25 LVR[12] 80.60 83.26 77.94 70.88 83.25 57.50 63.50 75.00 52.00 71.03 56.79 Monet[13] 81.90 81.94 81.86 69.97 84.01 55.93 67.01 78.59 55.43 70.00 56.70 COVT[28] 79.10 81.05 77.15 71.90 85.50 58.30 68.40 79.30 57.50 58.70 57.40
+> Our Model RIS 83.75 84.26 83.24 73.23 86.33 60.12 68.52 79.05 57.98 73.55 60.60
+> RIS +VLPO [13] 81.76 81.24 82.28 71.79 82.83 60.75 63.05 72.67 53.42 73.76 60.95
+> Relative Improvement +7.10 +7.14 +8.89 +4.93 +5.73 +4.09 +4.19 +4.63 +3.74 +10.27 +5.66
+
+Table 2: Main results on visual reasoning benchmarks across proprietary, open-source, and latent visual reasoning baselines (with Qwen2.5-VL-7B as the same backbone) with 5 latent tokens .
+
+5 Experiments 
+
+5.1 Experiment Setup Training and Evaluation Setup. We adopt Qwen2.5-VL-7B[ 23 ] as our base model. The training process follows our proposed three-phase pipeline and all parameters are detailed in Appendix B. 
+
+Evaluated Benchmarks. To comprehensively evaluate our proposed method, we conduct experi-ments on a diverse set of challenging perception and reasoning benchmarks: V∗[24 ], HRBench4K[ 25 ], HRBench8K[25], MMVP[26], and BLINK[27]. 
+
+Baselines. We compare RIS against a variety of baselines: (1) Proprietary Models: GPT-4o; (2) Open-Source Base Model: Qwen2.5-VL-7B; (3) Vanilla SFT: Qwen2.5-VL-7B+GLSD, which finetunes the base model on our curated Grounded Latent Supervision Dataset (GLSD) for same training steps as RIS ; (4) Latent Visual Reasoning Methods: LVR[ 12 ], Monet[ 13 ], and CoVT[ 28 ]. Furthermore, to investigate the benefit of reinforcement learning on our method, we introduce RIS +VLPO , a variant that further optimizes our model using Visual-latent Policy Optimization (VLPO) proposed by Monet. 
+
+5.2 Main Results 
+
+Table 2 summarizes the performance of RIS and baselines across five visual reasoning benchmarks. Overall, RIS consistently outperforms both the open-source backbone and existing latent visual reasoning baselines. The GLSD baseline, which retains explicit textual reasoning, yields much smaller gains. This indicates that the improvements are not only due to extra supervision but mainly stem from internalizing grounded visual evidence into latent states and performing latent reasoning. Although RIS+VLPO does not consistently yield further gains, it remains a promising direction for adaptive and stable latent computation, while a reliable latent variant is still underexplored.                                         
+
+> Model S.R. O.L. R.R. Counting R.D.
+> Base 86.81 43.62 39.87 68.30 67.26 Base+ GLSD 87.03 49.57 41.13 67.59 65.66 LVR 86.01 50.82 43.28 69.17 76.61 Monet 85.31 45.08 39.55 70.83 75.81 CVOT 87.41 53.20 38.06 65.83 77.65
+> RIS 89.60 54.63 44.25 72.02 76.50
+> Improvement +2.79 +11.01 +4.38 +3.72 +9.24
+
+Table 1: Performance on BLINK . (S.R.: Spatial Reasoning, O.L.: Object Localization, R.R.: Rel-ative Reflectance, R.D.: Relative Depth). 
+
+The performance pattern further aligns with the characteristics of each benchmark. RIS achieves larger gains on benchmarks requiring precise lo-calization, structured visual search, and multi-step perceptual reasoning, such as V ∗ and BLINK. The detailed BLINK results in Table 1 show particu-larly strong improvements on tasks closely tied to visual grounding and sequential evidence retrieval, including Spatial Reasoning , Object Localization ,and Relational Reasoning . In contrast, on MMVP, where performance is more constrained by the visual encoder’s ability, the gains are more mod-erate. 
+
+5.3 Analysis on Latent Behaviors Impact of Latent Token Budget. Figure 5(c) studies the effect of latent token budget. Although more latent tokens provide additional computation, performance does not improve monotonically. This is because most training samples contain only three to four supervised reasoning steps, which 8V*  HRB4K  HRB 8K                                                     
+
+> Cosine Similarity
+> MMVP BLINK
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> (a) Cross -sample Similarity (b) Within -sample Cross -step Similarity
+> Ours LVR Monet
+> 0.46
+> 0.52 0.47
+> 0.60
+> 0.53
+> 0.65 0.62 0.57
+> 0.71
+> 0.43
+> V* HRB4K HRB 8KMMVP BLINK
+> VI: person wearing shirt
+> and pants
+> Latent token 1Latent token 2
+> VI: the person is on a red
+> snowboard
+> VI: snow mountain under the
+> blue sky
+> Latent token 3Latent token 4
+> VI: snowboarder in fore -
+> ground with mountain behind
+> Latent token 5
+> VI: mountain covered
+> with snow
+> (d) Decoded Per -step Reasoning Process
+> 0
+> 0.0
+> 0.2
+> Reasoning Step
+> Normalized  Entropy
+> 𝐺𝑟𝑎𝑑𝑢𝑎𝑙 𝑡𝑟𝑎𝑛𝑠𝑖𝑡𝑖𝑜𝑛𝑠 ,
+> 𝑝𝑟𝑒𝑣𝑒𝑛𝑡𝑖𝑛𝑔 𝑒𝑎𝑟𝑙𝑦
+> 𝑐𝑜𝑛𝑣𝑒𝑟𝑔𝑒𝑛𝑐𝑒
+> 𝑈𝑛𝑠𝑢𝑝𝑒𝑟𝑣𝑖𝑠𝑒𝑑 𝑙𝑎𝑡𝑒𝑛𝑡 𝑡𝑜𝑘𝑒𝑛𝑠
+> 𝑒𝑥ℎ𝑖𝑏𝑖𝑡𝑒 𝑒𝑚𝑒𝑟𝑔𝑒𝑛𝑡 𝑐𝑎𝑝𝑎𝑏𝑖𝑙𝑖𝑡𝑖𝑒𝑠
+> 𝑓𝑜𝑟 𝑟𝑒𝑡𝑟𝑖𝑒𝑣𝑎𝑙 𝑎𝑛𝑑 𝑖𝑛𝑡𝑒𝑔𝑟𝑎𝑡𝑖𝑜𝑛
+> 12345678910 11
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Entropy Gap
+> Transition tokens Answer
+> 12
+> Latent tokens
+> (c) Reasoning Entropy Across Reasoning Steps
+
+Figure 4: Latent Behavior Analysis of RIS : Diversity, Reasoning Entropy, and Interpretability. already match the typical length of grounded logical reasoning. Tokens beyond this range receive no spatial-semantic supervision and only learn evidence integration from the final-answer objective. The effect is therefore task-dependent. For benchmarks requiring multi-step visual exploration, such as V ∗ and BLINK, a small number of extra tokens can help integrate retrieved evidence. However, larger budgets introduce more unsupervised slots, weakening grounding reliability and increasing optimization instability. This degradation is more evident on HRBench8K and MMVP: the former requires highly reliable local evidence under extreme resolution, while the latter is mainly limited by the visual encoder’s ability. Overall, the latent budget should match the steps of available supervision, enabling RIS to expand latent reasoning without diluting grounded visual evidence. 
+
+Entropy Dynamics of Latent Reasoning. Figure 4(c) visualizes the normalized reasoning entropy along the latent trajectory, with details provided in the Appendix D. The supervised latent tokens maintain high entropy, suggesting they preserve an open visual reasoning space rather than being constrained to a single reasoning path. The unsupervised slots show a slight entropy increase, indicating their role in aggregating and synthesizing evidence retrieved by earlier grounded tokens. Following latent tokens, transition tokens bridge high-entropy latent states to low-entropy answer tokens, avoiding an abrupt representation jump. This supports our design: visual evidence is first explored and integrated in the latent space, then transited back to the vocabulary decoding space. 
+
+Latent Token Diversity and Interpretability. Figure 4(a)(b) examines whether latent tokens collapse into instance-agnostic patterns. In both cross-sample and within-sample analyses, RIS shows much lower similarity than LVR and Monet, indicating more step-specific and instance-dependent latent states. Although within-sample similarity is naturally higher due to shared visual content within the same image, RIS remains notably diverse, suggesting that its latent tokens progressively organize grounded visual-semantic evidence rather than repeatedly encoding the same features. This effect is especially clear on BLINK, where repeated visual search and structured perception are required. Cross-sample similarity is overall lower, and the remaining similarity is likely due to similarity across examples; nevertheless, RIS still maintains substantially stronger diversity than prior methods. Figure 4(d) further provides a qualitative view. The decoded bounding boxes form a clear step-by-step reasoning trajectory, and the associated visual information captures key evidence in each region. The final synthesis tokens cover multiple semantically relevant regions and decode integrated visual information rather than isolated local details. This confirms their role as an evidence integration stage, consistent with the entropy increase observed in Figure 4(c). 
+
+5.4 Ablation Study 
+
+To assess the contribution of each component in RIS , we conduct systematic ablations, with results summarized in Figure 5 leading to three critical takeaways regarding latent visual reasoning. 9V* HRB ench4K  HRB ench8K  MMVP  BLINK                    
+
+> 50
+> 60
+> 70
+> 80
+> 90
+> Accuracy (%)
+> w/o Bbox Ours w/o Description
+> w/o Mask w/o Transition
+> (a) Performance under Different Ablations 5678910 11 12
+> 60
+> 65
+> 70
+> 75
+> 80
+> 85
+> (c) Impact of the Number of Latent Tokens
+> Accuracy (%)
+> 83.97
+> 74.59 73.55
+> 68.52
+> 61.79
+> V*
+> HRBench4K
+> HRBench 8K
+> MMVP
+> BLINK
+> Full w/o Mask(cross) w/o Mask(within)
+> Cosine Similarity
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 0.8
+> (b) Latent Token Similarity
+> HRB ench4K V*HRB ench8K MMVP BLINK
+> 0.39 0.44 0.42
+> 0.52 0.48
+> 83.75
+> 73.23
+> 68.52
+> 73.55
+> 60.60
+
+Figure 5: Design Ablations. (Error bars denote accuracy standard deviation across repeated training runs.) 
+
+Spatial-semantic supervision stabilizes grounded latent reasoning. Removing either side-head supervision degrades performance and increases variance, confirming the importance of explicit grounding. Bounding-box supervision is especially important on localization-heavy benchmarks such as V ∗ and BLINK, showing that spatial anchoring is crucial for directing latent tokens to task-relevant visual evidence. Description supervision has a milder but consistent impact, suggesting that semantic alignment mainly regularizes the latent space and prevents drift from the vocabulary reasoning manifold. 
+
+The progressive attention mask prevents latent bypassing and collapse. Removing the progressive attention mask causes the largest performance drop. Without this bottleneck, answer tokens can directly attend to the raw image and question, weakening the role of latent tokens. The degradation further suggests that uncalibrated latent tokens are not merely ignored placeholders; they can interfere with prediction even when answer tokens still access the original inputs. This is further supported by Figure 5(b), removing the mask also sharply increases both cross-sample and within-sample latent-token similarity, revealing collapse toward generic representations. Thus, the mask is essential for routing visual evidence through the latent trajectory and maintaining step-specific latent computation. 
+
+Transition tokens facilitate language-grounded decoding. Removing transition tokens also con-sistently hurts performance, indicating that the short-answer bridge is important for mapping syn-thesized latent evidence back to language-grounded decoding. This supports our hypothesis that transition tokens reduce representation mismatch between the expressive latent visual manifold and the vocabulary-aligned output space. 
+
+6 Conclusion 
+
+In this work, we propose RIS , a spatial-semantic grounded latent visual reasoning framework that enables MLLMs to reason over visual evidence within continuous latent states. We show that existing latent visual reasoning methods suffer from weak grounding, trajectory collapse, and answer shortcuts. To address these issues, RIS anchors latent tokens with spatial-semantic supervision, enforces their use through a progressive attention bottleneck, and introduces transition tokens to bridge latent reasoning back to language decoding phase. Extensive experiments demonstrate consistent improvements over strong baselines. Further analyses verify that RIS learns more diverse, interpretable, and causally effective latent trajectories, suggesting a practical path to faithful internal visual reasoning in MLLMs. 
+
+References 
+
+[1] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, et al. Chain-of-thought prompting elicits reasoning in large language models. 
+
+Advances in neural information processing systems , 35:24824–24837, 2022. [2] Takeshi Kojima, Shixiang Shane Gu, Machel Reid, Yutaka Matsuo, and Yusuke Iwasawa. Large language models are zero-shot reasoners. Advances in neural information processing systems ,35:22199–22213, 2022. [3] Junnan Li, Dongxu Li, Caiming Xiong, and Steven Hoi. Blip: Bootstrapping language-image pre-training for unified vision-language understanding and generation. In International conference on machine learning , pages 12888–12900. PMLR, 2022. 10 [4] Zhaochen Su, Peng Xia, Hangyu Guo, Zhenhua Liu, Yan Ma, Xiaoye Qu, Jiaqi Liu, Yanshu Li, Kaide Zeng, Zhengyuan Yang, et al. Thinking with images for multimodal reasoning: Foundations, methods, and future frontiers. arXiv preprint arXiv:2506.23918 , 2025. [5] Zhengyuan Yang, Linjie Li, Jianfeng Wang, Kevin Lin, Ehsan Azarnasab, Faisal Ahmed, Zicheng Liu, Ce Liu, Michael Zeng, and Lijuan Wang. Mm-react: Prompting chatgpt for multimodal reasoning and action. arXiv preprint arXiv:2303.11381 , 2023. [6] Shilong Liu, Hao Cheng, Haotian Liu, Hao Zhang, Feng Li, Tianhe Ren, Xueyan Zou, Jianwei Yang, Hang Su, Jun Zhu, et al. Llava-plus: Learning to use tools for creating multimodal agents. In European conference on computer vision , pages 126–142. Springer, 2024. [7] Zifu Wang, Junyi Zhu, Bo Tang, Zhiyu Li, Feiyu Xiong, Jiaqian Yu, and Matthew B Blaschko. Jigsaw-r1: A study of rule-based visual reinforcement learning with jigsaw puzzles. arXiv preprint arXiv:2505.23590 , 2025. [8] Tanmay Gupta and Aniruddha Kembhavi. Visual programming: Compositional visual reasoning without training. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 14953–14962, 2023. [9] Dídac Surís, Sachit Menon, and Carl Vondrick. Vipergpt: Visual inference via python execution for reasoning. In Proceedings of the IEEE/CVF international conference on computer vision ,pages 11888–11898, 2023. [10] Yushi Hu, Otilia Stretcu, Chun-Ta Lu, Krishnamurthy Viswanathan, Kenji Hata, Enming Luo, Ranjay Krishna, and Ariel Fuxman. Visual program distillation: Distilling tools and program-matic reasoning into vision-language models. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 9590–9601, 2024. [11] Xinlei Yu, Zhangquan Chen, Yongbo He, Tianyu Fu, Cheng Yang, Chengming Xu, Yue Ma, Xiaobin Hu, Zhe Cao, Jie Xu, et al. The latent space: Foundation, evolution, mechanism, ability, and outlook. arXiv preprint arXiv:2604.02029 , 2026. [12] Bangzheng Li, Ximeng Sun, Jiang Liu, Ze Wang, Jialian Wu, Xiaodong Yu, Hao Chen, Emad Barsoum, Muhao Chen, and Zicheng Liu. Latent visual reasoning. arXiv preprint arXiv:2509.24251 , 2025. [13] Qixun Wang, Yang Shi, Yifei Wang, Yuanxing Zhang, Pengfei Wan, Kun Gai, Xianghua Ying, and Yisen Wang. Monet: Reasoning in latent visual space beyond images and language. arXiv preprint arXiv:2511.21395 , 2025. [14] You Li, Chi Chen, Yanghao Li, Fanhu Zeng, Kaiyu Huang, Jinan Xu, and Maosong Sun. Imagination helps visual reasoning, but not yet in latent space. arXiv preprint arXiv:2602.22766 ,2026. [15] Zhuosheng Zhang, Aston Zhang, Mu Li, Hai Zhao, George Karypis, and Alex Smola. Mul-timodal chain-of-thought reasoning in language models. arXiv preprint arXiv:2302.00923 ,2023. [16] Yaoting Wang, Shengqiong Wu, Yuecheng Zhang, Shuicheng Yan, Ziwei Liu, Jiebo Luo, and Hao Fei. Multimodal chain-of-thought reasoning: A comprehensive survey. arXiv preprint arXiv:2503.12605 , 2025. [17] Shibo Hao, Sainbayar Sukhbaatar, DiJia Su, Xian Li, Zhiting Hu, Jason Weston, and Yuandong Tian. Training large language models to reason in a continuous latent space. arXiv preprint arXiv:2412.06769 , 2024. [18] Zhenyi Shen, Hanqi Yan, Linhai Zhang, Zhanghao Hu, Yali Du, and Yulan He. Codi: Com-pressing chain-of-thought into continuous space via self-distillation. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pages 677–693, 2025. [19] Jingcheng Deng, Liang Pang, Zihao Wei, Shicheng Xu, Zenghao Duan, Kun Xu, Yang Song, Huawei Shen, and Xueqi Cheng. Llm latent reasoning as chain of superposition, 2026. URL 
+
+https://arxiv.org/abs/2510.15522 .11 [20] Zeyuan Yang, Xueyang Yu, Delin Chen, Maohao Shen, and Chuang Gan. Machine men-tal imagery: Empower multimodal reasoning with latent visual tokens. arXiv preprint arXiv:2506.17218 , 2025. [21] Drew A. Hudson and Christopher D. Manning. Gqa: A new dataset for real-world vi-sual reasoning and compositional question answering. 2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 6693–6702, 2019. URL https: //api.semanticscholar.org/CorpusID:152282269 .[22] Shilong Liu, Zhaoyang Zeng, Tianhe Ren, Feng Li, Hao Zhang, Jie Yang, Chunyuan Li, Jianwei Yang, Hang Su, Jun Zhu, et al. Grounding dino: Marrying dino with grounded pre-training for open-set object detection. arXiv preprint arXiv:2303.05499 , 2023. [23] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, Humen Zhong, Yuanzhi Zhu, Mingkun Yang, Zhaohai Li, Jianqiang Wan, Pengfei Wang, Wei Ding, Zheren Fu, Yiheng Xu, Jiabo Ye, Xi Zhang, Tianbao Xie, Zesen Cheng, Hang Zhang, Zhibo Yang, Haiyang Xu, and Junyang Lin. Qwen2.5-vl technical report, 2025. URL https://arxiv.org/abs/2502.13923 .[24] Penghao Wu and Saining Xie. V*: Guided visual search as a core mechanism in multimodal llms. In 2024 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) ,pages 13084–13094, 2024. doi: 10.1109/CVPR52733.2024.01243. [25] Wenbin Wang, Liang Ding, Minyan Zeng, Xiabin Zhou, Li Shen, Yong Luo, Wei Yu, and Dacheng Tao. Divide, conquer and combine: A training-free framework for high-resolution image perception in multimodal large language models. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 39, pages 7907–7915, 2025. [26] Shengbang Tong, Zhuang Liu, Yuexiang Zhai, Yi Ma, Yann LeCun, and Saining Xie. Eyes wide shut? exploring the visual shortcomings of multimodal llms. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 9568–9578, 2024. [27] Xingyu Fu, Yushi Hu, Bangzheng Li, Yu Feng, Haoyu Wang, Xudong Lin, Dan Roth, Noah A Smith, Wei-Chiu Ma, and Ranjay Krishna. Blink: Multimodal large language models can see but not perceive. In European Conference on Computer Vision , pages 148–166. Springer, 2024. [28] Yiming Qin, Bomin Wei, Jiaxin Ge, Konstantinos Kallidromitis, Stephanie Fu, Trevor Darrell, and XuDong Wang. Chain-of-visual-thought: Teaching vlms to see and think better with continuous visual tokens. arXiv preprint arXiv:2511.19418 , 2025. 12 A Limitations 
+
+Although RIS provides an effective framework for grounded latent visual reasoning, it still has several limitations. First, our framework involves multiple interacting components. While each component is empirically essential, the overall framework introduces several hyperparameters and schedules whose optimal settings may depend on the backbone model, task type, and data distribution. A more principled and automatic strategy for configuring these components would further improve the robustness and usability of our framework. Second, RIS still fixes the latent token budget, which is a common setting of most existing latent reasoning methods. In our framework, the supervised latent tokens and unsupervised latent tokens provide an implicit form of adaptive computation, and our analyses suggest that different latent slots can spontaneously specialize into retrieval, integration, and synthesis roles. Nevertheless, the total number of latent slots is still predefined rather than dynamically determined according to the complexity of each input. Developing latent reasoning models with truly adaptive token allocation remains an important direction of our future work. Third, our experiments mainly focus on standard image-based VQA and visual reasoning benchmarks commonly used for latent visual reasoning. Although these benchmarks cover localization, structured visual search, and multi-step perceptual reasoning, they do not fully reflect the diversity of real-world multimodal reasoning scenarios. Future work would further evaluate and extend RIS to broader settings, such as open-ended long-form visual question answering, multi-image reasoning, video reasoning, and interactive embodied tasks. 
+
+B Training Hyperparameters 
+
+Table 3: Detailed Hyperparameters for RIS Training.                                     
+
+> Training Phase Hyperparameter Value
+> Architecture Base Model Qwen2.5-VL-7B Latent Tokens ( K)5Phase 1 Epochs 1 – 2 Learning Rate 1×10 −5
+> Phase 2 Sub-stage 2.A LR ( freg )5×10 −4
+> Sub-stage 2.A LR ( fdesc )1×10 −4
+> Sub-stage 2.B Epochs per Curriculum Stage 1 – 2 Sub-stage 2.B LR 5×10 −6
+> Phase 3 Epochs 1 – 2 Learning Rate 3×10 −6
+> Mask Ratio Annealing 0.3→1.0
+> Loss Weights
+> λr(Region Grounding) 1.0
+> λgiou (GIoU within Region Grounding) 2.0
+> λd(Region Description Alignment) 0.5
+> α(Textual CoT) 1.0
+
+C Compute Resources 
+
+All experiments were conducted on a single server equipped with an Intel Xeon Platinum 8383C CPU, 512GB DDR5 RAM, and 4 NVIDIA A100 80GB GPUs connected with NVLink. We trained on an 80k-sample Grounded Latent Supervision Dataset (GLSD) with a global batch size of 32, corresponding to 2,500 optimization steps for each full data pass. Table 5 reports the estimated wall-clock training time for each stage of RIS . For Phase 2b, we assume a latent budget of K = 5 
+
+and one full data pass for each curriculum stage; its cost scales approximately linearly with K.13 Table 4: Additional hyperparameters for the RIS +VLPO reinforcement learning stage.                                          
+
+> Hyperparameter Value Initialization Phase-3 RIS checkpoint RL data 3.2k/ 6.4k samples from GLSD Latent action RIS latent slot hidden state ct
+> Latent tokens K= 5
+> Attention mask Phase-3 bottleneck mask, fixed at ρ= 1 .0
+> Reference model Frozen Phase-3 RIS checkpoint Rollouts per prompt G= 4
+> Policy epochs per batch 1RL epochs 1Global prompt batch size 32 Learning rate 1×10 −6
+> KL coefficient β= 0 .02
+> Latent likelihood scale σ= 1 .0
+> Max response length 128 tokens Sampling temperature / top-p1.0 / 0.95 Reward racc + 0 .1rfmt
+> Accuracy reward racc 1 if normalized answer matches ground truth, else 0 Format reward rfmt 1 if final answer is extractable, else 0 Latent-use reward None Grounding regularization 0.1Lreg + 0 .05 Ldesc
+> Trainable modules MLLM backbone; side heads frozen
+
+Table 5: Recorded training time of different stages on 4 NVIDIA A100 80GB GPUs.                        
+
+> Training Stage Trainable Components Update Steps Wall-clock Time
+> Phase 1 Backbone 2.5K2.5–3.0hPhase 2a Side heads 2.5K2.0–2.5hPhase 2b Backbone + side heads 12 .5K16 –20 hPhase 3 Backbone + side heads 2.5K6.0–7.5h
+> Total –20 .0K26 .5–33 h
+
+D Details of Reasoning Entropy Estimation 
+
+We provide a detailed definition and implementation of Reasoning Entropy in this section. For latent tokens, we consider two possible estimators. The first estimator, Semantic Region Similarity as Reasoning Entropy , offers a direct and strict way to quantify how much grounded visual evidence is encoded in each latent token by measuring its compatibility with multiple semantic evidence regions. However, it depends on the semantic decoder fdesc calibrated for latent states and cannot be directly applied to language tokens due to their next-token prediction nature. Therefore, we use it only as a reference analysis for latent tokens. The second estimator, Intervention-based Visual Evidence Importance as Reasoning Entropy , places latent tokens and language tokens in the same space. It therefore enables a unified computation and comparison of Reasoning Entropy across latent tokens, transition tokens, and answer tokens. In practice, we found that the entropy of latent tokens computed by the two estimators exhibits highly consistent trends. Therefore, unless otherwise specified, we adopt the intervention-based estimator as the unified definition of Reasoning Entropy throughout our analysis. 
+
+D.1 Dataset Preparation 
+
+For each image–question pair (I, q ), we construct an analysis-only bank of diverse grounded reasoning traces. Following the same data construction protocol used for our step-wise grounded supervision, we prompt a strong MLLM to sample multiple visual reasoning traces. Each trace contains a sequence of grounded evidence steps, and each step consists of a bounding box, a region-specific semantic description, and the corresponding visual information. We retain only traces whose final answers match the ground-truth answer and whose grounded boxes pass the verification procedure. This 14 yields an image-question-specific trace bank: 
+
+T (I, q ) = 
+
+n
+
+Tm = {(bm,s , d m,s , v m,s )}Sm
+
+> s=1
+
+oMm=1 
+
+,
+
+where m indexes a valid reasoning trace, s indexes an evidence step, bm,s is the verified bounding box, dm,s is the region description, and vm,s is the extracted visual information. We encode each evidence step into the same semantic space used by the semantic alignment decoder: 
+
+em,s = g (dm,s ⊕ vm,s ) ,
+
+where g(·) denotes the frozen semantic encoder used to build stable region-level semantic anchors, and ⊕ denotes textual concatenation. The resulting set 
+
+B(I, q ) = {em,s }M,S m
+
+> m=1 ,s =1
+
+serves as an image-question-specific bank of answer-relevant visual evidence. 
+
+D.2 Semantic Region Similarity as Reasoning Entropy Probing latent token states in the semantic space. For a latent visual reasoning model, we collect the last-layer hidden states along the latent trajectory, including both supervised and unsupervised latent tokens. For a hidden state ht, we use the calibrated semantic alignment decoder as a probing interface: 
+
+dt = fdesc (ht).
+
+We compute the similarity between dt and each evidence step in B(I, q ), and normalize the similarities into an evidence-step distribution: 
+
+p(t) 
+
+> m,s
+
+= exp (cos( dt, e m,s )/τ )
+
+PMm′=1 
+
+PSm′ 
+
+> s′=1
+
+exp (cos( dt, e m′,s ′ )/τ ) ,
+
+where τ is a temperature parameter. 
+
+Normalized reasoning entropy. Our goal is to measure whether a latent state remains compatible with multiple plausible grounded reasoning traces, we aggregate the evidence-step distribution into a trace-level distribution: 
+
+P (t) 
+
+> m
+
+=
+
+> Sm
+
+X
+
+> s=1
+
+p(t)
+
+> m,s
+
+.
+
+The reasoning entropy of token t is then defined as 
+
+Hreason (ht) = −
+
+> M
+
+X
+
+> m=1
+
+P (t) 
+
+> m
+
+log P (t) 
+
+> m
+
+.
+
+To make values comparable across samples with different numbers of retained valid traces, we report the normalized reasoning entropy: 
+
+eHreason (ht) = Hreason (ht)log M .
+
+Thus, eHreason (ht) ∈ [0 , 1] . A higher value indicates that the hidden state remains semantically compatible with multiple valid grounded reasoning traces, while a lower value indicates that the state has concentrated on a smaller set of reasoning possibilities. This probing analysis should not be interpreted as decoding multiple bounding boxes from one latent token. The visual grounding decoder freg still predicts a single supervised bounding box for each grounded latent token. The entropy is instead estimated through the semantic alignment decoder fdesc ,which probes whether the hidden state is semantically close to multiple valid grounded reasoning traces beyond its explicitly decoded spatial output. 15 D.3 Intervention-based Visual Evidence Importance as Reasoning Entropy 
+
+The semantic probing entropy above measures whether a hidden state is compatible with multiple grounded reasoning traces in the learned semantic evidence space. Although more intuitive, this probing interface relies on the calibrated semantic decoder fdesc , which is trained on latent states and is therefore not directly comparable for ordinary language states. Another possible choice is to compute entropy from the language-modeling distribution, i.e., 
+
+Hvocab (t) = − X
+
+> v∈V
+
+pθ (v | ut) log pθ (v | ut),
+
+where pθ (v | ut) is obtained by applying the LM head and softmax to the hidden state. However, this quantity measures next-token prediction uncertainty over the vocabulary rather than the amount of visual evidence represented by the current state. For example, a transition token may have low vocab-ulary entropy simply because the next word is syntactically predictable, even if its hidden state still depends on multiple visual regions. Conversely, function words or ambiguous lexical continuations may yield high vocabulary entropy without indicating broad visual grounding. Moreover, vocabulary entropy is not naturally defined for non-linguistic latent slots, making it unsuitable for comparing latent tokens and language tokens in a shared representational space. To fairly compare latent tokens, transition tokens, and answer tokens, we therefore estimate entropy through an intervention-based visual evidence distribution, which does not require any additional projection head or vocabulary-level decoding. This estimate evaluates all analyzed states in the same image-question-specific evidence space by measuring how their representations change when each grounded visual evidence region is removed. For each image–question pair (I, q ), we use the grounded evidence bank B(I, q ) defined above. Each evidence node corresponds to a verified region bk from the retained grounded traces, where 
+
+k ∈ { 1, . . . , K I,q }. To avoid artificially increasing entropy due to repeated boxes across different traces, we merge highly overlapping evidence regions using non-maximum suppression and keep the merged regions as the intervention units. Let ut denote the last-layer hidden state at trajectory position t, where ut can be a supervised latent token, an unsupervised latent token, or to generate a transition token or an answer token. The model first inferences on the original image and record the full-state representation ufull  
+
+> t
+
+.We then construct one counterfactual input for each evidence node by masking the corresponding image region bk, producing I(−k). The same question, latent-token layout, transition tokens, and answer tokens are used under teacher forcing, so that token positions are aligned across the original and counterfactual forward passes. This yields a counterfactual representation u(−k) 
+
+> t
+
+for every analyzed state, and the difference between ufull  
+
+> t
+
+and u(−k) 
+
+> t
+
+reflects the effect of removing visual evidence region bk, rather than changes in the generated token sequence. The visual sensitivity of state ut to evidence node k is defined as 
+
+st,k = max 
+
+
+
+0, 1 − cos 
+
+
+
+LN( ufull  
+
+> t
+
+), LN( u(−k) 
+
+> t
+
+)
+
+ 
+
+,
+
+where LN( ·) denotes the same final hidden-state normalization used before the language modeling head. A larger st,k indicates that removing region bk induces a larger change in the token state, suggesting that the state depends more strongly on this visual evidence node. We normalize the sensitivities over all evidence nodes to obtain an interventional visual evidence distribution: 
+
+qt,k = st,k + ϵ
+
+PKI,q  
+
+> r=1
+
+(st,r + ϵ) ,
+
+where ϵ is a small constant for numerical stability. The corresponding evidence entropy is 
+
+HIVE (ut) = −
+
+> KI,q
+
+X
+
+> k=1
+
+qt,k log qt,k .
+
+Since different samples may contain different numbers of retained evidence nodes, we report normal-ized entropy: 
+
+eHIVE (ut) = HIVE (ut)log KI,q 
+
+.
+
+16 Table 6: Statistics of the Grounded Latent Supervision Dataset (GLSD).           
+
+> Item Value Source dataset GQA train split Storage format JSONL Parseable samples 96,000 Reasoning steps per sample 2–4 Total grounded reasoning steps 256,444 Average reasoning steps 2.67 Spatial supervision Normalized and pixel-level bounding boxes Semantic supervision Region descriptions and visual information Answer fields full answer and final answer
+
+Table 7: Distribution of reasoning-chain lengths in GLSD.           
+
+> Reasoning-chain length Number of samples Percentage 2 steps 47,410 49.39% 3 steps 32,736 34.10% 4 steps 15,854 16.51% Total 96,000 100.00%
+
+A potential issue is that visually inactive tokens, such as function words or punctuation, may have uniformly small sensitivities to all evidence regions. Such tokens can obtain spuriously high normalized entropy after normalization. We therefore compute the total visual sensitivity mass 
+
+Mt =
+
+> KI,q
+
+X
+
+> k=1
+
+st,k ,
+
+and use a mass-aware entropy score: 
+
+bHIVE (ut) = Mt
+
+Mt + α · eHIVE (ut),
+
+where α is set to the median visual sensitivity mass over all analyzed states on the validation subset. This weighting preserves high entropy only when the token state is both visually grounded and broadly influenced by multiple evidence nodes. 
+
+Trajectory-level aggregation. We compute bHIVE for all states along the latent-to-answer trajectory. Fixed latent slots are averaged by slot index across samples. Since the number of transition and answer tokens may vary across examples, we align textual positions by their normalized phase position and average them into fixed-width bins. Special tokens and padding tokens are excluded. The plotted curve reports the mean entropy over samples, with the latent phase, transition-token phase, and answer-token phase shown in order. This intervention-based estimate places latent tokens and language tokens in the same evidence space: both are evaluated by how their hidden states causally respond to removing each answer-relevant visual region. Therefore, the entropy gap should be interpreted as evidence-dispersion rather than next-token uncertainty. High values indicate that a state remains sensitive to multiple grounded visual evidence nodes, while low values indicate that the state has concentrated on a narrower set of evidence required for final vocabulary-aligned decoding. 
+
+E Dataset Statistics and Visualization 
+
+Tables 6–9 summarize the overall scale, reasoning-step distribution, JSONL sample schema, and per-step annotation format of GLSD. Figure 6–8 provide visualization of GLSD. 17 Table 8: Top-level fields in each GLSD JSONL sample. 
+
+Field Type Description 
+
+question string Question text 
+
+answer string final answer phrase 
+
+full_answer string elaborated answer (transition) 
+
+image string GQA image filename 
+
+width , height int Image resolution 
+
+dataset , split string Source dataset and split 
+
+reasoning_chain array Step-wise grounded reasoning trace 
+
+annotation_mask array[int] Valid-step mask padded to budget K
+
+K int Latent-slot budget in the stored sample 
+
+reasoning_chain_viz_file string Optional visualization filename 
+
+Table 9: Fields of each reasoning step in reasoning_chain .
+
+Field Type Description 
+
+step int Step index starting from 1 
+
+operation string Step type, e.g., locate , inspect , verify bbox_01 array[float] Normalized box [x1, y 1, x 2, y 2] in [0 , 1] 
+
+bbox_pixels array[int] Pixel-space bounding box 
+
+region_description string Description of the attended region 
+
+visual_information string Visual evidence extracted from the region 1:locate 
+
+> 2:inspect
+> 3:inspect
+> 4:verify
+
+Question 
+
+Who is standing? 
+
+Operation: [locate] 
+
+Bbox: [0.04,0.23,0.18,0.67] 
+
+Region Description: the umpire on the left side of the image. 
+
+Visual Information: wearing a blue shirt and black pants, standing upright. 
+
+Operation: [inspect] 
+
+Bbox: [0.18,0.33,0.48,0.68] 
+
+Region Description: the catcher in the center. 
+
+Visual Information: in a crouched position, knees on the ground. 
+
+Operation: [inspect] 
+
+Bbox: [0.59,0.26,0.79,0.67] 
+
+Region Description: the batter on the right. 
+
+Visual Information: standing with bat raised, feet on ground. 
+
+Operation: [verify] 
+
+Bbox: [0.04,0.23,0.79,0.68] 
+
+Region Description: all individuals in the scene. 
+
+Visual Information: only the umpire and batter are standing; catcher is crouching; 
+
+question asks 'who is standing?', and umpire is explicitly standing. 
+
+Reasoning Chain 
+
+Final Answer 
+
+umpire 
+
+Full Answer 
+
+The umpire is standing. 
+
+Figure 6: Example of 4-steps Supervision Sample. 18 Question 
+
+Who is the laptop in front of? 
+
+Operation: [locate] 
+
+Bbox: [0.25,0.18,0.63,0.87] 
+
+Region Description: a man wearing glasses and a striped sweater, leaning over DJ 
+
+equipment. 
+
+Visual Information: man is positioned behind the laptop, facing downward toward 
+
+controls. 
+
+Operation: [inspect] 
+
+Bbox: [0.7,0.42,1.0,0.62] 
+
+Region Description: the open laptop on the right side of the DJ setup 
+
+Visual Information: laptop screen is angled upward, placed in front of the man’s torso 
+
+and hands 
+
+Operation: [verify] 
+
+Bbox: [0.25,0.18,1.0,0.87] 
+
+Region Description: spatial relationship between man and laptop 
+
+Visual Information: man’s upper body and hands are behind the laptop, confirming 
+
+laptop is in front of him 
+
+Reasoning Chain 
+
+Final Answer 
+
+man 
+
+Full Answer 
+
+The laptop is in front of the man. 
+
+> 1:locate
+> 2:inspect
+> 3:verify
+
+Figure 7: Example of 3-steps Supervision Sample. Question 
+
+What is the menu on? 
+
+Operation: [locate] 
+
+Bbox: [0.0,0.25,0.83,0.82] 
+
+Region Description: the white food truck on the left side of the image. 
+
+Visual Information: a large blue menu panel is mounted on its side. 
+
+Operation: [read] 
+
+Bbox: [0.12,0.39,0.31,0.64] 
+
+Region Description: the blue menu panel on the food truck's side. 
+
+Visual Information: text includes 'TACOS’ and other items. 
+
+Reasoning Chain 
+
+Final Answer 
+
+food truck. 
+
+Full Answer 
+
+The menu is on the food truck. 
+
+> 1:locate
+> 2:read
+
+Figure 8: Example of 2-steps Supervision Sample. 19
