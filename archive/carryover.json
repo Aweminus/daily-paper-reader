@@ -1,6 +1,480 @@
 {
-  "generated_at": "2026-05-11T20:37:37.765705+00:00",
-  "updated_date": "20260511",
+  "generated_at": "2026-05-12T21:27:18.504951+00:00",
+  "updated_date": "20260512",
   "carryover_days": 9,
-  "items": []
+  "items": [
+    {
+      "id": "2605.09768v1",
+      "title": "SAGE: Scalable Agentic Grounded Evaluation for Crop Disease Diagnosis",
+      "abstract": "Plant disease diagnosis is critical for food security, yet training disease-recognition models that generalize across crops, pathogens, and field conditions remains challenging because labeled disease images are far less abundant and standardized than data for other biotic stresses such as insects or weeds. Frontier vision-language models offer new opportunities through improved visual reasoning, but they still struggle with fine-grained disease identification due to the lack of structured, crop-specific symptom knowledge. To address this gap, we curate the largest plant disease image--symptom dataset to date, covering 335 crops, 1{,}251 disease classes, and approximately 839K images, designed to support training-free, agentic disease prediction. A scalable automated pipeline generates source-grounded symptom descriptions in which each claim is linked to a verbatim web quote; domain experts validate sampled crops and reconcile disease-name variants across sources. As a baseline, we introduce an autonomous visual reasoning agent that identifies anatomical context, narrows candidate diseases using symptom knowledge, sequentially compares reference images, and produces a fully explainable reasoning trace. Incorporating symptom knowledge improves accuracy by 16.2 percentage points on average at the full reference budget, with consistent gains across all four evaluation crops. Because the framework only requires crop-specific reference images and symptom knowledge, it can be extended to new crops without retraining, while the agentic baseline can directly benefit from future improvements in foundation model capabilities. Dataset and code are available at:https://sage-dataset.github.io/.",
+      "authors": [
+        "Muhammad Arbab Arshad",
+        "Tirtho Roy",
+        "Yanben Shen",
+        "Dinakaran Elango",
+        "Shivani Chiranjeevi",
+        "Asheesh K. Singh",
+        "Baskar Ganapathysubramanian",
+        "Chinmay Hegde",
+        "Arti Singh",
+        "Soumik Sarkar"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA"
+      ],
+      "published": "2026-05-10T21:29:32+00:00",
+      "link": "https://arxiv.org/pdf/2605.09768v1",
+      "tags": [
+        "keyword:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "agentic grounded evaluation for crop disease using VLMs",
+      "llm_evidence_cn": "使用VLM进行作物疾病诊断的智能体接地评估",
+      "llm_evidence": "使用VLM进行作物疾病诊断的智能体接地评估",
+      "canonical_evidence": "使用VLM进行作物疾病诊断的智能体接地评估",
+      "llm_tldr_en": "SAGE leverages VLMs for agentic disease prediction and fine-grained visual reasoning in agriculture.",
+      "llm_tldr_cn": "SAGE利用VLM进行智能体疾病预测，提升农业领域的细粒度视觉推理。",
+      "llm_tldr": "SAGE利用VLM进行智能体疾病预测，提升农业领域的细粒度视觉推理。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "advancements in vision language reasoning agents",
+      "matched_requirement_id": "req-8",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.09768v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.09384v1",
+      "title": "LiteMedCoT-VL: Parameter-Efficient Adaptation for Medical Visual Question Answering",
+      "abstract": "The reasoning gap between large and compact vision-language models (VLMs) limits the deployment of medical AI on portable clinical devices. Compact VLMs of 2--4B parameters can run on resource-constrained hardware but lack the multi-step reasoning capacity needed for interpretable clinical decision support. Existing knowledge distillation methods transfer answers without the reasoning process behind them. Medical visual question answering (VQA) serves as a testbed for this problem, as it requires models to integrate visual evidence with clinical knowledge through structured reasoning chains. We introduce LiteMedCoT-VL, a pipeline that transfers chain-of-thought reasoning from a 235B teacher model to 2B student models through LoRA-based fine-tuning on explanation-enriched training data. All inference is conducted without image captions by default, simulating the clinical scenario in which a physician interprets a medical image directly without an accompanying radiology report. On the PMC-VQA benchmark, LiteMedCoT-VL achieves 64.9% accuracy, exceeding the zero-shot Qwen3-VL-4B baseline of 53.9% by 11.0 percentage points and outperforming all published baselines. This result indicates that a 2B model with reasoning distillation can match or exceed models with twice the parameters. Visual grounding analysis shows that the model relies on image content rather than exploiting textual priors. Our code is publicly available at https://anonymous.4open.science/r/LiteMedCoT-VL.",
+      "authors": [
+        "Runze Ma",
+        "Shunbo Jia",
+        "Haonan Lyu",
+        "Guo Liu",
+        "Caizhi Liao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "q-bio.QM"
+      ],
+      "published": "2026-05-10T07:21:33+00:00",
+      "link": "https://arxiv.org/pdf/2605.09384v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "vision-language models for complex medical reasoning tasks",
+      "llm_evidence_cn": "用于复杂医学推理任务的视觉语言模型",
+      "llm_evidence": "用于复杂医学推理任务的视觉语言模型",
+      "canonical_evidence": "用于复杂医学推理任务的视觉语言模型",
+      "llm_tldr_en": "Transfers chain-of-thought reasoning from large to compact VLMs for medical visual question answering.",
+      "llm_tldr_cn": "将思维链推理从大型视觉语言模型转移到小型模型，以辅助医学视觉问答。",
+      "llm_tldr": "将思维链推理从大型视觉语言模型转移到小型模型，以辅助医学视觉问答。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.09384v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.09693v1",
+      "title": "Do multimodal models imagine electric sheep?",
+      "abstract": "Yes. We find that large multimodal models develop mental imagery when solving spatial puzzles, and they do imagine sheep when solving sheep puzzles. We fine-tune a Qwen3.5 VLM to solve twelve diverse visual reasoning tasks -- including tangram, jigsaw, sokoban, 3D mental rotation, and rush hour -- that require understanding geometry, spatial relationships, and the consequences of actions. By supervising the model to predict the open-loop sequence of actions to solve a puzzle from an initial state, we show that the model's activations after each action encode meaningful visual information about the intermediate state. This finding suggests that an imperfect visual world model begins to form as a byproduct of learning to select correct actions, in the absence of any explicit visual supervision. Building on this observation, we propose two ways to sharpen and use the mental images formed by the model. We find that integrating as few as sixteen visual tokens per step into the chain of thought improves the average solve rate from 83% to 89%, with particularly strong gains on reasoning-heavy tasks such as jigsaw and 3D mental rotation.",
+      "authors": [
+        "Santhosh Kumar Ramakrishnan",
+        "Carl Vondrick",
+        "Raja Giryes",
+        "Philipp Krähenbühl",
+        "Vladlen Koltun"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-05-10T18:25:52+00:00",
+      "link": "https://arxiv.org/pdf/2605.09693v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "visual reasoning and action sequence prediction in spatial puzzles",
+      "llm_evidence_cn": "空间谜题中的视觉推理与动作序列预测",
+      "llm_evidence": "空间谜题中的视觉推理与动作序列预测",
+      "canonical_evidence": "空间谜题中的视觉推理与动作序列预测",
+      "llm_tldr_en": "Shows that VLMs develop internal world models as a byproduct of learning to solve visual reasoning puzzles.",
+      "llm_tldr_cn": "研究表明，视觉语言模型在学习解决视觉推理谜题时会产生内部世界模型。",
+      "llm_tldr": "研究表明，视觉语言模型在学习解决视觉推理谜题时会产生内部世界模型。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "visual reasoning and decision making",
+      "matched_requirement_id": "req-5",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.09693v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.10832v1",
+      "title": "Towards On-Policy Data Evolution for Visual-Native Multimodal Deep Search Agents",
+      "abstract": "Multimodal deep search requires an agent to solve open-world problems by chaining search, tool use, and visual reasoning over evolving textual and visual context. Two bottlenecks limit current systems. First, existing tool-use harnesses treat images returned by search, browsing, or transformation as transient outputs, so intermediate visual evidence cannot be re-consumed by later tools. Second, training data is usually built by fixed curation recipes that cannot track the target agent's evolving capability. To address these challenges, we first introduce a visual-native agent harness centered on an image bank reference protocol, which registers every tool-returned image as an addressable reference and makes intermediate visual evidence reusable by later tools. On top of this harness, On-policy Data Evolution (ODE) runs a closed-loop data generator that refines itself across rounds from rollouts of the policy being trained. This per-round refinement makes each round's data target what the current policy still needs to learn. The same framework supports both diverse supervised fine-tuning data and policy-aware reinforcement learning data curation, covering the full training lifecycle of the target agent. Across 8 multimodal deep search benchmarks, ODE improves the Qwen3-VL-8B agent from 24.9% to 39.0% on average, surpassing Gemini-2.5 Pro in standard agent-workflow setting (37.9%). At 30B, ODE raises the average score from 30.6% to 41.5%. Further analyses validate the effectiveness of image-bank reuse, especially on complex tasks requiring iterative visual refinement, while rollout-feedback evolution yields more grounded SFT traces and better policy-matched RL tasks than static synthesis.",
+      "authors": [
+        "Shijue Huang",
+        "Hangyu Guo",
+        "Chenxin Li",
+        "Junting Lu",
+        "Xinyu Geng",
+        "Zhaochen Su",
+        "Zhenyu Li",
+        "Shuang Chen",
+        "Hongru Wang",
+        "Yi R. Fung"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-05-11T16:49:36+00:00",
+      "link": "https://arxiv.org/pdf/2605.10832v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multimodal deep search agents with visual reasoning",
+      "llm_evidence_cn": "具有视觉推理能力的多模态深度搜索智能体",
+      "llm_evidence": "具有视觉推理能力的多模态深度搜索智能体",
+      "canonical_evidence": "具有视觉推理能力的多模态深度搜索智能体",
+      "llm_tldr_en": "Introduces a visual-native agent harness for multimodal search to improve visual evidence reuse and data evolution.",
+      "llm_tldr_cn": "引入视觉原生智能体框架，通过图像库协议提升多模态搜索中的视觉证据复用与数据演进。",
+      "llm_tldr": "引入视觉原生智能体框架，通过图像库协议提升多模态搜索中的视觉证据复用与数据演进。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.10832v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.10923v1",
+      "title": "Dynamic Skill Lifecycle Management for Agentic Reinforcement Learning",
+      "abstract": "Large language model agents increasingly rely on external skills to solve complex tasks, where skills act as modular units that extend their capabilities beyond what parametric memory alone supports. Existing methods assume external skills either accumulate as persistent guidance or internalized into the policy, eventually leading to zero-skill inference. We argue this assumption is overly restrictive, since with limited parametric capacity and uneven marginal contribution across skills, the optimal active skill set is non-monotonic, task- and stage-dependent. In this work, we propose SLIM, a framework of dynamic Skill LIfecycle Management for agentic reinforcement learning (RL), which treats the active external skill set as a dynamic optimization variable jointly updated with policy learning. Specifically, SLIM estimates each active skill's marginal external contribution through leave-one-skill-out validation, then applies three lifecycle operations: retaining high-value skills, retiring skills whose contribution becomes negligible after sufficient exposure, and expanding the skill bank when persistent failures reveal missing capability coverage. Experiments show that SLIM outperforms the best baselines by an average of 7.1% points across ALFWorld and SearchQA. Results further indicate that policy learning and external skill retention are not mutually exclusive: some skills are absorbed into the policy, while others continue to provide external value, supporting SLIM as a more general paradigm for skill-based agentic RL.",
+      "authors": [
+        "Junhao Shen",
+        "Teng Zhang",
+        "Xiaoyan Zhao",
+        "Hong Cheng"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-05-11T17:55:13+00:00",
+      "link": "https://arxiv.org/pdf/2605.10923v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "dynamic skill management for agentic reinforcement learning",
+      "llm_evidence_cn": "智能体强化学习的动态技能管理",
+      "llm_evidence": "智能体强化学习的动态技能管理",
+      "canonical_evidence": "智能体强化学习的动态技能管理",
+      "llm_tldr_en": "Proposes SLIM, a framework for dynamic skill lifecycle management in agentic reinforcement learning.",
+      "llm_tldr_cn": "提出SLIM框架，用于智能体强化学习中的动态技能生命周期管理。",
+      "llm_tldr": "提出SLIM框架，用于智能体强化学习中的动态技能生命周期管理。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language agentic reinforcement learning",
+      "matched_requirement_id": "req-1",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.10923v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.10912v1",
+      "title": "WildClawBench: A Benchmark for Real-World, Long-Horizon Agent Evaluation",
+      "abstract": "Large language and vision-language models increasingly power agents that act on a user's behalf through command-line interface (CLI) harnesses. However, most agent benchmarks still rely on synthetic sandboxes, short-horizon tasks, mock-service APIs, and final-answer checks, leaving open whether agents can complete realistic long-horizon work in the runtimes where they are deployed. This work presents WildClawBench, a native-runtime benchmark of 60 human-authored, bilingual, multimodal tasks spanning six thematic categories. Each task averages roughly 8 minutes of wall-clock time and over 20 tool calls, and runs inside a reproducible Docker container hosting an actual CLI agent harness (OpenClaw, Claude Code, Codex, or Hermes Agent) with access to real tools rather than mock services. Grading is hybrid, combining deterministic rule-based checks, environment-state auditing of side effects, and an LLM/VLM judge for semantic verification. Across 19 frontier models, the best, Claude Opus 4.7, reaches only 62.2% overall under OpenClaw, while every other model stays below 60%, and switching harness alone shifts a single model by up to 18 points. These results show that long-horizon, native-runtime agent evaluation remains a far-from-resolved task for current frontier models. We release the tasks, code, and containerized tooling to support reproducible evaluation.",
+      "authors": [
+        "Shuangrui Ding",
+        "Xuanlang Dai",
+        "Long Xing",
+        "Shengyuan Ding",
+        "Ziyu Liu",
+        "Yang JingYi",
+        "Penghui Yang",
+        "Zhixiong Zhang",
+        "Xilin Wei",
+        "Xinyu Fang",
+        "Yubo Ma",
+        "Haodong Duan",
+        "Jing Shao",
+        "Jiaqi Wang",
+        "Dahua Lin",
+        "Kai Chen",
+        "Yuhang Zang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-05-11T17:49:43+00:00",
+      "link": "https://arxiv.org/pdf/2605.10912v1",
+      "tags": [
+        "keyword:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Benchmark for vision-language model based agents",
+      "llm_evidence_cn": "视觉语言模型智能体的评测基准",
+      "llm_evidence": "视觉语言模型智能体的评测基准",
+      "canonical_evidence": "视觉语言模型智能体的评测基准",
+      "llm_tldr_en": "Introduces WildClawBench for evaluating long-horizon VLM agents in real-world CLI environments.",
+      "llm_tldr_cn": "推出WildClawBench，用于在真实CLI环境下评估长程视觉语言模型智能体。",
+      "llm_tldr": "推出WildClawBench，用于在真实CLI环境下评估长程视觉语言模型智能体。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.10912v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.09266v1",
+      "title": "SeePhys Pro: Diagnosing Modality Transfer and Blind-Training Effects in Multimodal RLVR for Physics Reasoning",
+      "abstract": "We introduce SeePhys Pro, a fine-grained modality transfer benchmark that studies whether models preserve the same reasoning capability when critical information is progressively transferred from text to image. Unlike standard vision-essential benchmarks that evaluate a single input form, SeePhys Pro features four semantically aligned variants for each problem with progressively increasing visual elements. Our evaluation shows that current frontier models are far from representation-invariant reasoners: performance degrades on average as information moves from language to diagrams, with visual variable grounding as the most critical bottleneck. Motivated by this inference-time fragility, we further develop large training corpora for multimodal RLVR and use blind training as a diagnostic control, finding that RL with all training images masked can still improve performance on unmasked validation sets. To analyze this effect, text-deletion, image-mask-rate, and format-saturation controls suggest that such gains can arise from residual textual and distributional cues rather than valid visual evidence. Our results highlight the need to evaluate multimodal reasoning not only by final-answer accuracy, but also by robustness under modality transfer and by diagnostics that test whether improvements rely on task-critical visual evidence.",
+      "authors": [
+        "Kun Xiang",
+        "Terry Jingchen Zhang",
+        "Zirong Liu",
+        "Bokai Zhou",
+        "Yueling Tang",
+        "Junjie Yu",
+        "Jiacong Lu",
+        "Shangrui Huang",
+        "Heng Li",
+        "Likui Zhang",
+        "Kunkun Liu",
+        "Changzheng Zhang",
+        "Yangle Fang",
+        "Boqiang Guo",
+        "Hui-Ling Zhen",
+        "Dandan Tu",
+        "Yinya Huang",
+        "Xiaodan Liang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-05-10T02:23:58+00:00",
+      "link": "https://arxiv.org/pdf/2605.09266v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multimodal RLVR for physics reasoning",
+      "llm_evidence_cn": "用于物理推理的多模态强化学习视觉推理",
+      "llm_evidence": "用于物理推理的多模态强化学习视觉推理",
+      "canonical_evidence": "用于物理推理的多模态强化学习视觉推理",
+      "llm_tldr_en": "Analyzes modality transfer and reasoning consistency in multimodal RLVR for physics tasks.",
+      "llm_tldr_cn": "分析了物理任务中多模态强化学习视觉推理的模态迁移和推理一致性。",
+      "llm_tldr": "分析了物理任务中多模态强化学习视觉推理的模态迁移和推理一致性。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reasoning for reinforcement learning",
+      "matched_requirement_id": "req-6",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.09266v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.08978v1",
+      "title": "Learning to Explore: Scaling Agentic Reasoning via Exploration-Aware Policy Optimization",
+      "abstract": "Recent advancements in agentic test-time scaling allow models to gather environmental feedback before committing to final actions. A key limitation of existing methods is that they typically employ undifferentiated exploration strategies, lacking the ability to adaptively distinguish when exploration is truly required. In this paper, we propose an exploration-aware reinforcement learning framework that enables LLM agents to adaptively explore only when uncertainty is high. Our method introduces a fine-grained reward function via variational inference that explicitly evaluates exploratory actions by estimating their potential to improve future decision-making, together with an exploration-aware grouping mechanism that separates exploratory actions from task-completion actions during optimization. By targeting informational gaps, this design allows agents to explore selectively and transition to execution as soon as the task context is clear. Empirically, we demonstrate that our approach achieves consistent improvements across a range of challenging text-based and GUI-based agent benchmarks. Code is available at \\url{https://github.com/HansenHua/EAPO-ICML26} and models are available at https://huggingface.co/hansenhua/EAPO-ICML26.",
+      "authors": [
+        "Xingyuan Hua",
+        "Sheng Yue",
+        "Ju Ren"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-05-09T14:44:18+00:00",
+      "link": "https://arxiv.org/pdf/2605.08978v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "exploration-aware reinforcement learning for LLM agents",
+      "llm_evidence_cn": "LLM 智能体的探索感知强化学习",
+      "llm_evidence": "LLM 智能体的探索感知强化学习",
+      "canonical_evidence": "LLM 智能体的探索感知强化学习",
+      "llm_tldr_en": "A framework for scaling agentic reasoning via exploration-aware policy optimization in LLMs.",
+      "llm_tldr_cn": "一种通过探索感知策略优化来扩展 LLM 智能体推理能力的框架。",
+      "llm_tldr": "一种通过探索感知策略优化来扩展 LLM 智能体推理能力的框架。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "advancements in vision language reasoning agents",
+      "matched_requirement_id": "req-8",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.08978v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.09679v1",
+      "title": "DeepTumorVQA: A Hierarchical 3D CT Benchmark for Stage-Wise Evaluation of Medical VLMs and Tool-Augmented Agents",
+      "abstract": "Medical vision-language models (VLMs) and AI agents have made significant progress in learning to analyze and reason about clinical images. However, existing medical visual question answering (VQA) benchmarks collapse model capabilities into a single accuracy score, obscuring where and why models fail. We propose DeepTumorVQA, a hierarchical benchmark that follows the multi-stage evidence chain in tumor diagnosis and decomposes 3D CT reasoning into four stages: recognition, measurement, visual reasoning, and medical reasoning. Higher-level questions remain independently scorable, while their ground-truth evidence chains are defined over lower-level primitives. The benchmark contains 476K questions across 42 clinical subtypes on 9,262 3D CT volumes. In addition to a direct reasoning mode for VLMs, DeepTumorVQA provides tool-interaction environments for agent evaluation, where a model can call external tools, including segmentation models, measurement programs, and medical knowledge modules, before answering the question. Evaluating over 30 model configurations, we find that reliable quantitative measurement is the primary bottleneck, making later-stage visual and medical reasoning harder for VLMs, while tool augmentation substantially mitigates this issue. When tools are available, leveraging medical knowledge and tools to reason about medical images becomes a new challenge. We further show that ground-truth step-by-step tool-use traces from DeepTumorVQA can supervise agents and reduce tool-use and reasoning failures. This stage-wise progression from recognition to measurement to visual and medical reasoning provides a concrete roadmap for future medical VLM and AI agent studies. All data and code are released at https://github.com/Schuture/DeepTumorVQA.",
+      "authors": [
+        "Yixiong Chen",
+        "Wenjie Xiao",
+        "Pedro R. A. S. Bassi",
+        "Boyan Wang",
+        "Liang He",
+        "Xinze Zhou",
+        "Sezgin Er",
+        "Ibrahim Ethem Hamamci",
+        "Zongwei Zhou",
+        "Alan Yuille"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-05-10T17:57:57+00:00",
+      "link": "https://arxiv.org/pdf/2605.09679v1",
+      "tags": [
+        "keyword:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Medical VLMs and tool-augmented agents for complex visual reasoning",
+      "llm_evidence_cn": "用于复杂视觉推理的医疗VLM和工具增强代理",
+      "llm_evidence": "用于复杂视觉推理的医疗VLM和工具增强代理",
+      "canonical_evidence": "用于复杂视觉推理的医疗VLM和工具增强代理",
+      "llm_tldr_en": "A hierarchical benchmark for evaluating multi-stage reasoning in medical vision-language models and agents.",
+      "llm_tldr_cn": "提出DeepTumorVQA基准，用于评估医疗视觉语言模型在肿瘤诊断中的多阶段推理能力。",
+      "llm_tldr": "提出DeepTumorVQA基准，用于评估医疗视觉语言模型在肿瘤诊断中的多阶段推理能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.09679v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.10445v1",
+      "title": "Uni-Synergy: Bridging Understanding and Generation for Personalized Reasoning via Co-operative Reinforcement Learning",
+      "abstract": "Unified Multimodal Models (UMMs) excel in general tasks but struggle to bridge the gap between personalized understanding and generation. Prior works largely rely on implicit token-level alignment via supervised fine-tuning, which fails to fully capture the potential synergy between comprehension and creation. In this work, we propose Sync-R1, an end-to-end reinforcement learning framework that jointly optimizes personalized understanding and generation within a single, explicit reasoning loop. Through this unified feedback process, Sync-R1 enables personalized comprehension to guide content creation, while the resulting generation quality reciprocally refines understanding within an integrated reward landscape. To efficiently orchestrate this dual-task synergy, we introduce Sync-GRPO, a reinforcement learning method utilizing an ensemble reward system. Furthermore, we propose Dynamic Group Scaling (DGS), which adaptively filters low-potential trajectories to reduce gradient variance and accelerate convergence. To better reflect real-world complexity, we introduce UnifyBench++, featuring denser textual descriptions and richer user contexts. Experimental results demonstrate that Sync-R1 achieves state-of-the-art performance, showcasing superior cross-task reasoning and robust personalization without requiring complex cold-start procedures. The code and the UnifyBench++ dataset will be released at: https://github.com/arctanxarc/UniCTokens.",
+      "authors": [
+        "Zijun Shen",
+        "Sihan Yang",
+        "Ruichuan An",
+        "Ziyu Guo",
+        "Hao Liang",
+        "Ming Lu",
+        "Renrui Zhang",
+        "Wentao Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-05-11T12:18:26+00:00",
+      "link": "https://arxiv.org/pdf/2605.10445v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multimodal reinforcement learning for personalized reasoning",
+      "llm_evidence_cn": "用于个性化推理的多模态强化学习",
+      "llm_evidence": "用于个性化推理的多模态强化学习",
+      "canonical_evidence": "用于个性化推理的多模态强化学习",
+      "llm_tldr_en": "Sync-R1 uses reinforcement learning to bridge multimodal understanding and generation in a unified reasoning loop.",
+      "llm_tldr_cn": "提出Sync-R1框架，利用强化学习在统一推理环路中优化多模态理解与生成。",
+      "llm_tldr": "提出Sync-R1框架，利用强化学习在统一推理环路中优化多模态理解与生成。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reinforcement learning with vision and language",
+      "matched_requirement_id": "req-2",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.10445v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2605.09719v1",
+      "title": "Distilling 3D Spatial Reasoning into a Lightweight Vision-Language Model with CoT",
+      "abstract": "Large-scale 3D vision-language models (VLMs) like LLaVA-3D offer strong spatial reasoning but are difficult to deploy due to high computational costs. We propose a knowledge distillation framework that transfers spatial reasoning from a 7B teacher to a 2.29B student model. Our approach achieves 8.7x lower inference latency and a 3x reduction in model size while retaining 54-72% of the teacher's performance. The framework utilizes VGGT as the vision encoder and a multi-task distillation pipeline with uncertainty-aware loss weighting. To improve reasoning without chain-of-thought (CoT) data, we introduce \"Hidden CoT\": learnable latent tokens that serve as an internal scratchpad before answer generation. This is the first use of latent scratchpad reasoning in distilled 3D VLMs. The student model jointly performs spatial description, depth estimation, and object detection. Experiments on ScanNet and 3D-FRONT show strong spatial understanding, reaching 68-72% accuracy on proximity and contact tasks. Our framework enables efficient 3D scene QA on resource-constrained platforms.",
+      "authors": [
+        "Alaa Asfour",
+        "Christopher Indris",
+        "Leihan Chen",
+        "Tejas Vyas",
+        "Guanghui Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-05-10T19:38:29+00:00",
+      "link": "https://arxiv.org/pdf/2605.09719v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Distilling spatial reasoning into vision-language models",
+      "llm_evidence_cn": "将空间推理蒸馏至视觉语言模型",
+      "llm_evidence": "将空间推理蒸馏至视觉语言模型",
+      "canonical_evidence": "将空间推理蒸馏至视觉语言模型",
+      "llm_tldr_en": "Distills 3D spatial reasoning from large VLMs into lightweight models using a Hidden Chain-of-Thought approach.",
+      "llm_tldr_cn": "通过隐藏思维链技术将3D空间推理能力从大型VLM蒸馏至轻量级模型。",
+      "llm_tldr": "通过隐藏思维链技术将3D空间推理能力从大型VLM蒸馏至轻量级模型。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2605.09719v1",
+      "carry_days": 1
+    }
+  ]
 }

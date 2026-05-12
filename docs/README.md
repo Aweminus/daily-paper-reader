@@ -6,73 +6,76 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-11
-- 运行时间：2026-05-11 20:39:30 UTC
+- 最新运行日期：2026-05-12
+- 运行时间：2026-05-12 21:29:24 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：6
+- 本次总论文数：18
+- 精读区：7
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度研读 17 篇论文，聚焦多模态推理优化与轻量化 GUI 智能体的前沿突破。
-重点推荐结构化角色感知策略与强化学习蒸馏技术，它们分别在复杂推理和移动端 Agent 效率上给出了满分答卷。
-建议普通读者优先关注如何利用强化学习提升模型在复杂规则下的决策精准度。
-- 详情：[/202605/11/README](/202605/11/README)
+今日精选 18 篇前沿成果，深度攻克 Web 智能体防御欺骗界面及多模态推理鲁棒性两大难题。
+满分论文揭示了提升 Agent 抵御欺骗性界面的关键技术，同时多模态推理在视觉退化环境下的强化表现亮眼。
+建议关注 VLA 模型在生物实验自动化及视觉带宽优化上的进展，探索具身智能的闭环推理潜力。
+- 详情：[/202605/12/README](/202605/12/README)
 
 ### 精读区论文标签
-1. [Structured Role-Aware Policy Optimization for Multimodal Reasoning](/202605/11/2605.07274v1-structured-role-aware-policy-optimization-for-multimodal-reasoning)  
+1. [Don't Click That: Teaching Web Agents to Resist Deceptive Interfaces](/202605/12/2605.09497v1-dont-click-that-teaching-web-agents-to-resist-deceptive-interfaces)  
    标签：评分：10.0/10、query:vlm-rl
-   evidence：用于多模态大模型推理的强化学习
-2. [LiteGUI: Distilling Compact GUI Agents with Reinforcement Learning](/202605/11/2605.07505v1-litegui-distilling-compact-gui-agents-with-reinforcement-learning)  
-   标签：评分：10.0/10、query:vlm-rl
-   evidence：使用强化学习训练的非机器人视觉语言GUI智能体
-3. [Agentick: A Unified Benchmark for General Sequential Decision-Making Agents](/202605/11/2605.06869v1-agentick-a-unified-benchmark-for-general-sequential-decision-making-agents)  
+   evidence：不涉及机器人的基于强化学习的VLM网页智能体
+2. [Reinforcing Multimodal Reasoning Against Visual Degradation](/202605/12/2605.09262v1-reinforcing-multimodal-reasoning-against-visual-degradation)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：强化学习、大语言模型和视觉语言模型智能体在序列决策中的基准测试
-4. [HyperEyes: Dual-Grained Efficiency-Aware Reinforcement Learning for Parallel Multimodal Search Agents](/202605/11/2605.07177v1-hypereyes-dual-grained-efficiency-aware-reinforcement-learning-for-parallel-multimodal-search-agents)  
+   evidence：针对多模态大模型推理能力的强化学习微调
+3. [Reflection Anchors for Propagation-Aware Visual Retention in Long-Chain Multimodal Reasoning](/202605/12/2605.09614v1-reflection-anchors-for-propagation-aware-visual-retention-in-long-chain-multimodal-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于并行多模态搜索智能体的强化学习，不涉及机器人
-5. [GazeVLM: Active Vision via Internal Attention Control for Multimodal Reasoning](/202605/11/2605.07817v1-gazevlm-active-vision-via-internal-attention-control-for-multimodal-reasoning)  
+   evidence：视觉语言模型中的长链多模态推理
+4. [When to Re-Commit: Temporal Abstraction Discovery for Long-Horizon Vision-Language Reasoning](/202605/12/2605.09860v1-when-to-re-commit-temporal-abstraction-discovery-for-long-horizon-vision-language-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：VLM 多模态推理中的主动视觉
-6. [Skill1: Unified Evolution of Skill-Augmented Agents via Reinforcement Learning](/202605/11/2605.06130v2-skill1-unified-evolution-of-skill-augmented-agents-via-reinforcement-learning)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：用于技能增强型智能体的强化学习
+   evidence：长程视觉语言推理以及用于动作承诺的可学习策略
+5. [TRACER: Verifiable Generative Provenance for Multimodal Tool-Using Agents](/202605/12/2605.09934v1-tracer-verifiable-generative-provenance-for-multimodal-tool-using-agents)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：多模态工具使用智能体与多步推理
+6. [V-ABS: Action-Observer Driven Beam Search for Dynamic Visual Reasoning](/202605/12/2605.10172v1-v-abs-action-observer-driven-beam-search-for-dynamic-visual-reasoning)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：多模态大模型中动作-观察者驱动的束搜索用于动态视觉推理
+7. [How Mobile World Model Guides GUI Agents?](/202605/12/2605.10347v1-how-mobile-world-model-guides-gui-agents)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：用于移动端GUI智能体的视觉语言模型
 
 ### 速读区论文标签
-1. [Retrieve, Integrate, and Synthesize: Spatial-Semantic Grounded Latent Visual Reasoning](/202605/11/2605.07106v1-retrieve-integrate-and-synthesize-spatial-semantic-grounded-latent-visual-reasoning)  
+1. [BioProVLA-Agent: An Affordable, Protocol-Driven, Vision-Enhanced VLA-Enabled Embodied Multi-Agent System with Closed-Loop-Capable Reasoning for Biological Laboratory Manipulation](/202605/12/2605.07306v1-bioprovla-agent-an-affordable-protocol-driven-vision-enhanced-vla-enabled-embodied-multi-agent-system-with-closed-loop-capable-reasoning-for-biological-laboratory-manipulation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：多模态大语言模型的潜空间视觉推理
-2. [BalCapRL: A Balanced Framework for RL-Based MLLM Image Captioning](/202605/11/2605.07394v1-balcaprl-a-balanced-framework-for-rl-based-mllm-image-captioning)  
+   evidence：支持VLA的具身多智能体系统，具备闭环推理能力
+2. [One Token Per Frame: Reconsidering Visual Bandwidth in World Models for VLA Policy](/202605/12/2605.07931v2-one-token-per-frame-reconsidering-visual-bandwidth-in-world-models-for-vla-policy)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：基于强化学习的多模态大模型图像描述
-3. [RuleSafe-VL: Evaluating Rule-Conditioned Decision Reasoning in Vision-Language Content Moderation](/202605/11/2605.07760v1-rulesafe-vl-evaluating-rule-conditioned-decision-reasoning-in-vision-language-content-moderation)  
+   evidence：结合世界模型进行规划的视觉-语言-动作（VLA）策略
+3. [CoLVR: Enhancing Exploratory Latent Visual Reasoning via Contrastive Optimization](/202605/12/2605.08802v1-colvr-enhancing-exploratory-latent-visual-reasoning-via-contrastive-optimization)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型中的规则约束决策推理
-4. [Object Hallucination-Free Reinforcement Unlearning for Vision-Language Models](/202605/11/2605.08031v1-object-hallucination-free-reinforcement-unlearning-for-vision-language-models)  
+   evidence：多模态大模型中的探索性潜空间视觉推理
+4. [Mirror, Mirror on the Wall: Can VLM Agents Tell Who They Are at All?](/202605/12/2605.08816v1-mirror-mirror-on-the-wall-can-vlm-agents-tell-who-they-are-at-all)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型的强化反向学习
-5. [Uncertainty-Aware Exploratory Direct Preference Optimization for Multimodal Large Language Models](/202605/11/2605.04874v1-uncertainty-aware-exploratory-direct-preference-optimization-for-multimodal-large-language-models)  
+   evidence：具身VLM智能体关于自我识别的推理
+5. [When Relations Break: Analyzing Relation Hallucination in Vision-Language Model Under Rotation and Noise](/202605/12/2605.05045v2-when-relations-break-analyzing-relation-hallucination-in-vision-language-model-under-rotation-and-noise)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：多模态大语言模型的偏好优化
-6. [AI CFD Scientist: Toward Open-Ended Computational Fluid Dynamics Discovery with Physics-Aware AI Agents](/202605/11/2605.06607v2-ai-cfd-scientist-toward-open-ended-computational-fluid-dynamics-discovery-with-physics-aware-ai-agents)  
+   evidence：分析视觉语言模型中的关系推理
+6. [SkillOS: Learning Skill Curation for Self-Evolving Agents](/202605/12/2605.06614v1-skillos-learning-skill-curation-for-self-evolving-agents)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：AI智能体的视觉物理验证
-7. [Fine-tuning a vision-language model for fracture-surface morphology recognition](/202605/11/2605.07145v1-fine-tuning-a-vision-language-model-for-fracture-surface-morphology-recognition)  
+   evidence：用于自我进化智能体技能策划的强化学习训练方案
+7. [Tools as Continuous Flow for Evolving Agentic Reasoning](/202605/12/2605.07339v1-tools-as-continuous-flow-for-evolving-agentic-reasoning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：微调 VLM 用于科学图像推理
-8. [Uncovering and Shaping the Latent Representation of 3D Scene Topology in Vision-Language Models](/202605/11/2605.07148v1-uncovering-and-shaping-the-latent-representation-of-3d-scene-topology-in-vision-language-models)  
+   evidence：用于进化智能体推理的连续轨迹生成
+8. [PolarVLM: Bridging the Semantic-Physical Gap in Vision-Language Models](/202605/12/2605.07574v1-polarvlm-bridging-the-semantic-physical-gap-in-vision-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型中的潜在空间推理
-9. [An Agent-Oriented Pluggable Experience-RAG Skill for Experience-Driven Retrieval Strategy Orchestration](/202605/11/2605.03989v2-an-agent-oriented-pluggable-experience-rag-skill-for-experience-driven-retrieval-strategy-orchestration)  
+   evidence：用于开放式推理的多模态框架
+9. [Proxy3D: Efficient 3D Representations for Vision-Language Models via Semantic Clustering and Alignment](/202605/12/2605.08064v1-proxy3d-efficient-3d-representations-for-vision-language-models-via-semantic-clustering-and-alignment)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：面向智能体的多跳推理检索编排
-10. [HNC: Leveraging Hard Negative Captions towards Models with Fine-Grained Visual-Linguistic Comprehension Capabilities](/202605/11/2605.06157v1-hnc-leveraging-hard-negative-captions-towards-models-with-fine-grained-visual-linguistic-comprehension-capabilities)  
+   evidence：视觉语言模型推理的3D表示
+10. [AIPO: : Learning to Reason from Active Interaction](/202605/12/2605.08401v1-aipo--learning-to-reason-from-active-interaction)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：细粒度视觉语言理解
-11. [Uneven Evolution of Cognition Across Generations of Generative AI Models](/202605/11/2605.06815v1-uneven-evolution-of-cognition-across-generations-of-generative-ai-models)  
+   evidence：通过多智能体交互进行推理的强化学习
+11. [ZAYA1-VL-8B Technical Report](/202605/12/2605.08560v1-zaya1-vl-8b-technical-report)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：评估多模态模型中的感知推理能力
+   evidence：用于图像理解和推理基准的视觉语言模型
 
 
 <div class="dpr-home-promo-card">

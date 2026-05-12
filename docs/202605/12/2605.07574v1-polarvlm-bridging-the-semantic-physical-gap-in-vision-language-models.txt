@@ -1,0 +1,1997 @@
+Title: PolarVLM: Bridging the Semantic-Physical Gap in Vision-Language Models
+
+URL Source: https://arxiv.org/pdf/2605.07574v1
+
+Published Time: Mon, 11 May 2026 01:03:18 GMT
+
+Number of Pages: 23
+
+Markdown Content:
+# PolarVLM: Bridging the Semantic-Physical Gap in Vision-Language Models 
+
+Yuliang Li 1 Chu Zhou 2 Heng Guo 1 Boxin Shi 3 Imari Sato 2,4 Zhanyu Ma 11Beijing University of Posts and Telecommunications, China 
+
+> 2
+
+National Institute of Informatics, Japan 
+
+> 3
+
+Peking University, China 
+
+> 4
+
+The University of Tokyo, Japan 
+
+{liyuliang, guoheng, mazhanyu}@bupt.edu.cn zhou_chu@hotmail.com, shiboxin@pku.edu.cn, imarik@nii.ac.jp 
+
+Abstract 
+
+Mainstream vision-language models (VLMs) fundamentally struggle with severe optical ambiguities, such as reflections and transparent objects, due to the inherent limitations of standard RGB inputs. While polarization imaging captures polari-metric physical parameters that resolve these ambiguities, existing methods are constrained by fixed-format outputs and remain isolated from open-ended rea-soning. To bridge this semantic-physical gap, we introduce PolarVLM , the first multimodal framework integrating polarimetric physical parameters into VLMs. By employing a dual-stream architecture and a progressive two-stage training strat-egy, PolarVLM effectively prevents physical misinterpretations while preserving general visual abilities. Complementing our architecture, we construct PolarVQA ,the first benchmark for polarization-aware VQA, featuring 75K physics-grounded instruction-tuning pairs targeting reflective and transparent scenes. Experiments show that PolarVLM surpasses the RGB baseline by 25.4% overall across five eval-uation tasks, with remarkable gains of 26.6% in reflection recognition and 34.0% in glass counting, successfully unlocking physics-aware semantic understanding. 
+
+1 Introduction 
+
+Mainstream vision-language models (VLMs) excel at open-ended visual question answering (VQA) using RGB inputs [ 1– 3]. However, real-world environments frequently feature specular reflections and transparent objects, which pose systematic challenges to this paradigm. These phenomena introduce inherent optical ambiguities : because standard RGB sensors capture only intensity and color, they cannot physically disentangle actual objects from reflected virtual content, nor perceive transparent surfaces lacking distinct visual boundaries. Relying exclusively on such ambiguous photometric features, existing VLMs are highly susceptible to severe perceptual illusions. Consequently, as illustrated by the RGB-only failures in Fig. 1, even state-of-the-art models fail to ground accurate semantic reasoning in these common physical scenarios. Polarization imaging breaks this bottleneck by capturing polarimetric physical parameters ( e.g., Degree of Linear Polarization (DoLP) and Angle of Linear Polarization (AoLP)) that remain invisible to standard RGB sensors [ 4, 5 ]. While these parameters have proven effective for low-level vision tasks like reflection removal [ 6 –8 ] and transparent object segmentation [ 9 , 10 ], their potential for high-level semantic reasoning remains largely untapped. This is because existing approaches are strictly constrained by fixed-format outputs, fundamentally preventing them from supporting open-ended dialogue. Moreover, a critical void of polarization-text instruction data leaves modern VLMs entirely blind to these physical parameters. Therefore, there is a compelling need to develop a unified                           
+
+> Preprint.
+> arXiv:2605.07574v1 [cs.CV] 8 May 2026 Resolving transparency
+> ambiguities
+> Robust reflection
+> reasoning
+> Q: Describe all visible glass in this scene.
+> RGB-only: Multiple glass panes are
+> arranged vertically , with varying
+> heights, likely windows .
+> PolarVLM (ours): One horizontal
+> glass across the width of image,
+> functioning as a partition .
+> GT: One glass is positioned horizontally
+> and appears to function as a partition .
+> RGB-only: The dog's nose is white ,
+> and the right reflection is a tree .
+> PolarVLM (ours): The dog's nose is
+> black , the reflection is a building .
+> GT: The dog's nose is black , and the
+> reflection on the right shows a building .
+> 7.57
+> 5.65 5.51
+> 4.88
+> 5.85
+> 4.62
+> LLaVA-1.5 (RGB-only)
+> Glass
+> Count
+> Glass
+> Loc.
+> Scene
+> Desc.
+> 6.87
+> 5.77
+> Glass
+> Desc.
+> PolarVLM (ours)
+> 4.09
+> 3.23
+> Refl.
+> Recog.
+> RGB DoLP
+> AoLP Reference:
+> Glass mask
+> RGB DoLP
+> AoLP Reference:
+> No-reflection
+> Q: Describe the dog's nose, right reflection.
+
+Figure 1: PolarVLM overcomes optical ambiguities through physics-aware multimodal reasoning. By integrating polarimetric physical parameters, PolarVLM significantly outperforms conventional RGB-only baselines ( e.g., fine-tuned LLaVA-1.5 [ 3]) in resolving transparency ambiguities and performing robust reflection reasoning, both qualitatively and quantitatively. multimodal framework and benchmark that jointly integrate RGB and polarimetric cues, injecting physics-aware perception into open-ended VQA to unlock accurate semantic understanding. Unlocking this capability, however, presents non-trivial challenges spanning both model architecture and data alignment. On the architectural front, directly injecting polarimetric physical parameters into standard VLMs leads to a severe representation gap. The physical properties encoded by these parameters differ from the appearance-based semantic features expected by pretrained visual encoders. A naive workaround is a cascaded approach that utilizes polarization solely for low-level image preprocessing. However, this strategy creates an opaque pipeline where early estimation errors inevitably accumulate. Consequently, the language model remains isolated from the raw physical signals, precluding genuine physics-aware reasoning. It is therefore critical to design a dedicated fusion mechanism that preserves the distinct strengths of both modalities. Concurrently, on the data front, existing polarimetric datasets offer only pixel-level annotations without language descriptions. The challenge lies in bridging this semantic-physical gap by translating dense physical measurements into high-fidelity textual supervision. Crucially, these annotations must strictly demonstrate the boundary of what polarization can actually express ( e.g., geometric structure and material properties). This precision is essential to prevent the model from misinterpreting physical parameters as ordinary visual textures, or erroneously associating them with unrelated semantic concepts. To address these limitations, we introduce PolarVLM , the first multimodal framework specifically designed to bridge the semantic-physical gap in open-ended VQA. By anchoring the language model in polarimetric physics, PolarVLM effectively resolves severe optical ambiguities for reflections and transparent objects (see Fig. 1). Overcoming the isolation of cascaded approaches, we construct a dual-stream architecture upon LLaVA-1.5 [ 3]. This design injects physical measurements via a dedicated polarization branch while robustly preserving pretrained RGB semantic priors. The result-ing heterogeneous features are integrated via token-level concatenation, empowering the language model’s self-attention layers to dynamically cross-reference physics-aware and appearance-based tokens. To prevent the model from misinterpreting physical parameters as ordinary visual textures, we propose a progressive two-stage training strategy. By initially aligning polarimetric features to the semantic space prior to dual-stream joint instruction tuning, we ensure that physical signals correctly ground the model’s reasoning without disrupting its inherent visual-linguistic capabilities. Complementing our architectural design, we introduce PolarVQA to bridge the critical void in polarimetric instruction data. We formulate a physics-guided data generation pipeline that integrates 2visual foundation models [ 11 ], exact polarimetric computations, and large language models [ 12 ]. This pipeline successfully translates low-level physical measurements into high-fidelity textual supervision while strictly preventing the introduction of unrelated semantic concepts. Built upon raw multimodal captures from public datasets [ 8, 9], we construct 28.5K physics-grounded captions and 46.8K diverse instruction-tuning pairs. Structurally, the benchmark is unified under two core dimensions: resolving transparency ambiguities and robust reflection reasoning , which feature a dedicated counterfactual reasoning subset explicitly designed to penalize reflection-induced object hallucinations. By addressing these severe optical ambiguities, PolarVQA establishes the first comprehensive benchmark for training and evaluating physics-aware vision-language models. In summary, our primary contributions include: • PolarVLM , the first multimodal framework integrating polarimetric physical parameters into VLMs for open-ended VQA under severe optical ambiguities. • A dual-stream architecture and progressive training strategy to bridge the semantic-physical gap, preventing physical misinterpretations while preserving general visual abilities. • PolarVQA , the first benchmark for polarization-aware VQA, providing 75K physics-grounded captions and instruction-tuning pairs targeting reflective and transparent scenes. 
+
+2 Related work 
+
+Polarization-based vision. Since the polarization properties of light are fundamentally governed by surface normals, textures, and material characteristics, polarization has become an indispensable physical cue for overcoming the limitations of conventional appearance-based approaches. In the realm of 3D vision, polarization has been widely exploited to solve a variety of ill-posed problems, including shape and normal estimation [ 13 – 17 ], 3D reconstruction and inverse rendering [ 18 – 20 ], and depth sensing [ 21 , 22 ]. Furthermore, because reflection and scattering consistently alter the polarization state of light, polarimetric cues have been extensively applied to low-level vision tasks such as reflection removal [ 6– 8, 23 , 24 ], dehazing [ 25 , 26 ], high dynamic range imaging [ 27 , 28 ], color constancy [ 29 ], and shadow removal [ 30 ]. Most critically for complex real-world scenes, polarization provides unique discriminative features for transparent object perception [ 9 , 10 , 31 ], scenarios where purely RGB-based methods suffer from severe generalization bottlenecks due to the absence of explicit physical constraints [ 32 , 33 ]. Despite their significant progress in these respective domains, existing methods remain confined to task-specific modules with fixed-format outputs, while PolarVLM pioneers the translation of polarimetric physical quantities into language supervision to enable open-ended, physics-grounded visual question answering. 
+
+Vision-language models. Recent VLMs have successfully aligned pretrained visual encoders with large language models. Pioneer frameworks like LLaVA [ 1 , 3] and MiniGPT-4 [ 34 ] project visual tokens via multi-layer perceptrons, while BLIP-2 [ 2] and InstructBLIP [ 35 ] employ learnable queries and cross-attention mechanisms. More recently, Qwen2-VL [ 36 ] and InternVL [ 37 ] have introduced dynamic resolution and scaled language backbones. However, these general-purpose VLMs rely merely on RGB inputs. Their perceptual failures in reflective and transparent scenarios stem not from insufficient model capacity, but from the lack of physical information within the RGB modality itself. 
+
+Incorporating non-RGB modalities. To transcend the physical limitations of RGB, researchers have increasingly explored extending vision-language alignment to diverse modalities. Foundational efforts successfully extended Contrastive Language-Image Pre-training (CLIP) [ 38 ] to point clouds [ 39 ], video [ 40 ], and audio [ 41 ], while unified frameworks like ImageBind [ 42 ] have established shared embedding spaces across multiple sensory inputs. Furthermore, domain-specific sensors are progres-sively being integrated into VLMs to tackle extreme conditions; notable examples include tactile sensing for physical deformation [ 43 ], event cameras for high-dynamic scenes [ 44 ], and thermal imaging for low-light environments [ 45 ]. Despite successes with other modalities, incorporating polarization into VLMs is hindered by its complex information overlap with RGB and a critical lack of text-aligned datasets. PolarVLM resolves these challenges, introducing the first dual-stream framework and companion PolarVQA benchmark for physics-grounded open-ended reasoning. 33 The PolarVLM framework 
+
+3.1 Physical image formation and polarimetric encoding 
+
+To introduce physical perception into vision-language models, it is essential to first bridge the gap between raw optical measurements and neural representations. Standard polarization cameras employ a micro-polarizer array to capture the modulation of light. According to Malus’s law [ 5], the measured intensity Iα passing through a linear polarizer oriented at angle α can be expressed in terms of the Stokes parameters S = [ S0, S 1, S 2]⊤:
+
+Iα = 12 S0 + 12 S1 cos(2 α) + 12 S2 sin(2 α), (1) where S0 denotes the total light intensity, and S1 and S2 characterize the linearly polarized compo-nents. In a single exposure, the sensor captures four spatially aligned directional intensities: I0◦ , I45 ◦ ,
+
+I90 ◦ , and I135 ◦ . Based on Eq. 1, the Stokes parameters can be strictly decoupled as: 
+
+S0 = I0◦ + I90 ◦ , S1 = I0◦ − I90 ◦ , S2 = I45 ◦ − I135 ◦ . (2) Once the Stokes vector is obtained, the fundamental physical properties of the incident light, namely, the Degree of Linear Polarization (DoLP, denoted as P ) and the Angle of Linear Polarization (AoLP, denoted as Φ), can be analytically derived: 
+
+P =
+
+pS21 + S22
+
+S0
+
+, Φ = 12 arctan 
+
+ S2
+
+S1
+
+
+
+. (3) Here, P ∈ [0 , 1] indicates the proportion of linearly polarized light, serving as a strong physical cue for separating reflections and revealing transparent surfaces. Φ ∈ [0 , π ) represents the oscillation orientation of the electric field. However, directly feeding Φ into a pretrained visual encoder introduces severe domain mismatch issues. Because the physical angle is π-periodic, values near 
+
+0 and π represent nearly identical physical states but exhibit maximal numerical distance. This angular discontinuity disrupts the continuous feature space expected by standard convolutional or transformer-based encoders. To seamlessly inject these physical properties into the vision-language domain, we design a continu-ous, neural-friendly polarimetric representation. We map the discontinuous Φ into a continuous 2D Cartesian space via trigonometric transformations sin(2Φ) and cos(2Φ) . Notably, this is physically equivalent to utilizing the normalized Stokes parameters S2/pS21 + S22 and S1/pS21 + S22 . By concatenating these components with the DoLP, we construct a normalized polarization input: 
+
+Xpol = [ P, sin(2Φ) , cos(2Φ)] . (4) This physics-grounded encoding strictly preserves the discriminative power of the original polarimet-ric measurements while eliminating periodic boundary ambiguities, explicitly aligning the physical signal distribution with the input requirements of the subsequent dual-stream architecture. 
+
+3.2 Dual-stream architecture and modality fusion 
+
+The core philosophy behind PolarVLM is to inject polarimetric physical perception into the language model without compromising its foundational semantic reasoning capabilities. Directly modifying the visual encoder to accept additional input channels would inevitably disrupt the pretrained semantic priors. Therefore, as shown in Fig. 2, we design a structurally symmetric dual-stream architecture built upon the LLaVA-1.5 [ 3] framework, explicitly decoupling appearance processing from physical feature extraction. The RGB encoder and its projection layer remain completely frozen throughout training, providing an anchor for stable semantic understanding. 
+
+Physics-aware visual branch. To extract representations from the polarimetric input Xpol , we construct a parallel visual branch adopting the same CLIP ViT-L/14 architecture [ 38 ] as the RGB pathway. Rather than training this branch from scratch, we initialize it with pretrained RGB weights. This design choice is motivated by the strong morphological affinities between polarimetric parameters and low-level visual features: DoLP resembles an edge map [ 46 , 47 ], while the spatial gradients of the trigonometric AoLP channels closely mimic a surface normal map [ 48 , 49 ]. Consequently, the edge detection and texture extraction priors inherently learned by the pretrained vision model can 4Concat                  
+
+> 𝐗 𝑝𝑜𝑙
+> 𝑃 ,sin 2𝛷 ,cos 2𝛷
+> Polarization
+> Encoder
+> Projection
+> Layer (Pol)
+> Norm
+> Polarization input
+> RGB input
+> RGB
+> Encoder
+> Projection
+> Layer (RGB)
+> Weight Initialization
+> CLIP ViT -L/14
+> Weight Initialization
+> Text Decoder
+> (Vicuna -13B)
+> ...
+> ...
+> 𝐇 𝑝𝑜𝑙
+> 𝐇 𝑟𝑔𝑏
+> Tokens
+> Concat
+> Describe all
+> visible glass
+> in this scene.
+> User M essage
+> Response (a) (b)
+> Stage 1: physics -to -semantic alignment
+> Stage 2: joint physics -aware instruction tuning
+> Polarization
+> Encoder
+> Projection
+> Layer (Pol) Text
+> Decoder
+> RGB branch: Bypassed
+> Polarization
+> Encoder
+> Projection
+> Layer (Pol) Text
+> Decoder
+> RGB
+> Encoder
+> Projection
+> Layer (RGB)
+> LoRA
+> LoRA
+> Freeze Trainable LoRA Low -Rank
+> Adaptation
+> One glass is
+> positioned
+> vertically and
+> functions as a
+> display case.
+> 𝑃
+> sin 2𝛷
+> cos 2𝛷
+
+Figure 2: Overall design of PolarVLM. (a) Dual-stream physics-aware architecture with sequence-concatenation modality fusion. (b) Progressive two-stage training strategy to avoid modality collapse and achieve robust physical-semantic alignment. effectively transfer to the physical domain. The extracted physical features are then mapped into the LLM embedding space via an MLP projection layer. Crucially, because the numerical distributions of physical and appearance features differ systematically, we introduce a normalization layer at the output of the polarization projector. This aligns the latent magnitudes of the two modalities, preventing the subsequent self-attention mechanism from being dominated by either modality due to scale imbalance. 
+
+LLM-delegated modality fusion. Given the two heterogeneous sets of visual tokens, Hrgb and 
+
+Hpol , an appropriate fusion mechanism is critical. Conventional fusion strategies exhibit distinct limitations in this multimodal context: residual addition implicitly assumes strict semantic additivity at corresponding spatial locations, which fundamentally violates the orthogonal physical meanings of RGB and polarization. Conversely, introducing auxiliary cross-attention modules yields excessive learnable parameters, risking severe overfitting when fine-tuning on limited multimodal data. To circumvent these issues, PolarVLM adopts sequence concatenation. By simply concatenating Hrgb 
+
+and Hpol along the sequence dimension, we impose no restrictive prior assumptions. Instead, we elegantly delegate the cross-modal information routing entirely to the robust self-attention mechanism of the LLM. This allows the model to dynamically cross-reference physics-aware tokens specifically when the appearance-based tokens are corrupted by specular reflections or transparency. 
+
+4 Progressive two-stage training strategy 
+
+Training a heterogeneous multimodal framework from scratch is notoriously prone to modality collapse, where the language model relies entirely on familiar RGB representations and effectively ignores newly introduced physical signals. To avoid this and ensure robust physical grounding, PolarVLM employs a progressive two-stage training paradigm. 
+
+Stage 1: physics-to-semantic alignment. The primary objective of this stage is to strictly enforce the semantic grounding of the polarimetric signals. As illustrated in Fig. 2, we explicitly bypass the RGB branch and feed only the physics-aware tokens Hpol into the language model. This unimodal bottleneck design forces the polarization branch to establish an independent semantic representation, categorically preventing the model from developing a lazy reliance on RGB priors during early training. Architecturally, we freeze the LLM and the polarization encoder’s transformer blocks, updating only the polarization patch embedding layer and the MLP projector. This design is highly deliberate: the patch embedding directly ingests the normalized physical values and thus requires domain adaptation to map continuous physical distributions into discrete semantic tokens, whereas the higher-level spatial reasoning capabilities of the ViT are domain-agnostic and should be preserved. 
+
+Stage 2: joint physics-aware instruction tuning. Having established a foundational semantic understanding of polarization, the model transitions to dual-stream instruction tuning, as shown in Fig. 2. Here, both modalities are activated, and the concatenated visual tokens [Hrgb , Hpol ] are jointly processed by the language model. The network is trained on complex, multi-turn VQA tasks involving reflections and transparency. To endow the model with advanced reasoning while preventing catastrophic forgetting, we freeze the polarization patch embedding and instead adapt 5Transparent                 
+
+> object
+> instances
+> Specular
+> reflection
+> instances
+> •Geometry
+> •Spatial relationship
+> •Physical signal discrepancy
+> 28.5K 9,618
+> (34%)
+> 18,936
+> (66%)
+> Glass
+> Count ing
+> Glass
+> Localization
+> Glass
+> Description
+> Scene
+> Description
+> Reflection
+> Recognition
+> Counterfactual
+> Reasoning
+> 2.9K
+> 220
+> 2.9K 2.9K 2.9K
+> 220 238 220
+> 162 119 127
+> 21.3K
+> 1.9K
+> 512
+> 4.5K
+> 516
+> 80
+> 4.5K
+> 516
+> Train Val Test
+> Glass
+> Detection
+> For Stage 1
+> Resolving transparency ambiguities Robust reflection reasoning
+> For Stage 2
+> 46.8K in total (41.9K Train / 3.9K Val / 1K Test)
+> Subtotal: 12.9K Subtotal: 33.9K
+> (a) (b)
+
+Figure 3: Statistical overview and task taxonomy of the PolarVQA benchmark. (a) For Stage 1, the distribution of high-fidelity polarization captions is partitioned by physical scenarios and explicitly annotated semantic variants. (b) For Stage 2, the diverse multi-turn instruction-tuning pairs are categorized across progressive cognitive tasks, with the y-axis presented in logarithmic scale to accommodate varying data magnitudes. the polarization ViT’s attention modules alongside the LLM via Low-Rank Adaptation (LoRA) [ 50 ]. This creates a decoupled adaptation scheme: Stage 1 achieves input-level physical alignment, while Stage 2 realizes high-level cross-modal semantic adaptation. 
+
+Training objective. Throughout both stages, we optimize the model using the standard autoregressive next-token prediction objective. Let H denote the visual tokens provided to the language model, where H = Hpol in Stage 1, and H = [ Hrgb , Hpol ] in Stage 2. Given the embedded instruction tokens 
+
+Hinstruct , the model maximizes the likelihood of generating the target answer sequence: 
+
+L(θ) = −
+
+> L
+
+X
+
+> i=1
+
+log pθ (yi | H, Hinstruct , y <i ), y = {y1, . . . , y L}, (5) where θ denotes the trainable parameters of the respective stage, L is the sequence length, and y<i 
+
+represents the previously generated tokens. 
+
+5 The PolarVQA benchmark 
+
+To effectively train PolarVLM and rigorously evaluate its physics-aware reasoning capabilities, we construct PolarVQA, the first comprehensive vision-language benchmark targeting specular reflections and transparent objects. We source raw multi-angle polarimetric measurements and RGB images from two public datasets, PolarFree [ 8] and RGBP-Glass [ 9 ]. However, since these datasets provide only pixel-level physical annotations without natural language descriptions, they cannot be directly utilized for vision-language instruction tuning. 
+
+Physics-guided data generation. Rather than relying on manual labeling, we design an automated, physics-guided data generation pipeline to translate raw physical measurements into high-fidelity textual supervision. At a high level, this pipeline adopts a visual foundation model (Florence-2-large [ 11 ]) for spatial structural extraction, precise polarimetric computations for physical grounding, and a large language model (GPT-4o-mini [ 12 ]) for final text synthesis. To prevent the language model from hallucinating and to avoid introducing spurious supervisory signals into the polarization modality, we explicitly strip RGB-specific semantics ( e.g., color and texture) from the polarization prompts. The detailed architecture of this generation pipeline is provided in Appendix A. 
+
+Dataset composition and task diversity. As illustrated in Fig. 3, the PolarVQA benchmark provides a rich, multi-tiered task distribution strictly partitioned into non-overlapping training, validation, and test splits. For Stage 1 (physics-to-semantic alignment), we generate 28.5K high-fidelity polarization captions (25.2K train / 3.3K val). This split inherently balances optical challenges, comprising roughly 18.9K specular reflection instances and 9.6K transparent object instances, with each scene annotated 6across three semantic variants (geometry, spatial relationship, and physical signal discrepancy). For Stage 2 (joint physics-aware instruction tuning), we construct 46.8K diverse multi-turn instruction-tuning pairs (41.9K train / 3.9K val / 1K test) structured precisely around our two core evaluation dimensions. Under resolving transparency ambiguities , the evaluation encompasses four distinct tasks that progressively scale from fundamental perception to spatial reasoning: glass detection , glass counting , glass localization , and comprehensive glass description . Under robust reflection reasoning ,the evaluation includes holistic scene description and reflection recognition , alongside a dedicated 
+
+counterfactual reasoning subset. In this specific subset, we leverage spurious objects that exist solely in reflections to construct intentionally misleading instructions, explicitly training the model to resist object hallucinations by anchoring its reasoning in orthogonal polarization cues. This task design ensures that PolarVQA serves as a comprehensive testbed for multimodal physical perception. 
+
+6 Experiments 
+
+6.1 Experimental setup Implementation details. PolarVLM is initialized from the LLaVA-1.5-13B framework [ 3], inte-grating Vicuna-13B as the language model backbone and CLIP ViT-L/14 as the visual encoder. To ensure computational efficiency, we optimize the model using QLoRA [ 51 ], where the frozen backbones are loaded in 4-bit NormalFloat (NF4) quantization and trainable parameters are updated under a BF16 mixed-precision regime. The training process strictly follows our proposed progressive schedule: Stage 1 aligns physical representations using 28.5K polarization captions, while Stage 2 performs joint instruction tuning on 46.8K PolarVQA multi-turn pairs. All experiments are conducted on a workstation equipped with two NVIDIA RTX 5880 Ada GPUs (48GB VRAM each). The comprehensive hyperparameter configuration is detailed in Appendix B. 
+
+Test benchmark and evaluation protocol. We evaluate all models on the PolarVQA test set, which comprises 1K multi-turn question-answer pairs across five distinct cognitive tasks. Structured around our two core dimensions, these encompass glass counting , glass localization , and glass description 
+
+for resolving transparency ambiguities, alongside holistic scene description and reflection recognition 
+
+for robust reflection reasoning. We adopt an LLM-as-a-Judge protocol [ 52 , 53 ], utilizing GPT-4o-mini [ 12 ] to assign a quantitative score on a 1–10 scale based on semantic consistency, physical accuracy, and resistance to hallucinations. We report the mean score for each task and an overall sample-weighted average. Comprehensive details are provided in Appendix C. 
+
+6.2 Quantitative evaluation Compared baselines. To comprehensively evaluate the physical reasoning capabilities of PolarVLM, we benchmark against a diverse spectrum of multimodal pipelines (Tab. 1), categorized as follows: • Open-weight RGB-only VLMs: Leading open-source frameworks, including BLIP2-Flan-T5-XL [2], InternVL3-14B [54] and Qwen2.5-VL-7B [55]. • Proprietary VLMs: State-of-the-art closed-source models, specifically GPT-4.1 [56]. • Controlled baseline: A strictly controlled LLaVA-1.5-13B [ 3 ] fine-tuned on the exact same instruction data as our model, isolating the contribution of the polarization modality. • Cascaded polarimetric pipelines: Two-stage approaches that apply task-specific physical preprocessing—such as reflection removal (PolarFree [ 8 ]) or transparent object masking (Glass Seg. [9])—prior to VLM inference. 
+
+The necessity of polarimetric grounding. As reported in Tab. 1, PolarVLM significantly outperforms the directly comparable RGB-only baseline, elevating the Overall score from 4.85 to 6.08 (a relative gain of 25.4%). This consistent improvement across all physical reasoning tasks confirms that polarimetric cues provide critical structural evidence—such as DoLP responses induced by Fresnel reflections—that effectively resolves the visual ambiguities inherent in RGB imagery. Remarkably, PolarVLM also surpasses vastly larger general-purpose VLMs (including GPT-4.1) on physics-heavy tasks like glass localization and reflection recognition . This demonstrates that scaling model parameters cannot compensate for the lack of orthogonal physical sensing modalities. 
+
+End-to-end vs. cascaded pipelines. Tab. 1 further reveals the severe information bottlenecks inherent in cascaded pipelines. For instance, while using PolarFree [ 8] to remove reflections yields visually cleaner RGB images, it explicitly destroys the optical cues required for reflection recognition 
+
+7Table 1: Quantitative evaluation on the PolarVQA test set. Scores are reported on a 1–10 scale using the LLM-as-a-Judge protocol. For cascaded pipelines, “–” denotes tasks strictly not supported by the pipeline’s heuristics, and “N/A” indicates reflection cues are explicitly destroyed before evaluation. 
+
+Model / Pipeline Resolving Transparency Ambiguities Robust Reflection Reasoning Overall Glass Count Glass Loc. Glass Desc. Scene Desc. Refl. Recog. Open-Weight RGB-only VLMs 
+
+BLIP2-Flan-T5-XL [2] 2.53 3.55 3.05 3.03 2.06 2.94 InternVL3-14B [54] 4.55 5.40 6.55 5.02 2.81 5.01 Qwen2.5-VL-7B [55] 5.22 5.38 6.65 5.54 3.10 5.42 
+
+Proprietary VLMs 
+
+GPT-4.1 [56] 4.81 5.46 5.96 5.66 3.71 5.38 
+
+Controlled Baseline (Trained on PolarVQA) 
+
+LLaVA-1.5-13B [3] (RGB-only) 5.65 4.88 5.77 4.62 3.23 4.85 
+
+Cascaded Polarimetric Pipelines 
+
+PolarFree [8] + LLaVA-1.5-13B [3] – – – 4.34 N/A –PolarFree [8] + GPT-4.1 [56] – – – 5.71 N/A –Glass Seg. [9] + LLaVA-1.5-13B [3] 2.94 4.29 4.54 – – –Glass Seg. [9] + GPT-4.1 [56] 7.16 5.48 6.54 – – –
+
+End-to-End Multimodal Pipeline 
+
+PolarVLM (Ours) 7.57 5.51 6.87 5.85 4.09 6.08 Glass  Description 
+
+Q: Describe all visible glass surfaces in this scene. 
+
+GT: The glass is positioned vertically and appears 
+
+to function as a partition .
+
+RGB-only: There is one horizontal glass surface that 
+
+appears to function as a tabletop .
+
+GPT-4.1: There are two glass surfaces: a vertical partition 
+
+panel and a reflective glass lamp base .
+
+PolarVLM (ours): There is one vertical glass surface that 
+
+appears to function as a partition .
+
+> Reflection Recognition
+
+Q: What is the main content of the reflection in front of the 
+
+“APYBARA” sign? 
+
+GT: The reflection shows a building and tree , confirmed by 
+
+high polarization signals indicating reflections. 
+
+RGB-only: The reflection shows a stack of three white 
+
+boxes with Chinese characters on them .
+
+GPT-4.1: The floor reflects the “Magic World” sign and 
+
+surrounding store environment nearby. 
+
+PolarVLM (ours): The reflection shows a building and a tree .      
+
+> DoLP Reference:
+> Glass mask
+> RGB AoLP RGB DoLP AoLP Reference:
+> No-reflection
+> Glass Localization
+> Scene Description
+
+Q: Where is all the glass located in this scene? 
+
+GT: The glass surface is positioned in the center of the 
+
+scene , in front of the tiled wall. 
+
+RGB-only: One glass is positioned above the circular light ,
+
+and another is located below it. 
+
+GPT-4.1: The glass is located as a shower door or partition 
+
+on the far right side of the scene. 
+
+PolarVLM(ours): The glass is positioned centrally in front 
+
+of the tiled wall.   
+
+> DoLP Reference:
+> Glass mask
+> RGB AoLP
+
+Q: Describe the guitar in the scene. 
+
+GT: The guitar is white with a red and white design, 
+
+featuring a white pickguard and a red neck. 
+
+RGB-only: The guitar is a large, black, and white image 
+
+with a red and gold color scheme. 
+
+GPT-4.1: The large guitar in the center is mainly light blue 
+
+and reddish-brown , with a yellow accent on the headstock. 
+
+PolarVLM(ours): The guitar is a large, curved instrument 
+
+with a white and red color scheme.    
+
+> RGB DoLP AoLP Reference:
+> No-reflection
+
+Figure 4: Qualitative comparisons on the PolarVQA test set. We evaluate PolarVLM against the strictly controlled RGB-only LLaVA-1.5-13B [ 3] baseline and GPT-4.1 [ 56 ] under optical ambiguities caused by transparency (left) and specular reflections (right). By grounding its reasoning in polari-metric priors, PolarVLM mitigates the spatial mislocalizations and reflection-induced hallucinations (marked in red), generating physically accurate responses (highlighted in green). (rendering the pipeline inapplicable, denoted as N/A). Furthermore, even on scene description —a task where reflection removal should theoretically simplify perception—this rigid filtering discards contextual physical evidence, causing the cascaded pipeline to underperform PolarVLM even when powered by GPT-4.1 (5.71 vs. 5.85). Similarly, relying on intermediate segmentation masks [ 9]introduces error propagation; the cascaded approach struggles to match PolarVLM’s comprehensive scene understanding ( e.g., glass counting ). In contrast, PolarVLM’s unified architecture preserves the full spectrum of raw physical evidence, enabling the language model to jointly and robustly interpret both appearance and polarimetric signals without relying on fragile, task-specific heuristics. 8Table 2: Quantitative evaluation results of ablation study.                                           
+
+> Configuration Glass Count Glass Loc. Glass Desc. Scene Desc. Refl. Recog. Overall
+> w/o Stage 1 6.94 5.32 6.45 5.08 3.48 5.46 w/o Norm Layer 7.01 5.41 6.57 4.84 3.76 5.39 w/o CLIP LoRA 6.77 5.25 6.28 5.65 3.36 5.68 w/o RGB Branch 6.49 4.80 6.04 4.47 3.14 4.93 w/o Polar Branch 5.65 4.88 5.77 4.62 3.23 4.85
+> PolarVLM (Ours) 7.57 5.51 6.87 5.85 4.09 6.08
+
+6.3 Qualitative analysis 
+
+Fig. 4 provides representative qualitative comparisons between PolarVLM, the strictly controlled RGB-only LLaVA-1.5-13B [ 3 ] baseline, and the state-of-the-art GPT-4.1 [ 56 ] across our two core evaluation dimensions. Additional visualizations are provided in Appendix D. 
+
+Resolving transparency ambiguities. As illustrated in the left column, standard RGB-based models frequently struggle with materials lacking distinct visual boundaries. In the glass description task (top left), both the RGB-only baseline and GPT-4.1 fail to perceive the geometry of the glass, misidentifying a vertical partition as a “horizontal tabletop.” Similarly, in glass localization (bottom left), the baselines succumb to spatial misalignments, either hallucinating glass positions or misplacing them relative to the light source. In contrast, by grounding its reasoning in the structural contours revealed by DoLP and AoLP channels, PolarVLM precisely captures the surface orientation and central positioning, matching the ground-truth physical layout. 
+
+Robust reflection reasoning. In reflective scenarios (right column), standard VLMs often conflate reflected virtual content with intrinsic scene properties. In the reflection recognition task (top right), the RGB-only model hallucinates spurious “white boxes with Chinese characters,” while GPT-4.1 fails to identify the reflected building. More remarkably, in the scene description task (bottom right), intense specular reflections on the guitar body distort RGB appearance, leading the baselines to hallucinate incorrect colors such as “light blue” or “red and gold.” By effectively leveraging the polarimetric discrepancy between reflected light and Lambertian surfaces, PolarVLM filters out these optical artifacts and correctly describes the intrinsic “white and red” design of the instrument, demonstrating superior robustness in physically ambiguous environments. 
+
+6.4 Ablation studies 
+
+Tab. 2 evaluates our architectural and training designs. Removing Stage 1 (semantic pretraining) causes a clear performance drop, confirming that grounding polarimetric features into the LLM’s semantic space is vital prior to complex instruction tuning. Removing the normalization layer yields the most severe degradation. Without it, the projected polarization tokens exhibit a substantially larger activation scale than RGB tokens, fatally biasing the language model and destroying cross-modal balance. Disabling CLIP LoRA also reduces performance, demonstrating that frozen weights pretrained on natural RGB images cannot optimally process the distinct statistical distributions of DoLP/AoLP without targeted adaptation. Finally, the single-branch variants confirm the necessity of dual-stream fusion. The RGB-only model preserves general semantics but fails on physical reasoning, whereas the polarization-only model captures structural boundaries but loses crucial scene context. The fully equipped PolarVLM outperforms both single-modality baselines, empirically proving that RGB appearance and polarimetric physical parameters are strictly complementary. Additional ablation studies, including fusion strategy and polarimetric encoding, are provided in Appendix E. 
+
+7 Conclusion 
+
+We introduced PolarVLM, the first multimodal framework specifically designed to bridge the semantic-physical gap in open-ended visual question answering, alongside PolarVQA, a comprehen-sive benchmark dedicated to physics-aware visual reasoning. By employing a dual-stream architecture and a progressive two-stage training strategy, PolarVLM successfully injects orthogonal physical mea-surements ( e.g., DoLP and AoLP) into the language model while explicitly preserving RGB semantic priors. Extensive evaluations demonstrate that PolarVLM fundamentally resolves severe optical 9ambiguities, effectively mitigating transparency-induced structural omissions and reflection-induced object hallucinations where conventional RGB-only models systematically fail. 
+
+Limitations. While PolarVLM demonstrates the immense potential of polarimetric grounding, our current implementation is bounded by the capacity of the mid-scale open-source backbone ( e.g., 13B parameters). Although this already suffices to outperform massively scaled proprietary models on physics-centric tasks, exploring the scaling laws of polarimetric integration with larger foundational models and broader data diversity remains an exciting avenue for future work. 
+
+References 
+
+[1] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. Visual instruction tuning. In Proc. of Advances in Neural Information Processing Systems , pages 34892–34916, 2023. [2] Junnan Li, Dongxu Li, Silvio Savarese, and Steven Hoi. BLIP-2: Bootstrapping language-image pre-training with frozen image encoders and large language models. In Proc. of International Conference on Machine Learning , pages 19730–19742, 2023. [3] Haotian Liu, Chunyuan Li, Yuheng Li, and Yong Jae Lee. Improved baselines with visual instruction tuning. In Proc. of Computer Vision and Pattern Recognition , pages 26296–26306, 2024. [4] Dennis H Goldstein. Polarized Light . CRC Press, 2017. [5] Edward Collett. Field guide to polarization . SPIE press Bellingham, Washington, 2005. [6] Youwei Lyu, Zhaopeng Cui, Si Li, Marc Pollefeys, and Boxin Shi. Reflection separation using a pair of unpolarized and polarized images. In Proc. of Advances in Neural Information Processing Systems , 2019. [7] Xin Wang, Yong Zhang, and Yanchu Chen. Polarized reflection removal with dual-stream attention guidance. Pattern Recognition , 157:110945, 2025. [8] Mingde Yao, Menglu Wang, King-Man Tam, Lingen Li, Tianfan Xue, and Jinwei Gu. PolarFree: Polarization-based reflection-free imaging. In Proc. of Computer Vision and Pattern Recognition , pages 10890–10899, 2025. [9] Haiyang Mei, Bo Dong, Wen Dong, Jiaxi Yang, Seung-Hwan Baek, Felix Heide, Pieter Peers, Xiaopeng Wei, and Xin Yang. Glass segmentation using intensity and spectral polarization cues. In Proc. of Computer Vision and Pattern Recognition , pages 12622–12631, 2022. [10] Mingqi Shao, Chongkun Xia, Zhendong Yang, Junnan Huang, and Xueqian Wang. Transparent shape from a single view polarization image. In Proc. of International Conference on Computer Vision , pages 9277–9286, 2023. [11] Bin Xiao, Haiping Wu, Weijian Xu, Xiyang Dai, Houdong Hu, Yumao Lu, Michael Zeng, Ce Liu, and Lu Yuan. Florence-2: Advancing a unified representation for a variety of vision tasks. In Proc. of Computer Vision and Pattern Recognition , pages 4818–4829, 2024. [12] Aaron Hurst, Adam Lerer, Adam P Goucher, Adam Perelman, Aditya Ramesh, Aidan Clark, AJ Ostrow, Akila Welihinda, Alan Hayes, Alec Radford, et al. GPT-4o system card. arXiv preprint arXiv:2410.21276 ,2024. [13] Valentin Deschaintre, Yiming Lin, and Abhijeet Ghosh. Deep polarization imaging for 3D shape and SVBRDF acquisition. In Proc. of Computer Vision and Pattern Recognition , pages 15567–15576, 2021. [14] Yunhao Ba, Alex Gilbert, Franklin Wang, Jinfa Yang, Rui Chen, Yiqin Wang, Lei Yan, Boxin Shi, and Achuta Kadambi. Deep shape from polarization. In Proc. of European Conference on Computer Vision ,pages 554–571, 2020. [15] Youwei Lyu, Lingran Zhao, Si Li, and Boxin Shi. Shape from polarization with distant lighting estimation. 
+
+IEEE Transactions on Pattern Analysis and Machine Intelligence , 45(11):13991–14004, 2023. [16] Chenyang Lei, Chenyang Qi, Jiaxin Xie, Na Fan, Vladlen Koltun, and Qifeng Chen. Shape from polarization for complex scenes in the wild. In Proc. of Computer Vision and Pattern Recognition , pages 12632–12641, 2022. [17] Xu Cao, Hiroaki Santo, Fumio Okura, and Yasuyuki Matsushita. Multi-view azimuth stereo via tangent space consistency. In Proc. of Computer Vision and Pattern Recognition , pages 825–834, 2023. 
+
+10 [18] Yufei Han, Heng Guo, Koki Fukai, Hiroaki Santo, Boxin Shi, Fumio Okura, Zhanyu Ma, and Yunpeng Jia. NeRSP: Neural 3D reconstruction for reflective objects with sparse polarized images. In Proc. of Computer Vision and Pattern Recognition , pages 11821–11830, 2024. [19] Guangcheng Chen, Yicheng He, Li He, and Hong Zhang. PISR: Polarimetric neural implicit surface reconstruction for textureless and specular objects. In Proc. of European Conference on Computer Vision ,pages 205–222, 2024. [20] Akshat Dave, Yongyi Zhao, and Ashok Veeraraghavan. PANDORA: Polarization-aided neural decomposi-tion of radiance. In Proc. of European Conference on Computer Vision , pages 538–556, 2022. [21] Achuta Kadambi, Vage Taamazyan, Boxin Shi, and Ramesh Raskar. Depth sensing using geometrically constrained polarization normals. International Journal of Computer Vision , 125(1):34–51, 2017. [22] Chaoran Tian, Weihong Pan, Zimo Wang, Mao Mao, Guofeng Zhang, Hujun Bao, Ping Tan, and Zhaopeng Cui. DPS-Net: Deep polarimetric stereo depth estimation. In Proc. of International Conference on Computer Vision , pages 3569–3579, 2023. [23] Youwei Lyu, Zhaopeng Cui, Si Li, Marc Pollefeys, and Boxin Shi. Physics-guided reflection separation from a pair of unpolarized and polarized images. IEEE Transactions on Pattern Analysis and Machine Intelligence , 45(2):2151–2165, 2022. [24] Chenyang Lei, Xuhua Huang, Mengdi Zhang, Qiong Yan, Wenxiu Sun, and Qifeng Chen. Polarized reflection removal with perfect alignment in the wild. In Proc. of Computer Vision and Pattern Recognition ,pages 1750–1758, 2020. [25] Yoav Y Schechner, Srinivasa G Narasimhan, and Shree K Nayar. Instant dehazing of images using polarization. In Proc. of Computer Vision and Pattern Recognition , pages I–I, 2001. [26] Chu Zhou, Minggui Teng, Yufei Han, Chao Xu, and Boxin Shi. Learning to dehaze with polarization. In 
+
+Proc. of Advances in Neural Information Processing Systems , pages 11487–11500, 2021. [27] Xuesong Wu, Hong Zhang, Xiaoping Hu, Moein Shakeri, Chen Fan, and Juiwen Ting. HDR reconstruction based on the polarization camera. IEEE Robotics and Automation Letters , 5(4):5113–5119, 2020. [28] Chu Zhou, Yufei Han, Minggui Teng, Jin Han, Si Li, Chao Xu, and Boxin Shi. Polarization guided HDR reconstruction via pixel-wise depolarization. IEEE Transactions on Image Processing , 32:1774–1787, 2023. [29] Taishi Ono, Yuhi Kondo, Legong Sun, Teppei Kurita, and Yusuke Moriuchi. Degree-of-linear-polarization-based color constancy. In Proc. of Computer Vision and Pattern Recognition , pages 19740–19749, 2022. [30] Chu Zhou, Chao Xu, and Boxin Shi. Polarization guided mask-free shadow removal. In Proc. of the AAAI Conference on Artificial Intelligence , pages 10716–10724, 2025. [31] Agastya Kalra, Vage Taamazyan, Supreeth Krishna Rao, Kartik Venkataraman, Ramesh Raskar, and Achuta Kadambi. Deep polarization cues for transparent object segmentation. In Proc. of Computer Vision and Pattern Recognition , pages 8602–8611, 2020. [32] Xuaner Zhang, Ren Ng, and Qifeng Chen. Single image reflection separation with perceptual losses. In 
+
+Proc. of Computer Vision and Pattern Recognition , pages 4786–4794, 2018. [33] Renjie Wan, Boxin Shi, Haoliang Li, Ling-Yu Duan, Ah-Hwee Tan, and Alex C Kot. CoRRN: Cooperative reflection removal network. IEEE Transactions on Pattern Analysis and Machine Intelligence , 42(12):2969– 2982, 2019. [34] Deyao Zhu, Jun Chen, Xiaoqian Shen, Xiang Li, and Mohamed Elhoseiny. MiniGPT-4: Enhancing vision-language understanding with advanced large language models. arXiv preprint arXiv:2304.10592 ,2023. [35] Wenliang Dai, Junnan Li, Dongxu Li, Anthony Tiong, Junqi Zhao, Weisheng Wang, Boyang Li, Pascale N Fung, and Steven Hoi. InstructBLIP: Towards general-purpose vision-language models with instruction tuning. In Proc. of Advances in Neural Information Processing Systems , pages 49250–49267, 2023. [36] Peng Wang, Shuai Bai, Sinan Tan, Shijie Wang, Zhihao Fan, Jinze Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, et al. Qwen2-VL: Enhancing vision-language model’s perception of the world at any resolution. arXiv preprint arXiv:2409.12191 , 2024. 
+
+11 [37] Zhe Chen, Jiannan Wu, Wenhai Wang, Weijie Su, Guo Chen, Sen Xing, Muyan Zhong, Qinglong Zhang, Xizhou Zhu, Lewei Lu, Bin Li, Ping Luo, Tong Lu, Yu Qiao, and Jifeng Dai. InternVL: Scaling up vision foundation models and aligning for generic visual-linguistic tasks. In Proc. of Computer Vision and Pattern Recognition , pages 24185–24198, 2024. [38] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever. Learning transferable visual models from natural language supervision. In Proc. of International Conference on Machine Learning , pages 8748–8763, 2021. [39] Renrui Zhang, Ziyu Guo, Wei Zhang, Kunchang Li, Xupeng Miao, Bin Cui, Yu Qiao, Peng Gao, and Hongsheng Li. PointCLIP: Point cloud understanding by CLIP. In Proc. of Computer Vision and Pattern Recognition , pages 8552–8562, 2022. [40] Hu Xu, Gargi Ghosh, Po-Yao Huang, Dmytro Okhonko, Armen Aghajanyan, Florian Metze, Luke Zettlemoyer, and Christoph Feichtenhofer. VideoCLIP: Contrastive pre-training for zero-shot video-text understanding. In Proc. of the Conference on Empirical Methods in Natural Language Processing , pages 6787–6800, 2021. [41] Andrey Guzhov, Federico Raue, Jörn Hees, and Andreas Dengel. AudioCLIP: Extending CLIP to image, text and audio. In Proc. of IEEE International Conference on Acoustics, Speech and Signal Processing ,pages 976–980, 2022. [42] Rohit Girdhar, Alaaeldin El-Nouby, Zhuang Liu, Mannat Singh, Kalyan Vasudev Alwala, Armand Joulin, and Ishan Misra. ImageBind: One embedding space to bind them all. In Proc. of Computer Vision and Pattern Recognition , pages 15180–15190, 2023. [43] Fengyu Yang, Chao Feng, Ziyang Chen, Hyoungseob Park, Daniel Wang, Yiming Dou, Ziyao Zeng, Xien Chen, Rit Gangopadhyay, Andrew Owens, et al. Binding touch to everything: Learning unified multimodal tactile representations. In Proc. of Computer Vision and Pattern Recognition , pages 26340–26353, 2024. [44] Pengteng Li, Yunfan Lu, Pinghao Song, Wuyang Li, Huizai Yao, and Hui Xiong. EventVL: Understand event streams via multimodal large language model. arXiv preprint arXiv:2501.13707 , 2025. [45] Shixin Jiang, Zerui Chen, Jiafeng Liang, Yanyan Zhao, Ming Liu, and Bing Qin. Infrared-LLaVA: Enhancing understanding of infrared images in multi-modal large language models. In Proc. of the Conference on Empirical Methods in Natural Language Processing , pages 8573–8591, 2024. [46] Chu Zhou, Minggui Teng, Xinyu Zhou, Chao Xu, Imari Sato, and Boxin Shi. Learning to deblur polarized images. International Journal of Computer Vision , 133(9):5976–5991, 2025. [47] Shuangfan Zhou, Chu Zhou, Youwei Lyu, Heng Guo, Zhanyu Ma, Boxin Shi, and Imari Sato. PIDSR: Complementary polarized image demosaicing and super-resolution. In Proc. of Computer Vision and Pattern Recognition , pages 16081–16090, 2025. [48] Henry Peters, Yunhao Ba, and Achuta Kadambi. pCON: Polarimetric coordinate networks for neural scene representations. In Proc. of Computer Vision and Pattern Recognition , pages 16579–16589, 2023. [49] Chu Zhou, Yixin Yang, Junda Liao, Heng Guo, Boxin Shi, and Imari Sato. Polarimetric neural field via unified complex-valued wave representation. In Proc. of International Conference on Computer Vision ,pages 25660–25669, 2025. [50] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen. LoRA: Low-rank adaptation of large language models. In Proc. of International Conference on Learning Representations , 2022. [51] Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, and Luke Zettlemoyer. QLoRA: Efficient finetuning of quantized LLMs. In Proc. of Advances in Neural Information Processing Systems , pages 10088–10115, 2023. [52] Junfei Wu, Yue Ding, Guofan Liu, Tianze Xia, Ziyue Huang, Dianbo Sui, Qiang Liu, Shu Wu, Liang Wang, and Tieniu Tan. SHARP: Steering hallucination in LVLMs via representation engineering. In Proc. of the Conference on Empirical Methods in Natural Language Processing , pages 14357–14372, 2025. [53] Zhiyuan Jiang, Weihao Hong, Xinlei Guan, Tejaswi Dhandu, Miles Q Li, Meng Xu, Kuan Huang, Umamaheswara Rao Tida, Bingyu Shen, Daehan Kwak, et al. LLM-as-judge framework for evaluating tone-induced hallucination in vision-language models. arXiv preprint arXiv:2604.18803 , 2026. 
+
+12 [54] Jinguo Zhu, Weiyun Wang, Zhe Chen, Zhaoyang Liu, Shenglong Ye, Lixin Gu, Hao Tian, Yuchen Duan, Weijie Su, Jie Shao, et al. InternVL3: Exploring advanced training and test-time recipes for open-source multimodal models. arXiv preprint arXiv:2504.10479 , 2025. [55] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, et al. Qwen2.5-VL technical report. arXiv preprint arXiv:2502.13923 , 2025. [56] Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, et al. GPT-4 technical report. arXiv preprint arXiv:2303.08774 , 2023. [57] Ilya Loshchilov and Frank Hutter. Decoupled weight decay regularization. In Proc. of International Conference on Learning Representations , 2019. [58] Abrar Majeedi, Zhiyuan Ruan, Ziyi Zhao, Hongcheng Wang, Jianglin Lu, and Yin Li. DUALVISION: RGB-infrared multimodal large language models for robust visual reasoning. arXiv preprint arXiv:2604.18829 ,2026. [59] Min Shi, Fuxiao Liu, Shihao Wang, Shijia Liao, Subhashree Radhakrishnan, Yilin Zhao, De-An Huang, Hongxu Yin, Karan Sapra, Yaser Yacoob, Humphrey Shi, Bryan Catanzaro, Andrew Tao, Jan Kautz, Zhiding Yu, and Guilin Liu. EAGLE: Exploring the design space for multimodal LLMs with mixture of encoders. In Proc. of International Conference on Learning Representations , 2025. [60] Junyan Lin, Haoran Chen, Yue Fan, Yingqi Fan, Xin Jin, Hui Su, Jinlan Fu, and Xiaoyu Shen. Multi-layer visual feature fusion in multimodal LLMs: Methods, analysis, and best practices. In Proc. of Computer Vision and Pattern Recognition , pages 4156–4166, 2025. 
+
+A Details of the PolarVQA generation pipeline 
+
+In this section, we detail the automated data generation pipeline used to construct the PolarVQA benchmark from raw pixel-level datasets. As illustrated in Fig. 5, the pipeline comprises three serially connected modules: (a) visual structure extraction, (b) physical quantity analysis, and (c) rigorous text synthesis. 
+
+Visual structure extraction. To obtain robust semantic anchors, we employ Florence-2-large [ 11 ]for object detection and region description on the RGB images. For reflection scenes (sourced from PolarFree [ 8 ]), we run Florence-2-large independently on both the original image containing reflections and the reflection-removed reference image. By computing the difference set between these two detection outputs, we strictly isolate the spurious objects that exist exclusively within the specular reflections. 
+
+Physical quantity analysis. Subsequently, the physical analysis module bridges the spatial structures with polarimetric cues. For specular reflections, the module localizes reflection regions based on the strict physical prior that reflected light simultaneously exhibits a high DoLP and a substantial RGB domain difference. For transparent object data (sourced from RGBP-Glass [ 9]), the module extracts the spatial attributes and DoLP statistical distributions of each glass instance using the provided COCO-format segmentation masks. 
+
+Rigorous text synthesis. Finally, the structured outputs from the previous modules are assembled into standardized text prompts and fed to GPT-4o-mini [ 12 ] to generate the final captions and instruction-tuning pairs. To ensure the generation process is fully auditable and free from visual hallucinations, only structured text is submitted to the language model application programming interface (API). We further apply automated rule-based verification to the LLM outputs to filter out formatting errors or unqualified responses. This strictly text-based, physics-constrained synthesis guarantees the high fidelity of the resulting PolarVQA benchmark. 
+
+Prompt templates for data generation. To make the text synthesis process transparent and repro-ducible, we provide the prompt templates used in the four data-generation settings. Specifically, Fig. 6 and Fig. 7 show the caption-generation prompts for Stage 1 (physics-to-semantic alignment), while Fig. 8 and Fig. 9 show the instruction-generation prompts for Stage 2 (joint physics-aware instruction tuning). 13 RGB image; 
+
+reflection-removed reference 
+
+image (reflection scenes only) 
+
+Input: Model: 
+
+Florence-2-large Object detection; 
+
+region description; 
+
+OCR results 
+
+Raw output: 
+
+Structured object list; 
+
+bounding boxes; region 
+
+captions; real/reflection labels 
+
+Final output: 
+
+Extract structured scene information from RGB inputs using Florence-2-large 
+
+Post-processing 
+
+# 1
+
+Merge duplicated boxes and 
+
+descriptions 
+
+Merge 
+
+Filter invalid regions by 
+
+area threshold 
+
+Filter 
+
+Isolate reflection-only 
+
+objects by difference 
+
+matching 
+
+Reflection scenes 
+
+Retain object detections 
+
+and region descriptions 
+
+Transparent scenes 
+
+(b) Physical Quantity Analysis 
+
+Analyze polarimetric cues to localize reflection regions and characterize glass instances 
+
+# 2 3 4
+
+Polarization images; 
+
+RGB-reference image difference; 
+
+COCO-format segmentation masks 
+
+Input: 
+
+High DoLP + large RGB-
+
+domain difference 
+
+→ reflection region 
+
+Reflection analysis: 
+
+Extract spatial attributes and 
+
+DoLP statistics for each glass 
+
+instance 
+
+Reflection regions; glass attributes; 
+
+position, area, and DoLP statistics (mean / P90 / max) 
+
+Output: 
+
+(c) Rigorous Text Synthesis 
+
+Convert structured outputs into text-only prompts for physics-constrained data generation 
+
+Structured outputs from 
+
+Modules (a) and (b) 
+
+Input: 
+
+Stage 1: caption synthesis 
+
+Stage 2: instruction QA 
+
+synthesis 
+
+Prompt construction: 
+
+GPT-4o-mini 
+
+Generation model: 
+
+Rule-based verification for 
+
+unsupported semantics and 
+
+formatting errors 
+
+Verification: 
+
+Output: 
+
+Stage 1: 28.5K high-fidelity polarization captions 
+
+(25.2K train / 3.3K val). 
+
+Stage 2: 46.8K diverse multi-turn instruction-tuning pairs 
+
+(41.9K train / 3.9K val / 1K test) 
+
+Transparent-object analysis: 
+
+(a) Visual Structure Extraction Figure 5: Automated data generation pipeline for PolarVQA. The pipeline extracts visual structures with Florence-2-large [ 11 ], analyzes polarimetric cues from reflection and glass data [ 8 , 9], and synthesizes text-only Stage 1 captions and Stage 2 instruction-tuning samples with GPT-4o-mini [ 12 ], followed by rule-based verification. 14 You are a strict caption writer for polarization image-text 
+
+alignment training. 
+
+Describe only the physical shapes and materials of 
+
+objects visible in a polarization image. Do not rely on 
+
+color, text, or high-level semantics. 
+
+Focus on: 
+
+(1) describing the main objects by shape, such as 
+
+rectangular, cylindrical, curved, flat, circular, triangular, 
+
+or irregular; 
+
+(2) identifying material when supported by polarization 
+
+cues, such as metal, wood, glass, plastic, fabric, stone, 
+
+concrete, or paper; 
+
+(3) referring to people only as “human silhouette(s)”; 
+
+(4) using a generic physical description when an object 
+
+cannot be reliably named from shape and material alone; 
+
+(5) mentioning reflection only briefly by its location and 
+
+intensity, or stating “No significant surface reflection” if 
+
+absent. 
+
+Output a concise English caption in 10--30 words only. 
+
+Variant 1: Object Shape + Material 
+
+You are a strict caption writer for polarization image-text 
+
+alignment training. 
+
+Describe only the spatial layout and geometric 
+
+relationships visible in a polarization image. Do not use 
+
+color, text, or high-level semantics. 
+
+Focus on: 
+
+(1) describing object locations, such as 
+
+foreground/background, left/right/center, and 
+
+upper/lower regions; 
+
+(2) describing geometric relationships, such as aligned, 
+
+stacked, overlapping, side-by-side, perpendicular, or 
+
+receding; 
+
+(3) using physical terms such as outline, contour, 
+
+silhouette, edge, plane, surface, and structure; 
+
+(4) referring to people only as “human silhouette(s)”; 
+
+(5) mentioning reflection only briefly by its location and 
+
+intensity, or stating “No significant surface reflection” if 
+
+absent. 
+
+Output one concise English caption in 10--30 words. 
+
+Variant 2: Spatial Layout + Geometry 
+
+You are a strict caption writer for polarization image-text 
+
+alignment training. 
+
+Describe only the surface texture and reflection 
+
+characteristics visible in a polarization image. Do not 
+
+use color, text, or high-level semantics. 
+
+Focus on: 
+
+(1) describing surface textures, such as smooth, rough, 
+
+glossy, matte, corrugated, slatted, granular, polished, or 
+
+worn; 
+
+(2) describing reflection location and intensity when 
+
+reflection is present; 
+
+(3) stating “No significant surface reflection” when no 
+
+reflection is observed; 
+
+(4) briefly mentioning the dominant surface type for 
+
+context; 
+
+(5) referring to people only as “human silhouette(s)”; 
+
+(6) avoiding detailed object enumeration and focusing 
+
+on scene-level surface properties. 
+
+Output one concise English caption in 10--30 words. 
+
+Variant 3: Reflection + Surface Texture 
+
+Verification Prompt: 
+
+You are a strict quality checker for polarization image captions. 
+
+Check whether the caption contains only information observable in polarization imagery. Focus on: 
+
+• allowing only physically grounded content: shape, material, spatial layout, surface texture, and reflection location/intensity; 
+
+• removing forbidden content: colors, readable text, printed content, social semantics, person details, and action descriptions; 
+
+• replacing scene-specific function names with generic physical descriptions, such as “metallic box” or “flat glass screen”; 
+
+• rewriting food items or merchandise as generic descriptions such as “small objects” or “irregular objects”; 
+
+• returning the caption unchanged if it is already clean, otherwise outputting a corrected version. 
+
+Example: 
+
+User: 
+
+GT Caption: 
+
+A customer buys pastries at a bright yellow bakery counter while another person waits near a red fire extinguisher by the glass display case. 
+
+Detected Objects: 
+
+bakery counter [0.12, 0.55, 0.88, 0.92] 
+
+fire extinguisher [0.02, 0.30, 0.08, 0.65] 
+
+glass display case [0.15, 0.40, 0.85, 0.70] 
+
+person [0.35, 0.25, 0.55, 0.85] 
+
+Reflection Info: 
+
+Surface reflection detected in the lower region, intensity: moderate. 
+
+Assistant: 
+
+Caption: 
+
+A human silhouette stands before a long rectangular counter and a large rectangular glass structure; moderate surface reflection appears in 
+
+the lower area. 
+
+(Check: The output removes color, food, and object-function details while preserving the given reflection cue.) 
+
+Stage 1 Reflection Caption Generation (Three Variants) 
+
+Generation Constraints Prompt: 
+
+• Restrict captions to shape, material, surface texture, spatial layout, and reflection cues. 
+
+• Prohibit color, text, printed content, social semantics, person details, and unsupported object functions. 
+
+• Replace semantic object names with physical descriptions when they require color or text cues. 
+
+• Self-check the draft and rewrite violations before output. Figure 6: Prompt template for reflection caption generation in Stage 1. The template contains shared generation constraints, three caption variants, a verification prompt, and an illustrative example for producing polarization-grounded reflection captions. 15 You are a concise caption writer for polarization image-
+
+text alignment training. 
+
+Describe the scene by starting from the most prominent 
+
+non-glass object, then naturally introduce the glass 
+
+surfaces and their polarization. 
+
+Focus on: 
+
+(1) starting with a non-glass object described by shape 
+
+and material; 
+
+(2) introducing glass after the object using natural 
+
+connectors such as “with”, “near”, or “alongside”; 
+
+(3) describing glass polarization as a physical attribute, 
+
+such as weak or moderate polarization; 
+
+(4) avoiding captions that start directly with “Glass” or “A 
+
+glass”; 
+
+(5) writing one flowing scene-level sentence. 
+
+Variant 1: Object-First Scene Overview 
+
+You are a concise caption writer for polarization image-
+
+text alignment training. 
+
+Describe how glass surfaces and surrounding objects are 
+
+spatially arranged in the scene. 
+
+Focus on: 
+
+(1) using spatial relationships such as in front of, behind, 
+
+between, beneath, above, adjacent to, or to the left/right 
+
+of; 
+
+(2) linking glass and non-glass objects through position 
+
+rather than listing them separately; 
+
+(3) describing glass location, size, and polarization 
+
+intensity; 
+
+(4) using at least two spatial expressions when possible; 
+
+(5) writing one concise caption centered on spatial layout. 
+
+Variant 2: Spatial Arrangement 
+
+You are a concise caption writer for polarization image-
+
+text alignment training. 
+
+Describe glass surfaces by emphasizing their 
+
+polarization contrast with surrounding non-glass surfaces. 
+
+Focus on: 
+
+(1) starting with glass surfaces and their polarization 
+
+intensity; 
+
+(2) comparing glass with surrounding surfaces using 
+
+expressions such as “contrasting with”, “standing out 
+
+from”, or “against”; 
+
+(3) mentioning whether non-glass surroundings show 
+
+minimal, weak, or no polarization; 
+
+(4) emphasizing that glass differs from diffuse or 
+
+unpolarized background regions; 
+
+(5) avoiding a purely spatial description or object list. 
+
+Variant 3: Polarization Contrast 
+
+Verification Prompt: 
+
+You are a strict quality checker for polarization image captions. 
+
+Check whether the caption contains only information observable from polarization imagery. 
+
+Focus on: 
+
+• removing forbidden content, including colors, readable text, printed content, social actions, subjective descriptions, and unsupported object 
+
+functions; 
+
+• replacing scene-specific object names with generic physical descriptions, such as “metallic box”, “flat glass screen”, or “rectangular container”; 
+
+• ensuring every glass surface has a polarization intensity word: strong, moderate, weak, or very weak; 
+
+• removing contradictory descriptions, such as strong and weak polarization assigned to the same surface; 
+
+• keeping background polarization descriptions consistent throughout the caption; 
+
+• deleting vague filler phrases and retaining only shape, material, layout, surface texture, and polarization cues. 
+
+If the caption is clean, return it unchanged. Otherwise, output the corrected version only. 
+
+Example: 
+
+User: 
+
+Captions: 
+
+Shoppers browse pastries behind a blue glass bakery counter; a red fire extinguisher stands beside the entrance display. 
+
+Boxes — Objects: 
+
+bakery counter bbox=[0.11, 0.54, 0.89, 0.93] → position: lower-center 
+
+fire extinguisher bbox=[0.02, 0.28, 0.09, 0.72] → position: middle-left 
+
+human silhouette bbox=[0.42, 0.31, 0.58, 0.88] → position: middle-center 
+
+Boxes — Glass: 
+
+Glass 1: location=center foreground, size=large, shape=flat rectangular, area=18.0% of image, moderate polarization (p90=0.242, 
+
+mean=0.118, max=0.389), noticeably higher than background, bbox=[0.14, 0.52, 0.86, 0.91] → lower-center 
+
+Plus 2 additional smaller glass surface(s) with weak polarization (omitted for brevity) 
+
+Spatial relationships: flat glass panel in front of shelving structure 
+
+Total glass coverage: 24.5% of image 
+
+Polarization summary: 
+
+Overall scene polarization: moderate (mean=0.082, p90=0.156, max=0.412) 
+
+Background (non-glass) polarization: low (mean=0.031, p90=0.068) 
+
+Pixels with notable polarization (DoLP>0.15): 12.4% of image 
+
+KEY CONTRAST: Glass polarization is NOTICEABLY HIGHER than the non-glass background. Glass surfaces can be differentiated from 
+
+surroundings by their polarization. 
+
+Assistant: 
+
+Caption: 
+
+A long rectangular metallic counter runs across the lower scene with a human silhouette nearby; a large flat glass surface in the center 
+
+shows moderate polarization that stands out from the weakly polarized surroundings. 
+
+(Check: No colors, text, or numerical coordinates appear in the output; glass polarization is stated in qualitative terms and aligned 
+
+with the “noticeably higher than background” cue from DoLP, consistent with the polarization-caption constraints.) 
+
+Stage 1 Glass Caption Generation (Three Variants) 
+
+Generation Constraints Prompt: 
+
+• Each caption must mention both glass surfaces and at least one non-glass object described by shape and material. 
+
+• Each glass surface must include its polarization intensity: strong, moderate, weak, or very weak. 
+
+• When glass polarization is higher than the background, the caption must explicitly describe the relative contrast. 
+
+• Prohibit colors, readable text, numbers, coordinates, square brackets, social semantics, and unsupported object functions. 
+
+• If many glass surfaces are present, describe the 2–3 largest ones and summarize the rest as “several smaller glass surfaces”. Figure 7: Prompt template for glass caption generation in Stage 1. The template guides the generation of polarization-grounded captions for transparent-object scenes while suppressing unsupported RGB-only semantics such as colors, readable text, and ambiguous object functions. 16 Goal: Generate QA pairs about true physical objects 
+
+revealed after reflection removal. 
+
+Focus on: 
+
+(1) prioritizing objects that appear in the clean caption 
+
+but are missing, obscured, or distorted in the observed 
+
+caption; 
+
+(2) asking about important real objects, their attributes, 
+
+or spatial relationships; 
+
+(3) mixing question types, including description, attribute, 
+
+and relative-position questions; 
+
+(4) naming a concrete object in each question; 
+
+(5) answering using only facts from captions or 
+
+detections. 
+
+Output: Generate multiple independent QA pairs, up to 
+
+five in total. 
+
+Each answer should be one concise sentence and 
+
+should not mention polarization, reflection removal, or 
+
+image-processing terminology. 
+
+Task A: Scene Description 
+
+Goal: Generate one QA pair that asks the model to 
+
+identify what is reflected on a surface. 
+
+Focus on: 
+
+(1) comparing the two captions word by word to find 
+
+content present only in the observed caption; 
+
+(2) treating only observed-only content as reflection 
+
+content; 
+
+(3) never describing objects appearing in both captions 
+
+as reflections; 
+
+(4) preferring concrete reflected objects such as buildings, 
+
+windows, trees, or silhouettes over vague glare; 
+
+(5) designing the question with a detailed surface or 
+
+nearby-object anchor without revealing the reflected 
+
+object. 
+
+Answer requirements: Describe the reflected content, 
+
+state where it appears using a natural scene anchor, and 
+
+explain that it is confirmed by high polarization or DoLP 
+
+signals. 
+
+Task B: Reflection Recognition 
+
+Goal: Generate a deceptive existence question that 
+
+teaches the model not to treat reflection artifacts as real 
+
+objects. 
+
+Focus on: 
+
+(1) selecting one reflected target that appears in the 
+
+observed caption but not in the clean caption; 
+
+(2) prioritizing concrete reflected objects over vague 
+
+background differences; 
+
+(3) asking whether the target physically exists in the 
+
+scene; 
+
+(4) avoiding questions such as “Can you see ...?”, 
+
+because reflections may be visible; 
+
+(5) using nearby real objects or surfaces as anchors only 
+
+when supported by the captions. 
+
+Answer requirements: The answer must start with “No.” It 
+
+should explain that the apparent object is a surface 
+
+reflection rather than a real physical object, supported by 
+
+high polarization or DoLP evidence. 
+
+Task C: Counterfactual Reasoning 
+
+Quality Control Prompt: 
+
+Check each generated QA pair before output. 
+
+Focus on: 
+
+• ensuring that every answer is supported by the provided captions, detections, or reflection analysis; 
+
+• ensuring that objects appearing in both clean and observed captions are treated as real objects, not reflections; 
+
+• ensuring that reflection targets are selected only from observed-only content; 
+
+• removing raw coordinates and data-source terms such as “clean”, “observed”, “GT”, or “RGB”; 
+
+• using natural spatial anchors instead of coordinate-derived phrases; 
+
+• returning only valid JSON with no markdown or extra explanation. 
+
+Example: 
+
+User: 
+
+Captions — Clean Scene (reflections removed): 
+
+A convenience store aisle with a red metallic bench against the wall and dark grey tiled flooring; fluorescent tube lighting runs along the 
+
+ceiling. 
+
+Captions — Observed Scene (with reflections/glare): 
+
+Same aisle with the tiled floor showing a mirrored view of a multi-story building facade and illuminated storefront lettering beside the bench. 
+
+Boxes — Clean: 
+
+bench: [0.12, 0.42, 0.38, 0.72] 
+
+text "EXIT": [0.02, 0.08, 0.09, 0.14] 
+
+Boxes — Observed: 
+
+bench: [0.12, 0.42, 0.38, 0.72] 
+
+building: [0.18, 0.62, 0.92, 0.91] 
+
+text "EXIT": [0.02, 0.08, 0.09, 0.14] 
+
+Polarization Reflection Analysis: 
+
+Total reflection coverage: 14.2% of the image. 
+
+Region 1: located at the lower-center of the image, moderate intensity, covering 12.8% of image area, clear structural contours, structured 
+
+reflection with identifiable shapes or edges, bounding box [0.17, 0.61, 0.93, 0.93]. 
+
+Reflection-Only Objects (in observed but NOT in clean): 
+
+building: [0.18, 0.62, 0.92, 0.91] 
+
+Specific Requirement: 
+
+Follow the six steps: list objects from clean vs observed; treat items present only in observed as reflections; prefer reflection-only detections; 
+
+pick the main reflected content; phrase the question with a detailed anchor (surface + nearby real cues), without naming the reflected object in 
+
+the question; answer with what is reflected, grounded in nearby scene wording (no raw bbox directions), and explain confirmation via high DoLP 
+
+/ polarization. 
+
+Assistant: 
+
+Question: What is reflected on the dark grey tiled floor near the red metallic bench? 
+
+Answer: The reflection shows a multi-story building facade on the floor tiles beside the bench. High polarization (DoLP) in that region 
+
+matches specular reflection from the glossy tile, so it is glare-mediated imagery—not a physical structure lying on the floor. 
+
+Stage 2 Reflection QA Pair Generation (Three Task Types) 
+
+Generation Constraints Prompt: 
+
+• Compare the CLEAN caption and the OBSERVED caption to distinguish real objects from reflection artifacts. 
+
+• Content appearing in the CLEAN caption corresponds to real physical objects. 
+
+• Content appearing only in the OBSERVED caption is treated as reflection-induced content. 
+
+• Use detected objects/text and bounding boxes only as supporting evidence for object identity and spatial anchors. 
+
+• Do not output raw coordinates or mention data-source terms such as “GT”, “RGB”, “clean caption”, or “observed caption”. 
+
+• All generated answers must be evidence-based and should not invent attributes absent from the captions or detections. Figure 8: Prompt template for reflection instruction generation in Stage 2. The template is used to synthesize physics-aware question-answer pairs for reflection-related tasks, including scene descrip-tion, reflection recognition, and counterfactual reasoning. 17 Goal: Generate a presence-style QA pair 
+
+asking whether glass exists near a specific 
+
+visible object. 
+
+Focus on: 
+
+(1) choosing a small, specific, and 
+
+identifiable anchor near a glass surface; 
+
+(2) prioritizing unique anchors such as 
+
+brand logos, text signs, distinctive objects, 
+
+furniture, fixtures, or architectural details; 
+
+(3) avoiding broad anchors such as “wall”, 
+
+“floor”, “building”, “surface”, or abstract 
+
+positions; 
+
+(4) never using the glass itself as the 
+
+anchor; 
+
+(5) making the question sound like a 
+
+natural visual inquiry. 
+
+Answer requirements: Answer only “YES”. 
+
+Do not add extra descriptions. 
+
+Task A: Glass Detection 
+
+Quality Control Prompt: 
+
+Check each generated QA pair before output. 
+
+Focus on: 
+
+• ensuring the glass count and location do not contradict the metadata; 
+
+• ensuring every referenced anchor is actually visible in the RGB image; 
+
+• ensuring glass detection uses a specific non-glass anchor; 
+
+• ensuring glass localization does not use glass-to-glass references; 
+
+• removing raw coordinates, exact percentages, area ratios, and data-source terms; 
+
+• removing unsupported objects, unsupported functions, and generic filler phrases; 
+
+• returning only a valid JSON array in the required format. 
+
+Example: 
+
+User: 
+
+Captions: 
+
+An indoor mall walkway with grey square floor tiles; ahead is a boutique fa çade framed by pale stone pillars; a bright rectangular TISSOT 
+
+sign hangs centered above paired entrance panels; to the left of the doorway sits a red cylindrical fire extinguisher on a low metallic stand; twin 
+
+tall transparent panels form the doors and a narrower horizontal band runs above them. 
+
+Glass layout (metadata): 
+
+Glass count: 3 
+
+Glass 1: location = left door panel 
+
+Glass 2: location = right door panel 
+
+Glass 3: location = transom band above the doors 
+
+Spatial relationships: 
+
+The left and right door panels are vertically aligned on either side of the central entrance gap. 
+
+The transom spans above both door panels between the pillars. 
+
+Specific Requirement: 
+
+Treat the caption as the only scene inventory: mention only objects or structures supported there; use the metadata as ground truth for how 
+
+many glass regions exist and their coarse locations, without citing “metadata” or percentages. Produce three QA types—(1) glass_detect: ask 
+
+whether glass appears near one small, specific anchor visible in the caption (answer YES); (2) glass_location: answer the fixed question “Where 
+
+is all the glass located in this scene?” so each glass is anchored to a different non-glass scene object (never relative to another glass); (3) 
+
+glass_describe: answer the fixed prompt “Describe all visible glass surfaces in this scene.” with orientation and relative extent among panels, 
+
+without banned size words like “large” or “small”. Keep answers to one or two short sentences. 
+
+Assistant: 
+
+Question: Is there glass near the illuminated TISSOT sign above the entrance? 
+
+Answer: YES. 
+
+Question: Where is all the glass located in this scene? 
+
+Answer: One vertical panel forms the left storefront door beside the red cylindrical extinguisher, another vertical panel forms the right door, 
+
+and a horizontal band runs above both panels beneath the TISSOT sign between the stone pillars—each tied to a different landmark, not to 
+
+each other. 
+
+Question: Describe all visible glass surfaces in this scene. 
+
+Answer: There are three: two tall vertical panels that serve as the paired entrance doors, and one horizontal panel angled flat above them; 
+
+the side panels match in height while the upper band is shorter vertically and stretches across the doorway span. 
+
+Stage 2 Glass QA Pair Generation (Four Task Types) 
+
+Generation Constraints Prompt: 
+
+• Analyze the RGB image together with glass metadata, including the number of glass surfaces, coarse locations, shapes, spatial relationships. 
+
+• Use the metadata as the factual basis for glass count and position, but describe answers using only objects and surfaces visible in the image. 
+
+• Do not hallucinate scene objects or unsupported anchors, such as unseen desks, signs, corridors, or fixtures. 
+
+• Do not mention data-source terms such as “metadata”, “annotation”, “COCO”, “bbox”, “ground truth”, area ratio, or percentage. 
+
+• Do not add polarization-related boilerplate such as DoLP, AoLP, or polarimetric cues. 
+
+• Keep each answer concise, usually within one or two sentences. 
+
+Goal: Generate a QA pair asking how 
+
+many glass surfaces are visible in the 
+
+scene. 
+
+Focus on: 
+
+(1) using the metadata as the ground-truth 
+
+source for the number of glass surfaces; 
+
+(2) avoiding contradiction with the 
+
+annotated glass count; 
+
+(3) not estimating area ratios or 
+
+percentages; 
+
+(4) not adding unsupported glass surfaces; 
+
+(5) keeping the answer direct and concise. 
+
+Answer requirements: State the correct 
+
+number of glass surfaces clearly. 
+
+Task B: Glass Counting 
+
+Goal: Generate a QA pair about where the 
+
+glass surfaces are located. 
+
+Focus on: 
+
+(1) using the exact provided localization 
+
+question when required; 
+
+(2) describing each glass surface with 
+
+visible scene-object anchors; 
+
+(3) independently anchoring every glass 
+
+surface to its own real object or scene 
+
+structure; 
+
+(4) never using another glass surface as a 
+
+positional reference; 
+
+(5) avoiding phrases such as “the second 
+
+glass is next to the first glass” or “another 
+
+glass is beside it”. 
+
+Answer requirements: Describe the 
+
+location of each glass surface using 
+
+specific visible anchors, such as furniture, 
+
+signs, fixtures, or architectural structures. 
+
+Keep the answer to one or two sentences. 
+
+Task C: Glass Localization 
+
+Goal: Generate a QA pair describing the 
+
+observable properties of all visible glass 
+
+surfaces. 
+
+Focus on: 
+
+(1) stating the number of glass surfaces 
+
+when appropriate; 
+
+(2) always mentioning orientation, such as 
+
+vertical, horizontal, or angled; 
+
+(3) describing relative size differences 
+
+when multiple glass surfaces are present; 
+
+(4) optionally inferring function when 
+
+visually supported, using cautious 
+
+phrasing such as “appears to be” or “likely 
+
+serves as”; 
+
+(5) avoiding filler phrases such as 
+
+“reflecting light”, “smooth texture”, “clear 
+
+and transparent”, or unsupported function 
+
+claims. 
+
+Answer requirements: Use one or two 
+
+concise sentences. Do not directly copy 
+
+metadata shape terms; describe only what 
+
+is visually observable. 
+
+Task D: Glass Description Figure 9: Prompt template for glass instruction generation in Stage 2. The template is used to synthesize instruction-tuning pairs for glass-related tasks, including glass detection, glass counting, glass localization, and glass description. 18 B Comprehensive hyperparameter configuration 
+
+Architecture settings. The CLIP ViT-L/14 encoder [ 38 ] operates at a 336 × 336 resolution and produces 576 visual tokens with a feature dimension of 1024. The language-model hidden size is 5120, and the maximum sequence length is 2048. The polarization projector is a two-layer MLP, 
+
+1024 → 5120 → 5120 , followed by LayerNorm. 
+
+Stage 1: physics-to-semantic alignment. Stage 1 optimizes only the polarization branch in a polar-only setting, where the RGB branch is bypassed. The trainable modules include the polarization projector and the low-level input layers of the polarization CLIP encoder, including patch embedding, class token embedding, positional embedding, and the pre-Transformer LayerNorm; the LLM, RGB branch, and remaining CLIP Transformer layers are frozen. This stage contains approximately 32.7M trainable parameters. We train for 5 epochs using AdamW [ 57 ], with learning rates of 5 × 10 −4 for the projector and 5 × 10 −5 for the unfrozen CLIP layers. The warmup ratio is 3%, the weight decay is 0.05, and the effective batch size is 32. On two NVIDIA RTX 5880 Ada GPUs (48GB VRAM each), this stage takes approximately 10 hours. 
+
+Stage 2: joint physics-aware instruction tuning. Stage 2 applies QLoRA adapters [ 51 ] with r = 64 ,
+
+α = 128 , and dropout 0.1 to the LLM q_proj , k_proj , v_proj , o_proj , gate_proj , up_proj ,and down_proj matrices, and to the q_proj , k_proj , and v_proj matrices of all 24 polarization CLIP Transformer layers. The second linear layer of the polarization projector is frozen, while the first remains trainable; the polarization CLIP embedding layers, RGB CLIP encoder, and RGB projector are frozen. This stage contains approximately 265M trainable parameters. We train for 3 epochs, about 15.7K optimization steps, using learning rates of 2 × 10 −4, 1 × 10 −4, and 2 × 10 −5
+
+for LLM LoRA, the polarization projector, and polarization CLIP LoRA, respectively. The warmup ratio is 3%, the weight decay is 0.05, and the effective batch size is 8. On two NVIDIA RTX 5880 Ada GPUs (48GB VRAM each), this stage takes approximately 20 hours. 
+
+C Evaluation protocol details 
+
+Test-set curation and task selection. While our instruction tuning phase utilizes seven distinct task categories, we intentionally curate the test set to focus exclusively on five complex, open-ended reasoning tasks. Binary classification tasks ( e.g., glass detection ) are excluded from the evaluation split to prevent the overall metrics from being skewed by trivial yes/no guessing biases. Similarly, the counterfactual reasoning subset serves explicitly as a training-time regularization mechanism to penalize reflection-induced hallucinations, rather than a standalone test metric. 
+
+Rationale for LLM-as-a-Judge. Because PolarVQA expects open-ended, highly descriptive natural language responses, traditional metrics like exact string matching are inadequate for comprehen-sively assessing semantic and physical correctness. Consequently, following established rigorous protocols [ 52 , 53 ], we employ the LLM-as-a-Judge paradigm, which has proven highly reliable for evaluating factual consistency and hallucination severity. 
+
+Details on computing the overall score. To accurately reflect the model’s performance proportional to the test data distribution, the overall score is calculated as a sample-weighted average. Let Nt
+
+denote the number of test samples for task t, and St,i denote the LLM-assigned score (on a 1–10 scale) for the i-th sample in task t. The overall metric is formally computed as: Overall Score =
+
+P
+
+> t∈T
+
+PNt 
+
+> i=1
+
+St,i 
+
+P 
+
+> t∈T
+
+Nt
+
+, (6) where T represents the set of the five evaluated cognitive tasks. 
+
+Evaluation prompts and stability. As shown in Fig. 10, we use task-specific judging prompts for five tasks: scene description , reflection recognition , glass counting , glass description , and glass localization . All prompts use the same text-only template, including the question, reference answer, model prediction, and scoring criteria, while emphasizing task-specific aspects such as numerical correctness, spatial consistency, glass attributes, scene semantics, and polarimetrically verified reflected content. To ensure stable and comparable evaluation, all models are evaluated on the same fixed PolarVQA test split under temperature-zero or deterministic decoding where supported, and the LLM-as-a-Judge scoring is repeated and averaged using the same prompts across all methods. 19 You are evaluating an AI assistant's answer to a visual question 
+
+about objects or content in an image. 
+
+Please compare the Model Answer with the Ground Truth Answer. 
+
+Rate the response based on the following criteria: 
+
+(1) Accuracy: Does the model answer align factually with the 
+
+Ground Truth? 
+
+(2) Relevance: Does the model address the specific question 
+
+asked? 
+
+(3) Detail: Does the model provide an appropriate level of detail 
+
+without being too vague or hallucinating extra content? 
+
+Score on a scale of 1 to 10, where higher is better. A model answer 
+
+that contradicts the Ground Truth should receive a low score from 1 
+
+to 4. A model answer that is correct but less detailed than the 
+
+Ground Truth can receive a score from 5 to 7. A model answer that 
+
+matches the Ground Truth well should receive a score from 8 to 10. 
+
+Please first output a single line containing only one numerical value 
+
+indicating the score from 1 to 10. 
+
+Evaluation Prompt (Scene Description) 
+
+You are evaluating an AI assistant's answer about counting the 
+
+number of glass pieces or panels in a scene. 
+
+Evaluation criteria, in order of importance: 
+
+(1) Count accuracy: Does the model give the correct number of 
+
+glass pieces? An exact match is ideal. Being off by 1 is acceptable 
+
+and should usually receive a score around 5 to 6. Being off by 2 or 
+
+more should receive a very low score from 1 to 3. 
+
+(2) Understanding: Does the model demonstrate that it is counting 
+
+glass specifically? 
+
+(3) Confidence: Does the model provide a clear and definitive 
+
+count rather than a vague or hedging answer? 
+
+Score on a scale of 1 to 10: 
+
+1 to 3: Wrong count, off by 2 or more, or fails to identify glass at all. 
+
+4 to 5: Partially correct, off by 1, or identifies glass but gives an 
+
+unclear count. 
+
+6 to 7: Correct count but minimal reasoning. 
+
+8 to 10: Correct count with clear understanding. 
+
+Please first output a single line containing only one numerical value 
+
+indicating the score from 1 to 10. 
+
+Evaluation Prompt (Glass Counting) 
+
+You are evaluating an AI assistant's answer describing the visual 
+
+characteristics of glass in a scene, such as type, appearance, 
+
+reflections, transparency, shape, or context. 
+
+The Ground Truth answer provides a reference description based 
+
+on expert analysis. 
+
+Evaluation criteria, in order of importance: 
+
+(1) Descriptive accuracy: Does the model correctly describe the 
+
+glass characteristics mentioned in the Ground Truth? 
+
+(2) Key details: Does the model mention important features such 
+
+as transparency, reflection, size, shape, or surrounding context? 
+
+(3) Factual alignment: Does the model avoid contradicting the 
+
+Ground Truth? 
+
+(4) Detail level: Does the model provide appropriate detail without 
+
+hallucinating non-existent features? 
+
+Score on a scale of 1 to 10, where higher is better. A model answer 
+
+that contradicts key aspects of the Ground Truth should receive a 
+
+low score from 1 to 4. 
+
+Please first output a single line containing only one numerical value 
+
+indicating the score from 1 to 10. 
+
+Evaluation Prompt (Glass Description) 
+
+You are evaluating an AI assistant's answer about reflection 
+
+phenomena on surfaces, such as what is reflected on a glass 
+
+window, wall, or floor. The question asks the model to identify 
+
+or describe reflected content. 
+
+The Ground Truth answer is derived from specialized imaging 
+
+analysis, including polarization imaging, which can reliably 
+
+detect and characterize surface reflections. The Ground Truth 
+
+should be treated as the definitive correct answer. 
+
+Evaluation criteria, in order of importance: 
+
+(1) Content accuracy: Does the model correctly identify the 
+
+reflected content described in the Ground Truth? The model 
+
+does not need to mention polarization or DoLP, but should 
+
+correctly describe what is reflected. 
+
+(2) Factual alignment: Does the model agree with the 
+
+Ground Truth on whether a reflection exists and what it 
+
+contains? 
+
+(3) Detail and completeness: Does the model provide 
+
+relevant details consistent with the Ground Truth? 
+
+Please first output a single line containing only one numerical 
+
+value indicating the score from 1 to 10. 
+
+Evaluation Prompt (Reflection Recognition) 
+
+You are evaluating an AI assistant's answer about the 
+
+location of glass in a scene. 
+
+The Ground Truth answer is derived from specialized imaging 
+
+analysis, including polarization imaging and segmentation 
+
+masks, which can reliably detect and locate transparent glass 
+
+surfaces. 
+
+Important evaluation guidelines: 
+
+The Ground Truth and Model Answer may use different 
+
+anchor objects to describe the same location. For example, 
+
+the Ground Truth may say “near the potted plant”, while the 
+
+Model Answer may say “beside the wooden shelf”. These 
+
+may refer to the same spatial region. Do not penalize the 
+
+model for using different anchor objects if the spatial region is 
+
+plausibly the same. 
+
+Focus on broad spatial region matching, such as left, right, 
+
+center, top, or bottom of the scene, rather than exact anchor 
+
+object matching. Since glass is transparent and often nearly 
+
+invisible, any reasonable attempt to locate it should receive 
+
+partial credit. 
+
+Evaluation criteria, in order of importance: 
+
+(1) Glass count consistency: Does the model identify a 
+
+similar number of glass pieces as the Ground Truth? If the 
+
+Ground Truth mentions two pieces and the model says one or 
+
+three, deduct points. 
+
+(2) Approximate spatial region: Does the model place the 
+
+glass in roughly the same area of the scene as the Ground 
+
+Truth? 
+
+(3) Specificity: Does the model provide some spatial context, 
+
+even if the anchor objects differ from the Ground Truth? 
+
+Score on a scale of 1 to 10: 
+
+1 to 2: Completely wrong region or fails to mention glass at all. 
+
+3 to 4: Wrong count and wrong region, but at least attempts 
+
+to describe the location. 
+
+5 to 6: Correct count or correct approximate region. 
+
+7 to 8: Correct count and approximately correct region. 
+
+9 to 10: Correct count, correct region, and clear spatial 
+
+description. 
+
+Please first output a single line containing only one numerical 
+
+value indicating the score from 1 to 10. 
+
+Evaluation Prompt (Glass Localization) 
+
+User: 
+
+Ground Truth Answer: 
+
+{gt_answer} 
+
+Model Answer: 
+
+{model_answer} 
+
+Assistant: 
+
+Score (1-10) 
+
+Template Example1 ：Glass Counting Example2 ：Scene Description 
+
+User: 
+
+Ground Truth Answer: 
+
+There are 10 pieces of glass. 
+
+Model Answer: 
+
+There are 8 pieces of glass. 
+
+Assistant: 
+
+3.0 
+
+User: 
+
+Ground Truth Answer: 
+
+The background is black. 
+
+Model Answer: 
+
+The background is a light blue. 
+
+Assistant: 
+
+1.0 Figure 10: Task-specific evaluation prompts used by GPT-4o-mini [ 12 ]. The evaluator compares the model prediction with the reference answer using text-only inputs and assigns a score on a 1–10 scale. 20 Glass Counting 
+
+Q: How many pieces of glass can be identified in this scene? 
+
+GT: There is ONE piece of glass in total. 
+
+RGB-only: There are TWO pieces of glass in total. 
+
+GPT-4.1: In this scene, at least TWO distinct pieces of 
+
+glass are clearly visible. 
+
+PolarVLM (ours): There is ONE piece of glass in total.      
+
+> DoLP Reference:
+> Glass mask
+> RGB AoLP DoLP Reference:
+> Glass mask
+> RGB AoLP
+
+Q: How many pieces of glass can be identified in this scene? 
+
+GT: There is ONE piece of glass in total. 
+
+RGB-only: There are TWO pieces of glass in total. 
+
+GPT-4.1: No clearly identifiable glass is visible in the image. 
+
+PolarVLM (ours): There is ONE piece of glass in total. 
+
+> Glass Localization
+
+Q: Where is all the glass located in this scene? 
+
+GT: The glass is positioned in front of the white shelf and the 
+
+circular decorative plate. 
+
+RGB-only: The glass is positioned above the white container .
+
+GPT-4.1: All the glass in this scene is found in the two 
+
+transparent jars on the shelf. 
+
+PolarVLM (ours): The glass is positioned in front of the white 
+
+shelf , adjacent to the jars. 
+
+Q: Where is all the glass located in this scene? 
+
+GT: The glass is located above the wooden floor .
+
+RGB-only: The glass is positioned above the dark carpet .
+
+GPT-4.1: There is glass located on the left side of the 
+
+image, which appears to be the surface of a closed laptop .
+
+PolarVLM (ours): The glass is positioned above the 
+
+wooden floor .  
+
+> Glass Localization
+> DoLP Reference:
+> Glass mask
+> RGB AoLP
+> Scene Description
+> Scene Description
+
+Q: What color are the flowers in the scene? 
+
+GT: The flowers are red , specifically red carnations .
+
+RGB-only: The flowers are pink .
+
+GPT-4.1: The flowers in the scene are primarily shades of 
+
+pink and red. There are also some hints of white or very 
+
+light pink among the flowers. 
+
+PolarVLM (ours): The flowers are red and pink, such as red 
+
+carnations .  
+
+> DoLP Reference:
+> Glass mask
+> RGB AoLP
+
+Q: What is the material of the sign? 
+
+GT: The sign is made of cardboard .
+
+RGB-only: The cardboard sign is made of corrugated 
+
+metal .
+
+GPT-4.1: The sign is made of printed rigid material, likely 
+
+corrugated plastic or foam board , with a smooth glossy 
+
+surface and synthetic, durable properties for display use. 
+
+PolarVLM (ours): The cardboard sign is made of 
+
+cardboard .       
+
+> RGB DoLP AoLP Reference:
+> No-reflection RGB DoLP AoLP Reference:
+> No-reflection
+> Reflection Recognition
+> Reflection Recognition
+
+Q: What is reflected on the glass surface of the window near 
+
+the electric guitar sticker? 
+
+GT: The reflection shows a building silhouette , confirmed by 
+
+polarization signals indicating reflection. 
+
+RGB-only : The reflection shows a building and a tree .
+
+GPT-4.1: The reflection shows the sky with some clouds and 
+
+the outline of buildings. Also includes some vertical lines ,
+
+likely from window frames or elements of the building. 
+
+PolarVLM (ours): The reflection shows a building silhouette .
+
+Q: What is reflected on the old and weathered brick stairs 
+
+near the cheerful orange tote bag? 
+
+GT: The reflection shows a blurred background of a building .
+
+RGB-only: The reflection shows a blurred image of the 
+
+stairs and the tote bag .
+
+GPT-4.1: Reflected on the old brick stairs near the orange 
+
+tote bag are light streaks from a glass surface in front. 
+
+PolarVLM (ours): The reflection shows a bright glare 
+
+containing a building .
+
+> Glass Description
+
+Q: Describe all visible glass surfaces in this scene. 
+
+GT: The glass is oriented vertically and appears to function 
+
+as a window .
+
+RGB-only: There are two vertical glass surfaces likely 
+
+function as windows, one is noticeably taller than the other .
+
+GPT-4.1: There are two vertical glass surfaces in the scene 
+
+that serve as window panes. 
+
+PolarVLM (ours): The glass is positioned vertically and 
+
+appears to function as a window .
+
+Q: Describe all visible glass surfaces in this scene. 
+
+GT: The glass is positioned vertically and appears 
+
+to function as a display case for the building. 
+
+RGB-only: There is one horizontal 
+
+glass positioned above the model building .
+
+GPT-4.1: The scene shows a clear glass panel in front of 
+
+a miniature model , likely serving as a display case. 
+
+PolarVLM (ours): The glass is positioned vertically and 
+
+appears to function as a display case .           
+
+> DoLP Reference:
+> Glass mask
+> RGB AoLP
+> Glass Description
+> DoLP Reference:
+> Glass mask
+> RGB AoLP
+> RGB DoLP AoLP Reference:
+> No-reflection RGB DoLP AoLP Reference:
+> No-reflection
+> Glass Counting
+
+Figure 11: Additional qualitative comparisons on the PolarVQA test set. The examples cover glass counting, glass localization, glass description, scene description, and reflection recognition. Green text denotes responses that are correct or closely aligned with the ground truth, while red text marks incorrect or hallucinated content. 21 Table 3: Ablation of RGB–polarization fusion strategies. We compare direct sequence concatenation with representative fusion paradigms from prior multimodal VLMs.                           
+
+> Fusion strategy Glass Count Glass Loc. Glass Desc. Scene Desc. Refl. Recog. Overall
+> Multi-scale Local Attention [58] 6.64 5.02 5.99 4.49 3.40 5.00 Channel Concatenation [59] 6.64 5.36 6.36 4.96 3.33 5.33 Element-wise Addition [60] 6.42 5.07 6.15 4.72 3.81 5.14 Direct Sequence Concatenation (Ours) 7.57 5.51 6.87 5.85 4.09 6.08
+
+Table 4: Ablation of polarization encoding strategies. All variants use the same architecture and fusion strategy.                           
+
+> Encoding Glass Count Glass Loc. Glass Desc. Scene Desc. Refl. Recog. Overall
+> S0+Stokes 6.77 5.30 6.26 4.85 3.61 5.30 DoLP-Coupled Angular 6.78 5.09 6.31 4.96 3.73 5.35
+> S0+DoLP+AoLP 6.64 5.32 6.05 5.69 4.44 5.74 Decoupled (Ours) 7.57 5.51 6.87 5.85 4.09 6.08
+
+D Additional qualitative results 
+
+To further illustrate the behavior of PolarVLM under diverse optical ambiguities, Fig. 11 provides additional qualitative comparisons on the PolarVQA test set. The examples cover five evaluation tasks, including glass counting , glass localization , glass description , scene description , and reflection recognition . Compared with the RGB-only LLaVA-1.5-13B baseline and GPT-4.1, PolarVLM more consistently aligns its responses with the ground-truth annotations by leveraging polarimetric cues, especially when transparent surfaces or reflected content are difficult to infer from RGB appearance alone. 
+
+E Additional ablation studies 
+
+Fusion strategy ablation. Tab. 3 compares our straightforward sequence concatenation against repre-sentative multimodal fusion paradigms. We first evaluate Multi-scale Localized Cross-Attention [ 58 ], which forces early fusion of spatially aligned neighboring tokens before LLM decoding. While effec-tive for substituting degraded modalities ( e.g., RGB–Infrared), it severely underperforms here. This indicates that polarimetric cues provide orthogonal, physical evidence ( e.g., surface material proper-ties) rather than mere local visual replacements, making early spatial fusion suboptimal. Similarly, intermediate fusion techniques, such as Channel Concatenation [ 59 ] and Element-wise Addition [ 60 ], compress RGB and polarization features into shared token representations. This premature merg-ing inevitably scrambles the distinct statistical signatures of each modality. In contrast, our direct sequence concatenation preserves independent, uncompressed tokens for both branches. By delegat-ing the fusion mechanism entirely to the LLM’s deep self-attention layers, the model dynamically cross-references appearance semantics and physical priors based on the specific reasoning context, yielding the highest performance across all cognitive tasks. 
+
+Encoding ablation. We compare four polarization encoding strategies, defined as: 
+
+S0+Stokes: Xpol = [ S0, S 1, S 2], (7) DoLP-Coupled Angular: Xpol = [ P, P · cos(2Φ) , P · sin(2Φ)] , (8) 
+
+S0+DoLP+AoLP: Xpol = [ S0, P, Φ] , (9) Decoupled (Ours): Xpol = [ P, sin(2Φ) , cos(2Φ)] . (10) As shown in Tab. 4, the proposed decoupled encoding achieves the best Overall score and performs best on four out of five tasks. By representing the polarization degree P and angular structure 
+
+(sin(2Φ) , cos(2Φ)) as separate channels, it preserves orientation cues while avoiding the periodic discontinuity of directly using raw AoLP Φ. The direct S0+DoLP+AoLP encoding obtains the second-best Overall score and slightly improves reflection recognition . This is reasonable because 
+
+reflection recognition often depends on coarse specular-region evidence, where the intensity channel 
+
+S0 and raw angular response Φ can provide additional cues for identifying reflected content. However, 22 Polarization-dominant:    
+
+> Q: How many pieces of glass
+> can be identified in it?
+> A: There are 32 pieces of
+> glass in total.
+> RGB-dominant ：
+> Q: How many pieces of
+> glass can be identified in it?
+> A: There are 3 p ieces of
+> glass in total.
+> RGB
+
+(a) 
+
+(b) 
+
+> Polarization-dominant:
+> Q: Describe the dog statue in
+> this image.
+> A: Light brown fluffy dog
+> statue with round head.
+> RGB-dominant ：
+> Q: What shape is the "Magic
+> World" sign?
+> A: The sign with “Magic World”
+> has a conical shape.
+> DoLP
+> RGB
+> RGB
+> RGB
+> DoLP
+> DoLP DoLP
+
+Figure 12: Adaptive attention allocation in PolarVLM. We plot the Polarization Attention Ratio 
+
+across the LLM decoder layers. The results demonstrate that PolarVLM dynamically allocates higher attention to polarimetric tokens (red) for highly ambiguous physical scenes, while relying more on RGB tokens (blue) for simpler queries, proving its capacity for context-aware modality routing without explicit fusion gates. this advantage is task-specific and does not transfer to glass-centric or general scene-description tasks, where the raw AoLP discontinuity and intensity-like bias make the representation less robust overall. In contrast, the DoLP-coupled angular representation suppresses angular responses in weakly polarized regions, which may also attenuate useful directional information. The S0+Stokes representation performs worst overall, likely because S0 introduces intensity-like information already correlated with RGB appearance, encouraging the model to underuse more discriminative polarization cues. 
+
+Adaptive attention allocation. To gain mechanistic insight into why direct sequence concatenation outperforms explicit fusion modules, we analyze the attention mass from language tokens to visual tokens across the LLM’s 40 decoder layers. Specifically, we define the Polarization Attention Ratio as the proportion of visual attention weights allocated to polarimetric tokens versus RGB tokens. As illustrated in Fig. 12, the LLM dynamically modulates this ratio based on the inherent optical ambiguity of the scene. For instance, in the glass counting task (Fig. 12(a)), a complex facade with multiple indistinguishable glass panels heavily relies on the polarization branch (68.7% average attention). Conversely, a simpler scene with distinct visual boundaries requires significantly less polarimetric grounding (47.7%). A similar content-aware routing emerges under reflection interference (Fig. 12(b)): the model heavily attends to physical priors to decipher severely distorted surfaces, but reverts to RGB dominance when high-level geometric or textual cues ( e.g., a printed sign) are sufficient. Layer-wise trajectories further reveal that this modality divergence peaks in the middle decoder layers, where complex semantic reasoning typically occurs. These findings compellingly demonstrate that direct concatenation empowers the LLM to function as a zero-parameter, ambiguity-driven fusion gate, adaptively gathering physical evidence only when standard RGB semantics fall short. 
+
+F Responsible use and asset compliance 
+
+PolarVQA is constructed from publicly available polarimetric datasets and does not include Internet-scraped or private personal data. All existing datasets, models, and codebases used in this work are cited, and their licenses and terms of use are respected. The released resources are intended for research on physics-aware visual reasoning, and the generated annotations are produced through structured, text-only, rule-verified prompts to reduce unsupported or unsafe content. 23
