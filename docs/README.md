@@ -6,76 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-12
-- 运行时间：2026-05-12 21:29:24 UTC
+- 最新运行日期：2026-05-13
+- 运行时间：2026-05-13 21:24:00 UTC
 - 运行状态：成功
-- 本次总论文数：18
-- 精读区：7
+- 本次总论文数：17
+- 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日精选 18 篇前沿成果，深度攻克 Web 智能体防御欺骗界面及多模态推理鲁棒性两大难题。
-满分论文揭示了提升 Agent 抵御欺骗性界面的关键技术，同时多模态推理在视觉退化环境下的强化表现亮眼。
-建议关注 VLA 模型在生物实验自动化及视觉带宽优化上的进展，探索具身智能的闭环推理潜力。
-- 详情：[/202605/12/README](/202605/12/README)
+今日聚焦 17 篇前沿论文，深度剖析多模态强化学习在物理推理与智能体探索中的核心突破。
+高分论文 SeePhys Pro 揭示了物理推理中关键的盲训练效应，而 CoLVR 等研究则通过优化策略显著提升了智能体的视觉逻辑与探索能力。
+建议关注多模态模型如何从单纯的视觉识别转向深层的物理逻辑理解，这是提升 AI 复杂推理能力的关键。
+- 详情：[/202605/13/README](/202605/13/README)
 
 ### 精读区论文标签
-1. [Don't Click That: Teaching Web Agents to Resist Deceptive Interfaces](/202605/12/2605.09497v1-dont-click-that-teaching-web-agents-to-resist-deceptive-interfaces)  
-   标签：评分：10.0/10、query:vlm-rl
-   evidence：不涉及机器人的基于强化学习的VLM网页智能体
-2. [Reinforcing Multimodal Reasoning Against Visual Degradation](/202605/12/2605.09262v1-reinforcing-multimodal-reasoning-against-visual-degradation)  
+1. [SeePhys Pro: Diagnosing Modality Transfer and Blind-Training Effects in Multimodal RLVR for Physics Reasoning](/202605/13/2605.09266v1-seephys-pro-diagnosing-modality-transfer-and-blind-training-effects-in-multimodal-rlvr-for-physics-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：针对多模态大模型推理能力的强化学习微调
-3. [Reflection Anchors for Propagation-Aware Visual Retention in Long-Chain Multimodal Reasoning](/202605/12/2605.09614v1-reflection-anchors-for-propagation-aware-visual-retention-in-long-chain-multimodal-reasoning)  
+   evidence：用于物理推理的多模态强化学习视觉推理
+2. [SeePhys Pro: Diagnosing Modality Transfer and Blind-Training Effects in Multimodal RLVR for Physics Reasoning](/202605/13/2605.09266v2-seephys-pro-diagnosing-modality-transfer-and-blind-training-effects-in-multimodal-rlvr-for-physics-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉语言模型中的长链多模态推理
-4. [When to Re-Commit: Temporal Abstraction Discovery for Long-Horizon Vision-Language Reasoning](/202605/12/2605.09860v1-when-to-re-commit-temporal-abstraction-discovery-for-long-horizon-vision-language-reasoning)  
+   evidence：用于物理推理的多模态强化学习
+3. [Uni-Synergy: Bridging Understanding and Generation for Personalized Reasoning via Co-operative Reinforcement Learning](/202605/13/2605.10445v1-uni-synergy-bridging-understanding-and-generation-for-personalized-reasoning-via-co-operative-reinforcement-learning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：长程视觉语言推理以及用于动作承诺的可学习策略
-5. [TRACER: Verifiable Generative Provenance for Multimodal Tool-Using Agents](/202605/12/2605.09934v1-tracer-verifiable-generative-provenance-for-multimodal-tool-using-agents)  
+   evidence：用于多模态推理和生成的强化学习
+4. [Towards On-Policy Data Evolution for Visual-Native Multimodal Deep Search Agents](/202605/13/2605.10832v1-towards-on-policy-data-evolution-for-visual-native-multimodal-deep-search-agents)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：多模态工具使用智能体与多步推理
-6. [V-ABS: Action-Observer Driven Beam Search for Dynamic Visual Reasoning](/202605/12/2605.10172v1-v-abs-action-observer-driven-beam-search-for-dynamic-visual-reasoning)  
+   evidence：具有视觉推理能力的多模态深度搜索智能体
+5. [OmniThoughtVis: A Scalable Distillation Pipeline for Deployable Multimodal Reasoning Models](/202605/13/2605.11629v1-omnithoughtvis-a-scalable-distillation-pipeline-for-deployable-multimodal-reasoning-models)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：多模态大模型中动作-观察者驱动的束搜索用于动态视觉推理
-7. [How Mobile World Model Guides GUI Agents?](/202605/12/2605.10347v1-how-mobile-world-model-guides-gui-agents)  
+   evidence：视觉语言任务中多模态思维链推理的蒸馏
+6. [UniVLR: Unifying Text and Vision in Visual Latent Reasoning for Multimodal LLMs](/202605/13/2605.11856v1-univlr-unifying-text-and-vision-in-visual-latent-reasoning-for-multimodal-llms)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于移动端GUI智能体的视觉语言模型
+   evidence：多模态大模型的统一视觉潜空间推理，实现图像思考
 
 ### 速读区论文标签
-1. [BioProVLA-Agent: An Affordable, Protocol-Driven, Vision-Enhanced VLA-Enabled Embodied Multi-Agent System with Closed-Loop-Capable Reasoning for Biological Laboratory Manipulation](/202605/12/2605.07306v1-bioprovla-agent-an-affordable-protocol-driven-vision-enhanced-vla-enabled-embodied-multi-agent-system-with-closed-loop-capable-reasoning-for-biological-laboratory-manipulation)  
+1. [CoLVR: Enhancing Exploratory Latent Visual Reasoning via Contrastive Optimization](/202605/13/2605.08802v2-colvr-enhancing-exploratory-latent-visual-reasoning-via-contrastive-optimization)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：支持VLA的具身多智能体系统，具备闭环推理能力
-2. [One Token Per Frame: Reconsidering Visual Bandwidth in World Models for VLA Policy](/202605/12/2605.07931v2-one-token-per-frame-reconsidering-visual-bandwidth-in-world-models-for-vla-policy)  
+   evidence：多模态大模型中的探索性潜视觉推理
+2. [Learning to Explore: Scaling Agentic Reasoning via Exploration-Aware Policy Optimization](/202605/13/2605.08978v1-learning-to-explore-scaling-agentic-reasoning-via-exploration-aware-policy-optimization)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：结合世界模型进行规划的视觉-语言-动作（VLA）策略
-3. [CoLVR: Enhancing Exploratory Latent Visual Reasoning via Contrastive Optimization](/202605/12/2605.08802v1-colvr-enhancing-exploratory-latent-visual-reasoning-via-contrastive-optimization)  
+   evidence：通过强化学习扩展智能体推理能力
+3. [Learning to Explore: Scaling Agentic Reasoning via Exploration-Aware Policy Optimization](/202605/13/2605.08978v2-learning-to-explore-scaling-agentic-reasoning-via-exploration-aware-policy-optimization)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：多模态大模型中的探索性潜空间视觉推理
-4. [Mirror, Mirror on the Wall: Can VLM Agents Tell Who They Are at All?](/202605/12/2605.08816v1-mirror-mirror-on-the-wall-can-vlm-agents-tell-who-they-are-at-all)  
+   evidence：用于智能体推理和探索的强化学习
+4. [Flame3D: Zero-shot Compositional Reasoning of 3D Scenes with Agentic Language Models](/202605/13/2605.09218v1-flame3d-zero-shot-compositional-reasoning-of-3d-scenes-with-agentic-language-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：具身VLM智能体关于自我识别的推理
-5. [When Relations Break: Analyzing Relation Hallucination in Vision-Language Model Under Rotation and Noise](/202605/12/2605.05045v2-when-relations-break-analyzing-relation-hallucination-in-vision-language-model-under-rotation-and-noise)  
+   evidence：用于3D场景零样本组合推理的智能体语言模型
+5. [4DThinker: Thinking with 4D Imagery for Dynamic Spatial Understanding](/202605/13/2605.05997v1-4dthinker-thinking-with-4d-imagery-for-dynamic-spatial-understanding)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：分析视觉语言模型中的关系推理
-6. [SkillOS: Learning Skill Curation for Self-Evolving Agents](/202605/12/2605.06614v1-skillos-learning-skill-curation-for-self-evolving-agents)  
+   evidence：视觉语言模型的动态空间推理
+6. [Skill1: Unified Evolution of Skill-Augmented Agents via Reinforcement Learning](/202605/13/2605.06130v3-skill1-unified-evolution-of-skill-augmented-agents-via-reinforcement-learning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于自我进化智能体技能策划的强化学习训练方案
-7. [Tools as Continuous Flow for Evolving Agentic Reasoning](/202605/12/2605.07339v1-tools-as-continuous-flow-for-evolving-agentic-reasoning)  
+   evidence：用于技能增强型语言模型智能体的强化学习
+7. [The Context Gathering Decision Process: A POMDP Framework for Agentic Search](/202605/13/2605.07042v1-the-context-gathering-decision-process-a-pomdp-framework-for-agentic-search)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于进化智能体推理的连续轨迹生成
-8. [PolarVLM: Bridging the Semantic-Physical Gap in Vision-Language Models](/202605/12/2605.07574v1-polarvlm-bridging-the-semantic-physical-gap-in-vision-language-models)  
+   evidence：用于智能体搜索和决策过程的 POMDP 框架
+8. [ForgeVLA: Federated Vision-Language-Action Learning without Language Annotations](/202605/13/2605.07474v1-forgevla-federated-vision-language-action-learning-without-language-annotations)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于开放式推理的多模态框架
-9. [Proxy3D: Efficient 3D Representations for Vision-Language Models via Semantic Clustering and Alignment](/202605/12/2605.08064v1-proxy3d-efficient-3d-representations-for-vision-language-models-via-semantic-clustering-and-alignment)  
+   evidence：用于机器人视觉-语言-动作（VLA）模型的联邦学习
+9. [GeoStack: A Framework for Quasi-Abelian Knowledge Composition in VLMs](/202605/13/2605.06477v1-geostack-a-framework-for-quasi-abelian-knowledge-composition-in-vlms)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：视觉语言模型推理的3D表示
-10. [AIPO: : Learning to Reason from Active Interaction](/202605/12/2605.08401v1-aipo--learning-to-reason-from-active-interaction)  
+   evidence：视觉语言模型中的多领域自适应知识组合
+10. [When Language Overwrites Vision: Over-Alignment and Geometric Debiasing in Vision-Language Models](/202605/13/2605.08245v1-when-language-overwrites-vision-over-alignment-and-geometric-debiasing-in-vision-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：通过多智能体交互进行推理的强化学习
-11. [ZAYA1-VL-8B Technical Report](/202605/12/2605.08560v1-zaya1-vl-8b-technical-report)  
+   evidence：视觉语言模型中过度对齐和幻觉的机制分析
+11. [VECTOR-Drive: Tightly Coupled Vision-Language and Trajectory Expert Routing for End-to-End Autonomous Driving](/202605/13/2605.08830v1-vector-drive-tightly-coupled-vision-language-and-trajectory-expert-routing-for-end-to-end-autonomous-driving)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于图像理解和推理基准的视觉语言模型
+   evidence：用于自动驾驶推理和规划的视觉-语言-动作框架
 
 
 <div class="dpr-home-promo-card">
