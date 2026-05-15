@@ -6,79 +6,75 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-14
-- 运行时间：2026-05-14 21:34:28 UTC
+- 最新运行日期：2026-05-15
+- 运行时间：2026-05-15 20:56:21 UTC
 - 运行状态：成功
-- 本次总论文数：19
-- 精读区：8
+- 本次总论文数：18
+- 精读区：7
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析 19 篇多模态前沿论文，重点攻克 VLA 模型的高并发强化学习与视觉推理瓶颈。
-满分力荐 D-VLA 分布式异步框架与 PDCR 感知分解奖励机制，大幅提升了复杂任务下的决策效率与推理精度。
-建议优先研读 VLA 模型的物理感知增强与几何去偏技术，以解决多模态对齐中的语义冲突问题。
-- 详情：[/202605/14/README](/202605/14/README)
+今日精选18篇前沿论文，重点突破VLA模型策略优化与多模态潜空间长序列推理。
+RePO-
+- 详情：[/202605/15/README](/202605/15/README)
 
 ### 精读区论文标签
-1. [D-VLA: A High-Concurrency Distributed Asynchronous Reinforcement Learning Framework for Vision-Language-Action Models](/202605/14/2605.13276v1-d-vla-a-high-concurrency-distributed-asynchronous-reinforcement-learning-framework-for-vision-language-action-models)  
-   标签：评分：10.0/10、query:vlm-rl
-   evidence：针对视觉-语言-动作模型的分布式强化学习框架
-2. [PDCR: Perception-Decomposed Confidence Reward for Vision-Language Reasoning](/202605/14/2605.13467v1-pdcr-perception-decomposed-confidence-reward-for-vision-language-reasoning)  
-   标签：评分：10.0/10、query:vlm-rl
-   evidence：基于分解奖励的视觉语言推理强化学习
-3. [Agentick: A Unified Benchmark for General Sequential Decision-Making Agents](/202605/14/2605.06869v2-agentick-a-unified-benchmark-for-general-sequential-decision-making-agents)  
+1. [RePO-VLA: Recovery-Driven Policy Optimization for Vision-Language-Action Models](/202605/15/2605.09410v1-repo-vla-recovery-driven-policy-optimization-for-vision-language-action-models)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：针对强化学习、大语言模型及视觉语言模型智能体在序列决策任务中的统一基准测试
-4. [WildClawBench: A Benchmark for Real-World, Long-Horizon Agent Evaluation](/202605/14/2605.10912v1-wildclawbench-a-benchmark-for-real-world-long-horizon-agent-evaluation)  
+   evidence：视觉-语言-动作模型的策略优化
+2. [Self-Consistent Latent Reasoning: Long Latent Sequence Reasoning for Vision-Language Model](/202605/15/2605.12163v2-self-consistent-latent-reasoning-long-latent-sequence-reasoning-for-vision-language-model)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：针对视觉语言模型代理在真实任务中的评估基准
-5. [Self-Consistent Latent Reasoning: Long Latent Sequence Reasoning for Vision-Language Model](/202605/14/2605.12163v1-self-consistent-latent-reasoning-long-latent-sequence-reasoning-for-vision-language-model)  
+   evidence：视觉语言模型的视觉潜空间推理
+3. [Bad Seeing or Bad Thinking? Rewarding Perception for Vision-Language Reasoning](/202605/15/2605.14054v1-bad-seeing-or-bad-thinking-rewarding-perception-for-vision-language-reasoning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉语言模型的长潜序列推理
-6. [Fill the GAP: A Granular Alignment Paradigm for Visual Reasoning in Multimodal Large Language Models](/202605/14/2605.12374v1-fill-the-gap-a-granular-alignment-paradigm-for-visual-reasoning-in-multimodal-large-language-models)  
+   evidence：为视觉语言推理提供感知奖励
+4. [Resolving Action Bottleneck: Agentic Reinforcement Learning Informed by Token-Level Energy](/202605/15/2605.14558v1-resolving-action-bottleneck-agentic-reinforcement-learning-informed-by-token-level-energy)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：多模态大语言模型中使用潜变量证据的视觉推理
-7. [Think Twice, Act Once: Verifier-Guided Action Selection For Embodied Agents](/202605/14/2605.12620v1-think-twice-act-once-verifier-guided-action-selection-for-embodied-agents)  
+   evidence：带有推理轨迹的智能体强化学习
+5. [EARL: Towards a Unified Analysis-Guided Reinforcement Learning Framework for Egocentric Interaction Reasoning and Pixel Grounding](/202605/15/2605.14742v1-earl-towards-a-unified-analysis-guided-reinforcement-learning-framework-for-egocentric-interaction-reasoning-and-pixel-grounding)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：基于多模态大模型的具身智能体，结合思维链推理与验证器引导的动作选择
-8. [What to Ignore, What to React: Visually Robust RL Fine-Tuning of VLA Models](/202605/14/2605.13105v1-what-to-ignore-what-to-react-visually-robust-rl-fine-tuning-of-vla-models)  
+   evidence：用于第一视角交互推理和定位的强化学习框架
+6. [Self-Distilled Agentic Reinforcement Learning](/202605/15/2605.15155v1-self-distilled-agentic-reinforcement-learning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉语言动作模型的强化学习微调以增强鲁棒性
+   evidence：自蒸馏智能体强化学习
+7. [ATLAS: Agentic or Latent Visual Reasoning? One Word is Enough for Both](/202605/15/2605.15198v1-atlas-agentic-or-latent-visual-reasoning-one-word-is-enough-for-both)  
+   标签：评分：9.0/10、query:vlm-rl
+   evidence：使用功能令牌的智能体视觉推理框架
 
 ### 速读区论文标签
-1. [PolarVLM: Bridging the Semantic-Physical Gap in Vision-Language Models](/202605/14/2605.07574v2-polarvlm-bridging-the-semantic-physical-gap-in-vision-language-models)  
+1. [Do multimodal models imagine electric sheep?](/202605/15/2605.09693v1-do-multimodal-models-imagine-electric-sheep)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于复杂物理参数推理的视觉语言模型
-2. [When Language Overwrites Vision: Over-Alignment and Geometric Debiasing in Vision-Language Models](/202605/14/2605.08245v2-when-language-overwrites-vision-over-alignment-and-geometric-debiasing-in-vision-language-models)  
+   evidence：空间谜题中的视觉推理与动作序列预测
+2. [Distilling 3D Spatial Reasoning into a Lightweight Vision-Language Model with CoT](/202605/15/2605.09719v1-distilling-3d-spatial-reasoning-into-a-lightweight-vision-language-model-with-cot)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：对视觉语言模型推理失败和幻觉的机制分析
-3. [Failing Forward: Adaptive Failure-Informed Learning for Vision-Language-Action Models](/202605/14/2605.08434v1-failing-forward-adaptive-failure-informed-learning-for-vision-language-action-models)  
+   evidence：轻量级视觉语言模型中的3D空间推理
+3. [SAGE: Scalable Agentic Grounded Evaluation for Crop Disease Diagnosis](/202605/15/2605.09768v1-sage-scalable-agentic-grounded-evaluation-for-crop-disease-diagnosis)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：针对视觉-语言-动作策略的失败告知学习
-4. [DeltaRubric: Generative Multimodal Reward Modeling via Joint Planning and Verification](/202605/14/2605.09269v1-deltarubric-generative-multimodal-reward-modeling-via-joint-planning-and-verification)  
+   evidence：利用前沿视觉语言模型进行智能体化疾病预测
+4. [SciVQR: A Multidisciplinary Multimodal Benchmark for Advanced Scientific Reasoning Evaluation](/202605/15/2605.10187v1-scivqr-a-multidisciplinary-multimodal-benchmark-for-advanced-scientific-reasoning-evaluation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：通过联合规划和验证进行多模态奖励建模
-5. [LiteMedCoT-VL: Parameter-Efficient Adaptation for Medical Visual Question Answering](/202605/14/2605.09384v1-litemedcot-vl-parameter-efficient-adaptation-for-medical-visual-question-answering)  
+   evidence：用于高级科学推理评估的多模态基准
+5. [CollabVR: Collaborative Video Reasoning with Vision-Language and Video Generation Models](/202605/15/2605.08735v1-collabvr-collaborative-video-reasoning-with-vision-language-and-video-generation-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：在医疗视觉语言模型中迁移思维链推理
-6. [Evading Visual Aphasia: Contrastive Adaptive Semantic Token Pruning for Vision-Language Models](/202605/14/2605.09429v1-evading-visual-aphasia-contrastive-adaptive-semantic-token-pruning-for-vision-language-models)  
+   evidence：使用视觉语言模型进行视觉推理
+6. [HAGE: Harnessing Agentic Memory via RL-Driven Weighted Graph Evolution](/202605/15/2605.09942v1-hage-harnessing-agentic-memory-via-rl-driven-weighted-graph-evolution)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言推理中的Token剪枝
-7. [DeepTumorVQA: A Hierarchical 3D CT Benchmark for Stage-Wise Evaluation of Medical VLMs and Tool-Augmented Agents](/202605/14/2605.09679v1-deeptumorvqa-a-hierarchical-3d-ct-benchmark-for-stage-wise-evaluation-of-medical-vlms-and-tool-augmented-agents)  
+   evidence：强化学习驱动的智能体大模型系统记忆演化
+7. [SleepWalk: A Three-Tier Benchmark for Stress-Testing Instruction-Guided Vision-Language Navigation](/202605/15/2605.10376v1-sleepwalk-a-three-tier-benchmark-for-stress-testing-instruction-guided-vision-language-navigation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于复杂3D CT推理和视觉证据链的医疗视觉语言模型智能体
-8. [The Cartesian Shortcut: Re-evaluate Vision Reasoning in Polar Coordinate Space](/202605/14/2605.09883v1-the-cartesian-shortcut-re-evaluate-vision-reasoning-in-polar-coordinate-space)  
+   evidence：3D环境中的指令引导视觉语言导航
+8. [UniPath: Adaptive Coordination of Understanding and Generation for Unified Multimodal Reasoning](/202605/15/2605.11400v1-unipath-adaptive-coordination-of-understanding-and-generation-for-unified-multimodal-reasoning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：评估多模态大语言模型中的视觉推理能力
-9. [Gate-and-Merge: Zero-shot Compositional Personalization of Vision Language Models](/202605/14/2605.08702v1-gate-and-merge-zero-shot-compositional-personalization-of-vision-language-models)  
+   evidence：统一多模态推理与自适应协调
+9. [CrossVL: Complexity-Aware Feature Routing and Paired Curriculum for Cross-View Vision-Language Detection](/202605/15/2605.09802v1-crossvl-complexity-aware-feature-routing-and-paired-curriculum-for-cross-view-vision-language-detection)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：视觉语言模型的组合个性化
-10. [20/20 Vision Language Models: A Prescription for Better VLMs through Data Curation Alone](/202605/14/2605.11405v2-2020-vision-language-models-a-prescription-for-better-vlms-through-data-curation-alone)  
+   evidence：用于复杂跨视图检测任务的视觉语言模型
+10. [Allegory of the Cave: Measurement-Grounded Vision-Language Learning](/202605/15/2605.11727v1-allegory-of-the-cave-measurement-grounded-vision-language-learning)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：通过数据策展提升视觉语言模型在推理基准上的表现
-11. [DORA: Dynamic Online Reinforcement Agent for Token Merging in Vision Transformers](/202605/14/2605.11683v1-dora-dynamic-online-reinforcement-agent-for-token-merging-in-vision-transformers)  
+   evidence：基于测量接地的视觉语言学习推理
+11. [Macro-Action Based Multi-Agent Instruction Following through Value Cancellation](/202605/15/2605.12655v1-macro-action-based-multi-agent-instruction-following-through-value-cancellation)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于视觉Transformer动态Token合并的强化学习智能体
+   evidence：带有自然语言指令的多智能体强化学习
 
 
 <div class="dpr-home-promo-card">

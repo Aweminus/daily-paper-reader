@@ -1,0 +1,2653 @@
+Title: Do multimodal models imagine electric sheep?
+
+URL Source: https://arxiv.org/pdf/2605.09693v1
+
+Published Time: Tue, 12 May 2026 02:15:18 GMT
+
+Number of Pages: 59
+
+Markdown Content:
+# Do multimodal models imagine electric sheep? 
+
+Santhosh Kumar Ramakrishnan ∗ Carl Vondrick ∗ Raja Giryes ∗
+
+Philipp Krähenbühl Vladlen Koltun 
+
+Apple 
+
+Abstract 
+
+Yes. We find that large multimodal models develop mental imagery when solv-ing spatial puzzles, and they do imagine sheep when solving sheep puzzles. We fine-tune a Qwen3.5 VLM to solve twelve diverse visual reasoning tasks – includ-ing tangram, jigsaw, sokoban, 3D mental rotation, and rush hour – that require understanding geometry, spatial relationships, and the consequences of actions. By supervising the model to predict the open-loop sequence of actions to solve a puzzle from an initial state, we show that the model’s activations after each action encode meaningful visual information about the intermediate state. This finding suggests that an imperfect visual world model begins to form as a byproduct of learning to select correct actions, in the absence of any explicit visual supervision. Building on this observation, we propose two ways to sharpen and use the mental images formed by the model. We find that integrating as few as sixteen visual tokens per step into the chain of thought improves the average solve rate from 83% to 89%, with particularly strong gains on reasoning-heavy tasks such as jigsaw and 3D mental rotation. 
+
+1 Introduction 
+
+Mental imagery is a powerful underpinning for spatial cognition, allowing people to visualize and transform objects and environments in their head to answer questions and accomplish goals [ 1– 5]. For example, can you determine whether the sheep in Fig. 1 are the same? To answer this question, many people will mentally rotate the sheep in their head [1]. In contrast to humans, frontier models often perform poorly on spatial reasoning tasks, struggling to understand geometric relationships, track objects through transformations, and reason about the effects of actions [ 6– 9]. This gap is not limited to any particular model family or scale, and exposes a fundamental limitation in how current large models represent and reason about visual structure.  
+
+> ∗Equal contribution. VLM
+
+… Answer: 
+
+no    
+
+> rotatex(30) rotatey(30) rotatey(15) rotatez(15)
+
+(a) Left sheep (b) Model’s imagination (c) Right sheep 
+
+Figure 1: Are the left and right sheep identical? We show that VLMs develop mental imagery when trained to solve such spatial puzzles, even in the absence of explicit visual supervision. The model takes the left (a) and right (c) images to predict a series of actions that equalize their pose before making a decision on whether the two sheep are identical. The center images (b) visualize the model’s internal representations as read out by a separate visual decoder. 
+
+> arXiv:2605.09693v1 [cs.CV] 10 May 2026
+
+VLM  place('P0', 0, 2), place('P3', 2, 3), place('P1', 3, 1), place('P2', 2, 0), place('P4', 1, 1), yes 
+
+Actual State 
+
+(unobserved) 
+
+Imagined 
+
+State 
+
+VLM  place(0, 2, 0),…,place(3, 1, 2),…,place(4, 0, 1),…,place(2, 3, 0),…,place(6, 3, 3),identify(‘E’) 
+
+Actual State 
+
+(unobserved) 
+
+Imagined 
+
+State 
+
+Autoregressive Rollout (text only) 
+
+Input 
+
+Input Figure 2: Reconstructing world state from VLM activations. We freeze a VLM that has been trained to autoregressively predict the actions needed to solve puzzles, attach a visual decoder on the hidden activations at the action boundaries, and train it to predict the visual state. Although the VLM is trained open-loop to predict actions without observing intermediate steps, the decoder is able to reconstruct the state from the VLM’s internal representation. The colors are wrong, but the reconstruction of the tangram game matches the geometry well (top), and the identified character emerges in the visual representation (bottom). This suggests that mental imagery emerges in the model. 
+
+We study to what extent mental imagery emerges in VLMs and how to develop it further for spatial tasks. We use a suite of twelve puzzle classes spanning mental rotation, space filling, jigsaw, and others to analyze the internal representations of multimodal language models. Working with such puzzles allows us to focus on the core challenge of spatial reasoning in controlled settings. We use open-loop behavior cloning, where the model must learn to predict the full action sequence from the first frame without observing intermediate feedback. Our base model is the recent Qwen3.5 9B [ 10 ], which can only solve a small fraction of the puzzles out-of-the-box (13% average success rate). Behavior cloning successfully teaches the model to solve some of the puzzles, reaching an 83% average success rate. More interestingly, we find that mental imagery emerges in the course of training, even though there is no direct visual supervision. Open-loop behavior cloning creates a supervisory signal that indirectly elicits an internal representation of the evolving world state. With enough data, mental imagery emerges. We visualize the model’s mental imagery of sheep in Fig. 1 and of other objects in Fig. 2, showing that the internal representations are granular enough to reconstruct the visual state, recovering object positions, viewpoints, layouts, and spatial relationships that the model was never explicitly asked to represent. This echoes emergent world representations observed in prior work [11–13], now in visually complex environments. Since multimodal models appear to spontaneously develop mental imagery, we explore how to shape these mechanisms through additional supervision, and how mental imagery can further enhance test-time reasoning. We develop two approaches. The first adds an auxiliary loss for direct prediction of the visual state after each action. The second explicitly adds visual tokens into the chain of thought [14], training the model to autoregressively predict interleaved text and image tokens. 2With as few as sixteen visual tokens per action, we see substantial gains on reasoning-heavy tasks such as jigsaw puzzles and 3D mental rotation. We show an average gain of over 10 percentage points over textual chain-of-thought, especially in tasks such as 3D shape matching or 3D mental rotation, where it is difficult if not impossible to describe the state of the environment in words. Our best approach achieves an 89.5% average success rate, significantly outperforming the stock base model and other methods. Our results suggest that shaping and using internal visual representations may advance the spatial cognition of frontier models. 
+
+2 Related Work 
+
+Spatial reasoning in vision-language models. A large body of recent work has documented the limited spatial cognition of existing vision-language models (VLMs). Benchmarks such as SPACE [ 6 ], OmniSpatial [ 7], SpatialViz-Bench [ 15 ], 11Plus-Bench [ 9], and Mind the Gap [ 16 ]have demonstrated the limitations of VLMs on mental rotation, spatial visualization, and geometric reasoning. STARE [ 17 ] and MIRA [ 18 ] probe multi-step spatial simulation and find that VLMs exhibit inconsistent performance even with oracle visual chain-of-thought guidance during evaluation. BabyVision shows that the core visual reasoning abilities that develop in humans before language remain out of reach for current models [ 8], while MOCHI demonstrates large gaps between humans and models on 3D shape inference from multiple viewpoints [ 19 ]. Budny et al. [20] trace these failures to deficits in visually-grounded serial processing. Liu and Lee [21] show that VLMs cannot reliably track identical objects through spatial transformations. Fu et al. [22] find that VLMs substantially underperform their own visual encoders on perception tasks. Asadi et al. [23] expose “mirage reasoning” where models produce seemingly correct outputs without grounding in the image. 
+
+Visual chain-of-thought. Several methods aim to augment VLMs with visual reasoning capabilities. Lotfi et al. [24] propose chain-of-sketch, decomposing visual tasks into intermediate sketch steps for improved out-of-distribution generalization. Menon et al. [25] use code generation to allow LLMs to draw before answering. Bigverdi et al. [26] introduce perception tokens – tokenized visual representations such as depth maps and bounding boxes – to improve spatial understanding without external tools. Ray et al. [27] propose mull-tokens, modality-agnostic latent tokens for multimodal reasoning. In the embodied domain, Zhao et al. [28] show that predicting future image frames as intermediate visual goals improves robotic manipulation. However, Zeller et al. [29] find with MentisOculi that visual strategies – from latent tokens to explicitly generated imagery – generally fail to improve reasoning due to compounding generation errors. Wu et al. [30] propose visualization-of-thought, where LLMs generate intermediate visualizations for spatial reasoning; however, their approach relies on code-based rendering in text-only models rather than learning visual representations end-to-end. Li et al. [31] engineer explicit visual chain-of-thought by fine-tuning on ground-truth intermediate frames for navigation. Our work suggests that visual imagination 
+
+emerges spontaneously from just action prediction without any visual supervision, and shows that either explicit compact tokenization (16 tokens per state) or an auxiliary visual loss can sharpen these representations while mitigating drift. 
+
+Emergent world models. A growing body of work shows that sequence models trained via next-token prediction develop rich internal representations without explicit supervision. Nanda [11] demonstrates that a GPT trained on Othello gameplay learns a linear, causally relevant board-state representation in its activations. Gurnee and Tegmark [ 32 ] discover that large language models encode linear representations of space and time at multiple scales, with identifiable spatial neurons. Jin and Rinard [12] show that transformers trained on synthetic programs develop representations of unobserved intermediate program states. Liu et al. [33] find that visual information is encoded in the internal key-value tokens of multimodal language models, though it often fails to surface in outputs. We add to this body of work by demonstrating the emergence of visual imagination in multimodal models trained via imitation learning. 
+
+World models and unified multimodal architectures. World models that learn to predict future states from actions [ 34 , 35 ] have seen renewed interest in the context of large generative models. Maes et al. [36] present LeWorldModel, a joint-embedding predictive architecture that achieves stable end-to-end training from pixels. Wiedemer et al. [37] demonstrate emergent zero-shot reasoning in video models including maze solving and physical reasoning. Wang et al. [38] reveal that reasoning in video diffusion models emerges along denoising steps through a “chain-of-steps” process. Wu et al. [39] use video generation models to augment multimodal models with geometric cues. Magne et al. 3Figure 3: Spatial reasoning puzzles. We use twelve puzzles that require a variety of skills such as shape perception, visualization, and planning. We implement optimal solvers to rapidly sample training data on the fly, and use them to study spatial cognition in VLMs. 
+
+[40] train a vision-action foundation model on diverse gameplay via behavior cloning. Evaluations by Cai et al. [41] and Guo et al. [42] show that generative models achieve moderate physical reasoning but fail at abstract spatial tasks. Wang et al. [43] introduce a large-scale video reasoning benchmark that reveals early signs of emergent generalization. Heek et al. [44] propose unified latent representations regularized by diffusion for images and video. On the architecture side, unified models that combine visual understanding and generation – such as BAGEL [ 45 ] and Qwen3.5 [ 10 ] – enable both perception and generation within a single model; we use Qwen3.5 as our base architecture and use BAGEL and textual chain-of-thought [ 46 ] as baselines. Unlike approaches that build external world models, we cultivate an internal visual world model via auxiliary prediction during training. 
+
+3 Methods 
+
+We train VLMs to solve spatial puzzles. The model must predict a sequence of actions to solve the game or answer the question in the prompt. 
+
+3.1 Problem Setup 
+
+Given the initial image s0 corresponding to a puzzle and a text instruction t described in natural language, the VLM V must produce a sequence of actions that solve the puzzle: 
+
+a1, a 2, · · · , a N , r = V(s0, t ), (1) where ai is the action to be executed at state si to solve it. Some puzzles additionally require the model to predict a natural language answer to the puzzle (e.g., yes / no), denoted by r. The VLM produces the entire action sequence from the initial image alone, without observing intermediate states that result from its own actions. Since errors cannot be corrected from feedback [ 47 ], the model must internally simulate the consequences of each action to choose the next one. Open-loop supervision therefore creates pressure to maintain a faithful internal representation of the evolving state, the exact mechanism we hypothesize gives rise to mental imagery. To study this problem, we implement twelve spatial puzzles shown in Fig. 3. Our suite comprises well-studied puzzles involving object rotation [ 6 , 15 , 19 ], arranging pieces to form shapes [ 18 , 48 , 49 ], sliding objects to reach a target [ 50 – 52 ], and text manipulation [ 53 , 54 ]. Prior work has primarily focused on question-answering versions of these puzzles with small sample sizes, making it hard to perform systematic studies. In contrast, we implement them as game engines (written in Rust for speed) that can rapidly sample a variety of puzzle instances, along with expert solvers (such as breadth-first search, Algorithm X, or closed-form solutions) that can provide supervision via behavior cloning. Please see Section 4.1 for more details. 4⋯                                               
+
+> ⋯
+> pl ac ev1v5rot v7v9rot cc v2v3VLM
+> ⋯pl ac erot rot cc VLM
+> Image
+> Prompt
+> Image
+> Prompt ◊◊◊
+> pl ac erot rot cc VLM
+> Image
+> Prompt ◊◊◊
+> 𝒯 𝒯 𝒯
+> v1v5v7v9v2v3
+> rot cc ans ◊
+> Layer 1
+> Layer 2
+> Layer K
+> eans ◊wer Next Token
+> ⋮⋮⋮⋮⋮
+> p1
+> p2
+> v2
+> v3
+> ans wer
+> ans wer
+> ans wer
+> Transformer (MAE)
+> ◊Text Token Visual Token Sentinel
+> Visual Decoder
+> Action
+> Supervision
+> Visual
+> Tokens
+> Action+Visual
+> Supervision
+
+Figure 4: Architectures. Top: baseline post-trained model, which receives the input image and prompt and directly predicts the sequence of actions needed to solve the puzzle. Middle: visual supervision, which trains a separate head to predict the visual consequence of each action, thereby encouraging mental imagery. Bottom: chain-of-thought with visual tokens. 
+
+3.2 Action Supervision 
+
+We train a Qwen3.5 9B model with behavior cloning to predict the sequence of actions needed to reach the goal or answer the question. The model sees the initial state s0, receives the puzzle instruction t,and generates a sequence of actions ( a1, · · · , a N ) supervised by the expert solver (and optionally a response r for puzzles that require a final answer). The model receives no visual supervision beyond the initial image (see Fig. 4 (top) for an illustration). For each puzzle, we run the appropriate expert solver and do full fine-tuning of the base model to predict the next token with teacher forcing. What makes visual puzzles difficult is that they are sequential: each action changes the world, and the next action must account for that change. Solving a tangram puzzle with five pieces requires the model to mentally track how each placement and rotation reshapes the available space. Many of the puzzles require sequences of over twenty steps to solve, and the state space is inherently visual and geometric. Pieces have shapes, positions, and orientations, and moves have spatial preconditions and spatial effects. Although the model is trained without any visual supervision (only visual input), the model must learn to maintain an internal representation of the world to plan effectively, and that representation must be rich enough to capture the spatial relationships that determine which actions are legal and which lead toward the goal. The model must learn to represent these states to minimize an open-loop behavior cloning objective. To probe for emergent mental imagery, we build a visual decoder that is trained separately. We use a four-layer transformer based on masked autoencoders [ 55 ] (see Appendix A). We condition only on the hidden features of the last token of each action, and train to predict the visual state after applying this action. Since the decoder only sees the representation for one token (and not even the initial image), it allows us to understand how well the VLM is tracking the visual state through long-horizons. 
+
+3.3 Visual Supervision 
+
+Text-only supervision requires mental images to emerge indirectly. By removing the stop gradient on the visual probe and letting the reconstruction loss shape the hidden states, we can strengthen and refine these emergent representations, encouraging the model to form sharper mental images. During training, we attach the same auxiliary visual prediction head from above that reads the model’s hidden states at each action boundary, but now allow the gradients to flow between the two models in order to jointly learn behavior cloning with imagination of the visual state. The training objective for the visual head combines the standard language modeling objective with the visual prediction loss: 
+
+L = LLM + λ Lvisual , (2) where LLM is the next-token prediction cross-entropy over action tokens, Lvisual is the cross-entropy between predicted and ground-truth FSQ codes averaged over all action boundaries in the batch, and 
+
+λ is a weighting hyperparameter. The gradient of Lvisual flows through the cross-attention back into the language model, encouraging the hidden states at action boundaries to encode the visual state. At inference time, the visual head is removed and the model generates actions identically to the text-only baseline, with no additional cost. 53.4 Visual Tokens 
+
+We also study visual chain-of-thought, where the model generates discrete visual representations as part of its output sequence. After each action, the model produces a block of visual tokens enclosed in special delimiters that encode the resulting world state:            
+
+> <action> ai1· · · aiM</action> <image> vi1· · · viK</image> <action> · · · </action> · · ·
+
+We resize the rendered 256 × 256 image before encoding using the VQ-VAE [ 56 ] and control the number of tokens per state: resizing to 64 × 64 yields a 4 × 4 code grid (16 tokens per state), while resizing to 128 × 128 yields an 8 × 8 grid (64 tokens). The model’s vocabulary is extended with |C| 
+
+new tokens, one for each entry in codebook C, and trained jointly with the VLM. The vocabulary embeddings for the new tokens are initialized by aligning the VQ-VAE tokens to the VLM’s visual encoder embeddings. Please see the appendix for details. The training loss decouples visual and text tokens to allow independent weighting: 
+
+Lvcot = w CE( Hvis ) + (1 − w) CE( Htxt ), (3) where Hvis and Htxt partition the supervised token positions into visual-token and text-token subsets, and w is a visual loss weight hyperparameter. The VQ-VAE encoder and decoder remain frozen; the trainable parameters are the VLM and the new token embeddings. This approach makes the model’s visual reasoning explicit and interpretable: at each step the model must generate an image of the world, which can be decoded and inspected. 
+
+3.5 Implementation Details 
+
+Please see the appendix for full implementation details. The visual prediction head and the chain-of-thought both use discrete visual tokens to represent the world state. We use FSQ [ 57 ] for the visual supervision head and LlamaGen [ 58 ] for the visual chain-of-thought tokens (see ablation in Appendix D.2). The visual prediction head follows an architecture based on masked autoencoders. All methods fine-tune the same model, Qwen3.5 9B [ 10 ]. We train each model on one node with 8 B200 GPUs. Each model trains in 72 hours. The total compute cost for a single run of all experiments is 9,000 GPU hours. 
+
+4 Experiments 
+
+The goals of our experiments are a) to understand the extent to which mental images emerge in VLMs, b) to assess when they are helpful for visual reasoning, and c) to demonstrate how to sharpen them during learning. We present results across a variety of spatial puzzles, and compare against baselines. 
+
+4.1 Puzzle Suite 
+
+We evaluate on nine puzzle types, three with certificate variants, totaling twelve tasks. • Spatial rotation [ 6 , 7 , 15 , 19 , 59 ]: 3D Shape Matching requires rotating a 3D polycube (7–11 cubes) around three axes at 15 ◦ increments to match a target orientation; 2D Shape Matching is its planar counterpart, requiring rotation of a 2D polyomino into alignment. • Reconstruction from pieces [ 17 , 18 , 29 , 48 , 49 , 60 ]: Jigsaw requires placing and rotating puzzle pieces ( 90 ◦ CW/CCW) to reconstruct an image on a 2 × 2 to 3 × 3 grid; Tangram requires tiling a target silhouette with the seven classical tangram pieces. • Sliding and pushing [ 29 , 50 – 52 , 61 – 65 ]: Sokoban requires pushing boxes onto goal cells with four-directional moves (boxes can only be pushed, not pulled); Bloxorz requires rolling a 
+
+1 × 1 × 2 block to a goal cell, where some tiles are fragile and break after the block rolls off; Rush Hour requires sliding vehicles on a 6 × 6 grid to free the target car to the exit. • Text [ 53 , 54 ]: Anagram requires unscrambling letters (6–10 characters, at least 5 swaps from the solution) into a valid word; Character Recognition requires rotating scattered glyph fragments into labeled grid slots and identifying the assembled character. We include certificate variants of tangram and shape matching, where half of the task instantiations are unsolvable and the model must answer ‘yes’ or ‘no’ after optionally trying to construct the 670 100              
+
+> 0.0
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+> (a) 2D Shape Match.
+> 70 100
+> 47.0
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+> (b) 2D Mental Rot.
+> 70 100
+> 0.0
+> 87.5
+> 50.5
+> 87.5
+> 91.0
+> 97.5
+> (c) 3D Shape Match.
+> 50 80
+> 53.0
+> 49.0
+> 32.8
+> 60.0
+> 70.5
+> 77.5
+> (d) 3D Mental Rot.
+> 70 100
+> 0.0
+> 96.0
+> 74.5
+> 96.0
+> 97.5
+> 94.5
+> (e) Bloxorz
+> 70 100
+> 0.0
+> 94.0
+> 96.0
+> 93.0
+> 95.0
+> 97.0
+> (f) Rush Hour
+> 70 100
+> 0.5
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+> (g) Char. Recog.
+> 60 100
+> 0.0
+> 65.0
+> 60.0
+> 92.5
+> 84.5
+> 91.5
+> (h) Jigsaw
+> 40 70
+> 0.0
+> 55.5
+> 66.0
+> 52.5
+> 59.0
+> 55.0
+> (i) Tangram
+> 50 80
+> 52.5
+> 67.5
+> 71.9
+> 68.0
+> 75.0
+> 72.0
+> (j) Tangram (y/n)
+> 70 100
+> 0.0
+> 84.5
+> 92.5
+> 89.5
+> 95.0
+> 89.5
+> (k) Sokoban
+> 70 100
+> 3.5
+> 97.5
+> 100.0
+> 98.0
+> 100.0
+> 100.0
+> (l) Anagram
+> 70 100
+> 13.0
+> 83.0
+> 78.7
+> 86.4
+> 89.0
+> 89.5
+> (m) Average
+
+Base Action Superv. Textual CoT Visual Superv. Visual Tok. 64 ×64 Visual Tok. 128 ×128 
+
+Figure 5: Solve rates on visual reasoning tasks. Performance of the stock Qwen3.5 (‘Base’, without any training on our part), the baseline behavior cloning policy (‘Action Supervision’), and various forms of supervison. Chain-of-thought with visual tokens performs best across the puzzle suite. 
+
+Figure 6: Solve rate versus mental image quality. We train visual decoders on the base Qwen3.5 9B model (blue) and our post-trained models (orange, green). We plot their success rates (vertical axis) and mental image fidelity (horizontal). When an arrow points toward the top right, higher visual fidelity is accompanied by a higher success rate – a trend we see for ten out of the twelve games. 
+
+solution. For shape matching, we denote the certificate variants as 3D and 2D mental rotation. Each game is parameterized to control difficulty. Please see the appendix for the task prompts. 
+
+4.2 Emergence of Mental Imagery 
+
+We evaluate models on the puzzle suite, comparing their success rates in Fig. 5. While the off-the-shelf Qwen3.5 model achieves very low performance (13% average success rate), the base behavior-cloning policy (action supervision, Section 3.2) achieves 83% average success rate. This is notable and even slightly surprising because the model is trained with open-loop behavior cloning and teacher forcing. During learning, the model needs to plan all the actions to solve the game from a single image, sometimes over a long horizon (20+ steps) – a situation where errors can compound. What is the model learning in order to achieve this? We train a visual decoder on the frozen behavior-cloned LLM, which allows us to visualize and inspect what is encoded at each step in the autoregressive rollout. Although no gradients flow from the visual head to the LLM, and there is no visual supervision on the LLM, we are able to reconstruct significant detail about the intermediate states during the LLM rollout. Fig. 2 visualizes two examples, where although the colors are off, the geometry of the tangram grid is reproduced well (top) and the correct shape emerges as the VLM imagines piecing the character together (bottom). Furthermore, 7Tangram 
+
+Input  Autoregressive Rollout 
+
+3D Mental 
+
+Rotation  yes 
+
+no ⋯
+
+⋯
+
+> slide(‘A’,  -1)
+> slide(‘C’,  -1)
+> slide(‘A’,  4)
+
+⋯ B
+
+Character 
+
+Recognition 
+
+> Jigsaw
+> rotatecw(8)
+> place(8,  G)
+> place(4,  E)
+> place(5,  H)
+
+Input 
+
+> Rush Hour
+
+⋯
+
+⋯
+
+> VLM VLM VLM
+> VLM
+> slide(‘F’,  -1)
+
+Autoregressive Rollout (multimodal) 
+
+Actual States 
+
+(unobserved) 
+
+⋯
+
+> VLM
+
+Input 
+
+> Tangram
+
+Actual Sta 
+
+(unobserv 
+
+> Sokoban
+
+Actual States 
+
+(unobserved) 
+
+Actual Sta 
+
+(unobserv Figure 7: Visual chain-of-thought (QA). We show rollouts with explicit visual thinking tokens for QA puzzles, where the model must decide whether a puzzle is solvable or not, or identify an object/character. The model forms mental images to help answer these questions. Tangram    
+
+> Input Autoregressive Rollout
+> 3D Mental
+> Rotation yes
+> no ⋯
+> ⋯
+> slide(‘A’,  -1)
+> slide(‘C’,  -1)
+> slide(‘A’,  4)
+> ⋯B
+> Character
+> Recognition
+> Jigsaw
+> rotatecw(8)
+> place(8,  G)
+> place(4,  E)
+> place(5,  H)
+> Input
+> Rush Hour
+> rotateccw(‘P0’)
+> place(‘P0’,  1,  2)
+> rotatecw(‘P1’)
+> place(‘P1’,  1,  4)
+> ⋯
+> ⋯
+> ⋯
+> VLM VLM VLM
+> VLM
+> slide(‘F’,  -1)
+> Autoregressive Rollout (multimodal)
+> Actual States
+> (unobserved)
+> ⋯
+> VLM
+> Input
+> Tangram
+> VLM
+> Autoregressive Rollout (multimodal)
+> Actual States
+> (unobserved)
+> ⋯
+> Sokoban
+> right
+> up
+> left
+> left
+> ⋯
+> VLM
+> Actual States
+> (unobserved)
+> Actual States
+> (unobserved)
+
+Figure 8: Visual chain-of-thought (gameplay). We show the visual thinking tokens generated by the model during gameplay. The VLM imagines the consequences of its actions as it plans its moves, then executes them. 
+
+we plot the correlation between solve rate and mental image quality in Fig. 6. We can see that action supervision elicits higher-fidelity mental imagery. This raises a question: if the model already encodes partial visual state in its representations, can we improve performance by explicitly encouraging this behavior? The imperfect quality of the reconstructions suggests that the emergent encoding, while useful, leaves room for sharper internal representations. Fig. 6 shows that, for games with initially low solve rate, removing the stop gradient on the visual probe, and thus explicitly supervising the internal representations to be predictive of the visual state, can lead to dramatic gains. This can be seen in the sharp pivot to the right in 3D mental rotation, 3D shape matching, and other puzzles in Fig. 6. For most tasks, the model’s solve rate improves with the fidelity of the mental images. Anagram is an exception, where the base model has near-zero solve rates but better reconstructions than post-trained models. Upon inspection, we found that the base model produces less informative reconstructions that are quantitatively better since the image contains very few foreground pixels (see Appendix D.3 for more detail). 
+
+4.3 Game Playing and Question Answering 
+
+We compare six methods that differ in how intermediate state information is incorporated during training. We include the methods introduced previously: action-only supervision from Section 3.2, visual supervision from Section 3.3 that further shapes the internal representations to be predictive of the world state, and two versions of visual tokens from Section 3.4 that decode 64 × 64 or 128 × 128 
+
+states after each action. Additionally, we include a textual chain-of-thought baseline (based on the 8VLM 
+
+⋯ rotate cw (' P4')  place (' P4', 1, 3) 
+
+> VLM
+
+⋯ slide (' L', 1) slide (' A', 4)
+
+> Autoregressive Rollout Input
+> Attention Weight
+> Low
+> High
+> Target
+> Token
+
+Figure 9: Attention weight on visual chain-of-thought. We visualize the attention weights for a target token (in red). The VLM with visual tokens is able to attend to its own mental images to help plan actions. The top row shows the model attending to the rotated piece to decide its location, and the bottom row shows the model attending to the free space to decide how to win the rush hour game. same Qwen3.5 9B model) inspired by Mitra et al. [46] that replaces visual tokens with structured JSON scene-graph descriptions (see Appendix B for details). Each game is evaluated on 200 held-out puzzles with greedy autoregressive decoding using vLLM [66]. 
+
+Visual chain-of-thought is effective. As shown in Fig. 5, explicitly generating visual tokens achieves an average solve rate of 89.5%. It outperforms the textual CoT baseline and visual supervision by 10 and 3 percentage points on average, respectively. See Figs. 7 and 8 for illustrations of the visual tokens generated, and Fig. 9 for a qualitative analysis of the attention weights over the generated visual tokens. 
+
+Visual supervision refines mental imagery. Mental imagery emerges naturally without direct visual supervision. Further shaping this ability through visual supervision improves the fidelity of mental images (Fig. 6) and improves the average solve rate by 3.4 percentage points (Fig. 5). 
+
+Compact tokenization is effective. The two resolutions for visual tokens produce complementary per-game profiles. The 64 × 64 variant, with only 16 tokens per state, is better on long-horizon games like sokoban, tangram, and bloxorz, while the 128 × 128 variant with 64 tokens per state is better on tasks like jigsaw, 3D shape matching, and 3D mental rotation, where higher resolution for intermediate states proves beneficial. Despite these differences, their overall scores are close (89.5% vs. 89.0%), suggesting that even highly compressed visual representations carry enough spatial information to improve action selection on balance. The compactness of the 64 × 64 representation is particularly notable: 16 tokens per state adds minimal sequence length overhead while still capturing sufficient spatial structure to improve planning. 
+
+Comparison to text-based reasoning. Textual CoT [ 46 ] uses structured JSON scene graphs as intermediate representations (instead of visual tokens), and generates them autoregressively through behavior cloning. It achieves an average success rate of 78.7%, which falls well short of the other methods. This approach struggles on tasks such as 3D shape matching, 3D mental rotation, jigsaw, and bloxorz. This suggests that the benefit of visual chain-of-thought stems specifically from the visual modality, not just from the expenditure of test-time compute. Structured textual descriptions of the state, even when compact and machine-readable, do not provide the same representational advantage as visual tokens. Additional details are provided in the appendix. 
+
+Additional studies. We evaluated fine-tuning BAGEL [45], a unified understanding and generation model, but it did not reach reasonable performance. See the appendix for this and other studies. 
+
+5 Conclusion 
+
+We studied the emergence of mental imagery in vision-language models trained to solve multi-step spatial puzzles. We showed that models trained with open-loop behavior cloning learn implicit visual representations of the evolving world state. Sharpening mental imagery via additional supervision 9further improved performance on spatial puzzles with no test-time overhead. Introducing chain-of-thought reasoning that incorporates visual representations increased the model’s success even more. We hope that this work contributes to a better understanding of spatial cognition in frontier models. 
+
+References 
+
+[1] Roger N Shepard and Jacqueline Metzler. Mental rotation of three-dimensional objects. Science ,171(3972):701–703, 1971. [2] Priti Shah and Akira Miyake. The Cambridge Handbook of Visuospatial Thinking . Cambridge University Press, 2005. [3] Fred W. Mast and Lutz Jäncke. Spatial Processing in Navigation, Imagery and Perception .Springer, 2007. [4] Valérie Gyselinck and Francesca Pazzaglia. From Mental Imagery to Spatial Cognition and Language . Psychology Press, 2012. [5] Bence Nanay. Mental Imagery: Philosophy, Psychology, Neuroscience . Oxford University Press, 2023. [6] Santhosh Kumar Ramakrishnan, Erik Wijmans, Philipp Kraehenbuehl, and Vladlen Koltun. Does spatial cognition emerge in frontier models? In The Thirteenth International Conference on Learning Representations , 2025. [7] Mengdi Jia, Zekun Qi, Shaochen Zhang, Wenyao Zhang, XinQiang Yu, Jiawei He, He Wang, and Li Yi. Omnispatial: Towards comprehensive spatial reasoning benchmark for vision language models. In The Fourteenth International Conference on Learning Representations ,2026. URL https://openreview.net/forum?id=6nZKT2rL0H .[8] Liang Chen, Weichu Xie, Yiyan Liang, Hongfeng He, Hans Zhao, Zhibo Yang, Zhiqi Huang, Haoning Wu, Haoyu Lu, Y. Charles, et al. BabyVision: Visual reasoning beyond language. 
+
+arXiv preprint arXiv:2601.06521 , 2026. URL https://arxiv.org/abs/2601.06521 .[9] Chengzu Li, Wenshan Wu, Huanyu Zhang, Qingtao Li, Zeyu Gao, Yan Xia, José Hernández-Orallo, Ivan Vuli´ c, and Furu Wei. 11Plus-Bench: Demystifying multimodal LLM spatial reasoning with cognitive-inspired analysis. arXiv preprint arXiv:2508.20068 , 2025. URL 
+
+https://arxiv.org/abs/2508.20068 .[10] Qwen Team. Qwen3.5: Accelerating productivity with native multimodal agents, February 2026. URL https://qwen.ai/blog?id=qwen3.5 .[11] Neel Nanda. Actually, othello-gpt has a linear emergent world model, Mar 2023. URL 
+
+https://neelnanda.io/mechanistic-interpretability/othello .[12] Charles Jin and Martin Rinard. Emergent representations of program semantics in language models trained on programs. In International Conference on Machine Learning , 2024. URL 
+
+https://arxiv.org/abs/2305.11169 .[13] Kenneth Li, Aspen K Hopkins, David Bau, Fernanda Viégas, Hanspeter Pfister, and Martin Wattenberg. Emergent world representations: Exploring a sequence model trained on a synthetic task. arXiv preprint arXiv:2210.13382 , 2022. [14] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, et al. Chain-of-thought prompting elicits reasoning in large language models. 
+
+Advances in neural information processing systems , 35:24824–24837, 2022. [15] Siting Wang, Minnan Pei, Luoyang Sun, Cheng Deng, Yuchen Li, Kun Shao, Zheng Tian, Haifeng Zhang, and Jun Wang. Spatialviz-bench: A cognitively-grounded benchmark for diagnosing spatial visualization in MLLMs. In The Fourteenth International Conference on Learning Representations , 2026. URL https://openreview.net/forum?id=OqZ7bm28Xx .10 [16] Ilias Stogiannidis, Steven McDonagh, and Sotirios A. Tsaftaris. Mind the gap: Benchmarking spatial reasoning in vision-language models. arXiv preprint arXiv:2503.19707 , 2025. URL 
+
+https://arxiv.org/abs/2503.19707 .[17] Linjie Li, Mahtab Bigverdi, Jiawei Gu, Zixian Ma, Yinuo Yang, Ziang Li, Yejin Choi, and Ranjay Krishna. Unfolding spatial cognition: Evaluating multimodal models on visual simulations. In The Fourteenth International Conference on Learning Representations , 2026. URL https: //openreview.net/forum?id=fbGmSV6tUw .[18] Yiyang Zhou, Haoqin Tu, Zijun Wang, Zeyu Wang, Niklas Muennighoff, Fan Nie, Yejin Choi, James Zou, Chaorui Deng, Shen Yan, Haoqi Fan, Cihang Xie, Huaxiu Yao, and Qinghao Ye. When visualizing is the first step to reasoning: MIRA, a benchmark for visual chain-of-thought. 
+
+arXiv preprint arXiv:2511.02779 , 2025. URL https://arxiv.org/abs/2511.02779 .[19] Tyler Bonnen, Stephanie Fu, Yutong Bai, Thomas O’Connell, Yoni Friedman, Nancy Kanwisher, Joshua B. Tenenbaum, and Alexei A. Efros. Evaluating multiview object consistency in humans and image models. arXiv preprint arXiv:2409.05862 , 2024. URL https://arxiv.org/abs/ 2409.05862 .[20] Nicholas Budny, Kia Ghods, Declan Campbell, Raja Marjieh, Amogh Joshi, Sreejan Kumar, Jonathan D. Cohen, Taylor W. Webb, and Thomas L. Griffiths. Visual serial processing deficits explain divergences in human and VLM reasoning. arXiv preprint arXiv:2509.25142 , 2025. URL https://arxiv.org/abs/2509.25142 .[21] Tiedong Liu and Wee Sun Lee. Can vision-language models solve the shell game? arXiv preprint arXiv:2603.08436 , 2026. URL https://arxiv.org/abs/2603.08436 .[22] Stephanie Fu, Tyler Bonnen, Devin Guillory, and Trevor Darrell. Hidden in plain sight: VLMs overlook their visual representations. arXiv preprint arXiv:2506.08008 , 2025. URL 
+
+https://arxiv.org/abs/2506.08008 .[23] Mohammad Asadi, Jack W. O’Sullivan, Fang Cao, Tahoura Nedaee, Kamyar Rajabalifardi, Fei-Fei Li, Ehsan Adeli, and Euan Ashley. MIRAGE: The illusion of visual understanding. 
+
+arXiv preprint arXiv:2603.21687 , 2026. URL https://arxiv.org/abs/2603.21687 .[24] Aryo Lotfi, Enrico Fini, Samy Bengio, Moin Nabi, and Emmanuel Abbe. Chain-of-sketch: Enabling global visual reasoning. arXiv preprint arXiv:2410.08165 , 2024. URL https: //arxiv.org/abs/2410.08165 .[25] Sachit Menon, Richard Zemel, and Carl Vondrick. Whiteboard-of-thought: Thinking step-by-step across modalities. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing , pages 20016–20031, 2024. [26] Mahtab Bigverdi, Zelun Luo, Cheng-Yu Hsieh, Ethan Shen, Dongping Chen, Linda G. Shapiro, and Ranjay Krishna. Perception tokens enhance visual reasoning in multimodal language models. 
+
+arXiv preprint arXiv:2412.03548 , 2024. URL https://arxiv.org/abs/2412.03548 .[27] Arijit Ray, Ahmed Abdelkader, Chengzhi Mao, Bryan A. Plummer, Kate Saenko, Ranjay Krishna, Leonidas Guibas, and Wen-Sheng Chu. Mull-tokens: Modality-agnostic latent thinking. 
+
+arXiv preprint arXiv:2512.10941 , 2025. URL https://arxiv.org/abs/2512.10941 .[28] Qingqing Zhao, Yao Lu, Moo Jin Kim, Zipeng Fu, Zhuoyang Zhang, Yecheng Wu, Zhaoshuo Li, Qianli Ma, Song Han, Chelsea Finn, Ankur Handa, Ming-Yu Liu, Donglai Xiang, Gordon Wetzstein, and Tsung-Yi Lin. CoT-VLA: Visual chain-of-thought reasoning for vision-language-action models. arXiv preprint arXiv:2503.22020 , 2025. URL https://arxiv.org/abs/ 2503.22020 .[29] Jana Zeller, Thaddäus Wiedemer, Fanfei Li, Thomas Klein, Prasanna Mayilvahanan, Matthias Bethge, Felix Wichmann, Ryan Cotterell, and Wieland Brendel. MentisOculi: Revealing the limits of reasoning with mental imagery. arXiv preprint arXiv:2602.02465 , 2026. URL 
+
+https://arxiv.org/abs/2602.02465 .11 [30] Wenshan Wu, Shaoguang Mao, Yadong Zhang, Yan Xia, Li Dong, Lei Cui, and Furu Wei. Mind’s eye of LLMs: Visualization-of-thought elicits spatial reasoning in large language models. In Conference on Neural Information Processing Systems , 2024. URL https://openreview. net/forum?id=CEJ1mYPgWw .[31] Chengzu Li, Wenshan Wu, Huanyu Zhang, Yan Xia, Shaoguang Mao, Li Dong, Ivan Vuli´ c, and Furu Wei. Imagine while reasoning in space: Multimodal visualization-of-thought. In Forty-second International Conference on Machine Learning , 2025. URL https://openreview. net/forum?id=6vk6Xg24ZC .[32] Wes Gurnee and Max Tegmark. Language models represent space and time. In International Conference on Learning Representations , 2024. URL https://openreview.net/forum? id=jE8xbmvFin .[33] Benlin Liu, Amita Kamath, Madeleine Grunde-McLaughlin, Winson Han, and Ranjay Krishna. Visual representations inside the language model. arXiv preprint arXiv:2510.04819 , 2025. URL 
+
+https://arxiv.org/abs/2510.04819 .[34] David Ha and Jürgen Schmidhuber. Recurrent world models facilitate policy evolution. In 
+
+NeurIPS , 2018. [35] Danijar Hafner, Jurgis Pasukonis, Jimmy Ba, and Timothy Lillicrap. Mastering diverse domains through world models. arXiv preprint arXiv:2301.04104 , 2023. [36] Lucas Maes, Quentin Le Lidec, Damien Scieur, Yann LeCun, and Randall Balestriero. LeWorld-Model: Stable end-to-end joint-embedding predictive architecture from pixels. arXiv preprint arXiv:2603.19312 , 2026. URL https://arxiv.org/abs/2603.19312 .[37] Thaddäus Wiedemer, Yuxuan Li, Paul Vicol, Shixiang Shane Gu, Nick Matarese, Kevin Swersky, Been Kim, Priyank Jaini, and Robert Geirhos. Video models are zero-shot learners and reasoners. 
+
+arXiv preprint arXiv:2509.20328 , 2025. URL https://arxiv.org/abs/2509.20328 .[38] Ruisi Wang, Zhongang Cai, Fanyi Pu, Junxiang Xu, Wanqi Yin, Maijunxian Wang, Ran Ji, Chenyang Gu, Bo Li, Ziqi Huang, Hokin Deng, Dahua Lin, Ziwei Liu, and Lei Yang. Demystifing video reasoning. arXiv preprint arXiv:2603.16870 , 2026. URL https://arxiv. org/abs/2603.16870 .[39] Xianjin Wu, Dingkang Liang, Tianrui Feng, Kui Xia, Yumeng Zhang, Xiaofan Li, Xiao Tan, and Xiang Bai. Generation models know space: Unleashing implicit 3D priors for scene understanding. arXiv preprint arXiv:2603.19235 , 2026. URL https://arxiv.org/abs/ 2603.19235 .[40] Loïc Magne, Anas Awadalla, Guanzhi Wang, Yinzhen Xu, Joshua Belofsky, Fengyuan Hu, Joohwan Kim, Ludwig Schmidt, Georgia Gkioxari, Jan Kautz, Yisong Yue, Yejin Choi, Yuke Zhu, and Linxi Fan. NitroGen: An open foundation model for generalist gaming agents. arXiv preprint arXiv:2601.02427 , 2026. URL https://arxiv.org/abs/2601.02427 .[41] Zefan Cai, Haoyi Qiu, Tianyi Ma, Haozhe Zhao, Gengze Zhou, Kung-Hsiang Huang, Parisa Kordjamshidi, Minjia Zhang, Wen Xiao, Jiuxiang Gu, Nanyun Peng, and Junjie Hu. MMGR: Multi-modal generative reasoning. arXiv preprint arXiv:2512.14691 , 2025. URL https: //arxiv.org/abs/2512.14691 .[42] Ziyu Guo, Xinyan Chen, Renrui Zhang, Ruichuan An, Yu Qi, Dongzhi Jiang, Xiangtai Li, Manyuan Zhang, Hongsheng Li, and Pheng-Ann Heng. Are video models ready as zero-shot rea-soners? An empirical study with the MME-CoF benchmark. arXiv preprint arXiv:2510.26802 ,2025. URL https://arxiv.org/abs/2510.26802 .[43] Maijunxian Wang, Ruisi Wang, Juyi Lin, Ran Ji, Thaddäus Wiedemer, Qingying Gao, Dezhi Luo, Yaoyao Qian, Lianyu Huang, Zelong Hong, et al. A very big video reasoning suite. arXiv preprint arXiv:2602.20159 , 2026. URL https://arxiv.org/abs/2602.20159 .[44] Jonathan Heek, Emiel Hoogeboom, Thomas Mensink, and Tim Salimans. Unified latents (UL): How to train your latents. arXiv preprint arXiv:2602.17270 , 2026. URL https://arxiv. org/abs/2602.17270 .12 [45] Chaorui Deng, Deyao Zhu, Kunchang Li, Chenhui Gou, Feng Li, Zeyu Wang, Shu Zhong, Weihao Yu, Xiaonan Nie, Ziang Song, Guang Shi, and Haoqi Fan. Emerging properties in unified multimodal pretraining. arXiv preprint arXiv:2505.14683 , 2025. URL https: //arxiv.org/abs/2505.14683 .[46] Chancharik Mitra, Brandon Huang, Trevor Darrell, and Roei Herzig. Compositional chain of thought prompting for large multimodal models. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , June 2024. [47] Stephane Ross, Geoffrey Gordon, and Drew Bagnell. A reduction of imitation learning and structured prediction to no-regret online learning. In International Conference on Artificial Intelligence and Statistics , volume 15, pages 627–635, 11–13 Apr 2011. [48] Zesen Lyu, Dandan Zhang, Wei Ye, Fangdi Li, Zhihang Jiang, and Yao Yang. Jigsaw-puzzles: From seeing to understanding to reasoning in vision-language models. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pages 26003–26014, 2025. [49] Yikun Zong and Cheston Tan. Tangramsr: Can vision-language models reason in continuous geometric space? arXiv preprint arXiv:2602.05570 , 2026. [50] Tom C Van Der Zanden and Hans L Bodlaender. Pspace-completeness of bloxorz and of games with 2-buttons. In International Conference on Algorithms and Complexity , pages 403–415. Springer, 2015. [51] Ami Hauptman, Achiya Elyasaf, Moshe Sipper, and Assaf Karmon. Gp-rush: using genetic pro-gramming to evolve solvers for the rush hour puzzle. Proceedings of the 11th Annual conference on Genetic and evolutionary computation , 2009. URL https://api.semanticscholar. org/CorpusID:14553191 .[52] Zhao Yang, Mike Preuss, and Aske Plaat. Transfer learning and curriculum learning in sokoban. In Benelux Conference on Artificial Intelligence , pages 187–200. Springer, 2021. [53] Jingmiao Zhao and Carolyn Jane Anderson. Solving and generating npr sunday puzzles with large language models. arXiv preprint arXiv:2306.12255 , 2023. [54] Andrew Shin and Kunitake Kaneko. Large language models lack understanding of character composition of words. arXiv preprint arXiv:2405.11357 , 2024. [55] Kaiming He, Xinlei Chen, Saining Xie, Yanghao Li, Piotr Dollár, and Ross Girshick. Masked autoencoders are scalable vision learners. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 16000–16009, 2022. [56] Aaron van den Oord, Oriol Vinyals, and Koray Kavukcuoglu. Neural discrete representation learning. In Conference on Neural Information Processing Systems , page 6309–6318, 2017. [57] Fabian Mentzer, David Minnen, Eirikur Agustsson, and Michael Tschannen. Finite scalar quantization: Vq-vae made simple. arXiv preprint arXiv:2309.15505 , 2023. [58] Peize Sun, Yi Jiang, Shoufa Chen, Shilong Zhang, Bingyue Peng, Ping Luo, and Zehuan Yuan. Autoregressive model beats diffusion: Llama for scalable image generation. arXiv preprint arXiv:2406.06525 , 2024. [59] Yuyou Zhang, Radu Corcodel, Chiori Hori, Anoop Cherian, and Ding Zhao. Spinbench: Perspective and rotation as a lens on spatial reasoning in vlms. In The Fourteenth International Conference on Learning Representations , volume abs/2509.25390, 2026. URL https://api. semanticscholar.org/CorpusID:281681204 .[60] Gur Elkin, Ofir Itzhak Shahar, and Ohad Ben-Shahar. Seq2seq models reconstruct visual jigsaw puzzles without seeing them. arXiv preprint arXiv:2511.06315 , 2025. [61] Yaron Shoham and Gal Elidan. Solving sokoban with forward-backward reinforcement learning. In Proceedings of the International Symposium on Combinatorial Search , volume 12, pages 191–193, 2021. 13 [62] Mohammad Taufeeque, Philip Quirke, Maximilian Li, Chris Cundy, Aaron David Tucker, Adam Gleave, and Adrià Garriga-Alonso. Planning in a recurrent neural network that plays sokoban. In ICLR , 2025. URL https://openreview.net/forum?id=ORxjH9kTp8 .[63] Jialong Wu, Xiaoying Zhang, Hongyi Yuan, Xiangcheng Zhang, Tianhao Huang, Changjing He, Chaoyi Deng, Renrui Zhang, Youbin Wu, and Mingsheng Long. Visual generation unlocks human-like reasoning through multimodal world models. arXiv preprint arXiv:2601.19834 ,2026. [64] Tahani Q. Alhassan, Shefaa S. Omar, and Lamiaa A. Elrefaei. Game of bloxorz solving agent using informed and uninformed search strategies. Procedia Computer Science , 2019. URL 
+
+https://api.semanticscholar.org/CorpusID:213051605 .[65] Lorenzo Cian, Talissa Dreossi, and Agostino Dovier. Modeling and solving the rush hour puzzle. In Italian Conference on Computational Logic , 2022. URL https://api.semanticscholar. org/CorpusID:252599882 .[66] Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao Yu, Joseph Gonzalez, Hao Zhang, and Ion Stoica. Efficient memory management for large language model serving with PagedAttention. In Proceedings of the 29th symposium on operating systems principles , pages 611–626, 2023. URL https://dl.acm.org/doi/abs/10.1145/3600006. 3613165 .[67] Ilya Loshchilov and Frank Hutter. Decoupled weight decay regularization. arXiv preprint arXiv:1711.05101 , 2017. 14 A Implementation Details 
+
+Visual tokens. We use discrete visual tokens to represent images in all of our methods. We experiment with two encodings. Firstly, we use an FSQ autoencoder with D = 6 dimensions with L = 5 levels each, yielding a codebook of 56 = 15 ,625 entries. It maps 256 × 256 images to a 16 × 16 grid of codes via a convolutional encoder with four stride-2 stages. Secondly, we also explore LlamaGen VQ-VAE [ 58 ] which performs 16 × spatial downsampling and a codebook of 16,384 entries. We found that LlamaGen tokens worked best for autoregressive prediction and FSQ worked best for visual supervision. See Section D.2 for supporting experiments. 
+
+Visual prediction head. We follow an architecture based on masked autoencoders [ 55 ]. The decoder operates at dimension d = 256 with 8 attention heads. Hidden states from all NLLM LLM layers at the visual prediction position are projected from the LLM hidden dimension H (for Qwen3.5 9B, 
+
+H = 4096 and NLLM = 32 ) down to d, yielding one memory token per LLM layer that the decoder attends to. The self-attention stack consists of 4 pre-norm transformer layers with GELU activations, feed-forward dimension 4d = 1024 , and no dropout. The code prediction head is a single linear layer mapping d → D × L = 30 logits per patch. In total, the visual head has approximately 36.9M trainable parameters for the 9B model. The frozen FSQ autoencoder adds no trainable parameters. 
+
+Base model. All methods fine-tune the same base model, Qwen3.5 9B [ 10 ], which is cast to 
+
+bfloat16 with FlashAttention-2. Training uses FSDP with full sharding and activation checkpointing. Sequences are packed to a maximum of 1,024 tokens. 
+
+Optimization. All methods use AdamW [ 67 ] with β = (0 .9, 0.999) , weight decay of 0.01 , gradient clipping at 1.0, and a cosine learning rate schedule with 1,000-step linear warmup and minimum LR ratio 0.1, for up to 25,000 iterations. The base model and visual head variants use a learning rate of 1 × 10 −5; the visual token variants use 3 × 10 −5 to accommodate learning the additional token embeddings. For the visual head, its parameters use a 100 × learning rate multiplier. When an episode contains more than 32 action boundaries, we randomly subsample visual frames to bound the per-step cost of the visual head. 
+
+Embedding initialization for visual tokens. As discussed in Section 3.4, we add |C| = 16 , 384 VQ-VAE tokens from LlamaGen to the model vocabulary. We observed that initializing the vocabulary embeddings to Gaussian noise resulted in slow convergence, and would result in the model being stuck at nearly 0% solve rates on most games. We identified the root cause of this was the visual tokens in the vocabulary were disconnected from the model’s visual embedding space. Specifically, whenever the model encountered visual tokens in its context, it would not be represented in the same way as an image patch would by the visual encoder, but rather as a learnable and randomly initialized embedding. To fix this, we collected a dataset of images sampled from the puzzles via the expert solver. On each image, we obtained the discrete token representation using the VQ-VAE as well as the visual embeddings from the Qwen3.5 visual encoder. Since the tokens and the embeddings are spatially aligned, we can associate Qwen3.5 visual embeddings to corresponding VQ-VAE tokens. We averaged the visual embeddings corresponding to each VQ-VAE token over the collection of images, and used the average visual embedding per token to initialize the corresponding entry in the vocabulary embedding matrix. This ensured that whenever the Qwen3.5 LLM encountered a visual token, it would be similar to the visual embeddings it would see from an image, and made a massive difference to learning. See Fig. 10 for a comparison. 
+
+Text instructions for puzzles. We display the text prompts t for each puzzle (see Section 4.1) in Table 1. 15 Figure 10: Embedding initialization for visual tokens. We compare the solve rates versus training iterations for two embedding initialization schemes when visual tokens are added to the model’s vocabulary. When the embeddings for the tokens are randomly initialized, the model fails to train on a representative set of sokoban and bloxorz games. After our proposed initialization by aligning the VQ-VAE’s visual tokens with the Qwen3.5 VLM’s visual encoder embeddings, the model starts to learn puzzle solving rapidly. 
+
+Game Task Prompt 
+
+Tangram Complete the tangram. Fill the grey silhouette using the colored pieces. Tangram (certificate) Determine if the pieces can fill the silhouette. Say ‘yes’ if they can, ‘no’ if they can’t. Shape Matching (3D) Rotate the left shape to match the right shape. Mental Rotation (3D) Determine if the left and right shapes are the same. Rotate to check, then say ‘yes’ if they match or ‘no’ if they don’t. Shape Matching (2D) Rotate the left 2D shape to match the right shape. Mental Rotation (2D) Determine if the left and right 2D shapes are the same (possibly rotated). Rotate to check, then say ‘yes’ if they match or ‘no’ if they don’t. Jigsaw Reconstruct the original image by rotating each piece to the correct orientation and placing it at its correct grid position. Anagram The letters of a word have been scrambled. Swap letters to unscramble the word, then submit with identify(word) .Character Recognition A character has been broken into pieces that are scattered and rotated. Rotate each numbered piece to the correct orientation and place it into the matching lettered slot in the assembly area. Once all pieces are correctly assembled, identify the character. Sokoban Solve this Sokoban puzzle. Push the brown boxes onto the red diamonds. Bloxorz Solve this Bloxorz puzzle. Roll the block so it stands on the red goal. †
+
+Rush Hour Slide vehicles to free the red car (A) and move it to the right edge exit. 
+
+Table 1: Puzzle task prompts. Task prompts shown to the model for each game in our puzzle suite.  
+
+> †
+
+When fragile tiles are present, the prompt appends: “Striped tiles are fragile and will break after the block leaves them.” 16 B Textual Chain-of-Thought Baseline Details 
+
+We describe the textual chain-of-thought (Textual CoT) baseline in detail. Inspired by the composi-tional scene-graph prompting framework of Mitra et al. [46] , we replace the visual token channel with a structured JSON description of the state emitted between <image> and </image> delimiters at each action boundary. The training pipeline is identical to the visual chain-of-thought variants: the model is teacher-forced to reproduce the ground-truth scene-graph JSON at every step, using the decoupled loss with weight w = 0 .3. The only difference between textual CoT and VQ training is what sits between the <image> delimiters – JSON text versus discrete visual codebook indices. We design a per-game JSON schema that encodes the minimum information needed to reconstruct the state plus a small number of cheaply derivable quantities (counts, distances, flags). The schemas are calibrated to produce a max of 64 tokens per state when tokenized with the Qwen3.5 tokenizer, matching the visual chain-of-thought with the larger image of size 128 × 128 . We tried using longer textual chain-of-thought but it did not work better than the current setup. For some games, fewer tokens sufficed given the simpler state description. Table 2 reports the measured token statistics across all game types, computed over 100 episodes per game along optimal solution paths. The QA variants use the same schema as their base game and have nearly identical token statistics. Table 2: Textual CoT token counts per state description. Statistics measured over 100 episodes per game along optimal solution paths, tokenized with the Qwen3.5 tokenizer.                                         
+
+> Game Mean Median Min Max 3D Shape Matching / Mental Rotation 64.7 65 58 71 2D Shape Matching / Mental Rotation 31.0 31 29 33 Jigsaw 59.5 65 35 80 Tangram 47.5 49 28 68 Character Recognition 39.8 39 34 49 Sokoban 42.7 41 27 64 Bloxorz 48.1 48 38 61 Rush Hour 54.7 54 44 68 Anagram 31.9 32 28 37
+
+All schemas include a moves field recording the number of actions taken so far. Below we describe the schema and provide a concrete example for each game type. 
+
+Sokoban. The grid is encoded as a string with characters # (wall), . (floor), @ (player), O (box), 
+
+X (goal), * (box on goal), and + (player on goal), with row breaks stripped. 
+
+> {"g":"######@.X##.O.##...######","moves":3}
+
+Bloxorz. The grid encodes the block state ( S standing, = or - lying along X, H or | lying along Y), along with the block position and orientation, the goal location, the number of broken fragile tiles, and the Manhattan distance from the block to the goal. 
+
+> {"g":".....S.......G......","b":[1,1,"S"], "goal":[3,3],"broken":0,"distance":4,"moves":2}
+
+Rush Hour. The grid encodes vehicle letters at their occupied cells. Additional fields record the exit position, the number of vehicles, and a list of vehicle letters blocking car A’s path to the exit. 
+
+> {"g":"......B.....AA.B..C.CC...........", "exit_row":2,"exit_col":5,"n_vehicles":3, "blocks_A":["B","C"],"moves":1}
+
+Anagram. The schema records the current letter arrangement, the sorted letters, the string length, whether an identification has been attempted, the number of valid anagram solutions, and per-letter frequency counts. 
+
+> {"letters":"cat","sorted":"act","len":3, "id":false,"n_valid":1, "letter_counts":"a:1 c:1 t:1","moves":0}
+
+17 Tangram. The canvas grid uses digits to mark cells covered by placed pieces (the last character of the piece identifier), T for uncovered target cells, and . for empty non-target cells. An array records the identifier and rotation of each unplaced piece. 
+
+> {"c":"00T..01T..11T..TTT..", "q_rot":[["P2",90]],"moves":2}
+
+Jigsaw. A flat array records piece identifiers at each grid cell ( null for empty cells), along with the rotation of every piece, a list of unplaced piece identifiers, and the count of placed pieces. 
+
+> {"g":[0,1,null,3],"r":[0,0,90,0], "unplaced":[2],"n_placed":3,"moves":4}
+
+Character Recognition. The schema records the rotation of each piece and its slot assignment ( null 
+
+if unplaced), along with the number of placed pieces. 
+
+> {"r":[0,90,0,0],"p":[2,0,null,null], "n_placed":2,"moves":1}
+
+3D Mental Rotation. The schema records the current rotation angles ( rx , ry , rz ), the target angles (tx , ty , tz ), the signed shortest angular delta per axis ( dx , dy , dz ), the rotation increment, and the number of voxels in the polycube. 
+
+> {"rx":0,"ry":0,"rz":0,"tx":90,"ty":180,"tz":0, "dx":90,"dy":180,"dz":0, "inc":15,"n_voxels":7,"moves":0}
+
+2D Mental Rotation. The schema records the current rotation, the target rotation, the signed shortest angular delta, the rotation increment, and the number of cells in the polyomino. 
+
+> {"r":45,"target":135,"delta":90, "inc":15,"n_cells":5,"moves":3}
+
+18 C BAGEL Baseline Details 
+
+This appendix describes our adaptation of BAGEL-7B-MoT [ 45 ] to the puzzle suite via behavioral cloning and our analysis of why it failed to converge when being trained with its visual head. 
+
+Setup. BAGEL is a 7B-parameter Mixture-of-Transformers model that natively handles both image understanding (SigLIP ViT + connector) and image generation (VAE + flow-matching head) within a single architecture. We adapt it to our puzzle suite by constructing interleaved trajectories: the user turn contains ViT-encoded patches of the initial image plus the puzzle prompt, and the assistant turn alternates between blocks of 196 VAE latent tokens, encoding the world state after each action as a 
+
+14 × 14 continuous latent grid, with discrete action tokens enclosed in custom <action> /</action> 
+
+delimiters. Images are rendered at 128 px by the same game engine used for all other methods and encoded by BAGEL’s frozen VAE. 
+
+Loss design. Each trajectory position carries one of two losses: (i) standard shifted next-token cross-entropy on the action-token spans, or (ii) flow-matching MSE on the VAE velocity-field head at the 196 latent positions of each generated frame, trained under a Rectified-Flow schedule. The total loss is L = α mean (CE ) + β mean (MSE ). Because the MSE averages over ∼196 tokens per frame while the CE averages over ∼5–10 action tokens per step, the per-episode gradient contribution is strongly tilted toward reconstruction even at nominally equal weights. We train with LoRA adapters (rank 16) on all attention and MLP layers including the vision connector and the MoT generation head, using AdamW with bf16 and FlashAttention-2. 
+
+Training pathology. The naive approach feeds the full interleaved sequence causally. Each action attends to every prior VAE-latent block and every prior action. This collapsed training for two compounding reasons. First, effective context explodes: with 196 VAE tokens per frame, a medium-difficulty episode consumes thousands of context tokens, and self-attention becomes dominated by cross-frame latent-to-latent interactions that carry minimal task signal. Second, error accumulates at evaluation: under teacher forcing the model sees ground-truth VAE latents, but at rollout it sees its own noisy generations. Because each action conditions on the full visual history, errors at frame t
+
+corrupt the context for all subsequent steps. In practice, multi-step solve rate stagnated near zero despite reasonable single-step accuracy – a classic sign of overfitting to the teacher-forced visual stream rather than learning a coherent policy. We modified BAGEL to just generate the visual state without keeping it in the attention KV-cache or attend only to one past state. This improved the training but still fell well short of the baseline. 19 D Additional Results 
+
+D.1 Small VLM results 
+
+In Figs. 11 and 12, we show the puzzle solve rates of fine-tuned Qwen3.5 0.8B and 2B, respectively. The action-only method achieves solve rates of 82% and 84% in the two cases, and using visual CoT further enhances the solve rates on the most complex puzzles. This shows that our primary findings on the Qwen3.5 9B model hold for smaller models as well. 
+
+D.2 Comparing LlamaGen vs. FSQ tokenizers for visual token generation 
+
+In Fig. 13, we compare the impact of using LlamaGen and FSQ tokens for visual token-based CoT. On average, we observe that LlamaGen was better than FSQ by 1% on our puzzle suite. Therefore, we use LlamaGen as the default tokenizer for the visual token experiments. 
+
+D.3 Anagram Analysis 
+
+As noted in Fig. 6, anagram is the main exception to the general trend where improved reconstruction quality correlates with higher solve rates. However, this apparent discrepancy is explained by examining the nature of the reconstructions themselves. Fig. 14 reveals that the base model achieves lower reconstruction error by producing nearly uniform outputs that vary little across different inputs, approximating a mean image. Because anagram images share the same general structure – colored tiles on a grey background – this mean approximation achieves low pixel-wise error but encodes no task-relevant information about letter positions or identities. In contrast, the action-supervised model produces reconstructions with incorrect tile colors (yielding higher MSE) but faithfully preserves the spatial layout and letter content of each specific input. Thus, the action-supervised model’s representations are more informative for solving the task despite their higher reconstruction error, confirming that the correlation between mental image quality and solve rate holds for anagram as well when quality is measured by semantic fidelity rather than pixel-wise distance. 20 70 100 
+
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+
+(a) 2D Shape Match.  
+
+> 70 100
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+
+(b) 2D Mental Rot.  
+
+> 40 80
+> 48.0
+> 57.5
+> 77.0
+> 67.5
+
+(c) 3D Shape Match.  
+
+> 80 100
+> 87.5
+> 85.0
+> 92.0
+> 96.0
+
+(d) 3D Mental Rot.  
+
+> 90 100
+> 96.0
+> 95.0
+> 97.5
+> 94.5
+
+(e) Bloxorz  
+
+> 80 100
+> 90.5
+> 85.0
+> 96.0
+> 96.5
+
+(f) Rush Hour  
+
+> 70 100
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+
+(g) Char. Recog.  
+
+> 60 100
+> 61.5
+> 68.5
+> 61.5
+> 92.5
+
+(h) Jigsaw  
+
+> 40 70
+> 47.0
+> 42.5
+> 55.5
+> 56.5
+
+(i) Tangram  
+
+> 60 80
+> 64.0
+> 66.5
+> 68.0
+> 66.0
+
+(j) Tangram (y/n)  
+
+> 80 100
+> 89.5
+> 87.0
+> 93.5
+> 84.5
+
+(k) Sokoban  
+
+> 95 100
+> 99.5
+> 99.5
+> 100.0
+> 100.0
+
+(l) Anagram  
+
+> 70 100
+> 82.0
+> 82.2
+> 86.8
+> 87.8
+
+(m) Average 
+
+Action Supervision Visual Supervision Visual Tokens 64 ×64 Visual Tokens 128 ×128 
+
+Figure 11: Solve rates on visual reasoning tasks (Qwen 3.5 0.8B). Each chart shows the results of the Base Qwen3.5, action supervision and various forms of visual supervison. Visual tokens-based CoT improves over action supervision on every non-saturated game; the largest gains come on 3D Shape Match (+29 pts for Visual Tokens 64 ×64 ) and Jigsaw (+31 pts for Visual Tokens 128 ×128 ).  
+
+> 70 100
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+
+(a) 2D Shape Match.  
+
+> 70 100
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+
+(b) 2D Mental Rot.  
+
+> 40 80
+> 46.0
+> 73.5
+> 71.0
+> 75.5
+
+(c) 3D Shape Match.  
+
+> 80 100
+> 87.0
+> 90.5
+> 89.0
+> 95.5
+
+(d) 3D Mental Rot.  
+
+> 90 100
+> 97.0
+> 97.5
+> 98.5
+> 96.5
+
+(e) Bloxorz  
+
+> 80 100
+> 95.5
+> 90.5
+> 99.0
+> 96.5
+
+(f) Rush Hour  
+
+> 70 100
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+
+(g) Char. Recog.  
+
+> 60 100
+> 62.0
+> 62.5
+> 85.0
+> 63.0
+
+(h) Jigsaw  
+
+> 40 70
+> 56.0
+> 52.5
+> 64.0
+> 64.0
+
+(i) Tangram  
+
+> 60 80
+> 68.5
+> 67.0
+> 74.0
+> 69.5
+
+(j) Tangram (y/n)  
+
+> 80 100
+> 95.5
+> 89.0
+> 98.0
+> 94.5
+
+(k) Sokoban  
+
+> 95 100
+> 100.0
+> 99.5
+> 100.0
+> 100.0
+
+(l) Anagram  
+
+> 70 100
+> 84.0
+> 85.2
+> 89.9
+> 87.9
+
+(m) Average 
+
+Action Supervision Visual Supervision Visual Tokens 64 ×64 Visual Tokens 128 ×128 
+
+Figure 12: Solve rates on visual reasoning tasks (Qwen 3.5 2B). Each chart shows the results of the Base Qwen3.5, No CoT and various forms of supervison. Visual Tokens 64 ×64 leads the average (89.9%); the largest gains over No-CoT come on 3D Shape Match (+27 pts for Visual Superv.) and Jigsaw (+23 pts for Visual Tokens 64 ×64 ). 21 70 100              
+
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+> (a) 2D Shape Match.
+> 70 100
+> 100.0
+> 100.0
+> 100.0
+> 100.0
+> (b) 2D Mental Rot.
+> 70 100
+> 91.0
+> 97.5
+> 86.0
+> 96.5
+> (c) 3D Shape Match.
+> 50 80
+> 70.5
+> 77.5
+> 66.5
+> 66.0
+> (d) 3D Mental Rot.
+> 70 100
+> 97.5
+> 94.5
+> 97.0
+> 94.5
+> (e) Bloxorz
+> 70 100
+> 95.0
+> 97.0
+> 93.5
+> 92.5
+> (f) Rush Hour
+> 70 100
+> 100.0
+> 100.0
+> 99.5
+> 100.0
+> (g) Char. Recog.
+> 60 100
+> 84.5
+> 91.5
+> 92.0
+> 93.0
+> (h) Jigsaw
+> 40 70
+> 59.0
+> 55.0
+> 62.5
+> 53.0
+> (i) Tangram
+> 50 80
+> 75.0
+> 72.0
+> 68.5
+> 70.0
+> (j) Tangram (y/n)
+> 70 100
+> 95.0
+> 89.5
+> 97.0
+> 85.0
+> (k) Sokoban
+> 70 100
+> 100.0
+> 100.0
+> 97.5
+> 99.0
+> (l) Anagram
+> 70 100
+> 89.0
+> 89.5
+> 88.3
+> 87.5
+> (m) Average
+
+Visual Tokens 64 ×64 (llamagen) Visual Tokens 128 ×128 (llamagen) 
+
+Visual Tokens 64 ×64 (FSQ) Visual Tokens 128 ×128 (FSQ) 
+
+Figure 13: Comparing Llamagen vs. FSQ tokenizers for visual token prediction. We observe that Llamagen tokens are on average better for autoregressive generation than the FSQ tokens. Therefore, we use it as our de-facto approach for autoregressive generation. 
+
+(a) Ground truth (b) Base Qwen (c) Action Only Figure 14: Anagram reconstruction comparison. (a) The ground-truth visual state. (b) Recon-struction from the Base Qwen model, which produces nearly uniform reconstructions that vary little across inputs, achieving low reconstruction error by approximating a mean image that is uninfor-mative. (c) The detached trained visual head for action-supervised model reconstructs images with incorrect colors yielding higher reconstruction error. Yet, it preserves the spatial arrangement and letter identities of the actual input, producing more semantically meaningful representations. 22 E Qualitative Rollouts 
+
+In the remainder of the pages, we show qualitative rollouts from different models and different games. 
+
+Anagram 
+
+Fig. 15: Action-only Supervision Fig. 27: Action and Visual Supervision Fig. 39: Visual Tokens 
+
+Bloxorz 
+
+Fig. 16: Action-only Supervision Fig. 28: Action and Visual Supervision Fig. 40: Visual Tokens 
+
+Character Recognition 
+
+Fig. 17: Action-only Supervision Fig. 29: Action and Visual Supervision Fig. 41: Visual Tokens 
+
+Jigsaw 
+
+Fig. 18: Action-only Supervision Fig. 30: Action and Visual Supervision Fig. 42: Visual Tokens 
+
+Shape Matching (3D) 
+
+Fig. 19: Action-only Supervision Fig. 31: Action and Visual Supervision Fig. 43: Visual Tokens 
+
+Mental Rotation (3D) (yes/no certificate) 
+
+Fig. 20: Action-only Supervision Fig. 32: Action and Visual Supervision Fig. 44: Visual Tokens 
+
+Shape Matching (2D) 
+
+Fig. 21: Action-only Supervision Fig. 33: Action and Visual Supervision Fig. 45: Visual Tokens 
+
+Mental Rotation (2D) (yes/no certificate) 
+
+Fig. 22: Action-only Supervision Fig. 34: Action and Visual Supervision Fig. 46: Visual Tokens 
+
+Rush Hour 
+
+Fig. 23: Action-only Supervision Fig. 35: Action and Visual Supervision Fig. 47: Visual Tokens 
+
+Sokoban 
+
+Fig. 24: Action-only Supervision Fig. 36: Action and Visual Supervision Fig. 48: Visual Tokens 
+
+Tangram 
+
+Fig. 25: Action-only Supervision Fig. 37: Action and Visual Supervision Fig. 49: Visual Tokens 
+
+Tangram (yes/no certificate) 
+
+Fig. 26: Action-only Supervision Fig. 38: Action and Visual Supervision Fig. 50: Visual Tokens 23 Input 
+
+swap(0, 4) swap(1, 2) swap(2, 6) swap(3, 7) swap(5, 7) swap(6, 7) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: borrowed 
+
+Input 
+
+swap(0, 7) swap(1, 3) swap(3, 6) swap(4, 6) swap(6, 8) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: gummatous 
+
+Input 
+
+swap(0, 3) swap(1, 2) swap(2, 4) swap(3, 4) swap(5, 7) swap(6, 7) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: steaming 
+
+Input 
+
+swap(0, 4) swap(1, 5) swap(3, 5) swap(4, 7) swap(5, 6) swap(6, 7) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: sketched 
+
+Input 
+
+swap(0, 8) swap(1, 4) swap(2, 5) swap(3, 4) swap(4, 9) swap(5, 9) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: attraction Figure 15: Autoregressive rollouts for Action-only Supervision on Anagram . See also: Action and Visual Supervision (Fig. 27) and Visual Tokens (Fig. 39). 24 Input 
+
+up right right +15 steps right up up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+down down down +8 steps right right up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+down down right +9 steps left up left 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+left up up +15 steps down left up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+right up up +11 steps up left up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 16: Autoregressive rollouts for Action-only Supervision on Bloxorz . See also: Action and Visual Supervision (Fig. 28) and Visual Tokens (Fig. 40). 25 Input 
+
+rotateccw(3, 90) place(3, 1, 3) rotateccw(4, 90) +5 steps place(2, 0, 1) rotateccw(5, 90) place(5, 0, 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: eta 
+
+Input 
+
+rotatecw(2, 90) place(2, 1, 1) rotateccw(0, 90) +4 steps place(5, 1, 0) rotatecw(1, 90) place(1, 2, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: v 
+
+Input 
+
+rotatecw(5, 90) place(5, 0, 0) rotatecw(0, 90) +8 steps rotatecw(3, 90) rotatecw(3, 90) place(3, 1, 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: w 
+
+Input 
+
+rotatecw(0, 90) place(0, 2, 1) rotatecw(1, 90) +9 steps place(5, 1, 1) rotateccw(6, 90) place(6, 0, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: V 
+
+Input 
+
+rotatecw(3, 90) rotatecw(3, 90) place(3, 3, 2) +10 steps rotatecw(6, 90) rotatecw(6, 90) place(6, 0, 0) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: a Figure 17: Autoregressive rollouts for Action-only Supervision on Character Recognition . See also: Action and Visual Supervision (Fig. 29) and Visual Tokens (Fig. 41). 26 Input 
+
+rotatecw(8) rotatecw(8) place(8, A) +10 steps rotateccw(1) place(1, H) place(7, B) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+place(0, G) rotatecw(8) rotatecw(8) +10 steps rotatecw(5) place(5, B) place(7, F) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+place(3, A) rotateccw(1) place(1, C) rotateccw(0) place(0, D) place(2, B) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotateccw(0) place(0, A) place(3, D) +1 steps place(1, B) rotateccw(2) place(2, C) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotateccw(3) place(3, D) rotateccw(1) +1 steps rotatecw(0) place(0, A) place(2, C) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 18: Autoregressive rollouts for Action-only Supervision on Jigsaw . See also: Action and Visual Supervision (Fig. 30) and Visual Tokens (Fig. 42). 27 Input 
+
+rotatex(30) rotatex(30) rotatex(30) +1 steps rotatex(30) rotatey(30) rotatex(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatey(30) rotatey(30) rotatey(30) +2 steps rotatex(-30) rotatey(30) rotatez(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatex(30) rotatex(30) rotatey(-30) +4 steps rotatez(-30) rotatex(30) rotatey(-30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatex(30) rotatey(-30) rotatex(30) +4 steps rotatez(-30) rotatex(30) rotatey(-30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+rotatey(30) rotatex(-30) rotatez(-30) +12 steps rotatey(30) rotatex(-15) rotatez(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 19: Autoregressive rollouts for Action-only Supervision on Shape Matching (3D) . See also: Action and Visual Supervision (Fig. 31) and Visual Tokens (Fig. 43). 28 Input 
+
+rotatex(-30) rotatey(-30) rotatex(-30) +2 steps rotatey(-30) rotatex(-15) rotatey(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotatez(30) rotatez(30) rotatey(30) +9 steps rotatex(30) rotatez(30) rotatey(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotatex(30) rotatey(30) rotatex(30) rotatey(30) rotatex(30) rotatez(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotatey(30) rotatey(30) rotatey(30) +2 steps rotatez(-30) rotatex(30) rotatey(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotatex(30) rotatex(30) rotatex(30) +3 steps rotatex(15) rotatey(15) rotatez(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no Figure 20: Autoregressive rollouts for Action-only Supervision on Mental Rotation (3D) (yes/no certificate) . See also: Action and Visual Supervision (Fig. 32) and Visual Tokens (Fig. 44). 29 Input 
+
+rotate(30) rotate(30) rotate(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(-30) rotate(-30) rotate(-30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 21: Autoregressive rollouts for Action-only Supervision on Shape Matching (2D) . See also: Action and Visual Supervision (Fig. 33) and Visual Tokens (Fig. 45). 30 Input 
+
+rotate(-30) rotate(-30) rotate(-30) rotate(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotate(-30) rotate(-30) rotate(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotate(30) rotate(30) rotate(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes Figure 22: Autoregressive rollouts for Action-only Supervision on Mental Rotation (2D) (yes/no certificate) . See also: Action and Visual Supervision (Fig. 34) and Visual Tokens (Fig. 46). 31 Input 
+
+slide('D', 1) slide('G', 1) slide('A', -1) +4 steps slide('E', 2) slide('C', 2) slide('A', 5) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+slide('B', -1) slide('G', -2) slide('H', 1) +3 steps slide('L', -1) slide('C', -1) slide('A', 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+slide('A', -1) slide('D', 1) slide('G', 1) +7 steps slide('E', 2) slide('J', 2) slide('A', 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+slide('C', 2) slide('G', 2) slide('K', 2) slide('L', -1) slide('F', 1) slide('A', 5) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+slide('A', 1) slide('I', 2) slide('K', 1) +4 steps slide('H', 2) slide('G', 2) slide('A', 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 23: Autoregressive rollouts for Action-only Supervision on Rush Hour . See also: Action and Visual Supervision (Fig. 35) and Visual Tokens (Fig. 47). 32 Input 
+
+down down left +11 steps up up up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+up left up +13 steps right down down 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+down left left +45 steps right right right 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+right down left +9 steps down down down 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+up up up +15 steps down left left 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 24: Autoregressive rollouts for Action-only Supervision on Sokoban . See also: Action and Visual Supervision (Fig. 36) and Visual Tokens (Fig. 48). 33 Input 
+
+rotateccw('P0') place('P0', 5, 2) rotatecw('P1') +3 steps rotatecw('P2') place('P2', 1, 3) place('P4', 3, 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+place('P3', 1, 0) rotatecw('P0') rotatecw('P0') +1 steps place('P1', 2, 1) rotateccw('P2') place('P2', 3, 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+place('P4', 3, 3) rotatecw('P0') place('P0', 1, 1) +1 steps place('P3', 0, 4) rotateccw('P2') place('P2', 2, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+place('P0', 1, 0) rotateccw('P1') place('P1', 2, 2) place('P3', 0, 3) place('P2', 3, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatecw('P0') place('P0', 1, 0) place('P2', 3, 1) place('P1', 1, 2) place('P3', 2, 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 25: Autoregressive rollouts for Action-only Supervision on Tangram . See also: Action and Visual Supervision (Fig. 37) and Visual Tokens (Fig. 49). 34 Input 
+
+place('P2', 5, 2) rotatecw('P3') place('P3', 1, 5) rotatecw('P0') place('P0', 2, 1) place('P1', 4, 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+place('P0', 1, 2) place('P2', 4, 2) rotatecw('P3') place('P3', 3, 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+place('P3', 3, 1) place('P0', 1, 2) place('P2', 2, 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+place('P2', 0, 2) place('P0', 2, 3) place('P1', 2, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+place('P1', 2, 2) rotateccw('P0') place('P0', 2, 4) place('P3', 0, 0) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no Figure 26: Autoregressive rollouts for Action-only Supervision on Tangram (yes/no certificate) .See also: Action and Visual Supervision (Fig. 38) and Visual Tokens (Fig. 50). 35 Input 
+
+swap(0, 4) swap(1, 2) swap(2, 6) swap(3, 7) swap(5, 7) swap(6, 7) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: borrowed 
+
+Input 
+
+swap(0, 7) swap(1, 3) swap(3, 6) swap(4, 6) swap(6, 8) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: gummatous 
+
+Input 
+
+swap(0, 3) swap(1, 2) swap(2, 4) swap(3, 4) swap(5, 7) swap(6, 7) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: steaming 
+
+Input 
+
+swap(0, 4) swap(1, 5) swap(3, 5) swap(4, 7) swap(5, 6) swap(6, 7) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: sketched 
+
+Input 
+
+swap(0, 8) swap(1, 4) swap(2, 5) swap(3, 4) swap(4, 9) swap(5, 9) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: attraction Figure 27: Autoregressive rollouts for Action and Visual Supervision on Anagram . See also: Action-only Supervision (Fig. 15) and Visual Tokens (Fig. 39). 36 Input 
+
+left up right +9 steps right up left 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+right up right +9 steps up right up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+left down right +9 steps down right up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+down right right +8 steps down left up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+up left left +15 steps up right up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED Figure 28: Autoregressive rollouts for Action and Visual Supervision on Bloxorz . See also: Action-only Supervision (Fig. 16) and Visual Tokens (Fig. 40). 37 Input 
+
+rotateccw(3, 90) place(3, 1, 3) rotateccw(4, 90) +5 steps place(2, 0, 1) rotatecw(1, 90) place(1, 1, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: eta 
+
+Input 
+
+rotatecw(1, 90) place(1, 2, 2) rotateccw(0, 90) +4 steps place(5, 1, 0) rotateccw(4, 90) place(4, 2, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: v 
+
+Input 
+
+rotatecw(0, 90) rotatecw(0, 90) place(0, 1, 0) +8 steps place(4, 2, 0) rotatecw(5, 90) place(5, 0, 0) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: w 
+
+Input 
+
+rotatecw(0, 90) place(0, 2, 1) rotatecw(1, 90) +9 steps rotatecw(4, 90) rotatecw(4, 90) place(4, 0, 0) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: V 
+
+Input 
+
+rotatecw(0, 90) rotatecw(0, 90) place(0, 0, 2) +10 steps rotatecw(6, 90) rotatecw(6, 90) place(6, 0, 0) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: a Figure 29: Autoregressive rollouts for Action and Visual Supervision on Character Recognition .See also: Action-only Supervision (Fig. 17) and Visual Tokens (Fig. 41). 38 Input 
+
+place(0, B) place(2, A) rotateccw(3) +1 steps rotatecw(1) rotatecw(1) place(1, D) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+place(2, D) rotateccw(1) place(1, A) rotatecw(0) place(0, C) place(3, B) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+place(3, D) rotatecw(1) place(1, B) +1 steps place(0, A) rotateccw(2) place(2, C) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotateccw(6) place(6, A) rotatecw(8) +9 steps rotateccw(3) place(3, B) place(5, H) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+place(6, A) place(8, G) rotatecw(0) +11 steps place(5, H) rotateccw(7) place(7, D) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 30: Autoregressive rollouts for Action and Visual Supervision on Jigsaw . See also: Action-only Supervision (Fig. 18) and Visual Tokens (Fig. 42). 39 Input 
+
+rotatex(-30) rotatex(-30) rotatey(30) +1 steps rotatex(-30) rotatey(30) rotatez(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatey(30) rotatex(30) rotatey(30) +6 steps rotatex(30) rotatey(15) rotatez(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatey(30) rotatex(-30) rotatey(30) +3 steps rotatey(30) rotatex(-30) rotatey(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatez(30) rotatez(30) rotatey(30) +5 steps rotatez(30) rotatey(30) rotatex(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatey(30) rotatex(30) rotatey(30) rotatez(30) rotatex(30) rotatey(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED Figure 31: Autoregressive rollouts for Action and Visual Supervision on Shape Matching (3D) .See also: Action-only Supervision (Fig. 19) and Visual Tokens (Fig. 43). 40 Input 
+
+rotatey(30) rotatey(30) rotatey(30) +2 steps rotatez(-30) rotatex(30) rotatey(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotatex(30) rotatey(30) rotatex(30) +10 steps rotatex(30) rotatey(15) rotatez(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotatex(30) rotatex(30) rotatex(30) +5 steps rotatex(30) rotatez(-30) rotatey(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotatez(30) rotatex(30) rotatez(30) +8 steps rotatex(30) rotatez(30) rotatey(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotatex(30) rotatex(30) rotatez(-30) +5 steps rotatey(-30) rotatex(30) rotatez(-30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes Figure 32: Autoregressive rollouts for Action and Visual Supervision on Mental Rotation (3D) (yes/no certificate) . See also: Action-only Supervision (Fig. 20) and Visual Tokens (Fig. 44). 41 Input 
+
+rotate(30) rotate(30) rotate(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(-30) rotate(-30) rotate(-30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 33: Autoregressive rollouts for Action and Visual Supervision on Shape Matching (2D) .See also: Action-only Supervision (Fig. 21) and Visual Tokens (Fig. 45). 42 Input 
+
+rotate(-30) rotate(-30) rotate(-30) rotate(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotate(-30) rotate(-30) rotate(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotate(30) rotate(30) rotate(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes Figure 34: Autoregressive rollouts for Action and Visual Supervision on Mental Rotation (2D) (yes/no certificate) . See also: Action-only Supervision (Fig. 22) and Visual Tokens (Fig. 46). 43 Input 
+
+slide('B', -2) slide('D', -1) slide('I', 1) +2 steps slide('L', -2) slide('C', -2) slide('A', 5) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+slide('C', -2) slide('F', -3) slide('D', 2) +1 steps slide('I', -1) slide('E', -3) slide('A', 6) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+slide('B', 2) slide('H', -1) slide('L', 1) +7 steps slide('M', -1) slide('K', -3) slide('A', 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+slide('C', 1) slide('E', 2) slide('F', 1) slide('H', 2) slide('M', 2) slide('A', 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+slide('B', -1) slide('H', 1) slide('J', -1) +3 steps slide('C', -1) slide('M', -1) slide('A', 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 35: Autoregressive rollouts for Action and Visual Supervision on Rush Hour . See also: Action-only Supervision (Fig. 23) and Visual Tokens (Fig. 47). 44 Input 
+
+down down down +19 steps left up right 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+left left down +9 steps left left down 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+left up up +15 steps down left left 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+up up right +25 steps up right down 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+down down down +14 steps left up up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 36: Autoregressive rollouts for Action and Visual Supervision on Sokoban . See also: Action-only Supervision (Fig. 24) and Visual Tokens (Fig. 48). 45 Input 
+
+rotatecw('P3') place('P3', 1, 5) place('P2', 5, 2) place('P0', 4, 4) rotatecw('P1') place('P1', 2, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+place('P3', 1, 0) rotatecw('P0') rotatecw('P0') +1 steps place('P1', 2, 1) rotateccw('P2') place('P2', 3, 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+place('P1', 2, 0) rotatecw('P0') place('P0', 2, 2) +2 steps rotatecw('P2') place('P2', 0, 2) rotatecw('P4') 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatecw('P1') rotatecw('P1') place('P1', 0, 3) +3 steps place('P5', 3, 3) place('P0', 0, 1) place('P2', 1, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatecw('P2') place('P2', 2, 0) place('P0', 0, 2) place('P3', 2, 3) place('P1', 3, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 37: Autoregressive rollouts for Action and Visual Supervision on Tangram . See also: Action-only Supervision (Fig. 25) and Visual Tokens (Fig. 49). 46 Input 
+
+place('P2', 0, 1) place('P3', 2, 1) rotateccw('P1') place('P1', 2, 3) place('P0', 1, 1) place('P4', 3, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+place('P1', 2, 5) place('P3', 3, 2) rotatecw('P2') place('P2', 5, 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+place('P0', 1, 1) rotatecw('P1') place('P1', 3, 4) +1 steps rotatecw('P2') place('P2', 5, 1) place('P3', 3, 6) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+place('P0', 2, 1) place('P1', 2, 3) rotatecw('P3') place('P3', 4, 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+place('P3', 2, 2) place('P1', 5, 3) place('P2', 0, 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no Figure 38: Autoregressive rollouts for Action and Visual Supervision on Tangram (yes/no certifi-cate) . See also: Action-only Supervision (Fig. 26) and Visual Tokens (Fig. 50). 47 Input 
+
+swap(0, 1) swap(1, 2) swap(2, 5) swap(3, 6) swap(4, 5) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: fussily 
+
+Input 
+
+swap(0, 6) swap(2, 7) swap(3, 5) swap(4, 5) swap(5, 7) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: drudgery 
+
+Input 
+
+swap(0, 3) swap(1, 6) swap(2, 3) swap(3, 7) swap(5, 6) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: dripping 
+
+Input 
+
+swap(0, 8) swap(2, 6) swap(3, 9) swap(4, 6) swap(6, 7) swap(7, 9) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: statmatitis 
+
+Input 
+
+swap(0, 7) swap(1, 7) swap(2, 4) swap(3, 6) swap(4, 5) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: believer Figure 39: Autoregressive rollouts for Visual Tokens on Anagram . See also: Action-only Supervi-sion (Fig. 15) and Action and Visual Supervision (Fig. 27). 48 Input 
+
+right right up +6 steps up right up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+down down right +16 steps right down right 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+right right down +8 steps right down left 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+down down left +9 steps down right up 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+down down down +14 steps up left down 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED Figure 40: Autoregressive rollouts for Visual Tokens on Bloxorz . See also: Action-only Supervision (Fig. 16) and Action and Visual Supervision (Fig. 28). 49 Input 
+
+place(5, 2, 0) rotatecw(1, 90) rotatecw(1, 90) +5 steps place(0, 3, 2) rotatecw(3, 90) place(3, 3, 0) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: a 
+
+Input 
+
+place(5, 1, 1) rotateccw(2, 90) place(2, 0, 1) +6 steps rotateccw(6, 90) place(6, 3, 1) place(1, 2, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: J 
+
+Input 
+
+place(4, 2, 0) rotatecw(5, 90) place(5, 0, 0) +6 steps rotatecw(3, 90) place(3, 1, 3) place(1, 1, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: w 
+
+Input 
+
+rotatecw(1, 90) place(1, 1, 2) rotatecw(4, 90) +9 steps place(5, 1, 1) rotateccw(6, 90) place(6, 0, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: v 
+
+Input 
+
+place(1, 1, 1) rotatecw(2, 90) rotatecw(2, 90) +5 steps place(4, 3, 0) rotatecw(0, 90) place(0, 3, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: R Figure 41: Autoregressive rollouts for Visual Tokens on Character Recognition . See also: Action-only Supervision (Fig. 17) and Action and Visual Supervision (Fig. 29). 50 Input 
+
+rotatecw(2) place(2, A) place(3, C) rotateccw(0) place(0, B) place(1, D) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatecw(0) place(0, C) rotateccw(1) place(1, A) place(3, B) place(2, D) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+place(3, A) place(0, D) rotatecw(2) +1 steps place(2, B) rotateccw(1) place(1, C) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatecw(1) rotatecw(1) place(1, A) place(0, C) place(3, B) place(2, D) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatecw(6) rotatecw(6) place(6, G) +11 steps rotateccw(7) place(7, H) place(5, F) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED Figure 42: Autoregressive rollouts for Visual Tokens on Jigsaw . See also: Action-only Supervision (Fig. 18) and Action and Visual Supervision (Fig. 30). 51 Input 
+
+rotatex(-30) rotatex(-30) rotatex(-30) rotatex(-30) rotatey(-30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatey(-30) rotatey(-30) rotatey(-30) +2 steps rotatez(-30) rotatex(-30) rotatey(-30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatex(30) rotatez(-30) rotatex(30) +10 steps rotatez(-30) rotatex(30) rotatey(-30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotatey(30) rotatez(-30) rotatey(30) rotatez(-30) rotatey(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+rotatey(30) rotatey(30) rotatez(30) +3 steps rotatez(30) rotatex(15) rotatey(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 43: Autoregressive rollouts for Visual Tokens on Shape Matching (3D) . See also: Action-only Supervision (Fig. 19) and Action and Visual Supervision (Fig. 31). 52 Input 
+
+rotatey(-30) rotatey(-30) rotatez(30) +1 steps rotatex(-30) rotatez(30) rotatey(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotatey(30) rotatey(30) rotatey(30) +3 steps rotatex(-30) rotatez(-30) rotatey(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotatey(30) rotatey(30) rotatey(30) +3 steps rotatey(30) rotatez(-30) rotatex(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotatey(30) rotatex(-30) rotatey(30) +10 steps rotatey(30) rotatez(-30) rotatex(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotatey(-30) rotatex(-30) rotatey(-30) +1 steps rotatex(-30) rotatey(-15) rotatez(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes Figure 44: Autoregressive rollouts for Visual Tokens on Mental Rotation (3D) (yes/no certificate) .See also: Action-only Supervision (Fig. 20) and Action and Visual Supervision (Fig. 32). 53 Input 
+
+rotate(30) rotate(30) rotate(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(-30) rotate(-30) rotate(-30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 45: Autoregressive rollouts for Visual Tokens on Shape Matching (2D) . See also: Action-only Supervision (Fig. 21) and Action and Visual Supervision (Fig. 33). 54 Input 
+
+rotate(-30) rotate(-30) rotate(-30) rotate(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotate(-30) rotate(-30) rotate(-15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotate(30) rotate(30) rotate(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(30) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+rotate(30) rotate(30) rotate(30) rotate(15) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes Figure 46: Autoregressive rollouts for Visual Tokens on Mental Rotation (2D) (yes/no certificate) .See also: Action-only Supervision (Fig. 22) and Action and Visual Supervision (Fig. 34). 55 Input 
+
+slide('C', -1) slide('F', 1) slide('H', 1) +2 steps slide('N', -1) slide('G', 2) slide('A', 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+slide('D', -1) slide('B', -1) slide('A', -1) +1 steps slide('J', -1) slide('M', 2) slide('A', 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+slide('E', -1) slide('F', -1) slide('G', 1) +10 steps slide('I', 1) slide('F', -1) slide('A', 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+slide('B', -1) slide('F', -1) slide('D', -1) slide('I', -1) slide('A', 6) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+slide('J', -1) slide('I', -1) slide('F', -3) +1 steps slide('E', -2) slide('G', -2) slide('A', 6) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 47: Autoregressive rollouts for Visual Tokens on Rush Hour . See also: Action-only Supervision (Fig. 23) and Action and Visual Supervision (Fig. 35). 56 Input 
+
+left up left +15 steps down right right 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+down right right +19 steps left left left 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+left up left +28 steps down left left 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+right right up +14 steps right up left 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+left left right +9 steps left left left 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 48: Autoregressive rollouts for Visual Tokens on Sokoban . See also: Action-only Supervision (Fig. 24) and Action and Visual Supervision (Fig. 36). 57 Input 
+
+rotatecw('P1') place('P1', 1, 1) rotateccw('P4') +4 steps rotatecw('P0') place('P0', 0, 1) place('P5', 3, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+UNSOLVED 
+
+Input 
+
+place('P1', 0, 3) rotateccw('P3') place('P3', 3, 2) place('P2', 6, 3) rotateccw('P0') place('P0', 3, 5) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+place('P4', 3, 3) rotatecw('P0') place('P0', 1, 1) +1 steps place('P3', 0, 4) rotateccw('P2') place('P2', 2, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+place('P0', 2, 0) rotatecw('P3') rotatecw('P3') +1 steps place('P2', 0, 2) rotatecw('P1') place('P1', 2, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED 
+
+Input 
+
+rotateccw('P2') place('P2', 3, 4) rotatecw('P0') +2 steps place('P1', 1, 3) rotatecw('P3') place('P3', 0, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+SOLVED Figure 49: Autoregressive rollouts for Visual Tokens on Tangram . See also: Action-only Supervision (Fig. 25) and Action and Visual Supervision (Fig. 37). 58 Input 
+
+place('P1', 0, 2) place('P0', 2, 1) place('P2', 2, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+place('P2', 2, 2) place('P1', 0, 0) place('P3', 3, 0) place('P4', 4, 2) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+place('P1', 2, 2) place('P0', 5, 3) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+place('P2', 3, 2) place('P3', 0, 2) rotatecw('P0') rotatecw('P0') place('P0', 3, 4) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: no 
+
+Input 
+
+place('P1', 3, 3) place('P3', 1, 1) place('P2', 1, 4) place('P0', 3, 1) 
+
+Imagined State 
+
+Actual State (unobserved) 
+
+Answer: yes Figure 50: Autoregressive rollouts for Visual Tokens on Tangram (yes/no certificate) . See also: Action-only Supervision (Fig. 26) and Action and Visual Supervision (Fig. 38). 59
