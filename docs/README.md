@@ -6,75 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-15
-- 运行时间：2026-05-15 20:56:21 UTC
+- 最新运行日期：2026-05-16
+- 运行时间：2026-05-16 20:51:12 UTC
 - 运行状态：成功
-- 本次总论文数：18
-- 精读区：7
+- 本次总论文数：17
+- 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日精选18篇前沿论文，重点突破VLA模型策略优化与多模态潜空间长序列推理。
-RePO-
-- 详情：[/202605/15/README](/202605/15/README)
+今日聚焦 17 篇 AI 前沿进展，重点攻克高并发分布式 VLA 模型训练与多学科科学推理评测。
+核心突破在于 D-VLA 框架实现的异步强化学习效率提升，以及 SciVQR 对多模态逻辑推理能力的深度诊断。
+推荐深入研读 D-VLA 的分布式架构设计，并关注具身智能在复杂任务与全景空间推理中的最新表现。
+- 详情：[/202605/16/README](/202605/16/README)
 
 ### 精读区论文标签
-1. [RePO-VLA: Recovery-Driven Policy Optimization for Vision-Language-Action Models](/202605/15/2605.09410v1-repo-vla-recovery-driven-policy-optimization-for-vision-language-action-models)  
+1. [D-VLA: A High-Concurrency Distributed Asynchronous Reinforcement Learning Framework for Vision-Language-Action Models](/202605/16/2605.13276v2-d-vla-a-high-concurrency-distributed-asynchronous-reinforcement-learning-framework-for-vision-language-action-models)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉-语言-动作模型的策略优化
-2. [Self-Consistent Latent Reasoning: Long Latent Sequence Reasoning for Vision-Language Model](/202605/15/2605.12163v2-self-consistent-latent-reasoning-long-latent-sequence-reasoning-for-vision-language-model)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉语言模型的视觉潜空间推理
-3. [Bad Seeing or Bad Thinking? Rewarding Perception for Vision-Language Reasoning](/202605/15/2605.14054v1-bad-seeing-or-bad-thinking-rewarding-perception-for-vision-language-reasoning)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：为视觉语言推理提供感知奖励
-4. [Resolving Action Bottleneck: Agentic Reinforcement Learning Informed by Token-Level Energy](/202605/15/2605.14558v1-resolving-action-bottleneck-agentic-reinforcement-learning-informed-by-token-level-energy)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：带有推理轨迹的智能体强化学习
-5. [EARL: Towards a Unified Analysis-Guided Reinforcement Learning Framework for Egocentric Interaction Reasoning and Pixel Grounding](/202605/15/2605.14742v1-earl-towards-a-unified-analysis-guided-reinforcement-learning-framework-for-egocentric-interaction-reasoning-and-pixel-grounding)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：用于第一视角交互推理和定位的强化学习框架
-6. [Self-Distilled Agentic Reinforcement Learning](/202605/15/2605.15155v1-self-distilled-agentic-reinforcement-learning)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：自蒸馏智能体强化学习
-7. [ATLAS: Agentic or Latent Visual Reasoning? One Word is Enough for Both](/202605/15/2605.15198v1-atlas-agentic-or-latent-visual-reasoning-one-word-is-enough-for-both)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：使用功能令牌的智能体视觉推理框架
+   evidence：视觉-语言-动作模型的分布式强化学习框架
+2. [SciVQR: A Multidisciplinary Multimodal Benchmark for Advanced Scientific Reasoning Evaluation](/202605/16/2605.10187v2-scivqr-a-multidisciplinary-multimodal-benchmark-for-advanced-scientific-reasoning-evaluation)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：高级科学推理的多模态基准测试
+3. [Verifiable Process Rewards for Agentic Reasoning](/202605/16/2605.10325v1-verifiable-process-rewards-for-agentic-reasoning)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：基于可验证奖励的智能体推理强化学习
+4. [Dynamic Skill Lifecycle Management for Agentic Reinforcement Learning](/202605/16/2605.10923v1-dynamic-skill-lifecycle-management-for-agentic-reinforcement-learning)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：智能体强化学习的动态技能管理
+5. [Emergent Communication between Heterogeneous Visual Agents through Decentralized Learning](/202605/16/2605.11695v1-emergent-communication-between-heterogeneous-visual-agents-through-decentralized-learning)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：视觉智能体之间的涌现通信，非机器人重点
+6. [Learn to Think: Improving Multimodal Reasoning through Vision-Aware Self-Improvement Training](/202605/16/2605.11931v1-learn-to-think-improving-multimodal-reasoning-through-vision-aware-self-improvement-training)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：通过自我改进训练提高多模态推理能力
 
 ### 速读区论文标签
-1. [Do multimodal models imagine electric sheep?](/202605/15/2605.09693v1-do-multimodal-models-imagine-electric-sheep)  
+1. [Learning Agentic Policy from Action Guidance](/202605/16/2605.12004v1-learning-agentic-policy-from-action-guidance)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：空间谜题中的视觉推理与动作序列预测
-2. [Distilling 3D Spatial Reasoning into a Lightweight Vision-Language Model with CoT](/202605/15/2605.09719v1-distilling-3d-spatial-reasoning-into-a-lightweight-vision-language-model-with-cot)  
+   evidence：针对大语言模型的代理强化学习及动作引导
+2. [Reinforcing VLAs in Task-Agnostic World Models](/202605/16/2605.12334v1-reinforcing-vlas-in-task-agnostic-world-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：轻量级视觉语言模型中的3D空间推理
-3. [SAGE: Scalable Agentic Grounded Evaluation for Crop Disease Diagnosis](/202605/15/2605.09768v1-sage-scalable-agentic-grounded-evaluation-for-crop-disease-diagnosis)  
+   evidence：通过强化学习增强视觉-语言-动作（VLA）模型
+3. [Beyond Localization: A Comprehensive Diagnosis of Perspective-Conditioned Spatial Reasoning in MLLMs from Omnidirectional Images](/202605/16/2605.12413v1-beyond-localization-a-comprehensive-diagnosis-of-perspective-conditioned-spatial-reasoning-in-mllms-from-omnidirectional-images)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：利用前沿视觉语言模型进行智能体化疾病预测
-4. [SciVQR: A Multidisciplinary Multimodal Benchmark for Advanced Scientific Reasoning Evaluation](/202605/15/2605.10187v1-scivqr-a-multidisciplinary-multimodal-benchmark-for-advanced-scientific-reasoning-evaluation)  
+   evidence：多模态大语言模型中的空间推理
+4. [MMSkills: Towards Multimodal Skills for General Visual Agents](/202605/16/2605.13527v1-mmskills-towards-multimodal-skills-for-general-visual-agents)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于高级科学推理评估的多模态基准
-5. [CollabVR: Collaborative Video Reasoning with Vision-Language and Video Generation Models](/202605/15/2605.08735v1-collabvr-collaborative-video-reasoning-with-vision-language-and-video-generation-models)  
+   evidence：视觉智能体的多模态程序性知识
+5. [SimWorld Studio: Automatic Environment Generation with Evolving Coding Agent for Embodied Agent Learning](/202605/16/2605.09423v1-simworld-studio-automatic-environment-generation-with-evolving-coding-agent-for-embodied-agent-learning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：使用视觉语言模型进行视觉推理
-6. [HAGE: Harnessing Agentic Memory via RL-Driven Weighted Graph Evolution](/202605/15/2605.09942v1-hage-harnessing-agentic-memory-via-rl-driven-weighted-graph-evolution)  
+   evidence：基于视觉语言模型的数字智能体与环境生成
+6. [SimWorld Studio: Automatic Environment Generation with Evolving Coding Agent for Embodied Agent Learning](/202605/16/2605.09423v2-simworld-studio-automatic-environment-generation-with-evolving-coding-agent-for-embodied-agent-learning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：强化学习驱动的智能体大模型系统记忆演化
-7. [SleepWalk: A Three-Tier Benchmark for Stress-Testing Instruction-Guided Vision-Language Navigation](/202605/15/2605.10376v1-sleepwalk-a-three-tier-benchmark-for-stress-testing-instruction-guided-vision-language-navigation)  
+   evidence：基于VLM的数字智能体及用于学习的环境生成
+7. [Plan in Sandbox, Navigate in Open Worlds: Learning Physics-Grounded Abstracted Experience for Embodied Navigation](/202605/16/2605.10118v1-plan-in-sandbox-navigate-in-open-worlds-learning-physics-grounded-abstracted-experience-for-embodied-navigation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：3D环境中的指令引导视觉语言导航
-8. [UniPath: Adaptive Coordination of Understanding and Generation for Unified Multimodal Reasoning](/202605/15/2605.11400v1-unipath-adaptive-coordination-of-understanding-and-generation-for-unified-multimodal-reasoning)  
+   evidence：用于具身导航的视觉语言模型推理
+8. [DeepSight: Long-Horizon World Modeling via Latent States Prediction for End-to-End Autonomous Driving](/202605/16/2605.10564v1-deepsight-long-horizon-world-modeling-via-latent-states-prediction-for-end-to-end-autonomous-driving)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：统一多模态推理与自适应协调
-9. [CrossVL: Complexity-Aware Feature Routing and Paired Curriculum for Cross-View Vision-Language Detection](/202605/15/2605.09802v1-crossvl-complexity-aware-feature-routing-and-paired-curriculum-for-cross-view-vision-language-detection)  
+   evidence：用于自动驾驶视觉推理的视觉语言模型架构
+9. [20/20 Vision Language Models: A Prescription for Better VLMs through Data Curation Alone](/202605/16/2605.11405v1-2020-vision-language-models-a-prescription-for-better-vlms-through-data-curation-alone)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于复杂跨视图检测任务的视觉语言模型
-10. [Allegory of the Cave: Measurement-Grounded Vision-Language Learning](/202605/15/2605.11727v1-allegory-of-the-cave-measurement-grounded-vision-language-learning)  
+   evidence：视觉语言模型在多图推理和各项能力维度上的表现
+10. [Towards Long-horizon Embodied Agents with Tool-Aligned Vision-Language-Action Models](/202605/16/2605.13119v1-towards-long-horizon-embodied-agents-with-tool-aligned-vision-language-action-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：基于测量接地的视觉语言学习推理
-11. [Macro-Action Based Multi-Agent Instruction Following through Value Cancellation](/202605/15/2605.12655v1-macro-action-based-multi-agent-instruction-following-through-value-cancellation)  
+   evidence：用于长程任务时间推理的VLM代理，尽管提到了机器人应用
+11. [MetaAgent-X : Breaking the Ceiling of Automatic Multi-Agent Systems via End-to-End Reinforcement Learning](/202605/16/2605.14212v1-metaagent-x--breaking-the-ceiling-of-automatic-multi-agent-systems-via-end-to-end-reinforcement-learning)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：带有自然语言指令的多智能体强化学习
+   evidence：多智能体系统的端到端强化学习
 
 
 <div class="dpr-home-promo-card">
