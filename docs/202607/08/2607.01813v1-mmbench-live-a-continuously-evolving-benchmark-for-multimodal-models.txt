@@ -1,0 +1,1465 @@
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+Yuanzhi Liu 1 Shousheng Zhao 1 Bo Zhou 1 Kongming Liang 1 Zhanyu Ma 1
+Abstract
+Evaluation benchmarks are essential for assessing
+vision–language models (VLMs), but most mul-
+timodal benchmarks are static, making them vul-
+nerable to temporal staleness, data contamination,
+and costly maintenance. We present MMBench-
+Live, a continuously evolving multimodal bench-
+mark built by a multi-agent-driven automated
+pipeline. Our framework treats benchmark evolu-
+tion as task-guided dataset construction, integrat-
+ing structured benchmark specification, feedback-
+controlled real-time data acquisition, and veri-
+fiable QA generation with executable reasoning.
+To maintain cross-version comparability, we intro-
+duce a distribution-consistent update strategy that
+extracts task-related visual patterns from the orig-
+inal benchmark to guide data collection and fil-
+tering. Instantiated from MMBench, MMBench-
+Live contains 5.9K newly generated evaluation in-
+stances with a high answer correctness rate, while
+each update costs about $30 and takes 1–2 hours.
+Extensive evaluations show that MMBench-Live
+preserves stable model rankings, maintains seman-
+tic alignment with the original benchmark, and
+exhibits weaker contamination-related memoriza-
+tion signals, suggesting a practical and scalable
+paradigm for sustainable multimodal benchmark
+evolution. The project is available at https://
+github.com/PRIS-CV/MMBench-Live.
+1. Introduction
+Most existing vision-language evaluation benchmarks (Lu
+et al., 2022; Fu et al., 2023; Li et al., 2024; Liu et al., 2024b)
+adopt a static evaluation paradigm, implicitly assuming that
+a fixed test set can serve as a long-term proxy for model
+capability. This assumption becomes increasingly fragile
+as modern vision-language models (VLMs) scale rapidly
+1Beijing University of Posts and Telecommunications, Bei-
+jing, China. Correspondence to: Kongming Liang <liangkong-
+ming@bupt.edu.cn>.
+Proceedings of the 43 rd International Conference on Machine
+Learning, Seoul, South Korea. PMLR 306, 2026. Copyright 2026
+by the author(s).
+and are trained on ever-growing web-scale corpora. Static
+benchmarks are vulnerable to temporal staleness, data con-
+tamination (Touvron et al., 2023a; Chen et al., 2024; Song
+et al., 2025b), and high maintenance costs, making frequent
+updates impractical at scale. However, dynamically updat-
+ing a benchmark is not simply a matter of replacing old
+samples with new ones: a reliable live benchmark must
+introduce temporally fresh instances while preserving the
+original task semantics, capability coverage, data character-
+istics, and cross-version comparability.
+Prior work has explored several strategies for updating mul-
+timodal evaluation datasets. Self-evolving methods based
+on visual perturbations or linguistic rewrites (Yang et al.,
+2025b; Zhang et al., 2026) may suffer from semantic drift
+and degraded comparability, while generation-based meth-
+ods (Wang et al., 2026; Zhang et al., 2025a; Wen et al., 2025)
+can introduce distributional gaps under complex semantic
+constraints. Real-world data updating (Jiang et al., 2025;
+Shabtay et al., 2025; Jain et al., 2025; White et al., 2025) is
+a promising direction because it naturally improves tempo-
+ral freshness and reduces direct reuse of static benchmark
+samples. Nevertheless, existing pipelines are often tied to
+fixed data sources, predefined task formats, or task-specific
+construction procedures. Consequently, continuously incor-
+porating fresh real-world data across diverse multimodal
+tasks while preserving semantic coherence, distributional
+alignment, and evaluation stability remains challenging.
+To address this challenge, we propose MMBench-Live, a
+continuously evolving multimodal benchmark built through
+a multi-agent-driven automated pipeline. Our framework
+models benchmark evolution as task-guided dataset con-
+struction. Starting from the original benchmark, it converts
+evaluation objectives, task hierarchy, and atomic tasks into
+structured benchmark descriptions, which serve as the se-
+mantic basis for data acquisition and QA generation. To pre-
+serve cross-version comparability, MMBench-Live identi-
+fies task-related visual patterns from the original benchmark
+and uses them to guide feedback-controlled real-time data
+acquisition, enabling the pipeline to refine poorly aligned
+retrieval queries and filter task-irrelevant candidates. For
+each collected image, the QA generation stage constructs a
+question, an answer, and an executable solution plan, which
+is verified through tool-supported reasoning to improve the
+reliability of automatically generated evaluation instances.
+1
+arXiv:2607.01813v1  [cs.CV]  2 Jul 2026
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+We instantiate this framework by systematically updating
+MMBench (Liu et al., 2024b). The resulting MMBench-
+Live contains 5.9K newly generated evaluation instances,
+achieves a manual answer correctness rate of 96.06%, and
+completes each update within approximately 1–2 hours at
+a cost of about $30. Experiments on representative open-
+source VLMs show that MMBench-Live maintains stable
+cross-version model rankings, preserves the core semantic
+and distributional characteristics of the original benchmark,
+and exhibits weaker PaCoST-based (Zhang et al., 2024)
+memorization signals than MMBench. These results demon-
+strate that MMBench-Live provides a practical, scalable,
+and low-cost paradigm for sustainable multimodal bench-
+mark evolution.
+The main contributions can be summarized as follows:
+• We introduce MMBench-Live, a continuously evolving
+multimodal benchmark constructed through a multi-
+agent-driven automated pipeline, enabling scalable and
+cost-efficient benchmark updates with temporally fresh
+real-world data.
+• We propose a distribution-consistent benchmark updat-
+ing strategy that combines task-related visual pattern
+identification with feedback-controlled data acquisi-
+tion, preserving task semantics and visual characteris-
+tics across benchmark versions.
+• We conduct systematic evaluations on MMBench-Live,
+showing high QA correctness, low construction cost,
+stable cross-version consistency, distributional align-
+ment, and weaker contamination-related memorization
+signals.
+2. Related Work
+2.1. Data Contamination in Model Evaluation
+Data contamination has become a critical issue in evaluating
+large language models (LLMs) and vision-language models
+(LVLMs), as overlap between benchmarks and pretrain-
+ing corpora can substantially inflate reported performance.
+Prior studies show that such leakage is widespread even in
+commonly used benchmarks; for example, the LLaMA-2
+report finds that over 16% of MMLU samples are contam-
+inated, with a non-trivial fraction exhibiting severe leak-
+age (Touvron et al., 2023b). Controlled experiments further
+demonstrate that even limited contamination can cause sig-
+nificant score inflation, disproportionately favoring larger
+models (Kocyigit et al., 2025). Position papers argue that
+these effects compromise the validity of model compar-
+isons and lead to misleading conclusions about model ca-
+pabilities (Sainz et al., 2023). The issue is exacerbated
+in multimodal evaluation, where leakage in either textual
+or visual modalities can artificially boost performance on
+vision-language benchmarks (Song et al., 2025a). Together,
+these findings underscore the vulnerability of static bench-
+marks as pretraining corpora scale, motivating recent efforts
+toward automated and dynamic evaluation datasets designed
+to mitigate contamination (Wu et al., 2025).
+2.2. Automatic Dataset Construction
+Automatic dataset construction has gained increasing atten-
+tion as manual curation and annotation limit the scalability
+of training and evaluation corpora. A major research direc-
+tion frames dataset construction as automated instruction
+synthesis, where large language models generate and filter
+new instances from small seed sets, including reasoning-
+oriented and curriculum-based variants (Wang et al., 2023;
+Bu et al., 2025; Xu et al., 2024). These principles have
+been extended to multimodal settings, enabling large-scale
+vision-language instruction data synthesis with minimal
+human annotation, as exemplified by LLaVA (Liu et al.,
+2023b). Complementary approaches further incorporate
+programmatic structures and external artifacts—such as tool
+specifications, executable APIs, and web-scale data collec-
+tion with lightweight filtering—to improve reliability and
+reduce manual effort (Guo et al., 2025; Xu et al., 2023; Liu
+et al., 2024a). However, most existing methods rely on post-
+hoc filtering rather than systematic validation, motivating
+closed-loop construction pipelines that explicitly enforce
+data correctness and evaluation relevance.
+3. MMBench-Live
+We construct MMBench-Live by converting the original
+MMBench into structured descriptions, acquiring new data
+in a task-aware manner, and generating executable and veri-
+fied QA pairs for evaluation. Therefore, it can maintain (i)
+capability coverage consistency, (ii) distributional alignment
+with the original benchmark, and (iii) evaluation discrimina-
+tiveness over time.
+3.1. Benchmark Summary
+To enable controlled and stable benchmark updates, we con-
+vert MMBench into a structured description, providing a
+unified representation for subsequent data acquisition and in-
+stance construction. Inspired by the prior works (Reuel et al.,
+2024; Sokol et al., 2025), we define a structured benchmark
+template for MMBench, including four components:
+(1) Evaluation purpose. The evaluation purpose specifies
+the target capabilities that the benchmark is designed to
+assess. It provides a high-level semantic characterization
+of what competencies are being evaluated, such as visual
+perception, cross-modal reasoning, spatial understanding,
+or compositional inference.
+(2) Evaluation format. The evaluation format specifies
+2
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+Figure 1. Overview of the MMBench-Live framework. MMBench-Live is constructed by converting the original MMBench into structured
+descriptions, acquiring new data in a task-aware manner, and generating executable and verified QA pairs for evaluation.
+the structural form of an evaluation instance, including the
+modalities involved, the input–output interface, and the ex-
+pected response type. An evaluation instance can be a sin-
+gle image paired with a multiple-choice question, an open-
+ended textual answer, or a structured output.
+(3) Task hierarchy. The task hierarchy organizes the bench-
+mark into a multi-level structure of tasks with various granu-
+larity. At the top level, the hierarchy captures coarse-grained
+evaluation tasks, which are progressively decomposed into
+finer-grained sub-tasks that correspond to specific and well-
+scoped capability requirements. For example, in MMBench,
+high-level perception tasks are further refined into fine-
+grained tasks such as OCR and attribute recognition.
+(4) Atomic tasks. Atomic tasks correspond to the leaf-level
+units in the task hierarchy and define the smallest opera-
+tional evaluation units. For each atomic task, we also define
+a structured task description template consisting of three
+components: Task purpose, Data sources and construction
+procedures and Task characterization.
+Task characterization is decomposed into textual and visual
+components. The textual aspect is represented by QA ex-
+amples, which clarify the intended evaluation semantics.
+The visual aspect is captured by task-related visual patterns,
+defined as recurrent visual or semantic attributes that oc-
+cur frequently within an atomic task but are not explicitly
+specified in the task definition, implicitly constraining valid
+evaluation instances.
+To identify these patterns, we adopt a data-driven procedure
+summarized in Algorithm 1. For each atomic task t, we
+sample a subset of original instances and analyze them from
+five semantic perspectives inspired by MMBench: visual
+content, visual style, OCR dependency, spatial relations,
+3
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+Algorithm 1 Task-Related Visual Pattern Identification
+1: Input: evaluation instances Et for atomic task t; sam-
+pling ratio ρ; analysis perspectives P
+2: Output: task-related visual pattern set Bt
+3: E′
+t ←Sample(Et, ρ)
+4: Ct ←∅
+5: for p ∈P do
+6:
+Cp ←VLM Extract(E′
+t, p)
+7:
+Ct ←Ct ∪Cp
+8: end for
+9: Bt ←LLM Consolidate(Ct)
+10: return Bt
+and external knowledge dependency. A VLM extracts re-
+curring patterns Ct under each perspective, which are then
+consolidated by an LLM to merge similar patterns and re-
+move redundancy, yielding a compact set of task-related
+visual patterns. These patterns guide subsequent data ac-
+quisition and filtering, ensuring consistency with the visual
+characteristics of the original evaluation data.
+3.2. Task-aware Data Acquisition
+This stage collects new evaluation data by converting each
+atomic task into an executable acquisition procedure. Rather
+than issuing generic search queries, the acquisition process
+is constrained by the task intent, required visual evidence,
+and available acquisition context. It consists of three compo-
+nents: an acquisition planner, an acquisition executor, and a
+feedback controller.
+Acquisition Planner. For each atomic task t, the acquisi-
+tion planner analyzes the structured task description St and
+produces an acquisition plan:
+Pt = ⟨Ft, At, Qt⟩.
+(1)
+Here, Ft denotes the observable fields that must be pre-
+served with each collected image, such as titles, surrounding
+textual context, source metadata, or timestamps. At denotes
+the acquisition strategy, and Qt denotes the generated query
+set when query-based retrieval is required.
+Acquisition Executor. The Acquisition executor performs
+data collection according to the plan generated by acquisi-
+tion planner. It supports three executable retrieval modes:
+(1) Source-specific Structured Retrieval. This mode con-
+ducts structured crawling over designated websites specified
+in the acquisition plan. Relevant image links and associated
+textual fields are extracted from the crawler outputs and
+retained. This mode is primarily used when authoritative or
+task-specific data sources are explicitly defined.
+(2) Keyword-Guided Semantic Retrieval. This mode sub-
+mits a set of query keywords to the Google Image API to
+retrieve candidate images. To maintain temporal relevance
+and reduce potential contamination, retrieval is restricted
+to images uploaded within a one-year time window, and
+associated metadata are retained.
+(3) Open-Domain Retrieval. This mode continuously sam-
+ples recently uploaded public images from open-domain
+content streams via the Flickr API, together with their as-
+sociated metadata. This mode does not rely on predefined
+sources or explicit semantic constraints, enabling broad cov-
+erage of diverse and naturally occurring visual content.
+Feedback Controller. During data acquisition, retrieval
+queries may return visually plausible but task-irrelevant
+images, especially when the task involves fine-grained vi-
+sual cues, implicit constraints, or subjective concepts. To
+maintain semantic alignment, we introduce a lightweight
+feedback controller that verifies retrieved candidates and re-
+fines poorly aligned queries during retrieval. The controller
+is guided by the task purpose Gt and the task-related visual
+patterns Bt, which jointly specify the intended semantics
+and expected visual evidence of valid samples for task t.
+For each retrieved candidate image xi with its associated
+textual context ci, we instantiate a prompt-guided multi-
+modal judge J to evaluate whether the candidate is visually
+consistent with the task requirements:
+(ai, ri) = J(xi, ci | Gt, Bt),
+(2)
+where J denotes a multimodal judging model guided by
+task-specific prompts. Given the candidate image xi, its
+textual context ci, the task purpose Gt, and the task-related
+visual patterns Bt, the prompt instructs J to check task
+consistency based on observable visual evidence and to out-
+put a binary acceptance decision ai ∈{0, 1} together with
+one to three concise visual rationales ri. These rationales
+are grounded in observable image evidence, such as object
+presence, scene type, visual attributes, action states, spatial
+relations, or other task-specific visual cues.
+For each retrieval query, the controller examines the top-K
+returned candidates. In our implementation, we set K = 10.
+The acceptance rate of the current query is computed as
+ρq = 1
+K
+K
+X
+i=1
+ai.
+(3)
+If ρqm ≥τ, the current query is considered sufficiently
+aligned and is retained for subsequent acquisition. Other-
+wise, the controller treats the rejected candidates as diag-
+nostic examples. Their visual rationales are aggregated into
+a compact feedback signal r, which conditions the query
+update:
+qm+1 = U(qm | Gt, Bt, r),
+if ρqm < τ.
+(4)
+4
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+Algorithm 2 Feedback-controlled data acquisition
+Require: Gt, Bt, q0, J, K = 10, τ = 0.7, M = 3
+Ensure: Filtered candidate set D+
+1: for m = 0 to M −1 do
+2:
+Dm ←Retrieve(qm, K)
+3:
+{(ai, ri)}K
+i=1 ←{J(xi, ci | Gt, Bt)}(xi,ci)∈Dm
+4:
+ρqm ←1
+K
+PK
+i=1 ai
+5:
+if ρqm ≥τ then
+6:
+q⋆←qm
+7:
+break
+8:
+end if
+9:
+r ←Agg({ri | ai = 0})
+10:
+qm+1 ←U(qm | Gt, Bt, r)
+11: end for
+12: if q⋆is undefined then
+13:
+q⋆←qm
+14: end if
+15: D ←Retrieve(q⋆)
+16: D+ ←{(x, c) ∈D | J(x, c | Gt, Bt) = 1}
+17: return D+
+The update operator U is instantiated with a large language
+model. In this way, the updated query preserves the task
+intent while reducing the visual deviations observed in the
+previous retrieval round.
+As summarized in Algorithm 2, this feedback process is re-
+peated for at most three iterations. Once the query satisfies
+the acceptance criterion or reaches the maximum number of
+iterations, the controller stops updating the retrieval query.
+The final query is then used for subsequent candidate col-
+lection, while the judge is applied only as a candidate-level
+filter. This design allows the acquisition process to cor-
+rect poorly aligned search queries early, while keeping the
+overall pipeline lightweight. It improves the semantic qual-
+ity of collected samples without human annotation, model
+fine-tuning, or updates to the underlying judge model.
+3.3. QA Generation and Verification
+This stage constructs generate QA pairs from image data
+under a given task specification and verifies them through
+executable reasoning, ensuring that each evaluation instance
+is semantically aligned with the target task and admits a
+deterministic validation procedure.
+QA Generation. Given an atomic task t and an image x,
+the QA generator constructs a task-consistent and verifiable
+QA instance grounded in the image. To reduce systematic
+generation bias and improve generation quality, multiple
+multimodal large models are used to produce candidate QA
+pairs, and the best candidate is selected through model-
+based comparison and rule-based validity checks.
+For each image, the generated instance is represented as a
+structured triplet:
+z = (q, a, π),
+(5)
+where q is the evaluation question, a is the corresponding
+answer, and π is an executable solution plan specifying how
+a can be derived from the image. The solution plan provides
+an explicit reasoning procedure for subsequent verification
+through tool execution.
+Each generated triplet is required to satisfy three criteria:
+consistency with the atomic task definition, explicit reliance
+on visual evidence from the image, and executability of the
+solution plan. This design turns QA generation from uncon-
+strained question writing into structured instance construc-
+tion, where the generated question, answer, and solution
+plan are jointly prepared for automatic validation.
+Executable Reasoning Verification To address visual hal-
+lucinations and enhance the reliability of automatically gen-
+erated QA pairs, we explicitly decouple correctness verifica-
+tion from direct vision-based model judgment and instead
+employ a text-driven executable reasoning process for vali-
+dation.
+Given a synthesized instance (q, a, π), the solution plan
+π is treated as a structured and interpretable sequence of
+executable reasoning operations. Specifically, we represent
+the plan as
+π = (o1, o2, . . . , oK),
+(6)
+where ok denotes the executable operation at step k.
+Importantly, the verification controller itself is vision-blind:
+it does not directly access the image but performs reasoning
+solely over the textual intermediate results generated by
+tool execution. Starting from the input image x, tools are
+executed sequentially according to the generated operation
+sequence to produce textual intermediate outputs:
+zk = T(ok | x, z<k),
+k = 1, . . . , K,
+(7)
+where T denotes the tool execution process, and z<k repre-
+sents previously obtained textual intermediate outputs.
+The final verification outcome ˆa is then predicted by a vision-
+blind language-model verifier conditioned only on the ques-
+tion and the tool-derived textual observations:
+ˆa = arg max
+y
+P
+ y | q, z1:K
+
+.
+(8)
+The synthesized answer a and the corresponding QA pair
+are accepted only if it matches the verified outcome ˆa,
+I(q, a, π) = I
+
+a = ˆa
+
+.
+(9)
+Overall, this design constrains the verification process to ex-
+plicit reasoning chains, thereby reducing reliance on implicit
+visual guessing and mitigating hallucinations.
+5
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+Table 1. Results on MMBench-Live (L-2 abilities). Abbreviations adopted: LR for Logical Reasoning; AR for Attribute Reasoning; RR
+for Relation Reasoning; FP-C for Fine-grained Perception (Cross Instance); FP-S for Fine-grained Perception (Single Instance); CP for
+Coarse Perception.
+Model
+Overall
+CP
+FP-S
+FP-C
+AR
+LR
+RR
+DeepSeek-VL-7B-Chat (Lu et al., 2024)
+83.04%
+97.37%
+75.37%
+68.22%
+94.00%
+67.17%
+85.60%
+InstructBLIP-Vicuna-7B (Dai et al., 2023)
+73.85%
+92.05%
+60.14%
+55.66%
+91.73%
+56.95%
+73.44%
+LLaVA-v1.5-7B (Liu et al., 2023a)
+74.83%
+91.56%
+66.14%
+56.80%
+86.98%
+59.13%
+76.98%
+mPLUG-Owl2-7B (Ye et al., 2024)
+77.18%
+93.36%
+66.49%
+60.33%
+90.94%
+60.64%
+80.52%
+Qwen3-VL-8B-Instruct (Team, 2025)
+80.41%
+80.36%
+72.76%
+70.72%
+88.11%
+72.36%
+84.42%
+Qwen2.5-VL-7B-Instruct (Bai et al., 2025)
+83.10%
+81.54%
+75.11%
+77.47%
+88.45%
+80.23%
+85.71%
+Table 2. Cross-version correlation of model performance between the original and updated benchmarks.
+Granularity
+Pearson r
+Pearson p
+Spearman ρ
+Spearman p
+Task-Model Level
+0.5200
+1.15 × 10−9
+0.4254
+1.27 × 10−6
+Model-Averaged Level
+0.8876
+0.01823
+0.8286
+0.04156
+4. Experiment
+We evaluate the proposed framework through extensive ex-
+periments on MMBench-Live. Our analysis covers model
+performance, dataset quality, construction cost, distribu-
+tional alignment, cross-version consistency, and data con-
+tamination, together with ablation studies examining the
+role of task constraints, semantic feedback, and underlying
+foundation models.
+4.1. Evaluation Setup
+Size of Dataset. Taking the MMBench (Liu et al., 2024b)
+dev set (4K) as the reference baseline, we apply our au-
+tomated framework to construct MMBench-Live, which
+results in 5.9K newly generated evaluation QA pairs.
+Model Selected. In the QA Generation stage, we employ a
+small pool of generation models, consisting of OpenAI GPT-
+5 Mini (OpenAI, 2025) and Gemini-3-Flash-Preview (Team
+et al., 2025), to construct QA pairs. All agent components
+are uniformly instantiated with OpenAI GPT-5 Mini as the
+underlying proxy model.
+For executable reasoning verification, VisionReasoner (Liu
+et al., 2026) is used for object detection and segmentation,
+Depth Anything V2 (Yang et al., 2024) is used for monoc-
+ular depth estimation, and a fine-tuned LLaVA (Liu et al.,
+2023a) model is used for visual attribute recognition. For
+text-related perception, Qwen2.5-VL (Bai et al., 2025) and
+GOT-OCR-2-HF (Wei et al., 2024) are used for OCR. Fi-
+nally, Qwen3 (Yang et al., 2025a) is adopted as the text-only
+verifier, which aggregates the intermediate tool outputs and
+performs the final reasoning step.
+For evaluation, we consider a diverse set of representative
+VLMs, including DeepSeek-VL-7B-Chat (Lu et al., 2024),
+InstructBLIP-Vicuna-7B (Dai et al., 2023), mPLUG-Owl2-
+7B (Ye et al., 2024), LLaVA-v1.5-7B (Liu et al., 2023a),
+Qwen3-VL-8B-Instruct (Team, 2025), and Qwen2.5-VL-
+7B-Instruct (Bai et al., 2025). To guarantee fair and de-
+terministic comparisons, the generation temperature of all
+evaluated models is fixed to zero during inference.
+4.2. Evaluation Results on MMBench-Live
+Table 1 summarizes the performance of different models in
+MMBench-Live. Overall, Qwen2.5-VL achieves the best
+aggregate performance, slightly outperforming DeepSeek-
+VL. In contrast, earlier models obtain substantially lower
+scores, indicating limited its generalization capability to con-
+tinuously evolving benchmarks. A clear performance diver-
+gence is observed across evaluation dimensions. DeepSeek-
+VL excels in perception-oriented tasks, achieving the high-
+est scores on coarse perception and attribute recognition,
+reflecting strong coarse-level visual understanding and at-
+tribute recognition ability. In comparison, Qwen2.5-VL
+consistently outperforms other models in fine-grained per-
+ception and reasoning-intensive dimensions, highlighting
+its advantage in detailed visual understanding and logical
+reasoning.
+We also observe that Qwen2.5-VL outperforms the more
+recent Qwen3-VL across multiple evaluation dimensions.
+A similar performance reversal is also observed on MM-
+Bench. The performance degradation of Qwen3-VL is pri-
+marily concentrated in cross-instance fine-grained compar-
+ison and spatial reasoning tasks, where the model more
+frequently exhibits misaligned comparison targets and in-
+correct reference-frame binding.
+As shown in Figure 2, the transition from MMBench to
+MMBench-Live does not induce global ranking instability.
+6
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+Instead, ranking variations are largely driven by a small
+subset of highly discriminative sub-tasks, indicating that dy-
+namic benchmark updates can surface fine-grained capabil-
+ity differences while preserving overall evaluation stability.
+4.3. Dataset Quality and Construction Cost
+QA Correctness. To evaluate the correctness of automati-
+cally constructed QA pairs, we conduct a manual verifica-
+tion study. For each task, 10% of the images are randomly
+sampled, and their corresponding QA pairs are manually
+verified. This procedure is repeated three times with inde-
+pendent samples to reduce variance. Across all tasks and
+trials, the QA pairs achieve an average answer correctness
+rate of 96.06%, demonstrating high annotation reliability.
+This statistic measures the correctness of the final answers
+only, rather than the validity of the executable solution plans.
+For failure cases, we provide a representative case analysis
+in Appendix A.
+Construction Cost. We evaluate the construction cost from
+both monetary and time perspectives. Prior studies (Tang
+et al., 2024; Zhang et al., 2025b; Chen et al., 2025) on man-
+ual dataset construction report that, for a dataset at the scale
+of the 6K-sample MMBench-Live, manual pipelines typi-
+cally incur costs on the order of thousands to tens of thou-
+sands of dollars, with turnaround times of approximately
+one to two months. In contrast, our automated pipeline com-
+pletes a benchmark update within approximately 1–2 hours,
+with a total monetary cost of about $30, where QA genera-
+tion accounts for the majority of the expense (around 60%).
+Overall, the proposed approach reduces both construction
+cost and turnaround time by multiple orders of magnitude,
+enabling frequent and sustainable benchmark updates.
+4.4. Cross-Version Consistency of Model Performance
+To examine whether model capabilities remain consistent
+across benchmark versions, we conduct a correlation-based
+analysis comparing model performance on the original
+benchmark and the dynamically updated benchmark, using
+Pearson correlation for linear agreement (Pearson, 1895)
+and Spearman rank correlation for relative ordering consis-
+tency (Spearman, 1904).
+At the Task-Model Level, each model–capability pair is
+treated as an independent data point, enabling a fine-grained
+comparison of capability-level performance across bench-
+mark versions. As shown in Table 2, we observe a stable
+positive correlation, indicating that models performing well
+on the original benchmark tend to maintain higher perfor-
+mance on the updated benchmark despite variability across
+individual capabilities.
+At the Model-Averaged Level, performance is aggregated
+across all capability dimensions for each model before com-
+puting correlations. The resulting agreement is notably
+stronger, suggesting that the relative ordering of models
+at the overall capability level is largely preserved across
+benchmark versions. Together, these results indicate that
+the dynamic update maintains cross-version consistency.
+4.5. Data Contamination Analysis
+To assess potential contamination-related memorization ef-
+fects in multimodal evaluation benchmarks, we adopt the
+PaCoST framework (Zhang et al., 2024). PaCoST com-
+pares model confidence between original questions and their
+meaning-preserving paraphrases, based on the assumption
+that memorized or leaked evaluation samples may induce
+higher confidence on the original formulation than on para-
+phrased variants.
+It is important to note that our analysis should be inter-
+preted as a proxy-based contamination-related signal rather
+than a direct diagnosis of multimodal data leakage. Since
+PaCoST measures confidence shifts between original and
+paraphrased questions, it is primarily sensitive to text-side
+memorization effects and cannot explicitly distinguish vi-
+sual leakage, metadata overlap, or exposure through web
+content. Therefore, our goal is not to determine whether a
+benchmark is absolutely contaminated, but to compare the
+relative strength of memorization-related confidence shifts
+under the same evaluation protocol.
+In our experiments, we use Qwen2.5-VL-7B-Instruct as the
+evaluated model and measure its confidence on both original
+and paraphrased questions. After producing a multiple-
+choice answer, the model provides a binary self-assessment
+of correctness. Based on the decoding probabilities during
+this decision, we define a confidence score c ∈[0, 1] that
+reflects the model’s confidence in its predicted answer. For
+each sample i, we compute the confidence difference
+∆i = corig
+i
+−cpara
+i
+,
+(10)
+and conduct a one-sided paired t-test to evaluate whether
+E[∆] > 0. We further report Cohen’s d as a standardized
+effect size to quantify the magnitude of confidence shift.
+As shown in Table 3, both benchmarks exhibit statistically
+significant confidence shifts under the PaCoST criterion.
+However, MMBench-Live shows a smaller mean confi-
+dence difference and a lower effect size than MMBench.
+This indicates that, under the same PaCoST-based protocol,
+MMBench-Live exhibits a weaker memorization-related
+confidence bias than the original MMBench. We provide
+additional contamination-related analysis and comparisons
+with edited benchmark variants in Appendix B.
+7
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+Figure 2. Rank change heatmap between MMBench and MMBench-Live. Each cell shows the rank difference ∆Rank = RankLive −
+RankMMBench for a given model–task pair. All tasks are denoted using abbreviated names and full task names are provided in the
+appendix C.
+Table 3. Overall data contamination comparison between MMBench and MMBench-Live.
+Benchmark
+Mean ∆
+Std ∆
+t-stat
+p (one-sided)
+Cohen’s d
+MMBench (Liu et al., 2024b)
+0.0118
+0.1220
+6.38
+9.5 × 10−11
+0.097
+MMBench-Live
+0.0060
+0.1016
+4.54
+2.9 × 10−6
+0.059
+4.6. Task-Level Distribution Consistency
+To further examine whether MMBench-Live preserves the
+task semantics of the original benchmark, we conduct a
+complementary task-level distribution analysis. For fair-
+ness and comparability, the sample ratio across tasks is
+explicitly balanced during construction. In addition, since
+MMBench is entirely composed of multiple-choice ques-
+tions, MMBench-Live also uses multiple-choice QA pairs
+with the same number of answer options, ensuring that the
+answer format is controlled by design.
+We analyze the spatial-relation subtask as a representative
+case, where task-related relation labels can be reliably re-
+covered from QA pairs using an LLM. We compare both
+the label vocabulary and the frequency distribution between
+MMBench and MMBench-Live. Based on the recovered
+labels, MMBench contains 18 label types, with the top-5
+labels being north, east, west, northwest, and south. In com-
+parison, MMBench-Live contains 36 label types, with the
+top-5 labels being north, northeast, east, south, and west.
+The strong overlap among high-frequency labels indicates
+that the updated benchmark preserves the core semantic
+structure of this subtask while expanding label coverage.
+We attribute this consistency to the task-related visual pat-
+terns and our distribution-consistent update strategy, which
+help the acquisition agent capture recurring structures in the
+original benchmark, such as the prevalence of map-based
+instances in spatial-relation questions.
+4.7. Ablation Study and Analysis.
+Effect of Task-Related Visual Patterns and Semantic
+Feedback. We analyze the role of task-related visual pat-
+terns and semantic feedback in preserving distributional
+alignment during dynamic dataset updates. We compare a
+pattern-aware update pipeline with an unconstrained variant
+under a matched-sample protocol, evaluating both against
+the original dataset. Distributional alignment is measured
+using FID computed on CLIP-ViT-L/14-336 image embed-
+dings and KL divergence computed in a 256-dimensional
+PCA subspace, with FID averaged over 10 random trials.
+As shown in Table 4, the pattern-aware update achieves
+lower FID and reduced variance compared to the uncon-
+strained variant, indicating improved global semantic align-
+ment.
+Beyond global alignment, PCA-based KL diver-
+gence reveals structural differences: with task-related vi-
+sual patterns and semantic feedback enabled, KL(A ∥B)
+slightly exceeds KL(B ∥A), yielding a small positive ∆KL
+and suggesting that the updated data form a compact sub-
+distribution supported by the original dataset. In contrast,
+removing these mechanisms reverses this relation, result-
+ing in a negative ∆KL that reflects reduced coverage and
+increased structural drift. Overall, these results highlight
+the importance of task-related visual patterns and seman-
+tic feedback in preserving distributional alignment during
+8
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+Table 4. Distribution alignment between the dynamically updated dataset and the original dataset, where A denotes data collected by the
+dynamic update pipeline (with or without task-related visual patterns and semantic feedback), and B denotes the MMBench dataset.
+Updated Dataset
+FID ↓(mean±std)
+PCA-KL(A∥B) ↓
+PCA-KL(B∥A) ↓
+∆KL(A∥B −B∥A)
+dataset (w/ visual patterns + feedback)
+0.1831 ± 0.0007
+109.321
+95.514
++13.807
+dataset (w/o visual patterns + feedback)
+0.2035 ± 0.0012
+108.261
+142.969
+-34.708
+Table 5. Results on MMBench-Live (L-2 abilities) on the Qwen-based version. Abbreviations adopted: LR for Logical Reasoning; AR for
+Attribute Reasoning; RR for Relation Reasoning; FP-C for Fine-grained Perception (Cross Instance); FP-S for Fine-grained Perception
+(Single Instance); CP for Coarse Perception.
+Model
+Overall
+CP
+FP-S
+FP-C
+AR
+LR
+RR
+DeepSeek-VL-7B-Chat (Lu et al., 2024)
+80.81%
+92.77%
+68.50%
+69.60%
+88.47%
+72.21%
+84.01%
+InstructBLIP-Vicuna-7B (Dai et al., 2023)
+70.73%
+88.01%
+48.88%
+57.38%
+85.14%
+58.15%
+72.07%
+LLaVA-v1.5-7B (Liu et al., 2023a)
+72.05%
+85.91%
+55.59%
+61.12%
+82.31%
+62.26%
+74.77%
+mPLUG-Owl2-7B (Ye et al., 2024)
+74.30%
+88.01%
+58.35%
+60.90%
+86.31%
+65.69%
+76.35%
+Qwen3-VL-8B-Instruct (Team, 2025)
+82.45%
+78.62%
+72.72%
+77.86%
+84.75%
+80.45%
+85.02%
+Qwen2.5-VL-7B-Instruct (Bai et al., 2025)
+79.97%
+78.55%
+69.79%
+72.91%
+82.80%
+76.67%
+84.91%
+dynamic benchmark updates.
+Does the Effectiveness of the Pipeline Depend on GPT?
+To assess whether the proposed pipeline depends on GPT-
+specific capabilities, we replace the large-model components
+in task specification and data acquisition with Qwen3 and
+Qwen3-VL. As shown in Table 5, the resulting MMBench-
+Live still exhibits clear performance separation across model
+families, indicating that the pipeline remains effective with-
+out relying on GPT models.
+We further examine cross-version consistency between the
+original benchmark and the Qwen-based dynamic bench-
+mark. Stable positive correlations are observed at both
+the Task-Model level (Pearson r = 0.4574, Spearman ρ =
+0.4408) and the Model-Averaged level (Pearson r = 0.9084,
+Spearman ρ = 0.8286), suggesting that overall model or-
+dering remains largely preserved. These results demonstrate
+that the proposed method can stably construct discriminative
+and cross-version-consistent benchmarks even when GPT
+models are fully replaced.
+5. Limitations and Discussion
+Despite its effectiveness in mitigating data contamination
+and improving evaluation timeliness, the proposed dynamic
+benchmark construction framework has limitations. Dy-
+namic updates cannot fully eliminate implicit memorization
+of high-frequency visual concepts, particularly for recurring
+objects, scenes, or styles. Moreover, the quality of automat-
+ically constructed evaluation instances is bounded by the
+capabilities of the underlying agents and foundation models,
+and subtle noise may persist under visual ambiguity or un-
+derspecified constraints. From an extensibility perspective,
+the current task-grounded paradigm prioritizes cross-version
+comparability and stable evaluation objectives, which facil-
+itates tracking progress along predefined capabilities but
+limits task-space expansion. Future work will explore com-
+plementary task-expansive update strategies that introduce
+new task formulations alongside task-grounded updates to
+enable more adaptive evaluation of evolving VLMs.
+6. Conclusion
+This work revisits multimodal benchmark construction un-
+der the challenges of temporal obsolescence, data con-
+tamination, and high maintenance cost in static evalua-
+tion paradigms. We propose a task-centered, multi-agent
+framework that treats benchmark evolution as a task-guided
+dataset construction process, integrating structured bench-
+mark descriptions, task-grounded data acquisition with feed-
+back control, and automated instance construction with ex-
+ecutable verification. Instantiated on MMBench, the re-
+sulting MMBench-Live enables fully automated updates
+with temporally recent and semantically aligned evalua-
+tion instances while preserving cross-version comparability.
+Experiments demonstrate high QA correctness, improved
+robustness to contamination, and stable performance corre-
+lations across versions. The proposed framework is general
+and extensible to other multimodal benchmarks, providing
+a practical paradigm for sustainable evaluation of evolving
+vision–language models.
+Impact Statement
+This paper presents work whose goal is to advance the field
+of Machine Learning. There are many potential societal
+consequences of our work, none which we feel must be
+specifically highlighted here.
+9
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+References
+Bai, S., Chen, K., Liu, X., Wang, J., Ge, W., Song, S., Dang,
+K., Wang, P., Wang, S., Tang, J., Zhong, H., Zhu, Y.,
+Yang, M., Li, Z., Wan, J., Wang, P., Ding, W., Fu, Z., Xu,
+Y., Ye, J., Zhang, X., Xie, T., Cheng, Z., Zhang, H., Yang,
+Z., Xu, H., and Lin, J. Qwen2.5-vl technical report, 2025.
+URL https://arxiv.org/abs/2502.13923.
+Bu, T., Zhang, M., Duan, H., Li, S., Hu, L., and Li,
+Y. Enhanced data synthesis for LLM through reason-
+ing structures generated by hierarchical GFlowNet. In
+Findings of the Association for Computational Linguis-
+tics: ACL 2025, pp. 15931–15958, Vienna, Austria, July
+2025. Association for Computational Linguistics. doi:
+10.18653/v1/2025.findings-acl.821.
+Chen, C., Tseng, Y.-Y., Li, Z., Venkatesh, A., and Gurari, D.
+Acknowledging focus ambiguity in visual questions. In
+Proceedings of the IEEE/CVF International Conference
+on Computer Vision (ICCV), pp. 1228–1238, October
+2025.
+Chen, L., Li, J., Dong, X., Zhang, P., Zang, Y., Chen, Z.,
+Duan, H., Wang, J., Qiao, Y., Lin, D., and Zhao, F. Are
+we on the right way for evaluating large vision-language
+models? In The Thirty-eighth Annual Conference on Neu-
+ral Information Processing Systems, 2024. URL https:
+//openreview.net/forum?id=evP9mxNNxJ.
+Dai, W., Li, J., Li, D., Tiong, A., Zhao, J., Wang, W.,
+Li, B., Fung, P., and Hoi, S. InstructBLIP: Towards
+general-purpose vision-language models with instruc-
+tion tuning.
+In Thirty-seventh Conference on Neural
+Information Processing Systems, 2023. URL https:
+//openreview.net/forum?id=vvoWPYqZJA.
+Fu, C., Chen, P., Shen, Y., Qin, Y., Zhang, M., Lin, X., Yang,
+J., Zheng, X., Li, K., Sun, X., et al. Mme: A comprehen-
+sive evaluation benchmark for multimodal large language
+models. arXiv preprint arXiv:2306.13394, 2023.
+Guo, Z., Soria, A. M., Sun, W., Shen, Y., and Panda, R. API
+pack: A massive multi-programming language dataset
+for API call generation. In The Thirteenth International
+Conference on Learning Representations, 2025.
+Jain, N., Han, K., Gu, A., Li, W.-D., Yan, F., Zhang, T.,
+Wang, S., Solar-Lezama, A., Sen, K., and Stoica, I. Live-
+codebench: Holistic and contamination free evaluation
+of large language models for code. In The Thirteenth
+International Conference on Learning Representations,
+2025. URL https://openreview.net/forum?
+id=chfJJYC3iL.
+Jiang, M., Gao, J., Zhan, J., and Wang, D. MAC: A live
+benchmark for multimodal large language models in sci-
+entific understanding. In Second Conference on Language
+Modeling, 2025. URL https://openreview.net/
+forum?id=0aHOVhkuOB.
+Kocyigit, M. Y., Briakou, E., Deutsch, D., Luo, J., Cherry,
+C., and Freitag, M. Overestimation in LLM evaluation:
+A controlled large-scale study on data contamination’s
+impact on machine translation. In Singh, A., Fazel, M.,
+Hsu, D., Lacoste-Julien, S., Berkenkamp, F., Maharaj, T.,
+Wagstaff, K., and Zhu, J. (eds.), Proceedings of the 42nd
+International Conference on Machine Learning, volume
+267 of Proceedings of Machine Learning Research, pp.
+31105–31132. PMLR, 13–19 Jul 2025.
+Li, B., Ge, Y., Ge, Y., Wang, G., Wang, R., Zhang, R.,
+and Shan, Y. Seed-bench: Benchmarking multimodal
+large language models. In Proceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition
+(CVPR), pp. 13299–13308, June 2024.
+Liu, H., Li, C., Wu, Q., and Lee, Y. J. Visual instruction
+tuning. In NeurIPS, 2023a.
+Liu, H., Li, C., Wu, Q., and Lee, Y. J. Visual instruction
+tuning. In Oh, A., Naumann, T., Globerson, A., Saenko,
+K., Hardt, M., and Levine, S. (eds.), Advances in Neural
+Information Processing Systems, volume 36, pp. 34892–
+34916. Curran Associates, Inc., 2023b.
+Liu, M., Di, Z., Wei, J., Wang, Z., Zhang, H., Xiao, R.,
+Wang, H., Pang, J., Chen, H., Shah, A., Wei, H., He,
+X., Zhao, Z., Wang, H., Feng, L., Wang, J., Davis,
+J., and Liu, Y. Automatic dataset construction (adc):
+Sample collection, data curation, and beyond, 2024a.
+arXiv:2408.11338.
+Liu, Y., Duan, H., Zhang, Y., Li, B., Zhang, S., Zhao, W.,
+Yuan, Y., Wang, J., He, C., Liu, Z., et al. Mmbench:
+Is your multi-modal model an all-around player?
+In
+European conference on computer vision, pp. 216–233.
+Springer, 2024b.
+Liu, Y., Qu, T., Zhong, Z., PENG, B., Liu, S., Yu, B., and Jia,
+J. Visionreasoner: Unified reasoning-integrated visual
+perception via reinforcement learning. In The Fourteenth
+International Conference on Learning Representations,
+2026. URL https://openreview.net/forum?
+id=QoDOwjsbAq.
+Lu, H., Liu, W., Zhang, B., Wang, B., Dong, K., Liu, B.,
+Sun, J., Ren, T., Li, Z., Sun, Y., Deng, C., Xu, H., Xie, Z.,
+and Ruan, C. Deepseek-vl: Towards real-world vision-
+language understanding, 2024.
+Lu, P., Mishra, S., Xia, T., Qiu, L., Chang, K.-W., Zhu,
+S.-C., Tafjord, O., Clark, P., and Kalyan, A. Learn to
+explain: Multimodal reasoning via thought chains for
+science question answering. In The 36th Conference on
+Neural Information Processing Systems (NeurIPS), 2022.
+10
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+OpenAI. Introducing gpt-5. https://openai.com/
+index/introducing-gpt-5/, 2025.
+Pearson, K. Notes on regression and inheritance in the
+case of two parents. Proceedings of the Royal Society of
+London, 58:240–242, 1895.
+Reuel, A., Hardy, A., Smith, C., Lamparth, M., Hardy, M.,
+and Kochenderfer, M. Betterbench: Assessing AI bench-
+marks, uncovering issues, and establishing best prac-
+tices. In The Thirty-eight Conference on Neural Informa-
+tion Processing Systems Datasets and Benchmarks Track,
+2024. URL https://openreview.net/forum?
+id=hcOq2buakM.
+Sainz, O., Campos, J., Garc´ıa-Ferrero, I., Etxaniz, J., de La-
+calle, O. L., and Agirre, E. Nlp evaluation in trouble:
+On the need to measure llm data contamination for each
+benchmark. In Findings of the Association for Computa-
+tional Linguistics: EMNLP 2023, pp. 10776–10787, Sin-
+gapore, December 2023. Association for Computational
+Linguistics. doi: 10.18653/v1/2023.findings-emnlp.722.
+Shabtay, N., Polo, F. M., Doveh, S., Lin, W., Mirza, M. J.,
+Choshen, L., Yurochkin, M., Sun, Y., Arbelle, A., Karlin-
+sky, L., and Giryes, R. Livexiv - a multi-modal live bench-
+mark based on arxiv papers content. In The Thirteenth
+International Conference on Learning Representations,
+2025. URL https://openreview.net/forum?
+id=SulRfnEVK4.
+Sokol, A., Daly, E. M., Hind, M., Piorkowski, D., Zhang,
+X., Moniz, N., and Chawla, N. V. Benchmarkcards: Stan-
+dardized documentation for large language model bench-
+marks. In The Thirty-ninth Annual Conference on Neu-
+ral Information Processing Systems Datasets and Bench-
+marks Track, 2025.
+URL https://openreview.
+net/forum?id=b2IJBWhGFu.
+Song, D., Lai, S., Wang, M., Chen, S., Sun, L., and Wang,
+B. Both text and images leaked! a systematic analy-
+sis of data contamination in multimodal llm. In Find-
+ings of the Association for Computational Linguistics:
+EMNLP 2025, pp. 10527–10542, Suzhou, China, Novem-
+ber 2025a. Association for Computational Linguistics.
+doi: 10.18653/v1/2025.findings-emnlp.556.
+Song, D., Lai, S., Wang, M., Chen, S., Sun, L., and Wang,
+B. Both text and images leaked! a systematic analysis
+of data contamination in multimodal LLMs. In Data in
+Generative Models - The Bad, the Ugly, and the Greats,
+2025b. URL https://openreview.net/forum?
+id=CBr8T8qN2d.
+Spearman, C. The proof and measurement of association
+between two things. The American Journal of Psychology,
+15(1):72–101, 1904.
+Tang, J., Liu, Q., Ye, Y., Lu, J., Wei, S., Lin, C., Li, W.,
+Mahmood, M. F. F. B., Feng, H., Zhao, Z., Wang, Y., Liu,
+Y., Liu, H., Bai, X., and Huang, C. Mtvqa: Benchmarking
+multilingual text-centric visual question answering, 2024.
+Team, G., Kamath, A., Ferret, J., Pathak, S., Vieillard,
+N., Merhej, R., Perrin, S., Matejovicova, T., Ram´e, A.,
+Rivi`ere, M., Rouillard, L., Mesnard, T., Cideron, G.,
+bastien Grill, J., Ramos, S., Yvinec, E., Casbon, M., Pot,
+E., Penchev, I., Liu, G., Visin, F., Kenealy, K., Beyer,
+L., Zhai, X., Tsitsulin, A., Busa-Fekete, R., Feng, A.,
+Sachdeva, N., Coleman, B., Gao, Y., Mustafa, B., Barr, I.,
+Parisotto, E., Tian, D., Eyal, M., Cherry, C., Peter, J.-T.,
+Sinopalnikov, D., Bhupatiraju, S., Agarwal, R., Kazemi,
+M., Malkin, D., Kumar, R., Vilar, D., Brusilovsky, I.,
+Luo, J., Steiner, A., Friesen, A., Sharma, A., Sharma,
+A., Gilady, A. M., Goedeckemeyer, A., Saade, A., Feng,
+A., Kolesnikov, A., Bendebury, A., Abdagic, A., Vadi,
+A., Gy¨orgy, A., Pinto, A. S., Das, A., Bapna, A., Miech,
+A., Yang, A., Paterson, A., Shenoy, A., Chakrabarti, A.,
+Piot, B., Wu, B., Shahriari, B., Petrini, B., Chen, C.,
+Lan, C. L., Choquette-Choo, C. A., Carey, C., Brick,
+C., Deutsch, D., Eisenbud, D., Cattle, D., Cheng, D.,
+Paparas, D., Sreepathihalli, D. S., Reid, D., Tran, D.,
+Zelle, D., Noland, E., Huizenga, E., Kharitonov, E.,
+Liu, F., Amirkhanyan, G., Cameron, G., Hashemi, H.,
+Klimczak-Pluci´nska, H., Singh, H., Mehta, H., Lehri,
+H. T., Hazimeh, H., Ballantyne, I., Szpektor, I., Nardini,
+I., Pouget-Abadie, J., Chan, J., Stanton, J., Wieting, J.,
+Lai, J., Orbay, J., Fernandez, J., Newlan, J., yeong Ji,
+J., Singh, J., Black, K., Yu, K., Hui, K., Vodrahalli, K.,
+Greff, K., Qiu, L., Valentine, M., Coelho, M., Ritter,
+M., Hoffman, M., Watson, M., Chaturvedi, M., Moyni-
+han, M., Ma, M., Babar, N., Noy, N., Byrd, N., Roy, N.,
+Momchev, N., Chauhan, N., Sachdeva, N., Bunyan, O.,
+Botarda, P., Caron, P., Rubenstein, P. K., Culliton, P.,
+Schmid, P., Sessa, P. G., Xu, P., Stanczyk, P., Tafti, P.,
+Shivanna, R., Wu, R., Pan, R., Rokni, R., Willoughby,
+R., Vallu, R., Mullins, R., Jerome, S., Smoot, S., Gir-
+gin, S., Iqbal, S., Reddy, S., Sheth, S., P˜oder, S., Bhat-
+nagar, S., Panyam, S. R., Eiger, S., Zhang, S., Liu, T.,
+Yacovone, T., Liechty, T., Kalra, U., Evci, U., Misra,
+V., Roseberry, V., Feinberg, V., Kolesnikov, V., Han,
+W., Kwon, W., Chen, X., Chow, Y., Zhu, Y., Wei, Z.,
+Egyed, Z., Cotruta, V., Giang, M., Kirk, P., Rao, A.,
+Black, K., Babar, N., Lo, J., Moreira, E., Martins, L. G.,
+Sanseviero, O., Gonzalez, L., Gleicher, Z., Warkentin, T.,
+Mirrokni, V., Senter, E., Collins, E., Barral, J., Ghahra-
+mani, Z., Hadsell, R., Matias, Y., Sculley, D., Petrov,
+S., Fiedel, N., Shazeer, N., Vinyals, O., Dean, J., Hass-
+abis, D., Kavukcuoglu, K., Farabet, C., Buchatskaya, E.,
+Alayrac, J.-B., Anil, R., Dmitry, Lepikhin, Borgeaud, S.,
+Bachem, O., Joulin, A., Andreev, A., Hardin, C., Dadashi,
+R., and Hussenot, L. Gemma 3 technical report, 2025.
+11
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+URL https://arxiv.org/abs/2503.19786.
+Team, Q. Qwen3 technical report, 2025. URL https:
+//arxiv.org/abs/2505.09388.
+Touvron, H., Lavril, T., Izacard, G., Martinet, X., Lachaux,
+M.-A., Lacroix, T., Rozi`ere, B., Goyal, N., Ham-
+bro, E., Azhar, F., Rodriguez, A., Joulin, A., Grave,
+E., and Lample, G.
+Llama:
+Open and efficient
+foundation language models. ArXiv, abs/2302.13971,
+2023a.
+URL https://api.semanticscholar.
+org/CorpusID:257219404.
+Touvron, H., Lavril, T., Izacard, G., Martinet, X., Lachaux,
+M.-A., Lacroix, T., Rozi`ere, B., Goyal, N., Hambro, E.,
+Azhar, F., Rodriguez, A., Joulin, A., Grave, E., and Lam-
+ple, G. Llama: Open and efficient foundation language
+models, 2023b.
+Wang, H., Tian, Y., Liu, M., Zhang, Z., and Zhu, X. Sde-
+val: Safety dynamic evaluation for multimodal large lan-
+guage models, 2026. URL https://arxiv.org/
+abs/2508.06142.
+Wang, Y., Kordi, Y., Mishra, S., Liu, A., Smith, N. A.,
+Khashabi, D., and Hajishirzi, H. Self-instruct: Align-
+ing language models with self-generated instructions. In
+Rogers, A., Boyd-Graber, J., and Okazaki, N. (eds.), Pro-
+ceedings of the 61st Annual Meeting of the Association
+for Computational Linguistics (Volume 1: Long Papers),
+pp. 13484–13508, Toronto, Canada, July 2023. Associ-
+ation for Computational Linguistics. doi: 10.18653/v1/
+2023.acl-long.754.
+Wei, H., Liu, C., Chen, J., Wang, J., Kong, L., Xu, Y., Ge,
+Z., Zhao, L., Sun, J., Peng, Y., Han, C., and Zhang, X.
+General ocr theory: Towards ocr-2.0 via a unified end-to-
+end model, 2024. URL https://arxiv.org/abs/
+2409.01704.
+Wen, S., Ye, J., Feng, P., Kang, H., Wen, Z., Chen, Y.,
+Wu, J., wenjun wu, He, C., and Li, W. Spot the fake:
+Large multimodal model-based synthetic image detection
+with artifact explanation. In The Thirty-ninth Annual
+Conference on Neural Information Processing Systems,
+2025. URL https://openreview.net/forum?
+id=xLFYd1owiP.
+White, C., Dooley, S., Roberts, M., Pal, A., Feuer, B.,
+Jain, S., Shwartz-Ziv, R., Jain, N., Saifullah, K., Dey, S.,
+Shubh-Agrawal, Sandha, S. S., Naidu, S. V., Hegde, C.,
+LeCun, Y., Goldstein, T., Neiswanger, W., and Goldblum,
+M. Livebench: A challenging, contamination-limited
+LLM benchmark. In The Thirteenth International Confer-
+ence on Learning Representations, 2025. URL https:
+//openreview.net/forum?id=sKYHBTAxVa.
+Wu, X., Pan, L., Xie, Y., Zhou, R., Zhao, S., Ma, Y., Du,
+M., Mao, R., Luu, A. T., and Wang, W. Y. Antileak-
+bench: Preventing data contamination by automatically
+constructing benchmarks with updated real-world knowl-
+edge. In Proceedings of the 63rd Annual Meeting of
+the Association for Computational Linguistics (Volume
+1: Long Papers), pp. 18403–18419, Vienna, Austria, July
+2025. Association for Computational Linguistics.
+Xu, C., Sun, Q., Zheng, K., Geng, X., Zhao, P., Feng, J.,
+Tao, C., Lin, Q., and Jiang, D. WizardLM: Empowering
+large pre-trained language models to follow complex in-
+structions. In The Twelfth International Conference on
+Learning Representations, 2024.
+Xu, Q., Hong, F., Li, B., Hu, C., Chen, Z., and Zhang, J.
+On the tool manipulation capability of open-source large
+language models, 2023. arXiv:2305.16504.
+Yang, A., Li, A., Yang, B., Zhang, B., Hui, B., Zheng,
+B., Yu, B., Gao, C., Huang, C., Lv, C., Zheng, C., Liu,
+D., Zhou, F., Huang, F., Hu, F., Ge, H., Wei, H., Lin,
+H., Tang, J., Yang, J., Tu, J., Zhang, J., Yang, J., Yang,
+J., Zhou, J., Zhou, J., Lin, J., Dang, K., Bao, K., Yang,
+K., Yu, L., Deng, L., Li, M., Xue, M., Li, M., Zhang,
+P., Wang, P., Zhu, Q., Men, R., Gao, R., Liu, S., Luo,
+S., Li, T., Tang, T., Yin, W., Ren, X., Wang, X., Zhang,
+X., Ren, X., Fan, Y., Su, Y., Zhang, Y., Zhang, Y., Wan,
+Y., Liu, Y., Wang, Z., Cui, Z., Zhang, Z., Zhou, Z., and
+Qiu, Z. Qwen3 technical report, 2025a. URL https:
+//arxiv.org/abs/2505.09388.
+Yang, L., Kang, B., Huang, Z., Zhao, Z., Xu, X., Feng, J.,
+and Zhao, H. Depth anything v2. In The Thirty-eighth
+Annual Conference on Neural Information Processing
+Systems, 2024. URL https://openreview.net/
+forum?id=cFTi3gLJ1X.
+Yang, Y., Zhang, S., Zhang, K., Bin, Y., Wang, Y., Luo, P.,
+and Shao, W. Dynamic multimodal evaluation with flexi-
+ble complexity by vision-language bootstrapping. In The
+Thirteenth International Conference on Learning Rep-
+resentations, 2025b. URL https://openreview.
+net/forum?id=X1OfiRYCLn.
+Ye, Q., Xu, H., Ye, J., Yan, M., Hu, A., Liu, H., Qian, Q.,
+Zhang, J., and Huang, F. mplug-owi2: Revolutionizing
+multi-modal large language model with modality collabo-
+ration. In 2024 IEEE/CVF Conference on Computer Vi-
+sion and Pattern Recognition (CVPR), pp. 13040–13051,
+2024. doi: 10.1109/CVPR52733.2024.01239.
+Zhang, H., Lin, Y., and Wan, X.
+PaCoST: Paired con-
+fidence significance testing for benchmark contamina-
+tion detection in large language models. In Al-Onaizan,
+Y., Bansal, M., and Chen, Y.-N. (eds.), Findings of
+the Association for Computational Linguistics: EMNLP
+12
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+2024, pp. 1794–1809, Miami, Florida, USA, November
+2024. Association for Computational Linguistics. doi:
+10.18653/v1/2024.findings-emnlp.97.
+Zhang, J., Wang, Z., Lei, M., Yuan, Z., Yan, B., Shan, S.,
+and Chen, X. Dysca: A dynamic and scalable bench-
+mark for evaluating perception ability of LVLMs. In The
+Thirteenth International Conference on Learning Rep-
+resentations, 2025a. URL https://openreview.
+net/forum?id=bU1JOvdXXK.
+Zhang, J., Zhang, H., and Wan, X. Kbe-dme: Dynamic mul-
+timodal evaluation via knowledge enhanced benchmark
+evolution, 2026. URL https://arxiv.org/abs/
+2510.21182.
+Zhang, S., Wan, D., Cattan, A., Klein, A., Dagan, I., and
+Bansal, M. QAPyramid: Fine-grained evaluation of con-
+tent selection for text summarization. In Second Con-
+ference on Language Modeling, 2025b. URL https:
+//openreview.net/forum?id=dZRzInscvA.
+13
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+A. Failure Analysis
+Although executable reasoning verification substantially improves the reliability of automatically generated QA pairs, it
+does not eliminate all errors. We observe that the remaining failures are often not caused by low-level perception, but by the
+final reasoning stage that aggregates tool-derived evidence.
+Figure 3 shows a representative failure case from a spatial-relation question about toy cars. The question asks: “Comparing
+the toy cars in the image, which statement regarding their colors and positions is correct?” One candidate option states that
+“There is a yellow car and an orange car in the same diagonal row starting from the left.” In this case, the perception modules
+correctly identify the toy cars and the rotated grid layout. The upstream tools also return the relevant color attributes and
+bounding boxes. However, the final reasoning stage incorrectly concludes that the yellow and orange cars lie on the same
+diagonal.
+A closer inspection shows that the error comes from interpreting the rotated grid structure. Under the rotated reference
+frame, the upper-right direction should be treated as a row direction rather than a diagonal direction. Therefore, the two cars
+are not on the same diagonal, even though their relative positions can appear diagonal under the original image coordinate
+system. This indicates that the main error source lies in relation reasoning over structured tool outputs, rather than in object
+detection, attribute recognition, or localization.
+This case highlights both the benefit and limitation of executable verification. On the one hand, the tool chain makes
+the failure traceable by separating perception results from final reasoning. On the other hand, the verifier may still make
+incorrect relational inferences when the scene involves ambiguous reference frames, rotated layouts, or non-standard spatial
+structures. Future work may incorporate explicit geometric normalization or rule-based spatial consistency checks to further
+reduce such errors.
+Figure 3. A representative failure case of executable reasoning verification.
+B. Additional Contamination Analysis
+We provide additional PaCoST-based contamination-related analysis to further compare MMBench-Live with VLB-
+style (Yang et al., 2025b) image editing variants. Here, Adding, Elimination, and Outpainting denote edited variants
+constructed by adding visual content, removing visual content, and extending image regions, respectively.
+14
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+As shown in Table 6, the edited variants, including adding, elimination, and outpainting, exhibit substantially larger
+confidence shifts and effect sizes than MMBench-Live. In contrast, MMBench-Live shows a much smaller mean confidence
+shift and Cohen’s d. Combined with temporal isolation in data acquisition, these results suggest that our live updating
+paradigm is more effective than image-editing-based variants in reducing contamination-related memorization signals.
+We emphasize that PaCoST should be interpreted as a proxy-based analysis rather than a definitive contamination detector.
+Although the results provide suggestive evidence, they are insufficient on their own to draw strong conclusions about
+multimodal contamination, especially given the limited transparency of large-scale multimodal pretraining corpora.
+Table 6. Additional PaCoST-based confidence-shift comparison between edited variants and MMBench-Live.
+Benchmark Variant
+Mean ∆
+Std ∆
+p (one-sided)
+Cohen’s d
+Adding (Yang et al., 2025b)
+0.042
+0.187
+6.1 × 10−14
+0.224
+Elimination (Yang et al., 2025b)
+0.038
+0.200
+3.7 × 10−12
+0.191
+Outpainting (Yang et al., 2025b)
+0.042
+0.205
+1.1 × 10−13
+0.205
+MMBench-Live
+0.006
+0.102
+2.9 × 10−6
+0.059
+C. Task Abbreviations
+Abbrev.
+Task Name
+IT
+Image Topic
+IQ
+Image Quality
+IE
+Image Emotion
+IS
+Image Scene
+IST
+Image Style
+ARc
+Attribute Recognition
+OL
+Object Localization
+CR
+Celebrity Recognition
+OCR
+Optical Character Recognition
+SR
+Spatial Relationship
+AC
+Attribute Comparison
+ActR
+Action Recognition
+IR
+Identity Reasoning
+FR
+Function Reasoning
+PPR
+Physical Property Reasoning
+FP
+Future Prediction
+SITU
+Structuralized Image-Text Understanding
+SoR
+Social Relation
+PhR
+Physical Relation
+NaR
+Nature Relation
+Table 7. Task abbreviations and corresponding full task names.
+15
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+D. MMBench-Live Representative QA Examples
+D.1. QA Examples on the GPT-based Version
+16
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+17
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+18
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+19
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+20
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+21
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+22
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+23
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+24
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+25
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+D.2. QA Examples on the Qwen-based Version
+26
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+27
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+28
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+29
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+30
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+31
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+32
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+33
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+34
+
+
+MMBench-Live: A Continuously Evolving Benchmark for Multimodal Models
+35
