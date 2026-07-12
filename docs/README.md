@@ -6,71 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-11
-- 运行时间：2026-07-11 20:20:39 UTC
+- 最新运行日期：2026-07-12
+- 运行时间：2026-07-12 21:09:37 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析 17 篇 AI 论文，重点攻克统一多模态世界模型与计算成像智能体两大前沿阵地
-- 详情：[/202607/11/README](/202607/11/README)
+今日深度解析 17 篇多模态前沿论文，聚焦具身智能 VLA 模型的推理增强与泛化突破。
+重点关注通过场景图强化结构化视觉推理，以及“先观察再行动”策略对 VLA 模型泛化能力的显著提升。
+建议优先研读 Pelican-VLA 0.5，掌握提升具身智能模型鲁棒性与执行精度的关键架构设计。
+- 详情：[/202607/12/README](/202607/12/README)
 
 ### 精读区论文标签
-1. [WorldBagel: Uncovering the Power of Unified Multimodal Models for Vision-Language-Action-World Modeling](/202607/11/2607.03461v1-worldbagel-uncovering-the-power-of-unified-multimodal-models-for-vision-language-action-world-modeling)  
+1. [Scene Graph Thinking: Reinforcing Structured Visual Reasoning for Multimodal Large Language Models](/202607/12/2607.05716v1-scene-graph-thinking-reinforcing-structured-visual-reasoning-for-multimodal-large-language-models)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：感知、推理和动作的统一VLAW框架
-2. [Does AI Understand Imaging? A Systematic Benchmark of Agentic AI for Computational Imaging Tasks](/202607/11/2607.07189v1-does-ai-understand-imaging-a-systematic-benchmark-of-agentic-ai-for-computational-imaging-tasks)  
+   evidence：多模态大语言模型的结构化视觉推理
+2. [Pelican-VLA 0.5: Attending Before Acting Benefits Generalization](/202607/12/2607.06655v2-pelican-vla-05-attending-before-acting-benefits-generalization)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于计算成像任务的智能体 AI 和 VLM
-3. [OmniFood-Bench: Evaluating VLMs for Nutrient Reasoning and Personalized Health Advice](/202607/11/2607.08423v1-omnifood-bench-evaluating-vlms-for-nutrient-reasoning-and-personalized-health-advice)  
+   evidence：集成视觉语言理解和动作预测的统一VLA模型
+3. [When Thinking Hurts: Epistemic Signals in the Reasoning Chains of Visual Language Models](/202607/12/2607.08059v1-when-thinking-hurts-epistemic-signals-in-the-reasoning-chains-of-visual-language-models)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于营养推理和自主智能体的 VLM
-4. [HiMe: Hierarchical Embodied Memory for Long-Horizon Vision-Language-Action Control](/202607/11/2607.03449v1-hime-hierarchical-embodied-memory-for-long-horizon-vision-language-action-control)  
+   evidence：对思考模式VLM中推理链和熵的实证表征
+4. [Regime-Conditional Stabilisation of LLM-Augmented Cooperative Multi-Agent Reinforcement Learning](/202607/12/2607.04470v1-regime-conditional-stabilisation-of-llm-augmented-cooperative-multi-agent-reinforcement-learning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉-语言-动作控制的分层记忆
-5. [CAC-VLA: Context-Gated Action Conditioning for Vision-Language-Action Models](/202607/11/2607.04816v1-cac-vla-context-gated-action-conditioning-for-vision-language-action-models)  
+   evidence：LLM 用于将人类目标转化为多智能体强化学习的奖励信号
+5. [Pelican-VLA 0.5: Attending Before Acting Benefits Generalization](/202607/12/2607.06655v1-pelican-vla-05-attending-before-acting-benefits-generalization)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：VLA模型的动作推理和潜动作接口
-6. [DeltaV: Thinking with Visual State Updates in Unified Large Multimodal Models](/202607/11/2607.08434v1-deltav-thinking-with-visual-state-updates-in-unified-large-multimodal-models)  
+   evidence：带有推理槽的VLA模型用于动作预测
+6. [Early to Share, Late to Save: Synchronisation-Driven Communication Gating in Bandwidth-Constrained Cooperative VLN](/202607/12/2607.08504v1-early-to-share-late-to-save-synchronisation-driven-communication-gating-in-bandwidth-constrained-cooperative-vln)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：通过文本推理和中间视觉状态进行交错多模态推理
+   evidence：结合强化学习模式的视觉语言导航
 
 ### 速读区论文标签
-1. [Look Before You Leap: Distilling Tree Search into Action Evaluation for Frozen VLA Models](/202607/11/2607.03751v1-look-before-you-leap-distilling-tree-search-into-action-evaluation-for-frozen-vla-models)  
+1. [VLA Grounder: Language-Conditioning Space Optimization for Black-Box VLA Models](/202607/12/2607.04517v1-vla-grounder-language-conditioning-space-optimization-for-black-box-vla-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：VLA模型的强化学习与动作评估
-2. [Beyond Scene Priors: Fine-Grained Traffic Scene Reasoning with Benchmarking and Query-Guided Small-Object Focus](/202607/11/2607.04149v1-beyond-scene-priors-fine-grained-traffic-scene-reasoning-with-benchmarking-and-query-guided-small-object-focus)  
+   evidence：优化视觉-语言-动作（VLA）模型的语言调节空间
+2. [Do Vision-Language-Action Models Mean What They Say? On the Role of Faithfulness in Embodied Reasoning](/202607/12/2607.04681v1-do-vision-language-action-models-mean-what-they-say-on-the-role-of-faithfulness-in-embodied-reasoning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：使用多模态大模型进行细粒度交通场景推理
-3. [ACE: Agentic Control for Embodied Manipulation via Zero-shot Workflow Reasoning](/202607/11/2607.04162v1-ace-agentic-control-for-embodied-manipulation-via-zero-shot-workflow-reasoning)  
+   evidence：视觉-语言-动作模型中具身推理的忠实性
+3. [Does It Fail to See or Fail to Know? Attributing Errors in Vision-Language Models](/202607/12/2607.04683v1-does-it-fail-to-see-or-fail-to-know-attributing-errors-in-vision-language-models)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：具有视觉动作接口的代理工作流推理
-4. [PixelPilot: Scalable Vision-Language-Action Models for End-to-End Autonomous Driving](/202607/11/2607.04637v1-pixelpilot-scalable-vision-language-action-models-for-end-to-end-autonomous-driving)  
+   evidence：视觉语言模型推理中的错误归因
+4. [Learning to Control LLM Agent Harnesses with Offline Reinforcement Learning](/202607/12/2607.05458v1-learning-to-control-llm-agent-harnesses-with-offline-reinforcement-learning)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于自动驾驶推理的视觉-语言-动作模型
-5. [TACO: TActile World Model as a Self-COrrector forScalable VLA Post-Training](/202607/11/2607.02840v1-taco-tactile-world-model-as-a-self-corrector-forscalable-vla-post-training)  
+   evidence：针对非机器人LLM智能体执行框架的离线强化学习
+5. [Progress- and Reliability-Oriented Group Policy Optimization for Agentic Reinforcement Learning](/202607/12/2607.04242v1-progress--and-reliability-oriented-group-policy-optimization-for-agentic-reinforcement-learning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于机器人操作和策略改进的视觉-语言-动作 (VLA) 模型
-6. [CoRE-VLA: Towards Scalable and Robust Vision-Language-Action Modeling via Conditional Routing of Experts](/202607/11/2607.03693v1-core-vla-towards-scalable-and-robust-vision-language-action-modeling-via-conditional-routing-of-experts)  
+   evidence：智能体强化学习的组策略优化
+6. [Simple-to-Complex Structured Demonstrations for Vision-Language-Action Learning](/202607/12/2607.04591v1-simple-to-complex-structured-demonstrations-for-vision-language-action-learning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于机器人智能体的视觉-语言-动作 (VLA) 建模
-7. [From Region Arrival to Instance-Level Grounding in Vision-and-Language Navigation](/202607/11/2607.03792v1-from-region-arrival-to-instance-level-grounding-in-vision-and-language-navigation)  
+   evidence：视觉-语言-动作（VLA）学习的结构化演示
+7. [RoboVista: Evaluating Vision Language Models for Diverse Robot Applications](/202607/12/2607.04610v1-robovista-evaluating-vision-language-models-for-diverse-robot-applications)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：具有物体级定位的视觉语言导航智能体
-8. [Mask-based Predictive Representations for Reinforcement Learning](/202607/11/2607.04153v1-mask-based-predictive-representations-for-reinforcement-learning)  
+   evidence：评估用于机器人推理的VLM
+8. [DGSeg: Dynamic Gating of Semantic-Spatial Guided Predictions for Reasoning Segmentation](/202607/12/2607.04779v1-dgseg-dynamic-gating-of-semantic-spatial-guided-predictions-for-reasoning-segmentation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：强化学习中基于掩码的预测表示
-9. [IRIS: An Intelligent Vision-Language System for Ocular Surface Diseases via Topic Tree and Scene-Driven VQA Generation](/202607/11/2607.04344v1-iris-an-intelligent-vision-language-system-for-ocular-surface-diseases-via-topic-tree-and-scene-driven-vqa-generation)  
+   evidence：多模态大语言模型用于分割中的视觉语言推理
+9. [Transferability Between Understanding and Generation in Unified Multimodal Models](/202607/12/2607.04423v1-transferability-between-understanding-and-generation-in-unified-multimodal-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：视觉语言模型中的临床推理
-10. [Learning Task-Sufficient World Models by Synergizing Agentic Exploration and Structured Modeling](/202607/11/2607.04409v1-learning-task-sufficient-world-models-by-synergizing-agentic-exploration-and-structured-modeling)  
+   evidence：统一多模态模型中的可迁移性
+10. [Learning Structured Visual Compositional Representations for Weakly Supervised Referring Expression Comprehension](/202607/12/2607.04638v1-learning-structured-visual-compositional-representations-for-weakly-supervised-referring-expression-comprehension)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：用于决策的智能体探索和世界模型
-11. [TORINO: Token Reduction via Interpretable Concept Overlap in Vision-Language Models](/202607/11/2607.04593v1-torino-token-reduction-via-interpretable-concept-overlap-in-vision-language-models)  
+   evidence：视觉表示与语言结构化特性的对齐
+11. [Vision Pretraining for Dense Spatial Perception](/202607/12/2607.05247v1-vision-pretraining-for-dense-spatial-perception)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：视觉语言模型中可解释的概念重叠
+   evidence：视觉预训练用于可操作的表示和空间感知
 
 
 <div class="dpr-home-promo-card">
