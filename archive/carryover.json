@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-12T21:07:29.648336+00:00",
-  "updated_date": "20260712",
+  "generated_at": "2026-07-14T21:30:50.936788+00:00",
+  "updated_date": "20260714",
   "carryover_days": 9,
   "items": [
     {
@@ -29,55 +29,13 @@
         "query:VLM RL"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "multimodal agent with episodic visual memory for reasoning and autonomous tasks",
-      "llm_evidence_cn": "具有情节视觉记忆的多模态智能体，用于推理和自主任务",
-      "llm_evidence": "具有情节视觉记忆的多模态智能体，用于推理和自主任务",
-      "canonical_evidence": "具有情节视觉记忆的多模态智能体，用于推理和自主任务",
-      "llm_tldr_en": "Develops a cognitive-structured multimodal agent that uses external memory to enhance long-horizon reasoning.",
-      "llm_tldr_cn": "开发了一种认知结构多模态智能体，利用外部记忆增强长程推理能力。",
-      "llm_tldr": "开发了一种认知结构多模态智能体，利用外部记忆增强长程推理能力。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "advancements in vision language reasoning agents",
-      "matched_requirement_id": "req-8",
-      "selection_source": "carryover_cache",
-      "paper_id": "2607.08497v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2607.08359v1",
-      "title": "FSD-VLN: Fast-Slow Dual-System Modeling for Aerial Long-Horizon Vision-Language Navigation",
-      "abstract": "Vision-Language Navigation (VLN) enables UAV autonomous navigation in unknown environments by mapping language instructions to real-time visual inputs. Compared with GPS-dependent or pre-programmed navigation, VLN supports intuitive human-machine interaction and stronger environmental adaptability, requiring tight integration of high-level semantic reasoning and low-latency flight control.Existing methods suffer from structural misalignment between global multimodal understanding and sequential action generation, causing jittery trajectories and severe decision latency for long-horizon aerial navigation. To solve this issue, we propose FSD-VLN, a fast-slow dual-system architecture disentangling semantic reasoning and low-latency flight command generation.The framework has two asynchronous branches: a slow stream extracting stable semantic priors from pre-trained vision-language models, and a Diffusion Transformer (DiT) fast stream modeling cross-temporal action distributions to produce consistent flight outputs. We further introduce a time-aware adaptive optimizer to stabilize long-sequence training and reduce gradient oscillation.Large-scale low-altitude simulation experiments show FSD-VLN achieves up to 2X higher navigation success rates on unseen scenes than SOTA methods, while cutting single-action inference delay and total task runtime by over 50%. Our work validates the benefit of decoupled semantic-control modeling and provides a practical paradigm for long-horizon aerial VLN.",
-      "authors": [
-        "Xueke Zhu",
-        "Qingyan Meng",
-        "Liutao Yu",
-        "Wei Zhang",
-        "Zhengyu Ma",
-        "Huihui Zhou",
-        "Yonghong Tian"
-      ],
-      "primary_category": "cs.RO",
-      "categories": [
-        "cs.RO",
-        "cs.AI"
-      ],
-      "published": "2026-07-09T11:17:04+00:00",
-      "link": "https://arxiv.org/pdf/2607.08359v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "disentangling semantic reasoning and low-latency flight control in VLN",
-      "llm_evidence_cn": "在视觉语言导航中解耦语义推理与低延迟飞行控制",
-      "llm_evidence": "在视觉语言导航中解耦语义推理与低延迟飞行控制",
-      "canonical_evidence": "在视觉语言导航中解耦语义推理与低延迟飞行控制",
-      "llm_tldr_en": "FSD-VLN uses a dual-system architecture for long-horizon aerial vision-language navigation.",
-      "llm_tldr_cn": "FSD-VLN采用双系统架构进行长程空中视觉语言导航。",
-      "llm_tldr": "FSD-VLN采用双系统架构进行长程空中视觉语言导航。",
+      "llm_evidence_en": "Multimodal agent with episodic visual memory for reasoning",
+      "llm_evidence_cn": "具有情节视觉记忆的推理多模态智能体",
+      "llm_evidence": "具有情节视觉记忆的推理多模态智能体",
+      "canonical_evidence": "具有情节视觉记忆的推理多模态智能体",
+      "llm_tldr_en": "Introduces a cognitive-structured agent using episodic memory to improve long-horizon multimodal reasoning and tasks.",
+      "llm_tldr_cn": "引入认知结构化智能体，利用情节记忆提升长程多模态对话与推理任务能力。",
+      "llm_tldr": "引入认知结构化智能体，利用情节记忆提升长程多模态对话与推理任务能力。",
       "llm_tags": [
         "query:vlm-rl"
       ],
@@ -85,7 +43,7 @@
       "matched_query_text": "vision-language model based agents",
       "matched_requirement_id": "req-4",
       "selection_source": "carryover_cache",
-      "paper_id": "2607.08359v1",
+      "paper_id": "2607.08497v1",
       "carry_days": 1
     },
     {
@@ -127,165 +85,48 @@
       "matched_requirement_id": "req-4",
       "selection_source": "carryover_cache",
       "paper_id": "2607.08768v1",
-      "carry_days": 1
+      "carry_days": 3
     },
     {
-      "id": "2607.05465v1",
-      "title": "CanvasAgent: Enabling Complex Image Creation and Editing via Visual Tool Orchestration",
-      "abstract": "Complex image creation and editing often require more than a single generation or editing model. A user request may involve synthesizing images, localizing objects, segmenting regions, editing selected content, compositing intermediate assets, reading text, and enhancing the final result. Such tasks shift multimodal agents from perception-augmented reasoning to manipulation-centered visual creation, where tools must actively transform visual states rather than merely inspect them. However, existing multimodal tool-use agents are mostly optimized for perception, search, or domain-specific editing, and lack large-scale supervision for executable image-creation trajectories. In this paper, we introduce CanvasCraft, a large-scale multimodal tool-use dataset for complex image creation and editing, and \\textbf{CanvasAgent}, a tool-augmented multimodal agent that learns to orchestrate heterogeneous visual tools through multi-turn interaction. CanvasCraft contains 140K fully annotated executable trajectories and 10K   RL task specifications. CanvasAgent is first trained with SFT to learn executable reasoning-action trajectories, and is then optimized with GRPO using a hybrid reward that combines outcome- and process-level signals. During rollout, CanvasAgent inspects intermediate results, tracks visual assets, and adapts tool decisions to the evolving visual state. Experiments evaluate both final image quality and trajectory behavior, demonstrating the effectiveness of CanvasAgent and the proposed dataset for complex multi-tool image creation workflows.",
+      "id": "2607.08448v1",
+      "title": "Harness VLA: Steering Frozen VLAs into Reliable Manipulation Primitives via Memory-Guided Agents",
+      "abstract": "Language-conditioned manipulation requires both precise contact-rich control and robust reasoning over language, scenes, and long horizons. End-to-end Vision-Language-Action (VLA) models provide strong local visuomotor skills, but they are trained on in-distribution task trajectories and often fail under deployment perturbations such as semantic retargeting, goal re-binding, spatial-layout shifts, and unstable local contacts. LLM coding agents provide complementary semantic and compositional reasoning, but purely analytic primitives struggle with irregular grasping, constrained placement, and articulated-object interaction. We present Harness VLA, a memory-augmented agentic framework that exposes a frozen VLA as a retryable contact-rich primitive and composes it with a small fixed library of analytic primitives for grounding, staging, transport, navigation, and release. Rather than expanding the skill library, the harness learns the operating range of these fixed primitives from task-specific execution traces, global success rules, and failure models. By lifting semantic re-grounding, non-contact execution, and VLA re-staging to the planner while reserving the frozen VLA for local contact-rich phases, Harness VLA extends pretrained VLAs beyond their original trajectory distribution without finetuning. Across perturbed tabletop, household kitchen, and clean-to-randomized bimanual manipulation, Harness VLA improves over the strongest relevant baselines by 38.6 and 25.4 percentage points on LIBERO-Pro and RoboCasa365, respectively, and reaches 58.4% on RoboTwin C2R.",
       "authors": [
-        "Hairui Zhu",
-        "Yiying Yang",
-        "Tengjin Weng",
-        "Ziyu Lu",
-        "Xiao Yao",
-        "Xiaoyang Ye",
-        "Lin Ma",
-        "Wenhao Jiang"
-      ],
-      "primary_category": "cs.CV",
-      "categories": [
-        "cs.CV",
-        "cs.AI"
-      ],
-      "published": "2026-07-06T04:57:18+00:00",
-      "link": "https://arxiv.org/pdf/2607.05465v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "multimodal agents for perception-augmented reasoning and visual creation",
-      "llm_evidence_cn": "用于感知增强推理和视觉创作的多模态智能体",
-      "llm_evidence": "用于感知增强推理和视觉创作的多模态智能体",
-      "canonical_evidence": "用于感知增强推理和视觉创作的多模态智能体",
-      "llm_tldr_en": "Presents CanvasAgent for complex image editing using visual tool orchestration and multimodal reasoning.",
-      "llm_tldr_cn": "提出 CanvasAgent，利用视觉工具编排和多模态推理进行复杂的图像编辑。",
-      "llm_tldr": "提出 CanvasAgent，利用视觉工具编排和多模态推理进行复杂的图像编辑。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "vision-language model based agents",
-      "matched_requirement_id": "req-4",
-      "selection_source": "carryover_cache",
-      "paper_id": "2607.05465v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2607.05794v1",
-      "title": "From Passive Retrieval to Active Memory Navigation: Learning to Use Memory as a Structured Action Space",
-      "abstract": "Long-term user memory is essential for personalized conversational agents, yet many memory systems still expose memory through passive retrieval interfaces, making the model a consumer of pre-selected evidence. We introduce NapMem, a framework for learning to use long-term user memory as a structured action space rather than passively retrieved context. NapMem organizes user history into a linked multi-granularity memory pyramid, where raw conversations, typed memory records, topic tracks, and user profiles are connected through provenance relations, and exposes these levels through memory tools. The agent is trained to select memory according to the query and intermediate evidence, allowing it to inspect different memory granularities before answering. Experiments on PersonaMem-v2, LongMemEval, and LoCoMo show that a NapMem agent trained with memory-tool reinforcement learning is competitive across diverse memory-intensive tasks, while evaluations on non-memory tasks suggest that the learned policy largely preserves general reasoning and tool-use abilities. Additional analyses examine storage, inference cost, tool-use behavior, and ablations over navigation, memory granularity, and RL training. Our results suggest that long-term user memory benefits from coupling structured storage with a learned policy for using memory at the appropriate granularity.",
-      "authors": [
-        "Yue Xu",
-        "Yutao Sun",
-        "Yihao Liu",
-        "Mengyu Zhou",
-        "Jiayi Qiao",
-        "Lu Ma",
-        "Kai Tang",
-        "Wenjie Wang",
-        "Xiaoxi Jiang",
-        "Guanjun Jiang"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI"
-      ],
-      "published": "2026-07-07T03:47:12+00:00",
-      "link": "https://arxiv.org/pdf/2607.05794v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "agentic memory navigation as action space",
-      "llm_evidence_cn": "作为动作空间的智能体记忆导航",
-      "llm_evidence": "作为动作空间的智能体记忆导航",
-      "canonical_evidence": "作为动作空间的智能体记忆导航",
-      "llm_tldr_en": "NapMem treats long-term memory as a structured action space for agentic reasoning without robotics.",
-      "llm_tldr_cn": "NapMem将长期记忆视为结构化动作空间，用于非机器人场景下的智能体推理。",
-      "llm_tldr": "NapMem将长期记忆视为结构化动作空间，用于非机器人场景下的智能体推理。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "multimodal agentic reinforcement learning without robotics",
-      "matched_requirement_id": "req-9",
-      "selection_source": "carryover_cache",
-      "paper_id": "2607.05794v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2607.06165v1",
-      "title": "EAGOR: Embodied Reasoning in Omni-direction",
-      "abstract": "Omni-directional (360°) cameras provide embodied agents with a holistic view of their surroundings, making them suited for directional reasoning in tasks such as navigation and object search. Existing Vision Language Models (VLMs) project 360° observations to 2D equirectangular projection (ERP) images and process them using architectures designed for perspective images. However, they ignore the spherical nature of 360° observations, where each pixel represents a viewing direction relative to the agent. Consequently, their direction estimates often become inconsistent under camera view transformations caused by agent motion. This limitation is particularly critical for map-free navigation, where the agent must continuously estimate the target direction in its egocentric frame. We propose EAGOR, a training-free, geometry-aware framework for embodied 360° directional reasoning. Instead of predicting target directions as ERP image coordinates, EAGOR formulates directional reasoning as recursive Bayesian estimation directly on the sphere. It maintains a continuous belief over target directions and propagates it equivariantly under agent motion without training the backbone VLMs. To achieve this, we introduce the Spherical Harmonic Belief Field (SH-BF), whose spherical harmonic representation provides a globally defined, rotation-aware basis for directional estimation on the spherical manifold. This formulation eliminates ERP seam discontinuities, latitude distortions, and interpolation errors. We evaluate EAGOR on two benchmark datasets and real-world experiments with a legged robot across directional reasoning tasks. EAGOR consistently outperforms existing methods, achieving average relative gains of +34.4% and +45.6% on HOS and OSR-Bench, respectively, while improving navigation success by +14.6%, reducing step count by 17.7%, and lowering mean angular error by 24.5%.",
-      "authors": [
-        "Shriram Damodaran",
-        "Soumyaratna Debnath",
-        "Yan Wu",
-        "Wei-Yun Yau",
-        "Addison Lin Wang"
+        "Yixian Zhang",
+        "Huanming Zhang",
+        "Feng Gao",
+        "Xiao Li",
+        "Zhihao Liu",
+        "Chunyang Zhu",
+        "Jiaxing Qiu",
+        "Yuchen Yan",
+        "Jiyuan Liu",
+        "Wenhao Tang",
+        "Zhengru Fang",
+        "Yi Nie",
+        "Changxu Wei",
+        "Yu Wang",
+        "Wenbo Ding",
+        "Chao Yu"
       ],
       "primary_category": "cs.RO",
       "categories": [
         "cs.RO"
       ],
-      "published": "2026-07-07T11:39:57+00:00",
-      "link": "https://arxiv.org/pdf/2607.06165v1",
+      "published": "2026-07-09T13:08:54+00:00",
+      "link": "https://arxiv.org/pdf/2607.08448v1",
       "tags": [
         "keyword:VLM RL",
         "query:VLM RL"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "embodied reasoning and vision language models for navigation",
-      "llm_evidence_cn": "用于导航的具身推理和视觉语言模型",
-      "llm_evidence": "用于导航的具身推理和视觉语言模型",
-      "canonical_evidence": "用于导航的具身推理和视觉语言模型",
-      "llm_tldr_en": "Addresses omni-directional embodied reasoning for navigation using specialized VLM architectures.",
-      "llm_tldr_cn": "利用专门的 VLM 架构解决导航中的全向具身推理问题。",
-      "llm_tldr": "利用专门的 VLM 架构解决导航中的全向具身推理问题。",
-      "llm_tags": [
-        "query:vlm-rl"
-      ],
-      "matched_query_tag": "query:vlm-rl",
-      "matched_query_text": "advancements in vision language reasoning agents",
-      "matched_requirement_id": "req-8",
-      "selection_source": "carryover_cache",
-      "paper_id": "2607.06165v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2607.06882v1",
-      "title": "GemNav: Discrete-Token Visual Robot Navigation using a Multimodal Large Language Model",
-      "abstract": "Visual navigation policies built on large pretrained models have so far followed a common recipe: a dedicated visual encoder, a bespoke action head, and training on thousands of hours of cross-embodiment datasets. We ask whether this recipe is necessary. In this paper, we introduce GemNav, a visual robot navigation policy that adapts a frozen Multimodal Large Language Model (MLLM) for short-to-medium horizon waypoint navigation using Low-Rank Adaptation (LoRA) on the language tower alone, with no auxiliary visual encoder and no continuous regression head. Waypoints and categorical navigation signals share a single discrete token vocabulary generated by the language-model head, and a soft-decoded auxiliary loss recovers the metric structure that pure cross-entropy training discards. On a single 8.7-hour open corpus, roughly three orders of magnitude smaller than competing training sets, the policy transfers zero-shot to four physically distinct unseen environments and stops within 0.25-0.42m of the goal across 20 real-world trials covering an open carpark, an obstacle carpark, a long outdoor chemical yard, and an indoor warehouse. Conditioning on short image histories improves offline metrics but yields no robot benefit, pointing to a ceiling on what temporal context adds once pretrained vision features are in place. These results indicate that discrete-token adaptation of frozen MLLMs can provide a data-efficient, deployable alternative for foundation model robot navigation.",
-      "authors": [
-        "Peter Bohm",
-        "Saimunur Rahman",
-        "Abdelwahed Khamis",
-        "Sagun Man Singh Shrestha",
-        "Chris McCool",
-        "Peyman Moghadam"
-      ],
-      "primary_category": "cs.RO",
-      "categories": [
-        "cs.RO",
-        "cs.AI"
-      ],
-      "published": "2026-07-08T00:46:57+00:00",
-      "link": "https://arxiv.org/pdf/2607.06882v1",
-      "tags": [
-        "keyword:VLM RL",
-        "query:VLM RL"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "adapts a frozen MLLM for robot navigation using LoRA",
-      "llm_evidence_cn": "使用LoRA调整冻结的MLLM用于机器人导航",
-      "llm_evidence": "使用LoRA调整冻结的MLLM用于机器人导航",
-      "canonical_evidence": "使用LoRA调整冻结的MLLM用于机器人导航",
-      "llm_tldr_en": "GemNav adapts a frozen MLLM for visual robot navigation using discrete token outputs.",
-      "llm_tldr_cn": "GemNav通过离散标记输出将冻结的MLLM应用于视觉机器人导航。",
-      "llm_tldr": "GemNav通过离散标记输出将冻结的MLLM应用于视觉机器人导航。",
+      "llm_evidence_en": "agentic framework using frozen VLA for manipulation and reasoning",
+      "llm_evidence_cn": "使用冻结VLA进行操作和推理的智能体框架",
+      "llm_evidence": "使用冻结VLA进行操作和推理的智能体框架",
+      "canonical_evidence": "使用冻结VLA进行操作和推理的智能体框架",
+      "llm_tldr_en": "Harness VLA uses memory-guided agents to steer frozen vision-language-action models for reliable manipulation.",
+      "llm_tldr_cn": "Harness VLA利用记忆引导智能体操控冻结的视觉-语言-动作模型，实现可靠的机器人操作。",
+      "llm_tldr": "Harness VLA利用记忆引导智能体操控冻结的视觉-语言-动作模型，实现可靠的机器人操作。",
       "llm_tags": [
         "query:vlm-rl"
       ],
@@ -293,7 +134,346 @@
       "matched_query_text": "vision-language model based agents",
       "matched_requirement_id": "req-4",
       "selection_source": "carryover_cache",
-      "paper_id": "2607.06882v1",
+      "paper_id": "2607.08448v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.11106v1",
+      "title": "Beyond the Eye: Efficient Multimodal Reasoning via Self-Regulated Implicit Visual Tools",
+      "abstract": "Recent multimodal large language models (MLLMs) have made remarkable progress on fine-grained perception tasks under the \"Thinking with Images\" (TwI) paradigm by iteratively performing various visual tool operations. However, this paradigm relies heavily on frequent external tool calls and repeated image re-encoding, which leads to substantial computational overhead and inference latency. To address these issues, we propose Beyond the Eye (BEE), a novel implicit visual tool paradigm centered on self-regulated capability. BEE directly incorporates visual tool invocation behaviors into the training objective and encourages the model to develop a self-regulated invocation mechanism. This design enables the model to adaptively balance internal knowledge and implicit tools, avoiding redundant tool usage while substantially reducing inference latency. Specifically, BEE involves a two-stage training process: (1) Formalized Chain-of-Thought (CoT) Supervised Fine-tuning (SFT). We construct CoT trajectories with structured tool slots and mixed invocation states. This stage activates the model's implicit tool representations and adaptive switching capability. (2) Self-regulated Reward-Driven Alignment. To address redundant tool usage caused by ambiguous cognitive boundaries, we first introduce the Net Tool Gain (NTG) metric to quantify this phenomenon. Based on this observation, we further propose a self-regulated reward mechanism. This mechanism penalizes ineffective tool dependency and encourages the model to perform knowledge routing, ensuring that implicit tools are invoked only when the model's internal knowledge is insufficient. BEE achieves state-of-the-art performance in fine-grained visual perception while remaining competitive in general reasoning tasks and achieving substantial gains in inference efficiency.",
+      "authors": [
+        "Xiuwei Chen",
+        "Quanlin Chen",
+        "Wentao Hu",
+        "Zisheng Chen",
+        "Kun Xiang",
+        "Zehua Ma",
+        "Mingyang Zhang",
+        "Jianhua Han",
+        "Hanhui Li",
+        "Hang Xu",
+        "Xiaodan Liang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-07-13T05:32:00+00:00",
+      "link": "https://arxiv.org/pdf/2607.11106v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multimodal reasoning via implicit visual tools",
+      "llm_evidence_cn": "通过隐式视觉工具进行多模态推理",
+      "llm_evidence": "通过隐式视觉工具进行多模态推理",
+      "canonical_evidence": "通过隐式视觉工具进行多模态推理",
+      "llm_tldr_en": "Introduces an implicit visual tool paradigm to improve the efficiency of multimodal reasoning in MLLMs.",
+      "llm_tldr_cn": "提出一种隐式视觉工具范式，旨在提高多模态大模型在推理任务中的效率。",
+      "llm_tldr": "提出一种隐式视觉工具范式，旨在提高多模态大模型在推理任务中的效率。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.11106v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.09818v1",
+      "title": "TS-Mask VLA: 2D Temporal-Spatial Masking for Vision-Language-Action Model with Effective Bridging",
+      "abstract": "Vision-language-action (VLA) models aim to understand natural-language instructions and visual observations, and to generate and execute corresponding actions as embodied agents. Recently, autoregressive token-based action generation has driven the development of many representative VLA models. However, this paradigm often reduces action generation to next-token prediction, thereby lacking explicit modeling of the spatiotemporal structure of action sequences and the disentanglement between vision-language representations and actions, which can limit performance in long-horizon and complex scenarios. In this paper, we propose TS-Mask VLA, a vision-language-action framework for robot manipulation. TS-Mask VLA is built upon two key designs: (1) a Discrete Diffusion Action Expert equipped with a Bridge Attention conditioning bridge, which enables multi-layer conditioning from the VLM and facilitates more accurate and stable action generation; and (2) a temporal-spatial 2D masking strategy for discrete action tokens that strengthens the model's understanding of cross-time dependencies and inter-dimensional coupling, leading to more structurally consistent action sequences. We conduct extensive experiments on simulation benchmarks and real-world tasks. On LIBERO, TS-Mask VLA achieves a 95.7 percent average success rate with only 0.5B parameters, outperforming significantly larger models. On CALVIN, it attains the best average sequence length of 4.19 and strong long-horizon performance. Comprehensive analyses and ablations further validate the effectiveness of our design.",
+      "authors": [
+        "Shengzhuo Yang",
+        "Ronghao Yu",
+        "Chuanjie Lv",
+        "Linpeng Peng",
+        "Hang Yu",
+        "Jie Ren",
+        "Jiajun Lv",
+        "Yong Liu"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "published": "2026-07-10T07:06:02+00:00",
+      "link": "https://arxiv.org/pdf/2607.09818v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Vision-Language-Action framework for embodied agents",
+      "llm_evidence_cn": "用于具身智能体的视觉-语言-动作框架",
+      "llm_evidence": "用于具身智能体的视觉-语言-动作框架",
+      "canonical_evidence": "用于具身智能体的视觉-语言-动作框架",
+      "llm_tldr_en": "Proposes a temporal-spatial masking framework to improve action generation in VLA models.",
+      "llm_tldr_cn": "提出一种时空掩码框架，以增强视觉-语言-动作模型在复杂场景下的动作生成能力。",
+      "llm_tldr": "提出一种时空掩码框架，以增强视觉-语言-动作模型在复杂场景下的动作生成能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.09818v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.08575v1",
+      "title": "FabriVLA: A Lightweight Vision-Language-Action Model for Precise Multi-Task Manipulation",
+      "abstract": "We present FabriVLA, a lightweight Vision-Language-Action model for Precise Multi-Task Manipulation. FabriVLA combines an InternVL3.5 vision-language backbone with a flow-matching action head featuring gated self-attention across action tokens and shallow VLM layer fusion for enriched spatial context. The model is trained via single stage joint optimization from a pretrained VLM and randomly initialized action head. On the Meta-World MT50 benchmark spanning 50 diverse manipulation tasks, FabriVLA achieves a tier-average success rate of 90.0%, demonstrating that a compact VLA built on a 1B scale VLM can achieve strong performance without relying on multi billion parameter VLA backbones.",
+      "authors": [
+        "Shiyuan Yang",
+        "Borong Zhang",
+        "Jizheng Zhang",
+        "Zhijia Tao",
+        "Junfei Guo",
+        "Donglai Ran",
+        "Xu Bian",
+        "Qingbiao Li"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-07-09T15:06:43+00:00",
+      "link": "https://arxiv.org/pdf/2607.08575v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "lightweight Vision-Language-Action model",
+      "llm_evidence_cn": "轻量级视觉-语言-动作模型",
+      "llm_evidence": "轻量级视觉-语言-动作模型",
+      "canonical_evidence": "轻量级视觉-语言-动作模型",
+      "llm_tldr_en": "Develops a compact VLA model for multi-task manipulation using a 1B scale VLM backbone.",
+      "llm_tldr_cn": "开发了一种基于1B规模视觉语言主干的轻量级VLA模型，用于多任务操作。",
+      "llm_tldr": "开发了一种基于1B规模视觉语言主干的轻量级VLA模型，用于多任务操作。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.08575v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.08724v1",
+      "title": "Latent Memory Palace: Reasoning for Control as Autoregressive Variational Inference",
+      "abstract": "Human decision-making is highly flexible -- some actions are taken immediately; others require longer deliberation. Language models have exhibited a similar capacity for adaptive \"reasoning.\" However, transferring this capability to continuous control policies has been challenging, as directly reasoning in language space may lack the granularity for spatial understanding and precise motions. In this work, we show that reasoning for control policies can emerge by organizing information in an autoregressive latent space reminiscent of a memory palace, where retrieval is iterative and adaptive. Our method, Latent Memory Palace (LMP), formulates reasoning as variational inference with an autoregressive latent distribution. We derive a latent-space reinforcement learning technique to tractably optimize its variational lower bound. The resulting policy, LMP-$π$, achieves strong empirical performance in simulation and real-world domains while exhibiting interpretable, adaptive allocation of test-time compute. We further show that the same framework yields a variable-length action tokenizer, LMP-$\\texttt{tok}$, which significantly improves the performance of downstream autoregressive policies. Together, these results present a new perspective on latent reasoning for control through the lens of variational inference.",
+      "authors": [
+        "Chuning Zhu",
+        "Eva Xu",
+        "Jose Barreiros",
+        "Krishnan Srinivasan",
+        "Paarth Shah",
+        "Abhishek Gupta"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.RO"
+      ],
+      "published": "2026-07-09T17:30:49+00:00",
+      "link": "https://arxiv.org/pdf/2607.08724v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Reasoning for control policies using autoregressive latent space",
+      "llm_evidence_cn": "使用自回归潜空间进行控制策略推理",
+      "llm_evidence": "使用自回归潜空间进行控制策略推理",
+      "canonical_evidence": "使用自回归潜空间进行控制策略推理",
+      "llm_tldr_en": "Introduces Latent Memory Palace to enable adaptive reasoning for continuous control policies.",
+      "llm_tldr_cn": "引入潜意识记忆宫殿（LMP），使连续控制策略具备自适应推理能力。",
+      "llm_tldr": "引入潜意识记忆宫殿（LMP），使连续控制策略具备自适应推理能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reasoning for reinforcement learning",
+      "matched_requirement_id": "req-6",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.08724v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.09438v1",
+      "title": "Test-Time Scaling for Small VLMs on Multilingual Visual MCQ",
+      "abstract": "Test-time scaling (TTS) reliably improves reasoning in large language models, but whether it transfers to small open vision-language models remains unclear. We examine this on EXAMS-V, a multilingual visual multiple-choice benchmark, comparing self-consistency, describe-then-reason with PRM-guided beam search, and two post-hoc selectors across Qwen2.5-VL-7B-Instruct and Qwen3.5-4B. What matters is the conditions under which TTS runs, not the search or verification machinery. The largest factor is parseability: an early prompt format left many chains reasoning correctly yet never committing to an answer letter, which a standard answer cue and a guided repair step largely remove. A larger decoding budget removes the rest: raising the per-chain token limit from 1k to 2k recovers 3.7 pp, whereas sampling more chains (8 to 16) adds only 0.15 pp. Once chains have room to finish, elaborate methods contribute little: PRM-guided beam search trails plain self-consistency by 0.39 pp at over eight times the cost, and neither a training-free generative critic nor a trained multimodal PRM beats majority vote across both policies. The largest gain comes instead from the policy model itself (+11.4 pp). Our best configuration reaches 84.1% on the held-out ImageCLEF 2026 test split, ranking first on the Visual MCQ leaderboard.",
+      "authors": [
+        "Spiros Baxevanakis",
+        "Peng-Jian Yang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-07-10T14:09:04+00:00",
+      "link": "https://arxiv.org/pdf/2607.09438v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Test-time scaling for reasoning in small vision-language models",
+      "llm_evidence_cn": "小型视觉语言模型推理的测试时缩放",
+      "llm_evidence": "小型视觉语言模型推理的测试时缩放",
+      "canonical_evidence": "小型视觉语言模型推理的测试时缩放",
+      "llm_tldr_en": "Investigates how test-time scaling improves reasoning performance in small-scale vision-language models.",
+      "llm_tldr_cn": "研究了测试时缩放如何提高小型视觉语言模型在复杂视觉任务中的推理性能。",
+      "llm_tldr": "研究了测试时缩放如何提高小型视觉语言模型在复杂视觉任务中的推理性能。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.09438v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.11044v1",
+      "title": "RetroHolmes: When Semantic Plausibility Fails Retrospective Physical Process Reasoning",
+      "abstract": "Humans can infer hidden physical processes from sparse observations, yet current evaluation protocols for Vision Language Models fail to assess whether such physical reasoning is genuinely captured. To address this gap, we introduce Retrospective Physical Process Reasoning, a new evaluation paradigm to reason backward from outcomes under explicit physical constraints. Building on the paradigm, we present RetroHolmes, the first real-world benchmark for Retrospective Physical Process Reasoning, comprising object-centric image pairs annotated with reachability labels and causal step sequences across diverse physical transitions. Using RetroHolmes, we analyze state of the art Vision Language Models and uncover systematic failure modes, including judgment bias in reachability assessment and belief dominance over physical evidence, mirroring sycophancy behavior observed in large language models. We further demonstrate a simple analysis-by-synthesis instantiation with visual simulation as an intermediate step, validating the diagnostic value of RetroHolmes and highlighting the importance of physically grounded intermediate representations for physical reasoning.",
+      "authors": [
+        "Ruoxuan Zhang",
+        "Qiyun Zheng",
+        "Siyu Wu",
+        "Ling Zou",
+        "Hongxia Xie",
+        "Zhiyu Zhou",
+        "Jian-Yu Jiang-Lin",
+        "Zihan Li",
+        "Zhengguang Wang",
+        "Bin Wen",
+        "Ling Lo",
+        "Jianlong Fu",
+        "Meibao Yao",
+        "Juncheng Hu",
+        "Wen-Huang Cheng"
+      ],
+      "primary_category": "cs.MM",
+      "categories": [
+        "cs.MM"
+      ],
+      "published": "2026-07-13T03:13:39+00:00",
+      "link": "https://arxiv.org/pdf/2607.11044v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Retrospective physical process reasoning for vision language models",
+      "llm_evidence_cn": "视觉语言模型的回溯性物理过程推理",
+      "llm_evidence": "视觉语言模型的回溯性物理过程推理",
+      "canonical_evidence": "视觉语言模型的回溯性物理过程推理",
+      "llm_tldr_en": "Introduces a benchmark to evaluate the ability of VLMs to reason backward about physical transitions.",
+      "llm_tldr_cn": "引入了一个基准测试，用于评估视觉语言模型对物理过程进行回溯推理的能力。",
+      "llm_tldr": "引入了一个基准测试，用于评估视觉语言模型对物理过程进行回溯推理的能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language models for complex reasoning tasks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.11044v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.10557v1",
+      "title": "UNIBROWSE: A Data-to-Agent Framework for Multimodal BrowseComp",
+      "abstract": "Multimodal BrowseComp tasks require agents to combine perception, tool use, and long-horizon reasoning over dynamic web content, challenging their ability to handle compositional structure, open-world uncertainty, and multimodal integration across extended interactions. Crucially, real-world multimodal browsing involves three distinct information-flow patterns: text-only, image-to-text, and text-to-image, yet existing data construction methods cover only the text-only and image-to-text patterns, leaving text-to-image largely unaddressed and limiting agent generality and robustness. We introduce UNIBROWSE, a unified data pipeline that for the first time simultaneously generates training data covering all three patterns, augments curated knowledge graphs with live web retrieval for improved fidelity, and introduces a novel metric of exploration degree to filter low-signal instances for efficient reinforcement learning. Through this pipeline, we produce high-quality cold-start tool-use trajectories and exploration-rich QA pairs, and train a 35B-scale agent via supervised fine-tuning and exploration-aware RL.The resulting UNIBROWSE agent achieves state-of-the-art performance on multimodal BrowseComp benchmarks, attaining an average accuracy of 54.4 across five diverse benchmarks -- an improvement of 10.5 points over its base model Qwen3.5-35B-A3B -- and surpassing serveral closed-source agent workflows such as GPT-5 (42.9), Gemini-2.5 Pro (44.8), and Gemini-2.5 Flash (41.3).",
+      "authors": [
+        "Xiyu Wei",
+        "Qingwei Zong",
+        "Zhuocheng Yu",
+        "Sujian Li"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-07-12T04:13:27+00:00",
+      "link": "https://arxiv.org/pdf/2607.10557v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multimodal agent framework for long-horizon reasoning over web content",
+      "llm_evidence_cn": "用于网页内容长程推理的多模态智能体框架",
+      "llm_evidence": "用于网页内容长程推理的多模态智能体框架",
+      "canonical_evidence": "用于网页内容长程推理的多模态智能体框架",
+      "llm_tldr_en": "Introduces UNIBROWSE, a framework for multimodal web agents to improve reasoning and perception across interactions.",
+      "llm_tldr_cn": "引入 UNIBROWSE 框架，提升多模态网页智能体在交互中的推理与感知能力。",
+      "llm_tldr": "引入 UNIBROWSE 框架，提升多模态网页智能体在交互中的推理与感知能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.10557v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.10004v1",
+      "title": "Model Guides You How to Draw: Adaptive Visual Gating for Unified Multimodal Reasoning",
+      "abstract": "Unified multimodal models (UMMs) with interleaved reasoning, which generate both textual and visual steps as part of intermediate reasoning traces, have demonstrated great potential for visual mathematical reasoning tasks. However, we identify a key insight in this paradigm: generating intermediate visual reasoning steps is not always beneficial and can even be harmful, as self-generated visual steps may introduce erroneous visual evidence that misleads subsequent reasoning. Moreover, frequently triggering visual steps during reasoning incurs substantial computational and memory overhead, degrading inference efficiency. To address these accuracy and efficiency challenges, we observe that the model's internal signals can indicate whether a visual step will benefit reasoning before the entire visual generation is completed. Specifically, this work identifies two internal signals: 1) Generation Intent, which reflects whether the model has a concrete textual plan for what to draw, and 2) Visual Fidelity, which measures whether the visual generation remains grounded in the original input image. Leveraging these internal signals, we propose AdaViG, a training-free adaptive visual gating method for unified multimodal reasoning. AdaViG dynamically evaluates each triggered visual step at an early visual generation stage and aborts it when both signals are weak, thereby preventing misleading visual evidence from entering the reasoning trace while avoiding unnecessary computation. Comprehensive experiments demonstrate that AdaViG improves accuracy by up to 5.7% while reducing visual generation FLOPs by 25.0%-91.0% and wall-clock latency by 15.4%-45.6%.",
+      "authors": [
+        "Wenxi Gao",
+        "Guanxi Lu",
+        "Didi Zhu",
+        "Hao Mark Chen",
+        "Quan Deng",
+        "Zhican Wang",
+        "Jiankang Deng",
+        "Hongxiang Fan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-07-10T22:03:01+00:00",
+      "link": "https://arxiv.org/pdf/2607.10004v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "unified multimodal models with interleaved reasoning traces",
+      "llm_evidence_cn": "具有交错推理轨迹的统一多模态模型",
+      "llm_evidence": "具有交错推理轨迹的统一多模态模型",
+      "canonical_evidence": "具有交错推理轨迹的统一多模态模型",
+      "llm_tldr_en": "Proposes adaptive visual gating to improve accuracy and efficiency in multimodal mathematical reasoning.",
+      "llm_tldr_cn": "提出自适应视觉门控机制，以提高多模态数学推理的准确性和效率。",
+      "llm_tldr": "提出自适应视觉门控机制，以提高多模态数学推理的准确性和效率。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.10004v1",
       "carry_days": 1
     }
   ]
