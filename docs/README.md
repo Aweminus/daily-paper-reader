@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-19
-- 运行时间：2026-07-19 20:00:01 UTC
+- 最新运行日期：2026-07-20
+- 运行时间：2026-07-20 20:30:40 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦具身智能与强化学习，深度解析了开放世界移动操作及自进化蒸馏等 17 篇前沿进展。
-重点推荐视觉驱动的具身智能体部署方案与 SEED 自进化框架，两者均以 9.0 高分领跑具身操作与策略学习的技术突破。
-建议关注 VLA 模型在无人机追踪及物理推理中的跨界应用，探索 AI 迈向真实物理世界交互的最新趋势。
-- 详情：[/202607/19/README](/202607/19/README)
+今日深挖 17 篇 AI 前沿论文，重点聚焦多模态科学验证与强化学习驱动的视觉定位技术。
+满分神作 ToolSciVer 展现了视觉工具增强 RL 在科学理解中的突破，S1-Omni 则实现了科学预测与生成的全能统一。
+建议优先研读多模态推理与机器人操作的交叉领域，掌握 AI 调用工具解决复杂逻辑的最新范式。
+- 详情：[/202607/20/README](/202607/20/README)
 
 ### 精读区论文标签
-1. [Exploratory, Communicative, and Deployable: Vision-Driven Embodied Agents for Open-World Mobile Manipulation](/202607/19/2607.13653v1-exploratory-communicative-and-deployable-vision-driven-embodied-agents-for-open-world-mobile-manipulation)  
+1. [ToolSciVer: Multimodal Scientific Claim Verification with Visual Tool Augmented Reinforcement Learning](/202607/20/2607.16131v1-toolsciver-multimodal-scientific-claim-verification-with-visual-tool-augmented-reinforcement-learning)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：用于多模态推理的工具增强强化学习（非机器人）
+2. [Reasoning-Guided Part-Level Visual Grounding via Reinforcement Learning](/202607/20/2607.15374v1-reasoning-guided-part-level-visual-grounding-via-reinforcement-learning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于移动操作的智能体框架，结合了在线强化学习
-2. [SEED: Self-Evolving On-Policy Distillation for Agentic Reinforcement Learning](/202607/19/2607.14777v1-seed-self-evolving-on-policy-distillation-for-agentic-reinforcement-learning)  
+   evidence：通过强化学习进行推理引导的定位
+3. [ToolVerse: Unlocking Massive Environments and Long-Horizon Tasks for Agentic Reinforcement Learning](/202607/20/2607.15660v1-toolverse-unlocking-massive-environments-and-long-horizon-tasks-for-agentic-reinforcement-learning)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：智能体强化学习的自我进化蒸馏
-3. [DM-KG: A Novel Method for Boosting Spatial Cognition of Vision-Language Models in Street View Imagery](/202607/19/2607.12319v1-dm-kg-a-novel-method-for-boosting-spatial-cognition-of-vision-language-models-in-street-view-imagery)  
+   evidence：扩展智能体强化学习环境和长程推理的框架
+4. [VistaVLA: Geometry- and Semantic-Aware 3D Gaussian-Grounded VLA for Robotic Manipulation](/202607/20/2607.12356v1-vistavla-geometry--and-semantic-aware-3d-gaussian-grounded-vla-for-robotic-manipulation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：提升视觉语言模型在复杂逻辑推理中的空间认知能力
-4. [Semantic Anchoring for Robotic Action Representations](/202607/19/2607.13597v1-semantic-anchoring-for-robotic-action-representations)  
+   evidence：视觉-语言-动作 (VLA) 模型
+5. [Instance-Enriched Semantic Maps for Visual Language Navigation](/202607/20/2607.12630v2-instance-enriched-semantic-maps-for-visual-language-navigation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉-语言-动作模型中机器人动作表示的语义锚定
-5. [TRACE: Turn-level Reward Assignment via Credit Estimation for Long-Horizon Agents](/202607/19/2607.13988v1-trace-turn-level-reward-assignment-via-credit-estimation-for-long-horizon-agents)  
+   evidence：具身智能体利用大语言模型进行导航推理与决策
+6. [MaxSAT-Based Feedback for Guiding Vision-Language Models in Sudoku](/202607/20/2607.12711v2-maxsat-based-feedback-for-guiding-vision-language-models-in-sudoku)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：长程任务中智能体强化学习的稠密信用分配方法
-6. [SafeRelBench: A Spatial-Relation-Aware Benchmark for Process-Level Safety in VLM-Driven Embodied Agents](/202607/19/2607.14543v1-saferelbench-a-spatial-relation-aware-benchmark-for-process-level-safety-in-vlm-driven-embodied-agents)  
-   标签：评分：8.0/10、query:vlm-rl
-   evidence：VLM驱动的具身智能体进行多步动作规划
+   evidence：利用符号反馈引导 VLM 进行结构化视觉推理任务
 
 ### 速读区论文标签
-1. [FoMoVLA: Bridging Visual Foresight and Motion Guidance for Vision-Language-Action Models](/202607/19/2607.14739v1-fomovla-bridging-visual-foresight-and-motion-guidance-for-vision-language-action-models)  
+1. [S1-Omni: A Unified Multimodal Reasoning Model for Scientific Understanding, Prediction, and Generation](/202607/20/2607.15686v1-s1-omni-a-unified-multimodal-reasoning-model-for-scientific-understanding-prediction-and-generation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：为视觉-语言-动作模型桥接视觉预测与运动引导
-2. [CosFly-VLA: A Spatially Aware Vision-Language-Action Model for UAV Tracking](/202607/19/2607.15004v1-cosfly-vla-a-spatially-aware-vision-language-action-model-for-uav-tracking)  
+   evidence：用于科学任务的多模态推理
+2. [SkillNav: Score-Level Skill Intervention for Zero-Shot Object Goal Navigation](/202607/20/2607.15758v1-skillnav-score-level-skill-intervention-for-zero-shot-object-goal-navigation)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于无人机追踪和动作生成的VLA模型
-3. [PhysMRV: Physical Memory Retrieval and Verification for Physics Plausibility Reasoning](/202607/19/2607.10190v1-physmrv-physical-memory-retrieval-and-verification-for-physics-plausibility-reasoning)  
+   evidence：用于零样本导航和行为推理的VLM智能体
+3. [EDAR: Learning Environment-Dependent Action Representations for Robotic Manipulation](/202607/20/2607.11427v1-edar-learning-environment-dependent-action-representations-for-robotic-manipulation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：视觉语言模型对物理合理性和物体交互的推理
-4. [Traj-VLN: Learning Pixel-Space Interaction via Autoregressive Trajectory Generation](/202607/19/2607.10744v2-traj-vln-learning-pixel-space-interaction-via-autoregressive-trajectory-generation)  
+   evidence：将动作锚定在视觉后果中
+4. [The Ebb and Flow of Multimodal Focus: Scheduling Visual Relay Windows for Grounded VLM Reasoning](/202607/20/2607.11436v2-the-ebb-and-flow-of-multimodal-focus-scheduling-visual-relay-windows-for-grounded-vlm-reasoning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于具身导航和推理的视觉语言模型 (VLM)
-5. [Affordance-Based Manipulation Planning with Text Goals and Sim-to-Real Generalisation via Real-to-Sim Image Conversion](/202607/19/2607.11004v1-affordance-based-manipulation-planning-with-text-goals-and-sim-to-real-generalisation-via-real-to-sim-image-conversion)  
+   evidence：视觉语言模型接地推理中多模态注意力焦点的机制分析
+5. [ChunkFlow: Towards Continuity-Consistent Chunked Policy Learning](/202607/20/2607.12992v1-chunkflow-towards-continuity-consistent-chunked-policy-learning)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：基于文本目标的操纵规划视觉推理
-6. [SymbOmni: Evolving Agentic Omni Models via Symbolic Concept Learning](/202607/19/2607.12042v1-symbomni-evolving-agentic-omni-models-via-symbolic-concept-learning)  
+   evidence：视觉-语言-动作 (VLA) 模型的分块策略学习
+6. [Just-In-Time Scene Graph Growth: Combating Perceptual Saturation in Long-Horizon Robotics](/202607/20/2607.13245v1-just-in-time-scene-graph-growth-combating-perceptual-saturation-in-long-horizon-robotics)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于多模态交互创作和推理的智能体全能模型
-7. [Instance-Enriched Semantic Maps for Visual Language Navigation](/202607/19/2607.12630v1-instance-enriched-semantic-maps-for-visual-language-navigation)  
+   evidence：统一具身智能体任务推理与感知的闭环框架
+7. [Automatic Hard Example Synthesis with Multi-Level Agentic Data Curation](/202607/20/2607.14256v1-automatic-hard-example-synthesis-with-multi-level-agentic-data-curation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：LLM用于视觉语言导航中的推理和决策
-8. [HRO: Hierarchical Room-to-Object Framework for Zero-Shot Object Goal Navigation with Large Language Models](/202607/19/2607.13072v1-hro-hierarchical-room-to-object-framework-for-zero-shot-object-goal-navigation-with-large-language-models)  
+   evidence：用于多模态模型的基于多智能体架构的代理红队框架
+8. [VTM-Nav: Hierarchical Visual-Topological Memory for Cross-Episode Object-Goal Navigation](/202607/20/2607.14514v1-vtm-nav-hierarchical-visual-topological-memory-for-cross-episode-object-goal-navigation)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：使用LLM进行空间推理和导航的智能体
-9. [ChartSync: A Benchmark for Visuo-Logical Cascading Chart Editing](/202607/19/2607.10301v1-chartsync-a-benchmark-for-visuo-logical-cascading-chart-editing)  
+   evidence：基于VLM的具身导航智能体
+9. [Tool-Adaptive LLM Reranker](/202607/20/2607.10555v1-tool-adaptive-llm-reranker)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：视觉逻辑级联图表编辑与推理的基准测试
-10. [VINE: Taming Generative Control Policies for Reinforcement Learning](/202607/19/2607.10369v1-vine-taming-generative-control-policies-for-reinforcement-learning)  
+   evidence：将相关性评分形式化为代理马尔可夫决策过程
+10. [Artificial Foveated Perception for Mitigating Shortcut Learning in Robotic Foundation Models](/202607/20/2607.10655v1-artificial-foveated-perception-for-mitigating-shortcut-learning-in-robotic-foundation-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：针对多模态动作分布的强化学习
-11. [ARMOR: Stabilizing On-Policy LLM RL with Off-Policy Anchor Samples](/202607/19/2607.10481v1-armor-stabilizing-on-policy-llm-rl-with-off-policy-anchor-samples)  
+   evidence：用于决策的因果视觉结构
+11. [Enhancing Small Language Models Reasoning through Knowledge Graph Grounding](/202607/20/2607.14149v1-enhancing-small-language-models-reasoning-through-knowledge-graph-grounding)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：稳定用于提升推理能力的 LLM 强化学习过程
+   evidence：用于复杂推理任务的智能体框架
 
 
 <div class="dpr-home-promo-card">
