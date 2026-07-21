@@ -1,0 +1,687 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-21T20:23:50.084757+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 15,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 32,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2607.12815v2",
+      "title": "Visual Access Boundaries in Vision-Language Model Reasoning",
+      "abstract": "Chain-of-Thought (CoT) prompting is widely used as a test-time scaling strategy for Vision-Language Models (VLMs), but it remains unclear what is extended when VLMs generate longer reasoning traces. We ask whether CoT requires continued access to image tokens, or whether it mainly operates over visual information already made available earlier in the forward pass. We introduce Visual Access Sweep, a causal intervention that masks attention from generated-token queries to image-token keys along layer depth and generation time, and define the Visual Access Boundary (VAB) as the minimal access region that preserves task accuracy. Across six model configurations from Qwen2.5-VL and InternVL3, both no-CoT direct answering and CoT prompting exhibit finite VABs. In Qwen2.5-VL-32B and InternVL3 at 14B and 38B scales, when CoT is evaluated against the no-CoT full-access target, its VAB layer differs from the no-CoT boundary by at most two layers, despite substantially longer generations. This suggests that CoT does not primarily improve performance by prolonging direct image-token access throughout the reasoning trace, but by extending language-side computation over image-derived hidden-state information. We further show that CoT gains are constrained by perceptual readout. CoT helps when the queried visual attribute can be reliably read out by the model, but not when that readout is unreliable. A symbolic-attribute oracle shows that CoT can improve counting once ground-truth attributes are supplied as text, while a single-object probe-vs-decode check shows that hard attributes can be linearly recoverable from hidden states yet difficult for the model itself to output. Together, these analyses place the bottleneck at readout rather than counting.",
+      "authors": [
+        "Hiroto Osaka",
+        "Shohei Taniguchi",
+        "Gouki Minegishi",
+        "Kai Yamashita",
+        "Masahiro Suzuki",
+        "Yutaka Matsuo"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-14T14:27:58+00:00",
+      "link": "https://arxiv.org/pdf/2607.12815v2",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "investigates visual information access during VLM chain-of-thought reasoning",
+      "llm_evidence_cn": "研究VLM思维链推理过程中的视觉信息获取",
+      "llm_evidence": "研究VLM思维链推理过程中的视觉信息获取",
+      "canonical_evidence": "研究VLM思维链推理过程中的视觉信息获取",
+      "llm_tldr_en": "Analyzes how VLMs access image tokens during CoT reasoning to define minimal visual access boundaries.",
+      "llm_tldr_cn": "分析VLM在思维链推理中如何访问图像标记，并定义了最小视觉访问边界。",
+      "llm_tldr": "分析VLM在思维链推理中如何访问图像标记，并定义了最小视觉访问边界。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.16492v1",
+      "title": "WeedExpert-R1: Incentivizing Botanical Reasoning in MLLMs with Reinforcement Learning for Precision Weed Grounding",
+      "abstract": "Precision weed control requires species-level identification and instance-level localization. However, conventional object detectors use a closed vocabulary, limiting their deployment across regions, and cannot explain their predictions in complex agricultural scenes. Multimodal large language models (MLLMs) offer visual grounding and reasoning capabilities, but insufficient botanical knowledge can cause hallucinations in fine-grained weed identification. This study introduces WeedExpert-R1, a multimodal model that learns visually grounded botanical reasoning through verifiable rewards. A domain-specific Chain-of-Thought synthesis pipeline combines a human-curated botanical trait dictionary with an Auditor-Synthesizer LLM workflow to generate reasoning data for supervised fine-tuning. Group Relative Policy Optimization is then applied with rewards for format, accuracy, instance count, and response length. Across 37 weed species from six datasets, WeedExpert-R1-4B achieved 75.82 percent exact-set precision at an IoU threshold of 0.5, 89.30 percent precision, and 87.81 percent recall. It outperformed proprietary models, including GPT-5.4 and Gemini-3.1-Pro, and larger open-source models, including Qwen3-VL-30B-Instruct and Gemma-4-31B-it. Results on unseen species further demonstrate its open-vocabulary capability and potential for deployment across diverse regions and crops without retraining.",
+      "authors": [
+        "Zonglin Yang",
+        "Wei-Zhen Liang",
+        "Nevin Lawrence",
+        "Xin Qiao",
+        "Benjamin Riggan",
+        "Chi-En Chiang",
+        "Fuchen Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-07-17T20:33:10+00:00",
+      "link": "https://arxiv.org/pdf/2607.16492v1",
+      "tags": [
+        "keyword:VLM RL"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "reinforcement learning for botanical reasoning in MLLMs",
+      "llm_evidence_cn": "用于多模态大模型植物学推理的强化学习",
+      "llm_evidence": "用于多模态大模型植物学推理的强化学习",
+      "canonical_evidence": "用于多模态大模型植物学推理的强化学习",
+      "llm_tldr_en": "Uses RL with verifiable rewards to incentivize botanical reasoning and grounding in MLLMs.",
+      "llm_tldr_cn": "利用带有可验证奖励的强化学习，激励多模态大模型进行植物学推理与接地。",
+      "llm_tldr": "利用带有可验证奖励的强化学习，激励多模态大模型进行植物学推理与接地。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language reinforcement learning for agentic reasoning",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.17038v1",
+      "title": "Reward-Driven LLM Agent Workflows: Synthesizing POMDP Routing and Self-Correction for Autonomous Decision-Making",
+      "abstract": "This paper addresses key technical challenges in current large language model (LLM) agent applications, including long-horizon planning, sparse reward attribution, and dynamic environmental interaction, by designing and optimizing an intelligent agent workflow. The proposed architecture is based on the synthesis of core AI paradigms: Visual, Language, Generative, Graph, Multimodal, Reinforcement, and Agent Intelligence. Unlike conventional baseline models that rely on static prompting and lack robust perception-action loops, our approach introduces a Partially Observable Markov Decision Process (POMDP) routing mechanism. This mechanism is augmented with an internal, self-correcting reward model that evaluates decision trajectories before execution. By integrating multimodal inputs and advanced reinforcement learning principles (such as proximal policy optimization and value function approximation), the agent maintains long-term structural memory and dynamically adapts its reasoning pathways to mitigate error accumulation. Empirical experiments on the ALFWorld embodied simulation environment and the WebShop online navigation benchmark demonstrate a 24.5% absolute improvement in task success rate and trajectory efficiency over mainstream baselines like the standard ReAct framework. Comprehensive ablation studies confirm the significant contribution of the reward-driven critique module in suppressing hallucination rates. This research bridges theoretical foundations of reinforcement learning and graph-based memory with autonomous agent workflows. Ultimately, the resulting architecture offers a practical, scalable reference framework for developing artificial intelligence technologies in complex, multi-step autonomous systems. Code is available at https://github.com/01Amez/RLAW_Implementation.",
+      "authors": [
+        "Amez Amanj Ali",
+        "Kuo-Kun Tseng"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-19T02:51:41+00:00",
+      "link": "https://arxiv.org/pdf/2607.17038v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "agentic reinforcement learning for decision-making",
+      "llm_evidence_cn": "用于决策的智能体强化学习",
+      "llm_evidence": "用于决策的智能体强化学习",
+      "canonical_evidence": "用于决策的智能体强化学习",
+      "llm_tldr_en": "Synthesizes POMDP routing and self-correction for autonomous decision-making in multimodal agent workflows.",
+      "llm_tldr_cn": "在多模态智能体工作流中综合了POMDP路由和自我纠错，用于自主决策。",
+      "llm_tldr": "在多模态智能体工作流中综合了POMDP路由和自我纠错，用于自主决策。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language agentic reinforcement learning",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.17243v1",
+      "title": "LenGuard-GPC: Length Guarding with Guided-Prompt Consistency for Spatial Reasoning Reinforce Learning",
+      "abstract": "Multi-view spatial reasoning requires vision-language models to compare visual evidence across images, align object correspondences, and infer spatial relations over long visual contexts, a setting where chain-of-thought reasoning tends to grow verbose without becoming more accurate. Reinforcement learning with verifiable rewards is a natural fit for this task, but standard GRPO reward relies on sparse outcome-level feedback and gives no signal about where a reasoning trajectory goes wrong, nor any control over its length. We propose LenGuard-GPC, a dense reward framework that addresses both problems together. For each sampled trajectory, it compares the token-wise predictive distributions under a standard prompt and a guided prompt, and uses the resulting token-sum KL divergence as a dense reward signal. Since this KL penalty accumulates over tokens and would otherwise reward shorter responses regardless of their quality, we introduce a staged length bonus that keeps reasoning length within a controlled range without simply encouraging brevity. On six multi-view spatial reasoning benchmarks, LenGuard-GPC improves accuracy over vanilla GRPO while reducing average response length.",
+      "authors": [
+        "Xingjian Tao",
+        "Yiwei Wang",
+        "Yujun Cai",
+        "Jing Tang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-19T13:24:40+00:00",
+      "link": "https://arxiv.org/pdf/2607.17243v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Reinforcement learning for spatial reasoning in vision-language models",
+      "llm_evidence_cn": "视觉语言模型空间推理的强化学习",
+      "llm_evidence": "视觉语言模型空间推理的强化学习",
+      "canonical_evidence": "视觉语言模型空间推理的强化学习",
+      "llm_tldr_en": "Proposes a dense reward RL framework to improve spatial reasoning in vision-language models.",
+      "llm_tldr_cn": "提出一种稠密奖励强化学习框架，用于优化视觉语言模型的空间推理能力。",
+      "llm_tldr": "提出一种稠密奖励强化学习框架，用于优化视觉语言模型的空间推理能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reasoning for reinforcement learning",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.17786v1",
+      "title": "Reasoning as a Double-Edged Sword: Architecture and Cross-Stage Robustness in Vision-Language-Action Models",
+      "abstract": "Does adding a reasoning step make a Vision-Language-Action (VLA) model more robust to perturbation? Intuitively, a policy that reasons before acting should absorb a perturbed input better than one that maps observations directly to actions. We test this premise head-on across three models that span the reasoning spectrum (no reasoning, a text chain-of-thought, and a latent iterative loop), perturbing each at the vision, reasoning, and action stages on LIBERO and SimplerEnv. Two questions organize the study: does the reasoning design shift robustness, and can the reasoning be read back at runtime as a safety signal? We find that the latent-iterative model is by far the least robust: under both stochastic noise and white-box perturbation its task success collapses, while the other two hold. This fragility is structural rather than cumulative: varying the reasoning depth at inference barely moves it. Reasoning outputs can in principle be monitored, but the monitors fail under fair tests. A plan--action consistency probe that looks near-perfect under naive evaluation falls to chance under adaptive attack. Under matched-FPR calibration, fusing it with an action-anomaly probe never lifts defended success above undefended. Scoped to these output-level behavioral probes under white-box vision-stage attack, this ceiling is a precondition that any viable defense must first satisfy.",
+      "authors": [
+        "Tuan Duong Trinh",
+        "Naveed Akhtar",
+        "Basim Azam"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-07-20T10:20:32+00:00",
+      "link": "https://arxiv.org/pdf/2607.17786v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Reasoning in Vision-Language-Action (VLA) models",
+      "llm_evidence_cn": "视觉-语言-动作 (VLA) 模型中的推理",
+      "llm_evidence": "视觉-语言-动作 (VLA) 模型中的推理",
+      "canonical_evidence": "视觉-语言-动作 (VLA) 模型中的推理",
+      "llm_tldr_en": "Investigates how different reasoning architectures affect the robustness of Vision-Language-Action models.",
+      "llm_tldr_cn": "研究了不同的推理架构如何影响视觉-语言-动作 (VLA) 模型的鲁棒性。",
+      "llm_tldr": "研究了不同的推理架构如何影响视觉-语言-动作 (VLA) 模型的鲁棒性。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision language reinforcement learning for agentic reasoning",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.14635v1",
+      "title": "Action QFormer: Structured Representation Shaping under Action Supervision in Vision-Language-Action Models",
+      "abstract": "Action supervision in vision-language-action (VLA) models is often treated as a downstream objective for learning action prediction. In this paper, we study it instead as a force that shapes inherited multimodal representations. We show that this shaping has a dual effect: it is necessary for forming action-compatible representations, but when action supervision is applied too directly to the inherited multimodal pathway, it can also destabilize representations that support language-side processing and object grounding. To address this tension, we introduce Action QFormer, a query-based action-facing interface that uses instruction-conditioned queries to reorganize inherited multimodal information into action-facing representations before downstream action generation. In zero-shot sim-to-real navigation, Action QFormer improves average closed-loop task success from 18.8% to 56.3%, raises fixed-instruction action-generation correctness from 22.5% to 75.5%, and nearly eliminates out-of-distribution instruction generations. Further analyses show that Action QFormer changes how action supervision shapes inherited multimodal representations, reducing broad upstream rewriting while preserving targeted and sometimes constructive action-supervised adaptation. These results suggest that improving VLA performance requires not only stronger pretrained backbones, but also better ways of selecting and organizing inherited multimodal information while controlling how it is shaped under action supervision.",
+      "authors": [
+        "Yufeng Ji",
+        "Wenhao Tang",
+        "Haoyi Niu",
+        "Koushil Sreenath",
+        "Yi Wu",
+        "Zhongyu Li"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CV",
+        "cs.RO"
+      ],
+      "published": "2026-07-16T06:59:39+00:00",
+      "link": "https://arxiv.org/pdf/2607.14635v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Vision-Language-Action (VLA) models for action prediction",
+      "llm_evidence_cn": "用于动作预测的视觉-语言-动作 (VLA) 模型",
+      "llm_evidence": "用于动作预测的视觉-语言-动作 (VLA) 模型",
+      "canonical_evidence": "用于动作预测的视觉-语言-动作 (VLA) 模型",
+      "llm_tldr_en": "Introduces Action QFormer to balance action-compatible representations with language grounding in VLA models.",
+      "llm_tldr_cn": "引入 Action QFormer 以平衡 VLA 模型中的动作兼容表示与语言对齐。",
+      "llm_tldr": "引入 Action QFormer 以平衡 VLA 模型中的动作兼容表示与语言对齐。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.15642v1",
+      "title": "Difference-Based Relational Learning for Zero-Shot Object-Goal Visual Navigation With Direct Sim-to-Real Transfer",
+      "abstract": "End-to-end deep reinforcement learning (DRL) for zero-shot object-goal visual navigation remains challenged by the sim-to-real gap, particularly variations in object appearance and restricted camera field-of-view (FoV). This letter proposes a Temporal Difference-Relational Network (T-DRN) for robust zero-shot sim-to-real transfer. T-DRN combines a Siamese difference-based feature extractor, which computes relational difference between the target and observed objects to produce domain-independent representations, with a dual-frame temporal buffer that preserves short-term object continuity under narrow FoV. Extensive experiments in AI2-THOR demonstrate that T-DRN improves zero-shot generalization in terms of success rates over strong baselines. Furthermore, T-DRN is systematically validated on a physical wheeled robot, demonstrating robust performance under real sensing and actuation constraints and supporting the feasibility of direct sim-to-real transfer.",
+      "authors": [
+        "Guolei Qi",
+        "Feitian Zhang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-07-17T05:35:40+00:00",
+      "link": "https://arxiv.org/pdf/2607.15642v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "deep reinforcement learning for visual navigation",
+      "llm_evidence_cn": "用于视觉导航的深度强化学习",
+      "llm_evidence": "用于视觉导航的深度强化学习",
+      "canonical_evidence": "用于视觉导航的深度强化学习",
+      "llm_tldr_en": "Proposes a relational network for robust zero-shot sim-to-real transfer in RL-based visual navigation.",
+      "llm_tldr_cn": "提出一种关系网络，用于基于强化学习的视觉导航中鲁棒的零样本虚实迁移。",
+      "llm_tldr": "提出一种关系网络，用于基于强化学习的视觉导航中鲁棒的零样本虚实迁移。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "multimodal reinforcement learning with vision and language",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2607.14171v1",
+      "title": "Branching Policy Optimization: Sandbox-Native Language Agent Reinforcement Learning",
+      "abstract": "Reinforcement learning has emerged as the dominant paradigm for training large language model (LLM) agents that interact with executable sandboxes. State-of-the-art algorithms such as PPO, RLOO, and GRPO inherit their rollout topology from RLHF: for each prompt, N independent trajectories are sampled from the initial state, and an advantage is computed by subtracting a group baseline. This design ignores a defining property of agent sandboxes. They are deterministic, snapshottable, and resumable from any intermediate state. We argue that this property enables a fundamentally different rollout topology: rather than N independent trees of depth T, one can construct a single tree of N leaves whose siblings share prefixes, and therefore share variance. We instantiate this idea as Branching Policy Optimization (BPO), a sandbox-native RL algorithm that (i) adaptively snapshots the sandbox at high-entropy decision points along a backbone trajectory, (ii) forks K alternative actions per branch point and rolls out each to termination, and (iii) computes per-step advantages from sibling returns rather than from independent prompts. We prove this estimator is unbiased and has strictly lower variance than the trajectory-level baseline, with the reduction equal to the prefix-explained portion of return variance. On WebShop, ALFWorld, and SWE-bench Verified with Qwen2.5-7B and Llama-3.1-8B backbones, BPO improves success by 3.6--6.1 absolute points over GRPO and RLOO at matched compute, halves gradient-norm variance, and matches the best baseline using 38% fewer policy updates.",
+      "authors": [
+        "Bowei He",
+        "Yankai Chen",
+        "Xiaokun Zhang",
+        "Xue Liu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-07-15T09:37:36+00:00",
+      "link": "https://arxiv.org/pdf/2607.14171v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "language agent reinforcement learning in sandboxes",
+      "llm_evidence_cn": "沙盒中的语言代理强化学习",
+      "llm_evidence": "沙盒中的语言代理强化学习",
+      "canonical_evidence": "沙盒中的语言代理强化学习",
+      "llm_tldr_en": "Introduces Branching Policy Optimization for efficient reinforcement learning in language agents.",
+      "llm_tldr_cn": "引入分支策略优化，实现语言代理在沙盒环境中的高效强化学习。",
+      "llm_tldr": "引入分支策略优化，实现语言代理在沙盒环境中的高效强化学习。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language agentic reinforcement learning",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.12287v1",
+      "title": "Reducing Temporal Redundancy for Efficient Vision-Language-Action Inference",
+      "abstract": "Vision-Language-Action (VLA) models exhibit strong generalization for robotic manipulation, yet their high inference latency limits real time deployment. We identify two primary sources of temporal redundancy in existing VLA pipelines: repeated visual encoding of highly similar consecutive frames and multi step iterative sampling in diffusion based policies. To address this, we propose a system level acceleration strategy that reduces computation in both perception and action generation. On the perception side, we incrementally update only tokens corresponding to dynamic scene regions instead of re-encoding entire frames. On the policy side, we compress diffusion sampling into a compact 2-step schedule through efficiency oriented training while preserving action precision. Experiments on Libero, RobotWin, and Real Robot Platforms demonstrate over 2 times speedup while maintaining high performance, achieving up to 98% success rate on general manipulation benchmarks. Our codes will be released on Github.",
+      "authors": [
+        "Yuzhou Wu",
+        "Yuxin Zheng",
+        "Muchun Niu",
+        "Yishan Yang",
+        "Tianhao Liu",
+        "hanwen kang",
+        "Jiajian Jing",
+        "Linfeng Zhang",
+        "Chuan Wen"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-07-14T02:48:31+00:00",
+      "link": "https://arxiv.org/pdf/2607.12287v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Efficient Vision-Language-Action inference for robotic agents",
+      "llm_evidence_cn": "机器人智能体的高效视觉-语言-动作推理",
+      "llm_evidence": "机器人智能体的高效视觉-语言-动作推理",
+      "canonical_evidence": "机器人智能体的高效视觉-语言-动作推理",
+      "llm_tldr_en": "Reduces temporal redundancy in VLA models to enable real-time inference for robotic agents.",
+      "llm_tldr_cn": "减少VLA模型中的时间冗余，从而实现机器人智能体的实时推理。",
+      "llm_tldr": "减少VLA模型中的时间冗余，从而实现机器人智能体的实时推理。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.16094v1",
+      "title": "How Do VLMs Fail? Vision-Operation Misalignment in Compositional VQA",
+      "abstract": "Compositional visual question answering requires Vision-Language Models (VLMs) to execute multiple reasoning operations like object selection, spatial relation resolution, and attribute verification. Despite strong aggregate performance, the mechanistic basis of VLM failures on this task remains underexplored. To address this gap, we analyze vision-operation misalignment in VLMs by examining how failures relate to specific reasoning operations and the internal computational pathways through which they arise and propagate. We introduce an Operation-centric mechanistic framework that decomposes VLM failures by both the reasoning operation where they originate and the internal computational pathway through which they propagate. Our analysis reveals four mechanistically distinct failure modes: grounding failure, reasoning failure, attribute extraction failure, and language prior dominance failure. Each characterized by a unique relationship between visual grounding strength and answer correctness. Through three complementary causal interventions applied across all transformer layers, we further demonstrate a pathway dissociation: grounding failures route exclusively through the feedforward network, reasoning failures route through late-layer attention, and attribute extraction failures localize to the answer-position feedforward computation. This dissociation demonstrates that different failure types require fundamentally different corrective strategies, providing a principled foundation for targeted improvements to VLM reliability in multimedia reasoning.",
+      "authors": [
+        "Navya Gupta",
+        "Bingjie Xu",
+        "Avinash Anand",
+        "Timothy Liu",
+        "Zhengchen Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-07-17T16:25:03+00:00",
+      "link": "https://arxiv.org/pdf/2607.16094v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "mechanistic framework for reasoning operations in VLMs",
+      "llm_evidence_cn": "视觉语言模型推理操作的机制框架",
+      "llm_evidence": "视觉语言模型推理操作的机制框架",
+      "canonical_evidence": "视觉语言模型推理操作的机制框架",
+      "llm_tldr_en": "Analyzes internal computational pathways and failures in VLM compositional reasoning tasks.",
+      "llm_tldr_cn": "分析视觉语言模型在组合推理任务中的内部计算路径和失败原因。",
+      "llm_tldr": "分析视觉语言模型在组合推理任务中的内部计算路径和失败原因。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "reasoning in vision-language models",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2607.14586v1",
+      "title": "SoftNav: Injecting 3D Scene Tokens into VLMs for Embodied Navigation",
+      "abstract": "In goal-directed embodied navigation, where an agent must locate a specified target in an unseen environment, 3D scene understanding and navigation reasoning must work in concert. Current approaches transmit 3D scene information to vision-language models (VLMs) through text, suggesting a representation gap in our tested configurations; a controlled ablation confirms that direct embedding-level transfer significantly outperforms the evaluated text serialization formats. We introduce SoftNav, which injects entity-level 3D continuous representations -- one token per detected object or frontier -- into a VLM's hidden space as soft tokens through a lightweight projector. With the 3D encoder and VLM frozen, only ~1,200 samples and ~17M trainable parameters are needed. On HM3D-OVON, SoftNav achieves 74.2%/68.3%/66.7% SR across three splits, surpassing all prior methods in both SR and SPL; the same navigation policy transfers zero-shot to GOAT-Bench (67.2% SR), SG3D (47.2% s-SR), and real-world robot deployment without retraining or architectural modification. Injecting 3D scene tokens directly into VLMs bridges the representation gap, enabling transferable navigation with minimal training.",
+      "authors": [
+        "Yi Wu",
+        "Junjie An",
+        "Xiao Liu",
+        "Yiqun Zhou",
+        "Yuechen Wu",
+        "Xiaoqing Guan",
+        "Shuyang Yu",
+        "You Wang",
+        "Guang Li"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-07-16T05:32:52+00:00",
+      "link": "https://arxiv.org/pdf/2607.14586v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Injecting 3D scene tokens into VLMs for navigation reasoning",
+      "llm_evidence_cn": "将3D场景标记注入VLM以进行导航推理",
+      "llm_evidence": "将3D场景标记注入VLM以进行导航推理",
+      "canonical_evidence": "将3D场景标记注入VLM以进行导航推理",
+      "llm_tldr_en": "SoftNav improves embodied navigation by injecting 3D continuous representations into VLM hidden spaces.",
+      "llm_tldr_cn": "SoftNav通过将3D连续表示注入VLM隐藏空间，改进了具身导航能力。",
+      "llm_tldr": "SoftNav通过将3D连续表示注入VLM隐藏空间，改进了具身导航能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.13621v1",
+      "title": "UESF-Bench: Benchmarking and Probing for Unified Embodied Seeking and Following",
+      "abstract": "Language-guided human following is an important capability for embodied agents, but existing benchmarks typically assume that the target person is visible at the start of an episode. This setting simplifies the problem and overlooks a more realistic requirement: an agent often needs to first find a language-described target and then persistently follow that target in a dynamic environment. While recent work has started to study human search, existing settings are typically evaluated in task-specific scenarios and often rely on stronger prior knowledge of the environment. Moreover, they usually treat searching and following as separate tasks and still lack a unified benchmark for systematic evaluation. To address these limitations, we introduce the Unified Embodied Seeking and Following Benchmark (UESF-Bench), a large-scale and diverse benchmark for embodied human seeking and following. The benchmark requires agents to handle semantic-guided exploration, reliable behavior switching and recovery, and delayed identity grounding. To this end, we propose SeekFollow-VLA, a vision-language-action framework with a task-driven routing mechanism for latent phase inference and transition modeling between seeking and following. Experimental results show that SeekFollow-VLA achieves clear improvements over both single-head and dual-head baselines across single-person and multi-person environments, establishing a baseline for unified embodied seek-and-follow.",
+      "authors": [
+        "Kun Yu",
+        "Jianhua Yang",
+        "Yixiang Chen",
+        "Changwei Wang",
+        "Hongyuan Yu",
+        "Yan Huang",
+        "Fushuo Huo",
+        "Ya Jing",
+        "Zhumin Chen",
+        "Keji He"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-15T09:09:25+00:00",
+      "link": "https://arxiv.org/pdf/2607.13621v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "benchmarking embodied agents for seeking and following",
+      "llm_evidence_cn": "具身智能体寻找与跟随的基准测试",
+      "llm_evidence": "具身智能体寻找与跟随的基准测试",
+      "canonical_evidence": "具身智能体寻找与跟随的基准测试",
+      "llm_tldr_en": "Introduces a unified benchmark for embodied agents to find and follow targets using language.",
+      "llm_tldr_cn": "为具身智能体引入了一个统一的基准，用于通过语言描述寻找并跟随目标。",
+      "llm_tldr": "为具身智能体引入了一个统一的基准，用于通过语言描述寻找并跟随目标。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.16165v1",
+      "title": "An Exam for Active Observers",
+      "abstract": "Human vision is a closed loop: gaze is continuously redirected by intermediate hypotheses rather than a single snapshot. Decades of psychophysics and cognitive science have argued that this active observation is essential for a wide range of tasks. Whether today's multimodal large language models (MLLMs) exercise active observation is an empirical question that current vision-language benchmarks do not answer. We introduce ActiveVision, a benchmark that makes active observation measurable for MLLMs, comprising 17 tasks across 3 categories. Tasks are designed to force repeated visual perception rather than a single static description. Frontier MLLMs collapse on ActiveVision: the highest-scoring model we evaluate, GPT-5.5 at the highest exposed reasoning-effort tier, solves only 10.6% of items and scores zero on 11 of the 17 tasks, and even Claude Fable 5, despite topping most reasoning and coding leaderboards, solves just 3.5%, far behind three human participants who average 96.1%. Furthermore, much of the gap persists even when models write and run their own vision code: such code is unreliable on realistic imagery, and catching its failures itself requires the active perception the models lack. Together, these results indicate that current MLLMs lack robust active visual observation, motivating architectures and training objectives that close the perception-reasoning loop.",
+      "authors": [
+        "Jiarui Zhang",
+        "Muzi Tao",
+        "Shangshang Wang",
+        "Ollie Liu",
+        "Xuezhe Ma",
+        "Willie Neiswanger"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-07-17T17:46:23+00:00",
+      "link": "https://arxiv.org/pdf/2607.16165v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "benchmark for active observation in multimodal large language models",
+      "llm_evidence_cn": "多模态大语言模型主动观察能力的基准测试",
+      "llm_evidence": "多模态大语言模型主动观察能力的基准测试",
+      "canonical_evidence": "多模态大语言模型主动观察能力的基准测试",
+      "llm_tldr_en": "Introduces ActiveVision to measure the active observation and closed-loop perception of MLLMs.",
+      "llm_tldr_cn": "引入ActiveVision基准，衡量多模态大语言模型的主动观察和闭环感知能力。",
+      "llm_tldr": "引入ActiveVision基准，衡量多模态大语言模型的主动观察和闭环感知能力。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2607.14852v1",
+      "title": "Towards Human-like Physical Intelligence: LifelongVision-Language-Action Learning for Robotic Manipulation",
+      "abstract": "Similar to the natural capabilities of humans to sequentially learn new tasks, robots with Vision-Language-Action (VLA) models should possess lifelong learning ability to learn a new task when deployed in open-world environments. However, most recently proposed lifelong learning models aim to effectively learn the current task (plasticity) or maintain high accuracy on previous tasks (stability), while the plasticity-stability trade-off remains largely unsolved in robotic manipulation models. To address this fundamental challenge, we propose a cache-efficient lifelong Vision-Language-Action learning framework for robotic manipulation (i.e., LifelongVLA), which alleviates the plasticity-stability trade-off with a dual-timescale adaptation mechanism while achieving low-cost robotic deployment with a cache-efficient replay strategy. More concretely, we propose a dual-timescale LoRA gating module to decompose VLA adaptation into two lightweight pathways: a short-term adapter for plasticity and a long-term adapter for stable consolidation. These pathways are integrated via a task-aware gate, enabling explicit control of the plasticity-stability trade-off. In the skill replay phase, a cache-efficient stochastic replay strategy is proposed to preserve more balanced retention signals without full-trajectory storage. Finally, experiments show that LifelongVLA outperforms existing baselines, demonstrating efficient skill expansion, robust retention of learned manipulation behaviors, and reduced reliance on retraining for real-world deployment on an xArm robot.",
+      "authors": [
+        "Yao He",
+        "Gan Sun",
+        "Wenqi Liang",
+        "Fazeng Li",
+        "Yang Cong"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-07-16T11:22:06+00:00",
+      "link": "https://arxiv.org/pdf/2607.14852v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Lifelong Vision-Language-Action learning for robotic agents",
+      "llm_evidence_cn": "机器人智能体的终身视觉-语言-动作学习",
+      "llm_evidence": "机器人智能体的终身视觉-语言-动作学习",
+      "canonical_evidence": "机器人智能体的终身视觉-语言-动作学习",
+      "llm_tldr_en": "Develops LifelongVLA to address the plasticity-stability trade-off in vision-language-action models for robots.",
+      "llm_tldr_cn": "开发LifelongVLA框架，解决机器人视觉-语言-动作模型中的塑性与稳定性权衡问题。",
+      "llm_tldr": "开发LifelongVLA框架，解决机器人视觉-语言-动作模型中的塑性与稳定性权衡问题。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.14264v1",
+      "title": "MonteRET: AI Agent Enhancing Multimodal LLMs with Multi-granularity Knowledge Retrieval for Chest CT Report Generation",
+      "abstract": "Automated chest CT report generation remains challenging because clinically faithful reporting requires both whole-volume understanding and accurate description of localized anatomical findings. Here we developed and retrospectively evaluated MonteRET, a region-aware retrieval-enhanced framework for generating chest CT findings sections. MonteRET integrates global CT features with region-level anatomical representations, retrieves clinically relevant knowledge using predicted medical conditions and region-level vision-language alignment, and refines initial reports through a knowledge-guided report rewriting agent. We trained our model on a public cohort with 24,128 CT scans from RadGenome-ChestCT. We evaluated MonteRET on the public RadGenome-ChestCT test set of 1,564 CT scans and an external cohort of 82 CT scans from NewYork-Presbyterian/Weill Cornell Medical Center. MonteRET improved report quality, semantic similarity, and clinical efficacy compared with a matched baseline and several state-of-the-art methods. Gains were most pronounced for recall, suggesting fewer omitted findings. Human expert evaluation by radiology residents also favored MonteRET.",
+      "authors": [
+        "Yi Lin",
+        "Yihao Ding",
+        "Elana Benishay",
+        "Elefterios Trikantzopoulos",
+        "David Nauheim",
+        "Hanley Ong",
+        "Jiang Bian",
+        "Hua Xu",
+        "Yuzhe Yang",
+        "George Shih",
+        "Yifan Peng"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL"
+      ],
+      "published": "2026-07-15T18:17:13+00:00",
+      "link": "https://arxiv.org/pdf/2607.14264v1",
+      "tags": [
+        "keyword:VLM RL"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "knowledge-guided report rewriting agent",
+      "llm_evidence_cn": "知识引导的报告重写智能体",
+      "llm_evidence": "知识引导的报告重写智能体",
+      "canonical_evidence": "知识引导的报告重写智能体",
+      "llm_tldr_en": "Uses a retrieval-enhanced agentic framework to improve multimodal medical report generation.",
+      "llm_tldr_cn": "使用检索增强的智能体框架来改进多模态医学报告的生成质量。",
+      "llm_tldr": "使用检索增强的智能体框架来改进多模态医学报告的生成质量。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.17050v1",
+      "title": "EvoGUI: An Evolution-Aware Benchmark for GUI State-Transition Understanding",
+      "abstract": "GUI agents must reason about how actions transform interface states, but end-to-end success rates entangle this ability with perception, grounding, planning, and recovery. We introduce EvoGUI, a diagnostic framework that converts normalized GUI trajectories into three complementary visual question answering probes: temporal ordering, inverse action/value prediction, and contrastive one-step successor discrimination. Their labels are derived from trajectory order and logged actions, requiring no additional task-label annotation after trajectory normalization. We instantiate EvoGUI-Bench from Mind2Web and WebLINX, yielding 3,000 instances across 120 domains, and evaluate 28 vision-language model configurations zero-shot. The strongest model reaches only 60.4 EvoGain, while model scale and GUI specialization do not reliably predict performance. These results establish EvoGUI-Bench as a scalable diagnostic complement to end-to-end GUI-agent evaluation while exposing substantial headroom in state-transition understanding. The source code is publicly available at https://github.com/Yyhhh6/EvoGUI.",
+      "authors": [
+        "Yaohan Yang",
+        "Minglei Shi",
+        "Borui Zhang",
+        "Jie Zhou",
+        "Jiwen Lu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-07-19T03:29:08+00:00",
+      "link": "https://arxiv.org/pdf/2607.17050v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Vision-language model reasoning for GUI agents",
+      "llm_evidence_cn": "GUI智能体的视觉语言模型推理",
+      "llm_evidence": "GUI智能体的视觉语言模型推理",
+      "canonical_evidence": "GUI智能体的视觉语言模型推理",
+      "llm_tldr_en": "A benchmark for evaluating vision-language models on GUI state-transition reasoning.",
+      "llm_tldr_cn": "一个用于评估视觉语言模型在GUI状态转换推理能力的诊断性基准测试。",
+      "llm_tldr": "一个用于评估视觉语言模型在GUI状态转换推理能力的诊断性基准测试。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "advancements in vision language reasoning agents",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2607.15621v1",
+      "title": "Think at 5 Hz, Act at 20 Hz: Asynchronous Fast-Slow Vision-Language-Action Inference for Closed-Loop Driving",
+      "abstract": "Large language models bring instruction following and scene reasoning to end-to-end driving, but their inference latency collides with the control rate a vehicle requires. Existing closed-loop agents hide this gap by invoking the model on alternate simulation ticks and replaying the previous command in between, so half of all control outputs ignore the newest observations. We present a fast-slow architecture that removes this compromise. A frozen 7B vision-language backbone acts as the slow system, digesting navigation instructions and visual history at low frequency while exposing its per-layer key-value cache as a standing representation of the scene. A lightweight action expert acts as the fast system, attending to this cache and to the current camera frame at every simulation tick to regress waypoints in a single forward pass. Since the cache lags behind the world at deployment, we train the expert under randomized staleness, aligning training with asynchronous execution. On LangAuto-Short routes in CARLA, our system produces fresh control at every 50 ms simulation tick and lifts route completion from 37.0 to 94.0 over the frame-skipping baseline. A frame-skip ablation with the same expert separates the two factors at work: the expert raises the driving score on its own, while per-tick freshness raises completion from 82.1 to 94.0 and cuts red-light violations by a third. Trained on a single town, the expert transfers zero-shot to two unseen towns, holding 84-94% route completion where the baseline reaches 31-41%. It reduces open-loop waypoint error by nearly a factor of four compared to the backbone's own action head, at a per-tick model cost of 32 ms that is independent of history length on a single consumer GPU.",
+      "authors": [
+        "Yun Li",
+        "Jiachen Gong",
+        "Simon Thompson",
+        "Ehsan Javanmardi",
+        "Qunli Zhang",
+        "Zifan Zeng",
+        "Shiming Liu",
+        "Peng Wang",
+        "Zixuan Guo",
+        "Manabu Tsukada"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "published": "2026-07-17T04:40:02+00:00",
+      "link": "https://arxiv.org/pdf/2607.15621v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Vision-language-action inference for closed-loop driving agents",
+      "llm_evidence_cn": "用于闭环驾驶智能体的视觉-语言-动作推理",
+      "llm_evidence": "用于闭环驾驶智能体的视觉-语言-动作推理",
+      "canonical_evidence": "用于闭环驾驶智能体的视觉-语言-动作推理",
+      "llm_tldr_en": "A fast-slow architecture enables high-frequency control while maintaining VLM-based scene reasoning for driving.",
+      "llm_tldr_cn": "一种快慢架构在保持基于 VLM 的驾驶场景推理的同时，实现了高频控制。",
+      "llm_tldr": "一种快慢架构在保持基于 VLM 的驾驶场景推理的同时，实现了高频控制。",
+      "llm_tags": [
+        "query:vlm-rl:composite"
+      ],
+      "matched_query_tag": "query:vlm-rl:composite",
+      "matched_query_text": "Papers central to 查找vision-language agentic rl及vision-language reasoning相关的文章，排除diffusion model、robotics、video和audio。, especially work that connects or combines: vision-language agentic reinforcement learning; multimodal reinforcement learning with vision and language; reasoning in vision-language models; vision-language model based agents; visual reasoning and decision making; multimodal reasoning for reinforcement learning; vision language reinforcement learning for agentic reasoning; advancements in vision language reasoning agents; multimodal agentic reinforcement learning without robotics; vision language models for complex reasoning tasks.",
+      "matched_requirement_id": "req-composite-vlm-rl",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

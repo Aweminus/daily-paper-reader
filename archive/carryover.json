@@ -1,6 +1,210 @@
 {
-  "generated_at": "2026-07-20T20:28:35.434299+00:00",
-  "updated_date": "20260720",
+  "generated_at": "2026-07-21T20:23:50.086029+00:00",
+  "updated_date": "20260721",
   "carryover_days": 9,
-  "items": []
+  "items": [
+    {
+      "id": "2607.17806v1",
+      "title": "PGN: Design and Implementation of a Vision-Language Navigation System Based on Pangu Multimodal Foundation Model",
+      "abstract": "Vision-Language Navigation (VLN) requires an embodied agent to interpret a natural-language instruction and predict actions from temporally ordered visual observations. Adapting a multimodal large language model to VLN requires visual-language alignment, compact temporal inputs, action-space grounding, and stable training on the target hardware. This technical report presents PGN (Pangu Navigator), an offline VLN action-prediction system built on OpenPangu-7B. Training proceeds in two stages. First, PGMM aligns a frozen EVA-ViT-G/14 vision encoder with the frozen language backbone by training a Q-Former and a two-layer MLP projector. Second, PGN adapts the aligned model to expert navigation trajectories using five-observation windows, epoch-dependent temporal sampling, and a reasoning-then-action output format; this stage freezes the aligned visual pathway and updates three structural-token embeddings and LoRA adapters. The implementation combines mixed-precision computation, selective FP32 computation, and DeepSpeed ZeRO-2 on eight Ascend 910B NPUs. Under teacher-forced, open-loop evaluation on 500 held-out expert trajectories, V9 reports a 62.29% Normalized Action Match (NAM) and a 100.00% Non-empty Rate (NER). These metrics quantify offline expert-action alignment rather than closed-loop navigation success; evaluating error accumulation, path efficiency, and goal completion remains future work.",
+      "authors": [
+        "Li Xian",
+        "Mingxi Li",
+        "Yizheng Wang",
+        "Yiming Shen",
+        "Qi Chen",
+        "Zhuoling Xiao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-20T10:48:48+00:00",
+      "link": "https://arxiv.org/pdf/2607.17806v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Vision-Language Navigation system for embodied agents",
+      "llm_evidence_cn": "具身智能体的视觉语言导航系统",
+      "llm_evidence": "具身智能体的视觉语言导航系统",
+      "canonical_evidence": "具身智能体的视觉语言导航系统",
+      "llm_tldr_en": "Pangu Navigator adapts multimodal foundation models for offline vision-language navigation action prediction.",
+      "llm_tldr_cn": "盘古导航器将多模态大模型应用于离线视觉语言导航的动作预测。",
+      "llm_tldr": "盘古导航器将多模态大模型应用于离线视觉语言导航的动作预测。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.17806v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.18046v1",
+      "title": "SEE: Structure-aware Exploring \\& Exploiting for Long-horizon GUI Agent Trajectory Synthesis",
+      "abstract": "Graphical User Interface (GUI) agents powered by vision-language models hold promise for automating real-world mobile tasks. However, progress is limited by the lack of high-coverage, long-horizon interaction trajectories collected from element-rich and rapidly evolving apps. Existing pipelines often rely on costly human demonstrations or on-policy framework, which tends to over-sample common flows while missing rare transitions and complex multi-step procedures. To address this problem, we propose SEE, a two-stage data synthesis framework consisting of (i) an efficient exploration stage that builds an explicit UI transition graph over screens and elements, and (ii) a graph-based synthesis stage that composes diverse multi-step trajectories via planning and controlled sampling. This design yields reproducible and explainable data generation, while explicitly preventing spurious cycles and enabling long-horizon composition. Across multiple real-world apps, SEE produces trajectories with an average length of 14.8 steps while avoiding spurious loops, and agents fine-tuned on SEE achieve improved task success and generalization to unseen screens. We will publicly release our synthesis code and dataset.",
+      "authors": [
+        "Zhuohang Fan",
+        "Beichen Zhang",
+        "Yuanfa Li",
+        "Changqiao Wu",
+        "Wei Liu",
+        "Jian Luan",
+        "Weigang Zhang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-07-20T15:16:59+00:00",
+      "link": "https://arxiv.org/pdf/2607.18046v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "GUI agents powered by vision-language models",
+      "llm_evidence_cn": "由视觉语言模型驱动的 GUI 智能体",
+      "llm_evidence": "由视觉语言模型驱动的 GUI 智能体",
+      "canonical_evidence": "由视觉语言模型驱动的 GUI 智能体",
+      "llm_tldr_en": "Develops a framework for synthesizing long-horizon interaction trajectories for VLM-based GUI agents.",
+      "llm_tldr_cn": "开发了一个为基于 VLM 的 GUI 智能体合成长程交互轨迹的框架。",
+      "llm_tldr": "开发了一个为基于 VLM 的 GUI 智能体合成长程交互轨迹的框架。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.18046v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.18042v1",
+      "title": "Anticipate Before Acting: Future-State-Conditioned Vision-Language Navigation",
+      "abstract": "End-to-end vision-language navigation (VLN) with causal vision-language models can map instructions and egocentric observations directly to actions, but standard behavior cloning supervises only the next action and does not explicitly train the policy state to be predictive of future visual outcomes. We first ask a diagnostic question: if the policy is given an expert-trajectory future image as privileged input at training and testing time, is that additional visual evidence useful for choosing the current action? (These expert-trajectory future images are unavailable at test time in real deployment, so we use this setting only as a privileged-input diagnostic.) The answer is yes; this sanity check shows that future observations can provide rich, actionable cues.   We then ask a deployable question: without accessing future images at inference, can we still benefit from future information by using a compressed future visual latent only as training supervision? We propose Future-State-Conditioned VLN (FSC-VLN), which adds a future-query token and aligns its hidden state to a frozen visual embedding $Δ$ steps ahead via a training-only target branch that is removed after training. On R2R val-unseen, FSC-VLN improves SR/OSR/SPL over a StreamVLN-style baseline under two training-data regimes, with larger gains on long-horizon episodes; ablations further support the dual-query design (separating future and action queries).",
+      "authors": [
+        "Lingfeng Zhang",
+        "Zhanguang Zhang",
+        "Liheng Ma",
+        "Tongtong Cao",
+        "Yingxue Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-07-20T15:11:46+00:00",
+      "link": "https://arxiv.org/pdf/2607.18042v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Vision-language navigation with future-state conditioning",
+      "llm_evidence_cn": "基于未来状态条件的视觉语言导航",
+      "llm_evidence": "基于未来状态条件的视觉语言导航",
+      "canonical_evidence": "基于未来状态条件的视觉语言导航",
+      "llm_tldr_en": "Explores future-state conditioning to improve action selection in end-to-end vision-language navigation agents.",
+      "llm_tldr_cn": "探索未来状态条件化方法，以优化端到端视觉语言导航智能体的动作选择。",
+      "llm_tldr": "探索未来状态条件化方法，以优化端到端视觉语言导航智能体的动作选择。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.18042v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.17767v1",
+      "title": "VLN-AVP: Zero-Shot Vision-Language Navigation with Hybrid Long-Short-Term Memory for Autonomous Valet Parking",
+      "abstract": "Existing methods in Autonomous Valet Parking (AVP) typically rely on pre-built maps, which severely restricts their scalability to unseen environments and open-vocabulary targets. Inspired by the application of Vision-Language Models (VLMs) in Vision-Language Navigation (VLN) tasks, we propose VLN-AVP, a zero-shot navigation framework for AVP tasks. By combining the precise spatial perception of a Bird's-Eye-View (BEV) model with the general intelligence of VLMs, our framework 1) eliminates the dependency on pre-built maps, 2) interprets semantic environmental contexts in parking scenarios, and 3) enables intuitive navigation following natural language instructions. Specifically, we introduce a hybrid memory system: a short-term perception memory tracks semantic visual cues to address the limitations of VLM's single-frame reasoning in existing methods, while a long-term topological memory facilitates stable policy learning from past experiences. To bridge the gap in existing benchmarks, we also present the VLN-AVP dataset and benchmark. Featuring 10 high-fidelity parking scenes and over 1,000 navigation episodes, it has the largest number of garage scenes to date and is the first VLN benchmark for underground parking. Extensive experiments demonstrate that in simulation, our method achieves an over 25% improvement in success rate compared to VLN methods and an over 15% improvement compared to other autonomous driving methods. Furthermore, it attains a leading success rate in real-world vehicle experiments, proving its practical feasibility.",
+      "authors": [
+        "Yijian Li",
+        "Xiangru Mu",
+        "Changze Li",
+        "Hantian Shi",
+        "Jiyuan Cai",
+        "Jia Cai",
+        "Xiaoxue Liu",
+        "Yajing Sun",
+        "Ming Yang",
+        "Tong Qin"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-07-20T10:01:20+00:00",
+      "link": "https://arxiv.org/pdf/2607.17767v1",
+      "tags": [
+        "keyword:VLM RL",
+        "query:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "zero-shot vision-language navigation agent",
+      "llm_evidence_cn": "零样本视觉语言导航智能体",
+      "llm_evidence": "零样本视觉语言导航智能体",
+      "canonical_evidence": "零样本视觉语言导航智能体",
+      "llm_tldr_en": "Develops a zero-shot navigation framework for autonomous parking using VLMs and hybrid memory.",
+      "llm_tldr_cn": "利用VLM和混合记忆开发了一种用于自动泊车的零样本导航框架。",
+      "llm_tldr": "利用VLM和混合记忆开发了一种用于自动泊车的零样本导航框架。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language model based agents",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.17767v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2607.17136v1",
+      "title": "Teach it to stop, not just to click",
+      "abstract": "Agentic computer-use RL is reported in single runs, and those numbers mislead. Using verifier-guided repair of a 35B computer-use agent (CUA) across five oracle-graded environments, we show a repaired policy's success rate is dominated by upstream variance: a variance-components decomposition across three cells (crossed data-draw $\\times$ seed grid, bootstrap CIs) finds evaluation variance negligible ($σ_{\\mathrm{eval}} \\approx 0$) and the training-seed effect small everywhere ($\\leq 10\\%$); instead it splits between the data draw and run-to-run nondeterminism, the data draw's share rising to dominant ($48\\%$) on the hardest cell. There the run-to-run distribution is bimodal (Hartigan dip $p=0.07$, $k=10$), so a single run has roughly a 30% chance of the failure mode and mean$\\pm$std is the wrong summary. On that footing, two findings hold. First, repairability is two-tier in how constrained the corrective action is: a single fixed token installs reliably (done-detection $0.97\\pm0.06$), while open-ended corrections are only partial -- spatial-coordinate clicks (grounding $0.53\\pm0.35$) and a generative field-fill ($0.14\\pm0.04$). Second, the frame-level repair transfers to task success only when the corrective action is the task's sole remaining blocker (LinkedIn 8/20 vs. base 0/15, Fisher $p=0.006$). We caught two of our own over-claims -- a sample-efficiency curve and a 'grounding cannot be bought' boundary -- only by replicating across seeds; a stress test makes the stakes external: a single-run improvement of the size this field publishes would have the wrong sign roughly one-third of the time in a comparable regime. We release a library (cua_reliability) for routine k-seed reporting. The apparatus is, to our knowledge, the first multimodal segment-aggregated on-policy self-distillation (SA-OPSD) update on a real 35B CUA policy.",
+      "authors": [
+        "Barada Sahu",
+        "Shivesh Pandey"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE",
+        "cs.AI",
+        "cs.HC",
+        "cs.LG"
+      ],
+      "published": "2026-07-19T08:46:06+00:00",
+      "link": "https://arxiv.org/pdf/2607.17136v1",
+      "tags": [
+        "keyword:VLM RL"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Agentic computer-use reinforcement learning and policy repair",
+      "llm_evidence_cn": "智能体计算机使用强化学习与策略修复",
+      "llm_evidence": "智能体计算机使用强化学习与策略修复",
+      "canonical_evidence": "智能体计算机使用强化学习与策略修复",
+      "llm_tldr_en": "This paper analyzes variance in agentic computer-use RL and proposes verifier-guided policy repair.",
+      "llm_tldr_cn": "本文分析了智能体计算机使用强化学习中的方差，并提出了验证器引导的策略修复方法。",
+      "llm_tldr": "本文分析了智能体计算机使用强化学习中的方差，并提出了验证器引导的策略修复方法。",
+      "llm_tags": [
+        "query:vlm-rl"
+      ],
+      "matched_query_tag": "query:vlm-rl",
+      "matched_query_text": "vision-language agentic reinforcement learning",
+      "matched_requirement_id": "req-1",
+      "selection_source": "carryover_cache",
+      "paper_id": "2607.17136v1",
+      "carry_days": 1
+    }
+  ]
 }
