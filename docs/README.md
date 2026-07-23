@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-21
-- 运行时间：2026-07-21 20:27:39 UTC
+- 最新运行日期：2026-07-23
+- 运行时间：2026-07-23 21:33:02 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度复盘 17 篇多模态前沿进展，重点攻克 VLM 推理边界与强化学习驱动的精准农业定位。
-核心结论指出 RL 能显著增强 MLLM 的植物学推理，同时揭示了视觉访问边界对模型逻辑判断的关键影响。
-建议关注如何通过强化学习解决视觉定位中的“推理失配”，提升模型在复杂实景中的可靠性。
-- 详情：[/202607/21/README](/202607/21/README)
+今日深挖 17 篇 AI 论文，聚焦多领域视觉推理分类体系与长程机器人操控的突破。
+满分论文 Trace 重新定义了视觉推理环境，而 VLA 模型结合残差强化学习为复杂任务提供了新解法。
+建议重点关注视觉逻辑的结构化建模，并探索 VLA 模型在具身智能中的实战潜力。
+- 详情：[/202607/23/README](/202607/23/README)
 
 ### 精读区论文标签
-1. [Visual Access Boundaries in Vision-Language Model Reasoning](/202607/21/2607.12815v2-visual-access-boundaries-in-vision-language-model-reasoning)  
+1. [Trace: A Taxonomy-Guided Environment for Multidomain Visual Reasoning](/202607/23/2607.19790v1-trace-a-taxonomy-guided-environment-for-multidomain-visual-reasoning)  
+   标签：评分：10.0/10、query:vlm-rl
+   evidence：视觉语言模型推理的可验证奖励强化学习
+2. [Foresight Residual RL for Long-Horizon Robot Manipulation with Vision-Language-Action Models](/202607/23/2607.16506v1-foresight-residual-rl-for-long-horizon-robot-manipulation-with-vision-language-action-models)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：研究VLM思维链推理过程中的视觉信息获取
-2. [WeedExpert-R1: Incentivizing Botanical Reasoning in MLLMs with Reinforcement Learning for Precision Weed Grounding](/202607/21/2607.16492v1-weedexpert-r1-incentivizing-botanical-reasoning-in-mllms-with-reinforcement-learning-for-precision-weed-grounding)  
+   evidence：在冻结的VLA基础策略上进行残差强化学习
+3. [Token-Wise Latent Streaming from Slow Reasoners to Fast Planners for Dynamic Vision Language Navigation](/202607/23/2607.16806v1-token-wise-latent-streaming-from-slow-reasoners-to-fast-planners-for-dynamic-vision-language-navigation)  
    标签：评分：9.0/10、query:vlm-rl
-   evidence：用于多模态大模型植物学推理的强化学习
-3. [Reward-Driven LLM Agent Workflows: Synthesizing POMDP Routing and Self-Correction for Autonomous Decision-Making](/202607/21/2607.17038v1-reward-driven-llm-agent-workflows-synthesizing-pomdp-routing-and-self-correction-for-autonomous-decision-making)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：用于决策的智能体强化学习
-4. [LenGuard-GPC: Length Guarding with Guided-Prompt Consistency for Spatial Reasoning Reinforce Learning](/202607/21/2607.17243v1-lenguard-gpc-length-guarding-with-guided-prompt-consistency-for-spatial-reasoning-reinforce-learning)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉语言模型空间推理的强化学习
-5. [Reasoning as a Double-Edged Sword: Architecture and Cross-Stage Robustness in Vision-Language-Action Models](/202607/21/2607.17786v1-reasoning-as-a-double-edged-sword-architecture-and-cross-stage-robustness-in-vision-language-action-models)  
-   标签：评分：9.0/10、query:vlm-rl
-   evidence：视觉-语言-动作 (VLA) 模型中的推理
-6. [Action QFormer: Structured Representation Shaping under Action Supervision in Vision-Language-Action Models](/202607/21/2607.14635v1-action-qformer-structured-representation-shaping-under-action-supervision-in-vision-language-action-models)  
+   evidence：视觉语言智能体强化学习与推理
+4. [Semantic Anchoring for Robotic Action Representations](/202607/23/2607.13597v2-semantic-anchoring-for-robotic-action-representations)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于动作预测的视觉-语言-动作 (VLA) 模型
+   evidence：用于机器人智能体的视觉-语言-动作模型
+5. [Reinforcing Egocentric Spatial Perception in Multimodal Large Language Models via Ego Scene Augmentation](/202607/23/2607.14497v1-reinforcing-egocentric-spatial-perception-in-multimodal-large-language-models-via-ego-scene-augmentation)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：多模态大语言模型中的空间推理
+6. [SEE: Structure-aware Exploring \& Exploiting for Long-horizon GUI Agent Trajectory Synthesis](/202607/23/2607.18046v1-see-structure-aware-exploring--exploiting-for-long-horizon-gui-agent-trajectory-synthesis)  
+   标签：评分：8.0/10、query:vlm-rl
+   evidence：由视觉语言模型驱动的 GUI 智能体
 
 ### 速读区论文标签
-1. [Difference-Based Relational Learning for Zero-Shot Object-Goal Visual Navigation With Direct Sim-to-Real Transfer](/202607/21/2607.15642v1-difference-based-relational-learning-for-zero-shot-object-goal-visual-navigation-with-direct-sim-to-real-transfer)  
+1. [Constraint-Anchored Reasoning Traces](/202607/23/2607.16727v1-constraint-anchored-reasoning-traces)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：用于视觉导航的深度强化学习
-2. [How Do VLMs Fail? Vision-Operation Misalignment in Compositional VQA](/202607/21/2607.16094v1-how-do-vlms-fail-vision-operation-misalignment-in-compositional-vqa)  
+   evidence：用于多模态推理轨迹的神经符号框架
+2. [Teach it to stop, not just to click](/202607/23/2607.17136v1-teach-it-to-stop-not-just-to-click)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：视觉语言模型推理操作的机制框架
-3. [An Exam for Active Observers](/202607/21/2607.16165v1-an-exam-for-active-observers)  
+   evidence：非机器人领域的代理计算机使用强化学习
+3. [OrientSAM: Mitigating Camera-Centric Shortcut in Multimodal Spatial Reasoning via Orientation-Aware Spatial Alignment](/202607/23/2607.17657v1-orientsam-mitigating-camera-centric-shortcut-in-multimodal-spatial-reasoning-via-orientation-aware-spatial-alignment)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：多模态大语言模型主动观察能力的基准测试
-4. [EvoGUI: An Evolution-Aware Benchmark for GUI State-Transition Understanding](/202607/21/2607.17050v1-evogui-an-evolution-aware-benchmark-for-gui-state-transition-understanding)  
+   evidence：多模态空间推理与视角转换
+4. [PGN: Design and Implementation of a Vision-Language Navigation System Based on Pangu Multimodal Foundation Model](/202607/23/2607.17806v1-pgn-design-and-implementation-of-a-vision-language-navigation-system-based-on-pangu-multimodal-foundation-model)  
    标签：评分：8.0/10、query:vlm-rl
-   evidence：GUI智能体的视觉语言模型推理
-5. [Branching Policy Optimization: Sandbox-Native Language Agent Reinforcement Learning](/202607/21/2607.14171v1-branching-policy-optimization-sandbox-native-language-agent-reinforcement-learning)  
+   evidence：具身智能体的视觉语言导航系统
+5. [From Language to Navigation Goals: A Vision-Language Approach for Semantic Navigation of Mobile Robots Using RGB-D Perception](/202607/23/2607.13624v1-from-language-to-navigation-goals-a-vision-language-approach-for-semantic-navigation-of-mobile-robots-using-rgb-d-perception)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：沙盒中的语言代理强化学习
-6. [SoftNav: Injecting 3D Scene Tokens into VLMs for Embodied Navigation](/202607/21/2607.14586v1-softnav-injecting-3d-scene-tokens-into-vlms-for-embodied-navigation)  
+   evidence：用于机器人导航智能体的视觉语言方法
+6. [Multi-Head Latent Control: A Unified Interface for LLM Agent Decision Making](/202607/23/2607.14277v1-multi-head-latent-control-a-unified-interface-for-llm-agent-decision-making)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：将3D场景标记注入VLM以进行导航推理
-7. [Towards Human-like Physical Intelligence: LifelongVision-Language-Action Learning for Robotic Manipulation](/202607/21/2607.14852v1-towards-human-like-physical-intelligence-lifelongvision-language-action-learning-for-robotic-manipulation)  
+   evidence：基于潜层生成过程的大模型智能体决策
+7. [Non-vacuous Generalization Bounds for Reinforcement Learning with Verifiable Rewards](/202607/23/2607.14506v1-non-vacuous-generalization-bounds-for-reinforcement-learning-with-verifiable-rewards)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：机器人智能体的终身视觉-语言-动作学习
-8. [Think at 5 Hz, Act at 20 Hz: Asynchronous Fast-Slow Vision-Language-Action Inference for Closed-Loop Driving](/202607/21/2607.15621v1-think-at-5-hz-act-at-20-hz-asynchronous-fast-slow-vision-language-action-inference-for-closed-loop-driving)  
+   evidence：基于可验证奖励的强化学习提升LLM推理
+8. [Ask Twice, Look Twice: Prompt Echoing Resolves the Question-First Paradox in Vision-Language Models](/202607/23/2607.15565v1-ask-twice-look-twice-prompt-echoing-resolves-the-question-first-paradox-in-vision-language-models)  
    标签：评分：7.0/10、query:vlm-rl
-   evidence：用于闭环驾驶智能体的视觉-语言-动作推理
-9. [Reducing Temporal Redundancy for Efficient Vision-Language-Action Inference](/202607/21/2607.12287v1-reducing-temporal-redundancy-for-efficient-vision-language-action-inference)  
+   evidence：VLM计算与感知引导
+9. [Unleashing Multimodal Large Language Models for Training-free HOI Detection in the Wild](/202607/23/2607.13881v1-unleashing-multimodal-large-language-models-for-training-free-hoi-detection-in-the-wild)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：机器人智能体的高效视觉-语言-动作推理
-10. [UESF-Bench: Benchmarking and Probing for Unified Embodied Seeking and Following](/202607/21/2607.13621v1-uesf-bench-benchmarking-and-probing-for-unified-embodied-seeking-and-following)  
+   evidence：多模态大语言模型的推理能力
+10. [U-shaped Multi-granularity Learning for Vision-Language Models](/202607/23/2607.14966v1-u-shaped-multi-granularity-learning-for-vision-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：具身智能体寻找与跟随的基准测试
-11. [MonteRET: AI Agent Enhancing Multimodal LLMs with Multi-granularity Knowledge Retrieval for Chest CT Report Generation](/202607/21/2607.14264v1-monteret-ai-agent-enhancing-multimodal-llms-with-multi-granularity-knowledge-retrieval-for-chest-ct-report-generation)  
+   evidence：视觉语言模型的多粒度提示学习
+11. [IoUPD: IoU-Aware Privileged Distillation for Visual Grounding with Multimodal Large Language Models](/202607/23/2607.15732v1-ioupd-iou-aware-privileged-distillation-for-visual-grounding-with-multimodal-large-language-models)  
    标签：评分：6.0/10、query:vlm-rl
-   evidence：知识引导的报告重写智能体
+   evidence：多模态LLM的视觉定位
 
 
 <div class="dpr-home-promo-card">
